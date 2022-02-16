@@ -68,8 +68,74 @@
 
 ![](./images/install-done-2.png)
 
+### 6. 配置网络环境
+
+系统刚安装好时，网络并没有配置，此时无法访问外网，也不能访问宿主机，如下：
+
+```
+# ping www.baidu.com
+ping: www.baidu.com: Name or service not known
+
+# ping 192.168.1.43
+connect: Network is unreachable
+```
+
+可以通过 `ifcfg` 文件来配置网络：
+
+```
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+```
+
+`ifcfg` 文件内容如下：
+
+```
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=dhcp
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=enp0s3
+UUID=68f56f36-xxxx-xxxx-xxxx-24ca69e80f4d
+DEVICE=enp0s3
+ONBOOT=no
+```
+
+将最后一行的 `ONBOOT=no` 改成 `ONBOOT=yes`，然后重启机器：
+
+```
+# reboot
+```
+
+重启后进入系统，就可以正常访问网络了：
+
+```
+# ping 
+```
+
 ## 二、安装 Docker 服务
 
 ## 参考
 
+1. [Chapter 6. Virtual Networking](https://www.virtualbox.org/manual/ch06.html)
+1. [3.6. CONFIGURING IP NETWORKING WITH IP COMMANDS](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ip_commands)
+1. [3.5. CONFIGURING IP NETWORKING WITH IFCFG FILES](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ifcg_files)
+
 ## 更多
+
+### 1. 使用 ip 配置网络
+
+```
+ip link set enp0s3 down
+ip address add 10.0.2.15/24 dev enp0s3
+ip link set enp0s3 up
+```
+
+### 2. VirtualBox 的网络模式
+
+![](./images/virtualbox-network-modes.png)
