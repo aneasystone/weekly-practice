@@ -145,7 +145,41 @@ ONBOOT=no
 
 ## 8. 测试集群网络
 
-TODO
+我们启动 centos-1 和 centos-2 两个虚拟机，登陆进去检查和主机的连通性，并使用 `ip addr` 查看本机的网络地址：
+
+![](./images/two-virtual-machines.png)
+
+我们发现两台虚拟机的网络配置完全一样，就连 IP 都一模一样，这导致两个虚拟机之间根本无法通信，这是为什么呢？
+
+这里我们就需要学习下 VirtualBox 的网络模式了，VirtualBox 提供了各种不同的网络模式来满足各种不同的实验要求：
+
+* 网络地址转换（NAT）
+* 桥接网卡
+* 内部网络
+* 仅主机（Host-Only）网络
+* 通用网络
+* NAT 网络
+* Cloud Network（实验中）
+
+默认的网络模式为 `网络地址转换（NAT）`：
+
+![](./images/virtualbox-network-modes-2.png)
+
+[VirtualBox 官方文档](https://www.virtualbox.org/manual/ch06.html) 对 NAT 有如下一段说明：
+
+> A virtual machine with NAT enabled acts much like a real computer that connects to the Internet through a router. The router, in this case, is the Oracle VM VirtualBox networking engine, which maps traffic from and to the virtual machine transparently. In Oracle VM VirtualBox this router is placed between each virtual machine and the host. This separation maximizes security since by default virtual machines cannot talk to each other.
+
+可以看出，NAT 就像是一个介于宿主机和虚拟机之间的路由器，用于转发虚拟机到外网的流量。每个虚拟机和宿主机之间都有这么一个路由器，这就导致了所有的虚拟机之间是不能通信的。
+
+根据下面这张图，如果要让虚拟机之间能通信，我们可以选择除 NAT 之外的任何一个网络模式都可以，但是 Host-Only 模式会导致虚拟机访问不了外网，Internal 模式会导致虚拟机访问不了外网和宿主机：
+
+![](./images/virtualbox-network-modes.png)
+
+所以最好的选择是 `桥接网卡` 或 `NAT 网络` 这两个模式，这里我们选择 `NAT 网络` 模式。
+
+### 8.1 新建 NAT 网络
+
+### 8.2 验证
 
 ## 参考
 
@@ -170,13 +204,3 @@ ip link set enp0s3 down
 ip address add 10.0.2.15/24 dev enp0s3
 ip link set enp0s3 up
 ```
-
-### 2. VirtualBox 的网络模式
-
-[VirtualBox 官方文档](https://www.virtualbox.org/manual/ch06.html) 说明了 5 种不同的网络模式，下图展示了不同的网络模式之间的区别：
-
-![](./images/virtualbox-network-modes.png)
-
-默认的网络模式为 `网络地址转换（NAT）`：
-
-![](./images/virtualbox-network-modes-2.png)
