@@ -149,7 +149,23 @@ ONBOOT=no
 
 ![](./images/two-virtual-machines.png)
 
-我们发现两台虚拟机的网络配置完全一样，就连 IP 都一模一样，这导致两个虚拟机之间根本无法通信，这是为什么呢？
+我们发现两台虚拟机的网络配置完全一样，就连 IP 和 MAC 地址都一模一样，这导致两个虚拟机之间根本无法通信，这是为什么呢？
+
+如果你仔细的话，打开两个虚拟机网络配置的高级选项，可以看到 VirtualBox 为两个虚拟机生成的 MAC 地址是一模一样的：
+
+![](./images/two-virtual-machine-settings.png)
+
+这是因为在复制虚拟机的时候，对 MAC 地址有这么一个下拉选项：
+
+![](./images/copy-virtual-machine-3.png)
+
+选项中有三种情况：
+
+* 包含所有网卡的 MAC 地址
+* 仅包含 NAT 网卡的 MAC 地址
+* 为所有网卡重新生成 MAC 地址
+
+第一种和第三种都比较好理解，第一种是完全复制所有网卡的 MAC 地址，新生成的虚拟机所有网卡的 MAC 地址和之前的都一样，第三种是为所有网卡都重新生成 MAC 地址，而默认是第二种 `仅包含 NAT 网卡的 MAC 地址`，这个表示如果虚拟机的网络模式是 NAT，则完全复制，其他类型的网卡会重新生成 MAC 地址。那为什么对 NAT 网络模式会有这样的特殊照顾呢？
 
 这里我们就需要学习下 VirtualBox 的网络模式了，VirtualBox 提供了各种不同的网络模式来满足各种不同的实验要求：
 
@@ -169,7 +185,7 @@ ONBOOT=no
 
 > A virtual machine with NAT enabled acts much like a real computer that connects to the Internet through a router. The router, in this case, is the Oracle VM VirtualBox networking engine, which maps traffic from and to the virtual machine transparently. In Oracle VM VirtualBox this router is placed between each virtual machine and the host. This separation maximizes security since by default virtual machines cannot talk to each other.
 
-可以看出，NAT 就像是一个介于宿主机和虚拟机之间的路由器，用于转发虚拟机到外网的流量。每个虚拟机和宿主机之间都有这么一个路由器，这就导致了所有的虚拟机之间是不能通信的。
+可以看出，NAT 就像是一个介于宿主机和虚拟机之间的路由器，用于转发虚拟机到外网的流量。每个虚拟机和宿主机之间都有这么一个路由器，也就是说网络模式为 NAT 的时候，每个虚拟机都是独立于其他虚拟机的，之间是互不影响的，也是不能互相通信的，所以复制的时候，MAC 地址一模一样也无所谓了。
 
 根据下面这张图，如果要让虚拟机之间能通信，我们可以选择除 NAT 之外的任何一个网络模式都可以，但是 Host-Only 模式会导致虚拟机访问不了外网，Internal 模式会导致虚拟机访问不了外网和宿主机：
 
@@ -179,7 +195,27 @@ ONBOOT=no
 
 ### 8.1 新建 NAT 网络
 
+首先打开 VirtualBox 的 “管理” 菜单，选择 “全局设定”，然后在全局设定对话框中选择 “网络” 选项卡，点击右侧的加号，添加一个新的 NAT 网络，默认名称为 `NatNetwork`：
+
+![](./images/create-nat-network.png)
+
+可以双击这个 NAT 网络查看它的配置：
+
+![](./images/nat-network-setting.png)
+
+然后打开虚拟机的网络配置，将网络模式从 `网络地址转换（NAT）` 改成 `NAT 网络`，界面名称选择刚刚创建的那个 NAT 网络 `NatNetwork`，并且记得在高级选项中重新生成一个 MAC 地址（因为刚刚复制的虚拟机 MAC 地址都是一样的，在同一个网络中会导致冲突）：
+
+![](./images/change-network-mode-to-nat-network.png)
+
+对其他的虚拟机重复刚才的操作。
+
 ### 8.2 验证
+
+我们启动 centos-1 和 centos-2 两个虚拟机，登陆进去检查和主机的连通性，并使用 `ip addr` 查看本机的网络地址：
+
+![](./images/two-virtual-machines-3.png)
+
+我们发现两台虚拟机的 IP 已经变得不一样了，然后通过 ping 检查虚拟机之间的联通性也没问题，至此，虚拟机集群环境搭建完成。
 
 ## 参考
 
@@ -193,7 +229,7 @@ ONBOOT=no
 
 ### 1. 使用 ip 配置网络
 
-根据 [Red Hat 官方文档](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ip_commands) 中的说明，由于 `net-tools` 不支持 `InfiniBand`（无限带宽技术，缩写为 IB），`ip` 命令被用来替换 `ifconfig` 命令：
+根据 [Red Hat 官方文档](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ip_commands) 中的说明，由于 `net-tools` 不支持 `InfiniBand`（[无限带宽技术](https://zh.wikipedia.org/wiki/InfiniBand)，缩写为 IB），`ip` 命令被用来替换 `ifconfig` 命令：
 
 > Note that the ip utility replaces the ifconfig utility because the net-tools package (which provides ifconfig) does not support InfiniBand addresses.
 
