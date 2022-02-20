@@ -113,7 +113,7 @@ DEVICE=enp0s3
 ONBOOT=no
 ```
 
-将最后一行的 `ONBOOT=no` 改成 `ONBOOT=yes`，然后重启机器：
+对配置文件内容感兴趣的同学可以参考 [这里的参数说明](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/s1-networkscripts-interfaces)，将最后一行的 `ONBOOT=no` 改成 `ONBOOT=yes`，然后重启机器：
 
 ```
 # reboot
@@ -224,6 +224,7 @@ ONBOOT=no
 1. [Chapter 6. Virtual Networking](https://www.virtualbox.org/manual/ch06.html)
 1. [3.6. CONFIGURING IP NETWORKING WITH IP COMMANDS](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ip_commands)
 1. [3.5. CONFIGURING IP NETWORKING WITH IFCFG FILES](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_ifcg_files)
+1. [11.2. INTERFACE CONFIGURATION FILES](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/s1-networkscripts-interfaces)
 
 ## 更多
 
@@ -239,4 +240,23 @@ ONBOOT=no
 ip link set enp0s3 down
 ip address add 10.0.2.15/24 dev enp0s3
 ip link set enp0s3 up
+```
+
+### 2. 在 ifcfg 文件中配置静态地址
+
+```
+DEVICE="eth0"
+BOOTPROTO="static"
+NM_CONTROLLED="no"
+ONBOOT="yes"
+TYPE="Ethernet"
+UUID=27137241-842e-4e50-88dd-8d8da1305dc0
+DEFROUTE=yes
+IPADDR=192.168.254.109
+NETMASK=255.255.255.0
+GATEWAY=
+DNS1=
+DNS2=
+HWADDR=00:90:27:50:5B:30
+ARPCHECK=no
 ```
