@@ -153,11 +153,47 @@ For more examples and ideas, visit:
 
 ## 3. 通过 `docker-install` 脚本安装 Docker
 
+官方提供了一个便捷的脚本来一键安装 Docker，可以通过如下命令下载该脚本：
+
+```
+[root@localhost ~]# curl -fsSL https://get.docker.com -o get-docker.sh
+```
+
+其中，`-f/--fail` 表示连接失败时不显示 HTTP 错误，`-s/--silent` 表示静默模式，不输出任何内容，`-S/--show-error` 表示显示错误，`-L/--location` 表示跟随重定向，`-o/--output` 表示将输出写入到某个文件中。
+
+下载完成后，执行该脚本会自动安装 Docker：
+
+```
+[root@localhost ~]# sh ./get-docker.sh
+```
+
+如果想知道这个脚本具体做了什么，可以在执行命令之前加上 `DRY_RUN=1` 选项：
+
+```
+[root@localhost ~]# DRY_RUN=1 sh ./get-docker.sh
+# Executing docker install script, commit: 93d2499759296ac1f9c510605fef85052a2c32be
+yum install -y -q yum-utils
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum makecache
+yum install -y -q docker-ce
+yum install -y -q docker-ce-rootless-extras
+```
+
+可以看出和上一节手工安装的步骤基本类似，安装完成后，启动 Docker 服务并运行 `hello-world` 验证：
+
+```
+[root@localhost ~]# systemctl start docker
+[root@localhost ~]# docker run hello-world
+```
+
+## 4. 离线安装 Docker
+
 TODO
 
 ## 参考
 
 1. [Install Docker Engine on CentOS](https://docs.docker.com/engine/install/centos/)
+1. [curl - How To Use](https://curl.se/docs/manpage.html)
 
 ## 更多
 
