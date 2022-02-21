@@ -69,11 +69,95 @@ Last login: Mon Feb 21 06:49:44 2022
 [root@localhost ~]#
 ```
 
-## 2. 安装 Docker
+## 2. 通过 yum 安装 Docker
 
+系统默认的仓库里是没有 Docker 服务的：
 
+```
+[root@localhost ~]# ls /etc/yum.repos.d/
+CentOS-Base.repo  CentOS-Debuginfo.repo  CentOS-Media.repo    CentOS-Vault.repo
+CentOS-CR.repo    CentOS-fasttrack.repo  CentOS-Sources.repo  CentOS-x86_64-kernel.repo
+```
+
+我们需要先在系统中添加 [Docker 仓库](https://download.docker.com/linux/centos/docker-ce.repo)，可以直接将仓库文件下载下来放到 `/etc/yum.repos.d/` 目录，也可以通过 `yum-config-manager` 命令来添加。
+
+先安装 `yum-utils`：
+
+```
+[root@localhost ~]# yum install -y yum-utils
+```
+
+再通过 `yum-config-manager` 添加 Docker 仓库：
+
+```
+[root@localhost ~]# yum-config-manager \
+>     --add-repo \
+>     https://download.docker.com/linux/centos/docker-ce.repo
+已加载插件：fastestmirror
+adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
+grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
+repo saved to /etc/yum.repos.d/docker-ce.repo
+```
+
+接下来我们继续安装 Docker 服务：
+
+```
+[root@localhost ~]# yum install docker-ce docker-ce-cli containerd.io
+```
+
+安装过程根据提示输入 `y` 确认即可，另外，还会提示你校验 GPG 密钥，正常情况下这个密钥的指纹应该是 `060a 61c5 1b55 8a7f 742b 77aa c52f eb6b 621e 9f35`：
+
+```
+从 https://download.docker.com/linux/centos/gpg 检索密钥
+导入 GPG key 0x621E9F35:
+ 用户ID     : "Docker Release (CE rpm) <docker@docker.com>"
+ 指纹       : 060a 61c5 1b55 8a7f 742b 77aa c52f eb6b 621e 9f35
+ 来自       : https://download.docker.com/linux/centos/gpg
+是否继续？[y/N]：y
+```
+
+如果安装顺利，就可以通过 `systemctl start docker` 启动 Docker 服务了，然后运行 `docker run hello-world` 验证 Docker 服务是否正常：
+
+```
+[root@localhost ~]# systemctl start docker
+[root@localhost ~]# docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+2db29710123e: Pull complete 
+Digest: sha256:97a379f4f88575512824f3b352bc03cd75e239179eea0fecc38e597b2209f49a
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+```
+
+看到这个提示信息，说明 Docker 服务已经在虚拟机中正常运行了。
+
+## 3. 通过 `docker-install` 脚本安装 Docker
+
+TODO
 
 ## 参考
+
+1. [Install Docker Engine on CentOS](https://docs.docker.com/engine/install/centos/)
 
 ## 更多
 
