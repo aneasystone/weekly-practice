@@ -188,7 +188,38 @@ yum install -y -q docker-ce-rootless-extras
 
 ## 4. 离线安装 Docker
 
-TODO
+上面两种安装方式都需要连接外网，当我们的机器位于离线环境时（`air-gapped systems`），我们需要提前将 Docker 的安装包下载准备好。
+
+我们从 https://download.docker.com/linux/ 这里找到对应的 Linux 发行版本和系统架构，比如我这里的系统是 CentOS 7.9，系统架构是 x84_64，所以就进入 `/linux/centos/7/x86_64/stable/Packages/` 这个目录。但是这个目录里有很多的文件，我们该下载哪个文件呢？
+
+为了确定要下载的文件和版本，我们进入刚刚安装的那个虚拟机中，通过 `yum list installed | grep docker` 看看自动安装时都安装了哪些包：
+
+```
+[root@localhost ~]# yum list installed | grep docker
+containerd.io.x86_64                 1.4.12-3.1.el7                 @docker-ce-stable
+docker-ce.x86_64                     3:20.10.12-3.el7               @docker-ce-stable
+docker-ce-cli.x86_64                 1:20.10.12-3.el7               @docker-ce-stable
+docker-ce-rootless-extras.x86_64     20.10.12-3.el7                 @docker-ce-stable
+docker-scan-plugin.x86_64            0.12.0-3.el7                   @docker-ce-stable
+```
+
+我们将这些包都下载下来复制到一台新的虚拟机中，将网络服务关闭：
+
+```
+[root@localhost ~]# service network stop
+```
+
+然后执行 `yum install` 命令安装这些 RPM 包：
+
+```
+[root@localhost ~]# yum install *.rpm
+```
+
+我们会发现 yum 在安装的时候会自动解析依赖，还是会从外网下载，会出现一堆的报错：
+
+![](./images/rpm-install-docker.png)
+
+我们可以对照着这个列表再去一个个的下载对应的包，全部依赖安装完毕后，再安装 Docker 即可。
 
 ## 参考
 
