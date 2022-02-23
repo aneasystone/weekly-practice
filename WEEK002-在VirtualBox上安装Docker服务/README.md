@@ -90,9 +90,7 @@ CentOS-CR.repo    CentOS-fasttrack.repo  CentOS-Sources.repo  CentOS-x86_64-kern
 再通过 `yum-config-manager` 添加 Docker 仓库：
 
 ```
-[root@localhost ~]# yum-config-manager \
->     --add-repo \
->     https://download.docker.com/linux/centos/docker-ce.repo
+[root@localhost ~]# yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 已加载插件：fastestmirror
 adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
 grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
@@ -221,10 +219,140 @@ docker-scan-plugin.x86_64            0.12.0-3.el7                   @docker-ce-s
 
 我们可以对照着这个列表再去一个个的下载对应的包，全部依赖安装完毕后，再安装 Docker 即可。
 
+当然这样一个个去试并不是什么好方法，我们可以使用 `rpm` 的 `-q` 功能，查询 RPM 包的信息，`-R` 表示查询 RPM 包的依赖：
+
+```
+[root@localhost docker]# rpm -q -R -p docker-ce-20.10.12-3.el7.x86_64.rpm 
+警告：docker-ce-20.10.12-3.el7.x86_64.rpm: 头V4 RSA/SHA512 Signature, 密钥 ID 621e9f35: NOKEY
+/bin/sh
+/bin/sh
+/bin/sh
+/usr/sbin/groupadd
+container-selinux >= 2:2.74
+containerd.io >= 1.4.1
+docker-ce-cli
+docker-ce-rootless-extras
+iptables
+libc.so.6()(64bit)
+libc.so.6(GLIBC_2.2.5)(64bit)
+libc.so.6(GLIBC_2.3)(64bit)
+libcgroup
+libdevmapper.so.1.02()(64bit)
+libdevmapper.so.1.02(Base)(64bit)
+libdevmapper.so.1.02(DM_1_02_97)(64bit)
+libdl.so.2()(64bit)
+libdl.so.2(GLIBC_2.2.5)(64bit)
+libpthread.so.0()(64bit)
+libpthread.so.0(GLIBC_2.2.5)(64bit)
+libpthread.so.0(GLIBC_2.3.2)(64bit)
+libseccomp >= 2.3
+libsystemd.so.0()(64bit)
+libsystemd.so.0(LIBSYSTEMD_209)(64bit)
+rpmlib(CompressedFileNames) <= 3.0.4-1
+rpmlib(FileDigests) <= 4.6.0-1
+rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+rtld(GNU_HASH)
+systemd
+tar
+xz
+rpmlib(PayloadIsXz) <= 5.2-1
+```
+
+但是这样一个个去下载依赖的包也是很繁琐的，有没有什么办法能将依赖的包一次性都下载下来呢？当然有！还记得上面的 `yum install` 安装命令吧，其实 `yum` 在安装之前，先是做了两件事情，第一步解析包的依赖，然后将所有依赖的包下载下来，最后才是安装。而 `yum --downloadonly` 可以让我们只将依赖包下载下来，默认情况下 `yum` 将依赖的包下载到 `/var/cache/yum/x86_64/[centos/fedora-version]/[repository]/packages` 目录，其中 `[repository]` 表示来源仓库的名称，比如 base、docker-ce-stable、extras 等，不过这样还是不够友好，我们希望下载下来的文件放在一起，这时可以使用 `--downloaddir` 参数来指定下载目录：
+
+```
+[root@localhost ~]# yum --downloadonly --downloaddir=. install docker-ce docker-ce-cli containerd.io
+已加载插件：fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.bupt.edu.cn
+ * extras: mirrors.dgut.edu.cn
+ * updates: mirrors.bupt.edu.cn
+正在解决依赖关系
+--> 正在检查事务
+---> 软件包 containerd.io.x86_64.0.1.4.12-3.1.el7 将被 安装
+--> 正在处理依赖关系 container-selinux >= 2:2.74，它被软件包 containerd.io-1.4.12-3.1.el7.x86_64 需要
+---> 软件包 docker-ce.x86_64.3.20.10.12-3.el7 将被 安装
+--> 正在处理依赖关系 docker-ce-rootless-extras，它被软件包 3:docker-ce-20.10.12-3.el7.x86_64 需要
+--> 正在处理依赖关系 libcgroup，它被软件包 3:docker-ce-20.10.12-3.el7.x86_64 需要
+---> 软件包 docker-ce-cli.x86_64.1.20.10.12-3.el7 将被 安装
+--> 正在处理依赖关系 docker-scan-plugin(x86-64)，它被软件包 1:docker-ce-cli-20.10.12-3.el7.x86_64 需要
+--> 正在检查事务
+---> 软件包 container-selinux.noarch.2.2.119.2-1.911c772.el7_8 将被 安装
+--> 正在处理依赖关系 policycoreutils-python，它被软件包 2:container-selinux-2.119.2-1.911c772.el7_8.noarch 需要
+---> 软件包 docker-ce-rootless-extras.x86_64.0.20.10.12-3.el7 将被 安装
+--> 正在处理依赖关系 fuse-overlayfs >= 0.7，它被软件包 docker-ce-rootless-extras-20.10.12-3.el7.x86_64 需要
+--> 正在处理依赖关系 slirp4netns >= 0.4，它被软件包 docker-ce-rootless-extras-20.10.12-3.el7.x86_64 需要
+---> 软件包 docker-scan-plugin.x86_64.0.0.12.0-3.el7 将被 安装
+---> 软件包 libcgroup.x86_64.0.0.41-21.el7 将被 安装
+--> 正在检查事务
+---> 软件包 fuse-overlayfs.x86_64.0.0.7.2-6.el7_8 将被 安装
+--> 正在处理依赖关系 libfuse3.so.3(FUSE_3.2)(64bit)，它被软件包 fuse-overlayfs-0.7.2-6.el7_8.x86_64 需要
+--> 正在处理依赖关系 libfuse3.so.3(FUSE_3.0)(64bit)，它被软件包 fuse-overlayfs-0.7.2-6.el7_8.x86_64 需要
+--> 正在处理依赖关系 libfuse3.so.3()(64bit)，它被软件包 fuse-overlayfs-0.7.2-6.el7_8.x86_64 需要
+---> 软件包 policycoreutils-python.x86_64.0.2.5-34.el7 将被 安装
+--> 正在处理依赖关系 setools-libs >= 3.3.8-4，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libsemanage-python >= 2.5-14，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 audit-libs-python >= 2.1.3-4，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 python-IPy，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libqpol.so.1(VERS_1.4)(64bit)，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libqpol.so.1(VERS_1.2)(64bit)，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libapol.so.4(VERS_4.0)(64bit)，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 checkpolicy，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libqpol.so.1()(64bit)，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+--> 正在处理依赖关系 libapol.so.4()(64bit)，它被软件包 policycoreutils-python-2.5-34.el7.x86_64 需要
+---> 软件包 slirp4netns.x86_64.0.0.4.3-4.el7_8 将被 安装
+--> 正在检查事务
+---> 软件包 audit-libs-python.x86_64.0.2.8.5-4.el7 将被 安装
+---> 软件包 checkpolicy.x86_64.0.2.5-8.el7 将被 安装
+---> 软件包 fuse3-libs.x86_64.0.3.6.1-4.el7 将被 安装
+---> 软件包 libsemanage-python.x86_64.0.2.5-14.el7 将被 安装
+---> 软件包 python-IPy.noarch.0.0.75-6.el7 将被 安装
+---> 软件包 setools-libs.x86_64.0.3.3.8-4.el7 将被 安装
+--> 解决依赖关系完成
+
+依赖关系解决
+
+========================================================================================================================================================
+ Package                                    架构                    版本                                        源                                 大小
+========================================================================================================================================================
+正在安装:
+ containerd.io                              x86_64                  1.4.12-3.1.el7                              docker-ce-stable                   28 M
+ docker-ce                                  x86_64                  3:20.10.12-3.el7                            docker-ce-stable                   23 M
+ docker-ce-cli                              x86_64                  1:20.10.12-3.el7                            docker-ce-stable                   30 M
+为依赖而安装:
+ audit-libs-python                          x86_64                  2.8.5-4.el7                                 base                               76 k
+ checkpolicy                                x86_64                  2.5-8.el7                                   base                              295 k
+ container-selinux                          noarch                  2:2.119.2-1.911c772.el7_8                   extras                             40 k
+ docker-ce-rootless-extras                  x86_64                  20.10.12-3.el7                              docker-ce-stable                  8.0 M
+ docker-scan-plugin                         x86_64                  0.12.0-3.el7                                docker-ce-stable                  3.7 M
+ fuse-overlayfs                             x86_64                  0.7.2-6.el7_8                               extras                             54 k
+ fuse3-libs                                 x86_64                  3.6.1-4.el7                                 extras                             82 k
+ libcgroup                                  x86_64                  0.41-21.el7                                 base                               66 k
+ libsemanage-python                         x86_64                  2.5-14.el7                                  base                              113 k
+ policycoreutils-python                     x86_64                  2.5-34.el7                                  base                              457 k
+ python-IPy                                 noarch                  0.75-6.el7                                  base                               32 k
+ setools-libs                               x86_64                  3.3.8-4.el7                                 base                              620 k
+ slirp4netns                                x86_64                  0.4.3-4.el7_8                               extras                             81 k
+
+事务概要
+========================================================================================================================================================
+安装  3 软件包 (+13 依赖软件包)
+
+总下载量：95 M
+安装大小：387 M
+Background downloading packages, then exiting:
+exiting because "Download Only" specified
+```
+
+可以看到 3 个软件包和 13 个依赖包都下载好了，我们将这 16 个包全部复制到离线机器上，运行 `yum install *.rpm` 即可。
+
+除了 `yum --downloadonly` 实现离线安装之外，还有很多其他的方式，比如：搭建自己的本地 `yum` 源就是一种更通用的解决方案，可以根据参考链接尝试一下。
+
 ## 参考
 
 1. [Install Docker Engine on CentOS](https://docs.docker.com/engine/install/centos/)
 1. [curl - How To Use](https://curl.se/docs/manpage.html)
+1. [Centos7通过reposync搭建本地Yum源](https://www.jianshu.com/p/6c3090968d71)
 
 ## 更多
 
