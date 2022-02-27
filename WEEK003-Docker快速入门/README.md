@@ -139,7 +139,54 @@ Successfully tagged todo-list:latest
 
 ## Part 3: Update the application
 
+这一节我们将学习如何更新容器里的内容。当代办清单为空时，页面会显示一行提示信息：
 
+> No items yet! Add one above!
+
+如果现在我们需要把这行提示信息改为：
+
+> You have no todo items yet! Add one above!
+
+首先打开 `src/static/js/app.js` 文件，跳到第 56 行，修改如下：
+
+![](./images/change-code.png)
+
+保存文件后，通过 `docker build` 重新构建镜像：
+
+```
+[root@localhost app]# docker build -t todo-list .
+```
+
+在启动新容器之前，我们需要将老的容器删除，先通过 `docker ps` 找出老容器的 ID：
+
+```
+[root@localhost app]# docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS         PORTS                                       NAMES
+040a23aeff1e   eeb273056a6a   "docker-entrypoint.s…"   22 hours ago   Up 9 minutes   0.0.0.0:3000->3000/tcp, :::3000->3000/tcp   brave_sutherland
+```
+
+然后通过 `docker stop` 和 `docker rm` 停止并删除该容器：
+
+```
+[root@localhost app]# docker stop 040a23aeff1e
+[root@localhost app]# docker rm 040a23aeff1e
+```
+
+你也可以通过 `docker rm -f` 强制删除该容器：
+
+```
+[root@localhost app]# docker rm -f 040a23aeff1e
+```
+
+最后重新启动新容器：
+
+```
+[root@localhost app]# docker run -dp 3000:3000 todo-list
+```
+
+刷新浏览器，页面已经更新了：
+
+![](./images/change-code-done.png)
 
 ## Part 4: Share the application
 ## Part 5: Persist the DB
