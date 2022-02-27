@@ -16,7 +16,7 @@
 [root@localhost ~]# docker run -d -p 80:80 docker/getting-started
 ```
 
-其中，`-d` 表示让容器运行在 `detached mode`，也就是后台运行，`-p 80:80` 表示将容器内的 80 端口映射到主机的 80 端口，这样我们就可以通过主机的 80 端口来访问容器里的服务，在浏览器里输入 `http://127.0.0.1:80`，会看到如下页面：
+其中，`-d` 表示让容器运行在 `detached mode`，也就是后台运行，`-p 80:80` 表示将容器内的 80 端口映射到主机的 80 端口，这样我们就可以通过主机的 80 端口来访问容器里的服务，在浏览器里输入 `http://localhost:80`，会看到如下页面：
 
 ![](./images/getting-started.png)
 
@@ -55,7 +55,92 @@ package.json  spec  src  yarn.lock
 
 这是一个 Node.js 程序，为了让这个程序能运行起来，我们必须得有 Node.js 的运行环境。
 
+首先，我们在这个目录下新建一个 `Dockerfile` 文件：
+
+```
+[root@localhost app]# vi Dockerfile
+```
+
+在这个文件中输入如下内容：
+
+```
+FROM node:12-alpine
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+EXPOSE 3000
+```
+
+`Dockerfile` 是我们构建镜像时所需的指令文件，`FROM node:12-alpine` 表示我们使用 `node:12-alpine` 来作为我们的基础镜像，这是一个内置了 Node.js 运行环境的镜像，`WORKDIR /app` 表示将镜像的 `/app` 目录作为工作目录，这样执行 `COPY . .` 的时候就可以把当前目录下的文件复制到镜像里的 `/app` 目录下了。然后通过 `RUN yarn install --production` 安装程序所需要的一些依赖，这些依赖定义在 `package.json` 文件里。最后的 `CMD ["node", "src/index.js"]` 和 `EXPOSE 3000` 指定了容器运行时的启动命令和容器对外暴露的端口。
+
+写好这个 `Dockerfile` 文件后，就可以通过 `docker build -t todo-list .` 命令来构建镜像：
+
+```
+[root@localhost app]# docker build -t todo-list .
+Sending build context to Docker daemon  4.641MB
+Step 1/6 : FROM node:12-alpine
+12-alpine: Pulling from library/node
+59bf1c3509f3: Already exists 
+8769eb813ad5: Pull complete 
+7025e9ac362e: Pull complete 
+1efe07d207fa: Pull complete 
+Digest: sha256:dfa564312367b1a8fca8db7ae4bae102b28e68b39ebcb7b17022c938f105846b
+Status: Downloaded newer image for node:12-alpine
+ ---> 1b156b4c3ee8
+Step 2/6 : WORKDIR /app
+ ---> Running in fbb23d022619
+Removing intermediate container fbb23d022619
+ ---> a19fa5fc5c18
+Step 3/6 : COPY . .
+ ---> acdf512be224
+Step 4/6 : RUN yarn install --production
+ ---> Running in 9af3492b1571
+yarn install v1.22.17
+[1/4] Resolving packages...
+warning Resolution field "ansi-regex@5.0.1" is incompatible with requested version "ansi-regex@^2.0.0"
+warning Resolution field "ansi-regex@5.0.1" is incompatible with requested version "ansi-regex@^3.0.0"
+warning sqlite3 > node-gyp > request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+warning sqlite3 > node-gyp > tar@2.2.2: This version of tar is no longer supported, and will not receive security updates. Please upgrade asap.
+warning sqlite3 > node-gyp > request > har-validator@5.1.5: this library is no longer supported
+warning sqlite3 > node-gyp > request > uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 35.53s.
+Removing intermediate container 9af3492b1571
+ ---> c50542645f82
+Step 5/6 : CMD ["node", "src/index.js"]
+ ---> Running in 77212d79a3a7
+Removing intermediate container 77212d79a3a7
+ ---> 5f5a66a501ae
+Step 6/6 : EXPOSE 3000
+ ---> Running in c4d8ac990217
+Removing intermediate container c4d8ac990217
+ ---> eeb273056a6a
+Successfully built eeb273056a6a
+Successfully tagged todo-list:latest
+```
+
+其中 `-t todo-list` 指定了构建后的镜像名称，注意命令最后的 `.` 不能忽略，这表示让 `docker build` 将当前目录作为构建上下文，并从这里寻找 `Dockerfile` 文件。从上面的输出结果可以看出，`docker build` 命令按照 `Dockerfile` 文件中的指令一行一行的执行，最终生成了一个名为 `todo-list:latest` 的镜像。
+
+现在我们构建好了镜像，让我们运行它：
+
+```
+[root@localhost app]# docker run -dp 3000:3000 todo-list
+```
+
+其中 `-dp` 是 `-d -p` 的缩写，当 `docker` 命令行中的参数是一个字母的时候，就可以通过这种方式缩写，比如 `docker run -i -t` 可以缩写成 `docker run -it`。
+
+我们打开浏览器，访问 `http://localhost:3000`，你就能看到我们的代办清单小程序了：
+
+![](./images/todo-list.png)
+
 ## Part 3: Update the application
+
+
+
 ## Part 4: Share the application
 ## Part 5: Persist the DB
 ## Part 6: Use bind mounts
