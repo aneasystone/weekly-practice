@@ -188,7 +188,81 @@ CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS    
 
 ![](./images/change-code-done.png)
 
+虽然应用已经成功更新，但是有两点需要注意：
+
+1. 新容器启动后，所有的代办列表都清空了，也就是说这个应用没有持久化能力；
+2. 每次对应用进行修改都要经过上面这一系列繁琐的操作，能不能做到更新代码后不用重新构建镜像就可以直接生效？
+
 ## Part 4: Share the application
+
+这一节我们将学习如何将镜像分享给其他人。为了让其他人能访问到你的镜像，我们必须要将镜像上传到某个镜像仓库，Docker 默认使用的镜像仓库是 [Docker Hub](https://hub.docker.com/)，我们先在 Docker Hub 上注册一个账号。
+
+注册成功之后，我们就可以通过 `docker login` 命令进行登录：
+
+```
+[root@localhost app]# docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: aneasystone
+Password: 
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+
+这里有一个警告，你登录所用的账号密码信息其实保存在 `/root/.docker/config.json` 文件里，我们可以打开该文件看看：
+
+```
+{
+        "auths": {
+                "https://index.docker.io/v1/": {
+                        "auth": "YXN5..."
+                }
+        }
+}
+```
+
+其中，`auth` 字段是经过 BASE64 编码的，但对于稍懂技术的人来说，这点编码还是很容易破解的，所以，千万不要在公用的主机上登录你的账号。
+
+登录了 Docker Hub 账号之后，你就可以将你本地的镜像推送到 Docker 仓库了，但是要注意的是，Docker Hub 上的每个镜像都有自己的名字空间，如果不指定名字空间，默认的名字空间是 `docker.io/library`，所以如果我们直接 `docker push` 我们的镜像，会得到下面的访问拒绝错误：
+
+```
+[root@localhost app]# docker push todo-list
+Using default tag: latest
+The push refers to repository [docker.io/library/todo-list]
+1b9fd74047d7: Preparing 
+325c8936fbcd: Preparing 
+f46524a7ca21: Preparing 
+c5088e2ef878: Preparing 
+12587d8b4618: Preparing 
+738f7039e20b: Waiting 
+8d3ac3489996: Waiting 
+denied: requested access to the resource is denied
+```
+
+我们可以通过 `docker tag` 修改镜像名：
+
+```
+[root@localhost app]# docker tag todo-list aneasystone/todo-list
+```
+
+然后再 `docker push` 推送镜像：
+
+```
+[root@localhost app]# docker push aneasystone/todo-list
+```
+
+推送成功后，就可以在 Docker Hub 上看到我们的镜像了：
+
+![](./images/docker-hub.png)
+
+别人也可以通过 `docker pull` 来访问你的镜像了：
+
+```
+[root@localhost app]# docker pull aneasystone/todo-list
+```
+
 ## Part 5: Persist the DB
 ## Part 6: Use bind mounts
 ## Part 7: Multi-container apps
