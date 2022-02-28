@@ -263,6 +263,12 @@ denied: requested access to the resource is denied
 [root@localhost app]# docker pull aneasystone/todo-list
 ```
 
+你可以在 [Play with Docker](https://labs.play-with-docker.com/) 创建一个虚拟机，在这里做一些简单的 Docker 实验：
+
+![](./images/play-with-docker.png)
+
+Play with Docker 这个站点对于学习 Docker 非常有用，它提供了 [很多的实验和教程](https://training.play-with-docker.com/) 来帮助运维人员或开发人员快速上手 Docker，感兴趣的同学可以把这里的实验挨个做一遍。
+
 ## Part 5: Persist the DB
 ## Part 6: Use bind mounts
 ## Part 7: Multi-container apps
@@ -307,11 +313,21 @@ fatal: The remote end hung up unexpectedly
 
 ### 2. 体验使用 `chroot` 命令
 
-### 3. 关于 Docker 的更多文档
+https://www.cnblogs.com/sparkdev/p/8556075.html
+
+https://github.com/saschagrunert/demystifying-containers/blob/master/part1-kernel-space/post.md#chroot
+
+### 3. Play with Docker Classroom
+
+https://training.play-with-docker.com/
+
+### 4. 关于 Docker 的更多文档
 
 Docker 官方文档的内容非常丰富，主要分成如下几个部分：
 
 #### 1. Get Started
+
+Learn Docker basics and benefits of containerizing your applications.
 
 #### 2. Download and install
 
