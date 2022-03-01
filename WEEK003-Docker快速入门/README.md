@@ -270,6 +270,17 @@ denied: requested access to the resource is denied
 Play with Docker 这个站点对于学习 Docker 非常有用，它提供了 [很多的实验和教程](https://training.play-with-docker.com/) 来帮助运维人员或开发人员快速上手 Docker，感兴趣的同学可以把这里的实验挨个做一遍。
 
 ## Part 5: Persist the DB
+
+在第三部分的最后我们讲到，每次创建新容器后，之前创建的代办清单都会消失，这是为什么呢？这是因为每个容器都使用自己独立的文件系统，各个容器之间是互相隔离的。这个应用默认使用的是 SQLite 数据库，它将数据保存在 `/etc/todos/todo.db` 文件中，当删除容器时，这个文件会随着容器的文件系统一并被删掉。那么怎样才能将这个数据文件持久化呢？答案就是 [`Volume`](https://docs.docker.com/storage/volumes/)。
+
+Volume 可以让容器访问宿主机上的文件，并且这个文件可以在多个容器之间共享，在容器内对文件的修改会直接反映到宿主机的文件，这样当容器被删除后，Volume 依然保存在宿主机上，只要新建的容器继续使用这个 Volume ，新容器就能延用之前的数据。
+
+首先，我们通过 `docker volume create` 命令创建一个 Volume：
+
+```
+# docker volume create todo-db
+```
+
 ## Part 6: Use bind mounts
 ## Part 7: Multi-container apps
 ## Part 8: Use Docker Compose
@@ -313,9 +324,12 @@ fatal: The remote end hung up unexpectedly
 
 ### 2. 体验使用 `chroot` 命令
 
-https://www.cnblogs.com/sparkdev/p/8556075.html
-
-https://github.com/saschagrunert/demystifying-containers/blob/master/part1-kernel-space/post.md#chroot
+```
+$ mkdir rootfs
+$ (docker export $(docker create busybox) | tar -C rootfs -xvf -)
+$ ls rootfs
+$ sudo chroot rootfs /bin/sh
+```
 
 ### 3. Play with Docker Classroom
 
