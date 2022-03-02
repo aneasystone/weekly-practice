@@ -278,10 +278,53 @@ Volume 可以让容器访问宿主机上的文件，并且这个文件可以在�
 首先，我们通过 `docker volume create` 命令创建一个 Volume：
 
 ```
-# docker volume create todo-db
+[root@localhost ~]# docker volume create todo-db
+```
+
+然后重新启动容器，启动时通过 `-v` 参数将这个 Volume 挂载到容器的 `/etc/todos` 目录：
+
+```
+[root@localhost ~]# docker run -dp 3000:3000 -v todo-db:/etc/todos todo-list
+```
+
+启动后我们在浏览器中访问这个小程序，添加几条记录，然后通过 `docker rm -f` 删除容器，并使用上面的命令重新创建一个新容器，刷新浏览器，可以看到刚添加的几条记录都还在。
+
+可能有人会问，Docker 将我们的数据保存在哪里呢？可以通过 `docker volume inspect` 命令来确认：
+
+```
+[root@localhost ~]# docker volume inspect todo-db
+[
+    {
+        "CreatedAt": "2022-03-02T06:47:44+08:00",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/todo-db/_data",
+        "Name": "todo-db",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+上面的 `Mountpoint` 就是这个 Volume 在宿主机上的位置，我们添加的数据就保存在这里：
+
+```
+[root@localhost ~]# ls /var/lib/docker/volumes/todo-db/_data
+todo.db
 ```
 
 ## Part 6: Use bind mounts
+
+在上一节中，我们通过 `docker volume create` 创建了一个 `Volume` 来保存我们的数据，通过复用 Volume 我们做到了数据的持有化，像这种有名字的 Volume 我们称之为 `named volume`，当我们只是想保存数据而不关心数据保存在哪的时候，`named volume` 非常有用。
+
+当然我们也可以指定挂载的位置，这种 Volume 被称为 `bind mounts`。很显然使用 `bind mounts` 我们也可以持有化数据，但是更多的时候，我们通过这种方式向容器添加额外的数据。下表是 `bind mounts` 和 `named volume` 的一个对比：
+
+![](./images/named-volume-vs-bind-mounts.png)
+
+可以看到 `named volume` 相对于 `bind mounts` 来说有一个很大的特点：支持 `volume driver`，通过 volume driver 可以对接很多第三方存储，比如：SFTP, Ceph, NetApp, S3 等。
+
+还记得在第三部分的最后我们提到的两个问题吗？第一个问题是数据的持久化，我们通过 `named volume` 解决了；第二个问题是每次修改代码，都需要一堆繁琐的操作才能看到修改生效，这在开发阶段是不能忍受的，这一节我们将通过 `bind mounts` 来解决这个问题。
+
 ## Part 7: Multi-container apps
 ## Part 8: Use Docker Compose
 ## Part 9: Image-building best practices
@@ -335,7 +378,14 @@ $ sudo chroot rootfs /bin/sh
 
 https://training.play-with-docker.com/
 
-### 4. 关于 Docker 的更多文档
+### 4. Volume Drivers
+
+* [SFTP](https://github.com/vieux/docker-volume-sshfs)
+* [Ceph](https://ceph.com/geen-categorie/getting-started-with-the-docker-rbd-volume-plugin/)
+* [NetApp](https://netappdvp.readthedocs.io/en/stable/)
+* [S3](https://github.com/elementar/docker-s3-volume)
+
+### 5. 关于 Docker 的更多文档
 
 Docker 官方文档的内容非常丰富，主要分成如下几个部分：
 
