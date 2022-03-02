@@ -325,6 +325,69 @@ todo.db
 
 还记得在第三部分的最后我们提到的两个问题吗？第一个问题是数据的持久化，我们通过 `named volume` 解决了；第二个问题是每次修改代码，都需要一堆繁琐的操作才能看到修改生效，这在开发阶段是不能忍受的，这一节我们将通过 `bind mounts` 来解决这个问题。
 
+首先，我们进入源码所在的目录：
+
+```
+[root@localhost ~]# cd getting-started/app/
+```
+然后运行下面这行命令（运行之前确保之前的容器已经停止）：
+
+```
+[root@localhost app]# docker run -dp 3000:3000 \
+        -w /app \
+        -v "$(pwd):/app" \
+        node:12-alpine \
+        sh -c "yarn install && yarn run dev"
+```
+
+其中，`-dp 3000:3000` 之前已经解释过，容器以 `detached mode` 运行，并将容器内的 3000 端口映射到宿主机的 3000 端口；`-w /app` 表示指定容器的工作目录；`-v "$(pwd):/app"` 表示将当前目录挂载到容器里的 `/app` 目录，这个就是 `bind mounts`；`node:12-alpine` 是要运行的镜像，它也是我们之前写 Dockerfile 时指定的基础镜像；最后的 `sh -c "yarn install && yarn run dev"` 表示容器起来后要执行的命令，在当前目录通过 yarn 安装依赖并执行 `dev` 脚本。打开 `package.json` 文件我们可以看出 `dev` 脚本实际上是执行 `nodemon src/index.js` 命令：
+
+```
+  "scripts": {
+    "prettify": "prettier -l --write \"**/*.js\"",
+    "test": "jest",
+    "dev": "nodemon src/index.js"
+  },
+```
+
+容器运行起来后，`nodemon` 就会开始监听源码目录内文件的变动，一旦发现有文件变动，就会重新启动应用，这样就可以让你的变动实时生效。使用 `docker log` 可以查看容器的日志：
+
+```
+[root@localhost app]# docker logs -f 60d
+yarn install v1.22.17
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 42.06s.
+yarn run v1.22.17
+$ nodemon src/index.js
+[nodemon] 2.0.13
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,mjs,json
+[nodemon] starting `node src/index.js`
+Using sqlite database at /etc/todos/todo.db
+Listening on port 3000
+```
+
+现在我们对应用做一点修改，比如我们想将按钮上的 `Add Item` 改为 `Add`，可以打开 `src/static/js/app.js` 文件：
+
+```
+[root@localhost app]# vi src/static/js/app.js
+```
+
+跳转到 109 行进行修改即可：
+
+![](./images/change-add-item.png)
+
+修改完成后刷新页面，可以发现我们的修改立即生效了！
+
+![](./images/change-add-item-ui.png)
+
+通过这一节的内容，我们学习了使用 `bind mounts` 搭建本地开发环境，这种做法的好处是开发机器上不用安装任何构建工具，也不用配置开发环境，只需要执行一句简单的 `docker run` 命令即可。
+
 ## Part 7: Multi-container apps
 ## Part 8: Use Docker Compose
 ## Part 9: Image-building best practices
