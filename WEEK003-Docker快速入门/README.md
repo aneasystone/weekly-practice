@@ -389,6 +389,66 @@ Listening on port 3000
 通过这一节的内容，我们学习了使用 `bind mounts` 搭建本地开发环境，这种做法的好处是开发机器上不用安装任何构建工具，也不用配置开发环境，只需要执行一句简单的 `docker run` 命令即可。
 
 ## Part 7: Multi-container apps
+
+这一节我们将升级我们的程序，支持 MySQL 数据库。在之前的例子中，我们一直使用 SQLite 将数据存储在本地文件中，这种方式在开发时或应用规模很小时很方便，但是在生产环境，我们更多的是使用像 MySQL 这样具有扩展性的数据库。
+
+那么问题来了，我们要在哪里运行 MySQL 服务呢？是运行在和应用同一个容器中？还是运行在独立的容器中？一般来说，**每个容器都应该只负责一件事**。但是我们知道，容器都是互相独立的，它们之间如何通信呢？答案就是 **网络**。只要两个容器位于同一个网络，它们之间就可以通信。
+
+首先，我们创建一个名为 `todo-app` 的网络：
+
+```
+[root@localhost ~]# docker network create todo-app
+```
+
+然后，运行 MySQL 服务：
+
+```
+[root@localhost ~]# docker run -d \
+        --network todo-app --network-alias mysql \
+        -v todo-mysql-data:/var/lib/mysql \
+        -e MYSQL_ROOT_PASSWORD=123456 \
+        -e MYSQL_DATABASE=todos \
+        mysql:5.7
+```
+
+我们通过 `--network todo-app` 让 MySQL 运行在我们刚刚创建的 `todo-app` 这个网络中，并通过 `--network-alias mysql` 给网络取了一个别名。另外，我们使用 `-v todo-mysql-data:/var/lib/mysql` 创建了一个 `named volume` 并挂载到 MySQL 容器的数据目录，特别注意的是，我们并没有运行过 `docker volume create` 命令，Docker 会帮我们自动识别并创建 `named volume`。
+
+`-e` 参数可以定义环境变量，MySQL 容器在初次启动时会根据环境变量来初始化数据库，`MYSQL_ROOT_PASSWORD` 用来设置 root 密码，指定 `MYSQL_DATABASE` 会创建一个默认数据库。关于 MySQL 容器的环境变量，可以 [参考这里](https://hub.docker.com/_/mysql/)。
+
+为了确认 MySQL 服务已经成功启动，我们使用 `docker exec -it` 进入容器内部连接数据库：
+
+```
+[root@localhost ~]# docker exec -it ba1a2685 mysql -uroot -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.37 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+```
+
+输入 `show databases` 查看数据库 `todos` 是否已创建：
+
+```
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| todos              |
++--------------------+
+5 rows in set (0.01 sec)
+```
+
 ## Part 8: Use Docker Compose
 ## Part 9: Image-building best practices
 ## Part 10: What next?
@@ -448,7 +508,35 @@ https://training.play-with-docker.com/
 * [NetApp](https://netappdvp.readthedocs.io/en/stable/)
 * [S3](https://github.com/elementar/docker-s3-volume)
 
-### 5. 关于 Docker 的更多文档
+### 5. 使用 netshoot 排查容器网络故障
+
+[nicolaka/netshoot](https://github.com/nicolaka/netshoot) 提供了大量的工具用来排查 Docker 或 Kubernetes 网络问题。我们用它来检查 MySQL 容器的网络：
+
+```
+[root@localhost ~]# docker run -it --network todo-app nicolaka/netshoot
+
+~ dig mysql
+
+; <<>> DiG 9.16.22 <<>> mysql
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 29927
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;mysql.				IN	A
+
+;; ANSWER SECTION:
+mysql.			600	IN	A	172.18.0.2
+
+;; Query time: 0 msec
+;; SERVER: 127.0.0.11#53(127.0.0.11)
+;; WHEN: Thu Mar 03 23:59:14 UTC 2022
+;; MSG SIZE  rcvd: 44
+
+```
+
+### 6. 关于 Docker 的更多文档
 
 Docker 官方文档的内容非常丰富，主要分成如下几个部分：
 
