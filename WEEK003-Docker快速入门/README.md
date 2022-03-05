@@ -411,7 +411,7 @@ Listening on port 3000
         mysql:5.7
 ```
 
-我们通过 `--network todo-app` 让 MySQL 运行在我们刚刚创建的 `todo-app` 这个网络中，并通过 `--network-alias mysql` 给网络取了一个别名。另外，我们使用 `-v todo-mysql-data:/var/lib/mysql` 创建了一个 `named volume` 并挂载到 MySQL 容器的数据目录，特别注意的是，我们并没有运行过 `docker volume create` 命令，Docker 会帮我们自动识别并创建 `named volume`。
+我们通过 `--network todo-app` 让 MySQL 运行在我们刚刚创建的 `todo-app` 这个网络中，并通过 `--network-alias mysql` 给当前容器取了一个别名，这样其他容器就可以通过 `mysql` 这个名称来访问它。另外，我们使用 `-v todo-mysql-data:/var/lib/mysql` 创建了一个 `named volume` 并挂载到 MySQL 容器的数据目录，特别注意的是，我们并没有运行过 `docker volume create` 命令，Docker 会帮我们自动识别并创建 `named volume`。
 
 `-e` 参数可以定义环境变量，MySQL 容器在初次启动时会根据环境变量来初始化数据库，`MYSQL_ROOT_PASSWORD` 用来设置 root 密码，指定 `MYSQL_DATABASE` 会创建一个默认数据库。关于 MySQL 容器的环境变量，可以 [参考这里](https://hub.docker.com/_/mysql/)。
 
@@ -449,8 +449,185 @@ mysql> show databases;
 5 rows in set (0.01 sec)
 ```
 
+可以看到数据库 `todos` 已经创建好了。这时，就可以让我们的应用来连接 MySQL 数据库，和上面的 MySQL 启动命令一样，我们的应用也支持通过环境变量来设置 MySQL 的连接信息：
+
+```
+[root@localhost app]# docker run -dp 3000:3000 \
+        -w /app -v "$(pwd):/app" \
+        --network todo-app \
+        -e MYSQL_HOST=mysql \
+        -e MYSQL_USER=root \
+        -e MYSQL_PASSWORD=123456 \
+        -e MYSQL_DB=todos \
+        node:12-alpine \
+        sh -c "yarn install && yarn run dev"
+```
+
+和之前的启动命令对比，我们加上了 `--network todo-app` 参数，让应用程序运行在 `todo-app` 这个网络中，这个和 MySQL 服务同处于一个网络。注意这里的 `MYSQL_HOST` 环境变量，我们直接使用了 `mysql`，这个就是我们上面运行 MySQL 时指定的网络别名。
+
+使用 `docker logs` 应该能看到类似下面的信息，说明我们的应用已经成功连接上 MySQL 数据库了：
+
+```
+[root@localhost app]# docker logs -f d3e
+yarn install v1.22.17
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.83s.
+yarn run v1.22.17
+$ nodemon src/index.js
+[nodemon] 2.0.13
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,mjs,json
+[nodemon] starting `node src/index.js`
+Waiting for mysql:3306.
+Connected!
+Connected to mysql db at host mysql
+Listening on port 3000
+```
+
+打开页面，随便添加几条记录：
+
+![](./images/todo-list-mysql.png)
+
+再连接 MySQL 查看记录是否保存到数据库里了：
+
+```
+[root@localhost app]# docker exec -it ba1 mysql -p todos
+
+mysql> select * from todo_items;
++--------------------------------------+------+-----------+
+| id                                   | name | completed |
++--------------------------------------+------+-----------+
+| 418dd28d-10af-40d6-83bd-6470e77d121f | a    |         1 |
+| 431a53c5-250f-4eb6-87c0-4aae18f0df5c | b    |         1 |
+| 6914e287-d954-4a51-964a-7cdd905619c5 | c    |         0 |
+| bb35f81f-d265-461f-b867-cf1a84a72852 | d    |         0 |
++--------------------------------------+------+-----------+
+4 rows in set (0.00 sec)
+```
+
 ## Part 8: Use Docker Compose
+
+使用 Docker Compose，我们可以方便的对多容器应用进行管理，在一个 YAML 文件中定义多个服务，并使用一个命令就可以对所有的服务进行启动和停止。
+
+### 安装 Docker Compose
+
+1. 下载 docker-compose
+
+```
+[root@localhost app]# curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+2. 给文件赋上执行权限
+
+```
+[root@localhost app]# chmod +x /usr/local/bin/docker-compose
+```
+
+3. 查看版本，确认是否已成功安装
+
+```
+[root@localhost app]# docker-compose --version
+docker-compose version 1.29.2, build 5becea4c
+```
+
+### 编写 Compose 配置文件
+
+首先在 `getting-started/app` 目录创建一个 `docker-compose.yml` 文件：
+
+```
+[root@localhost app]# vi docker-compose.yml
+```
+
+在文件中输入如下内容：
+
+```
+version: "3.7"
+
+services:
+  app:
+    image: node:12-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123456
+      MYSQL_DB: todos
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: todos
+
+volumes:
+  todo-mysql-data:
+
+```
+
+将上面的 Compose 文件和之前运行的命令做个对比：
+
+```
+[root@localhost app]# docker run -dp 3000:3000 \
+        -w /app -v "$(pwd):/app" \
+        --network todo-app \
+        -e MYSQL_HOST=mysql \
+        -e MYSQL_USER=root \
+        -e MYSQL_PASSWORD=123456 \
+        -e MYSQL_DB=todos \
+        node:12-alpine \
+        sh -c "yarn install && yarn run dev"
+
+[root@localhost ~]# docker run -d \
+        --network todo-app --network-alias mysql \
+        -v todo-mysql-data:/var/lib/mysql \
+        -e MYSQL_ROOT_PASSWORD=123456 \
+        -e MYSQL_DATABASE=todos \
+        mysql:5.7
+```
+
+可以看出 Compose 文件比冗长的命令行更容易理解和编辑，而且在 Compose 文件中省去了 `--network` 定义，默认情况下，同一个 Compose 文件中的服务运行在同一个网络下，并将 `services` 的名称作为网络别名。
+
+### 执行 Docker Compose
+
+编写好 Compose 文件后，就可以运行 `docker-compose up` 命令：
+
+```
+[root@localhost app]# docker-compose up -d
+Creating network "app_default" with the default driver
+Creating volume "app_todo-mysql-data" with default driver
+Creating app_mysql_1 ... done
+Creating app_app_1   ... done
+```
+
+使用 `docker logs -f` 可以查看容器启动过程中打印的日志。
+
+就这样，我们用一行命令就把将两个服务同时启动起来了，访问浏览器，做一些简单的操作，再查看数据库，确保一切正常。
+
+当实验结束后，运行 `docker-compose down`：
+
+```
+[root@localhost app]# docker-compose down
+Stopping app_app_1   ... done
+Stopping app_mysql_1 ... done
+Removing app_app_1   ... done
+Removing app_mysql_1 ... done
+Removing network app_default
+```
+
+所有的容器都被停止和删除，包括网络也一起被删除了。不过我们在 Compose 文件中定义的 `volume` 并没有删除，可以加上 `--volumes` 参数来删除。
+
 ## Part 9: Image-building best practices
+
+
+
 ## Part 10: What next?
 
 ## 参考
