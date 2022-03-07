@@ -626,7 +626,173 @@ Removing network app_default
 
 ## Part 9: Image-building best practices
 
+这一节介绍构建镜像的最佳实践。
 
+### 安全扫描
+
+Docker 使用 [Snyk](https://snyk.io/) 提供的服务，可以通过 `docker scan` 命令对你的镜像进行安全扫描。执行这行命令之前要先使用 `docker login` 登录你的 Docker Hub 账号，否则会提示这样的错误：
+
+```
+[root@localhost ~]# docker scan todo-list
+failed to get DockerScanID: You need to be logged in to Docker Hub to use scan feature.
+please login to Docker Hub using the Docker Login command
+```
+
+登录账号后再执行 `docker scan`：
+
+```
+[root@localhost ~]# docker scan todo-list
+Docker Scan relies upon access to Snyk, a third party provider, do you consent to proceed using Snyk? (y/N)
+y
+
+Testing todo-list...
+
+Package manager:   apk
+Project name:      docker-image|todo-list
+Docker image:      todo-list
+Platform:          linux/amd64
+Base image:        node:12.22.10-alpine3.15
+
+✔ Tested 16 dependencies for known vulnerabilities, no vulnerable paths found.
+
+According to our scan, you are currently using the most secure version of the selected base image
+
+For more free scans that keep your images secure, sign up to Snyk at https://dockr.ly/3ePqVcp
+
+-------------------------------------------------------
+
+Testing todo-list...
+
+Tested 189 dependencies for known vulnerabilities, found 6 vulnerabilities.
+
+Issues with no direct upgrade or patch:
+  ✗ Arbitrary File Overwrite [High Severity][https://snyk.io/vuln/SNYK-JS-TAR-1536528] in tar@2.2.2
+    introduced by sqlite3@5.0.2 > node-gyp@3.8.0 > tar@2.2.2
+  This issue was fixed in versions: 3.2.3, 4.4.15, 5.0.7, 6.1.2
+  ✗ Regular Expression Denial of Service (ReDoS) [Low Severity][https://snyk.io/vuln/SNYK-JS-TAR-1536758] in tar@2.2.2
+    introduced by sqlite3@5.0.2 > node-gyp@3.8.0 > tar@2.2.2
+  This issue was fixed in versions: 6.1.4, 5.0.8, 4.4.16
+  ✗ Arbitrary File Write [High Severity][https://snyk.io/vuln/SNYK-JS-TAR-1579147] in tar@2.2.2
+    introduced by sqlite3@5.0.2 > node-gyp@3.8.0 > tar@2.2.2
+  This issue was fixed in versions: 6.1.7, 5.0.8, 4.4.16
+
+Package manager:   yarn
+Target file:       /app/package.json
+Project name:      101-app
+Docker image:      todo-list
+
+Tip: Run `snyk wizard` to address these issues.
+
+For more free scans that keep your images secure, sign up to Snyk at https://dockr.ly/3ePqVcp
+
+
+Tested 2 projects, 1 contained vulnerable paths.
+```
+
+### 镜像分层
+
+使用 `docker image history` 命令可以查看一个镜像的所有分层信息：
+
+```
+[root@localhost ~]# docker image history todo-list
+IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT
+d76789154cb4   7 days ago     /bin/sh -c #(nop)  EXPOSE 3000                  0B        
+53caa31c6bff   7 days ago     /bin/sh -c #(nop)  CMD ["node" "src/index.js…   0B        
+2c57812f0d70   7 days ago     /bin/sh -c yarn install --production            86.1MB    
+820c7e755433   7 days ago     /bin/sh -c #(nop) COPY dir:c209e9a63b2c3618c…   4.6MB     
+a19fa5fc5c18   7 days ago     /bin/sh -c #(nop) WORKDIR /app                  0B        
+1b156b4c3ee8   4 weeks ago    /bin/sh -c #(nop)  CMD ["node"]                 0B        
+<missing>      4 weeks ago    /bin/sh -c #(nop)  ENTRYPOINT ["docker-entry…   0B        
+<missing>      4 weeks ago    /bin/sh -c #(nop) COPY file:4d192565a7220e13…   388B      
+<missing>      4 weeks ago    /bin/sh -c apk add --no-cache --virtual .bui…   7.84MB    
+<missing>      4 weeks ago    /bin/sh -c #(nop)  ENV YARN_VERSION=1.22.17     0B        
+<missing>      4 weeks ago    /bin/sh -c addgroup -g 1000 node     && addu…   77.6MB    
+<missing>      4 weeks ago    /bin/sh -c #(nop)  ENV NODE_VERSION=12.22.10    0B        
+<missing>      3 months ago   /bin/sh -c #(nop)  CMD ["/bin/sh"]              0B        
+<missing>      3 months ago   /bin/sh -c #(nop) ADD file:9233f6f2237d79659…   5.59MB
+```
+
+通过这个列表，你可以看到 `todo-list` 这个镜像的每一层是如何构建的以及每一层的大小。不过，这里显示的信息可能并不是完整的，加上 `--no-trunc` 参数来显示完整信息：
+
+```
+[root@localhost ~]# docker image history --no-trunc todo-list
+```
+
+### 分层缓存
+
+在构建镜像时，我们要记住一个很重要的原则：
+
+> 一旦某个分层改变，这层下面的所有分层都会被重新创建。
+
+我们再来看下我们在第二部分使用的 Dockerfile 文件：
+
+```
+FROM node:12-alpine
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+```
+
+这个镜像首先使用了 `node:12-alpine` 作为基础镜像，然后将当前目录的所有源码都拷贝到容器的 `/app` 目录，并执行 `yarn install` 安装依赖。这里有一个很不爽的地方，每次我们修改了源码重新构建镜像时，都会重新执行 `yarn install` 安装所有的依赖，这是一件相当耗时的操作。这是因为 `COPY . .` 这一层发生了改变，所以后面的所有分层都会重新构建。
+
+我们将 Dockerfile 改成下面这样：
+
+```
+ FROM node:12-alpine
+ WORKDIR /app
+ COPY package.json yarn.lock ./
+ RUN yarn install --production
+ COPY . .
+ CMD ["node", "src/index.js"]
+```
+
+首先将 `package.json` 文件拷贝到容器中，然后再执行 `yarn install` 安装依赖，等所有的依赖安装好后，再拷贝当前目录的所有源码。这样做的好处是，每次修改源码后，拷贝 `package.json` 和安装依赖这两层都是不变的，所以 `docker build` 会直接使用缓存，节约了大量的时间，只有当你修改了 `package.json` 文件时，才会重新安装依赖。
+
+注意在源码目录下创建一个 `.dockerignore` 文件，将 `node_modules` 添加在里面：
+
+```
+node_modules
+```
+
+这样在构建的时候可以防止下面在构建 `COPY . .` 分层时把容器里已经安装好的依赖给覆盖了。
+
+### 多阶段构建（Multi-stage builds）
+
+我们在开发过程中构建的镜像中包含了大量的构建工具（比如 Node、Maven 等），这些构建工具在生产环境运行时是没有用的。通过多阶段构建，我们可以构建出仅包含应用所需工具的镜像，大幅降低构建镜像的大小。
+
+下面是两个多阶段构建的例子：
+
+#### Maven/Tomcat example
+
+```
+FROM maven AS build
+WORKDIR /app
+COPY . .
+RUN mvn package
+
+FROM tomcat
+COPY --from=build /app/target/file.war /usr/local/tomcat/webapps 
+```
+
+开发环境使用了 `maven` 基础镜像，通过 `mvn package` 构建 jar 包，而生产环境直接使用 `tomcat` 镜像运行 Java 服务。
+
+#### React example
+
+```
+FROM node:12 AS build
+WORKDIR /app
+COPY package* yarn.lock ./
+RUN yarn install
+COPY public ./public
+COPY src ./src
+RUN yarn run build
+
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+```
+
+开发环境使用 `node` 基础镜像，通过 `yarn install && yarn run build` 将前端源码构建成静态文件，而生产环境直接使用 `nginx` 代理这些静态文件。
 
 ## Part 10: What next?
 
