@@ -196,6 +196,17 @@ Java Framework
 		https://shiro.apache.org/
 		https://github.com/zhangkaitao/shiro-example
 	
+Java Utils
+
+	Akka
+	https://akka.io/
+	
+	Google Guava
+	https://github.com/google/guava
+	
+	Hutool
+	https://hutool.cn/
+	
 Microservice
 	
 	Spring Cloud
@@ -253,42 +264,45 @@ Front End
 	Vue.js
 	https://cn.vuejs.org/v2/guide/index.html
 
-Websocket
-https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
+Others
 
-Swagger
-https://swagger.io/docs/
+	Websocket
+	https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
 
-Google Guava
-https://github.com/google/guava
+	Swagger
+	https://swagger.io/docs/
 
-Minio
-https://docs.min.io/docs/minio-quickstart-guide.html
+	Minio
+	https://docs.min.io/docs/minio-quickstart-guide.html
 
-Visual Studio Code
-https://code.visualstudio.com/docs
+	Visual Studio Code
+	https://code.visualstudio.com/docs
 
-Akka
-https://akka.io/
+	Istio
+	https://istio.io/latest/docs/
 
-Istio
-https://istio.io/latest/docs/
+	CRIU
+	https://criu.org/Main_Page
 
-CRIU
-https://criu.org/Main_Page
+	Gogs
+	https://gogs.io/
 
-Gogs
-https://gogs.io/
+	SonarQube
+	https://docs.sonarqube.org/latest/
 
-SonarQube
-https://docs.sonarqube.org/latest/
+	OpenStack
+	https://www.openstack.org/software/start/
+	https://www.ibm.com/developerworks/community/blogs/132cfa78-44b0-4376-85d0-d3096cd30d3f?sortby=0&order=asc&maxresults=15&page=0&lang=en
 
-OpenStack
-https://www.openstack.org/software/start/
-https://www.ibm.com/developerworks/community/blogs/132cfa78-44b0-4376-85d0-d3096cd30d3f?sortby=0&order=asc&maxresults=15&page=0&lang=en
+	Envoy
+	https://www.envoyproxy.io/docs/envoy/latest/start/start
 
-Envoy
-https://www.envoyproxy.io/docs/envoy/latest/start/start
+	CoreDNS
+	https://coredns.io/
 
-CoreDNS
-https://coredns.io/
+	JFrog
+	https://www.jfrog.com/confluence/display/JFROG/JFrog+Documentation
+	
+	Maven
+	https://maven.apache.org/
+	
