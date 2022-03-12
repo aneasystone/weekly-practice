@@ -90,5 +90,296 @@ https://www.jhipster.tech/
 
 ### 1. Spring Initializr 支持的依赖一览
 
-* DEVELOPER TOOLS
-	* Spring Native [Experimental]
+在 Spring Initializr 上创建项目时，可以手工添加项目依赖，支持的依赖列表如下（记住这些依赖，大多是 Spring 生态中必学必会的技术）：
+
+#### Developer Tools
+
+* Spring Native
+	* Incubating support for compiling Spring applications to native executables using the GraalVM native-image compiler.
+* Spring Boot DevTools
+	* Provides fast application restarts, LiveReload, and configurations for enhanced development experience.
+* Lombok
+	* Java annotation library which helps to reduce boilerplate code.
+* Spring Configuration Processor
+	* Generate metadata for developers to offer contextual help and "code completion" when working with custom configuration keys (ex.application.properties/.yml files).
+
+#### Web
+
+* Spring Web
+	* Build web, including RESTful, applications using Spring MVC. Uses Apache Tomcat as the default embedded container.
+* Spring Reactive Web
+	* Build reactive web applications with Spring WebFlux and Netty.
+* Spring GraphQL
+	* Build GraphQL applications with Spring GraphQL and GraphQL Java.
+* Rest Repositories
+	* Exposing Spring Data repositories over REST via Spring Data REST.
+* Spring Session
+	* Provides an API and implementations for managing user session information.
+* Rest Repositories HAL Explorer
+	* Browsing Spring Data REST repositories in your browser.
+* Spring HATEOAS
+	* Eases the creation of RESTful APIs that follow the HATEOAS principle when working with Spring / Spring MVC.
+* Spring Web Services
+	* Facilitates contract-first SOAP development. Allows for the creation of flexible web services using one of the many ways to manipulate XML payloads.
+* Jersey
+	* Framework for developing RESTful Web Services in Java that provides support for JAX-RS APIs.
+* Vaadin
+	* A web framework that allows you to write UI in pure Java without getting bogged down in JS, HTML, and CSS.
+
+#### Template Engines
+
+* Thymeleaf
+	* A modern server-side Java template engine for both web and standalone environments. Allows HTML to be correctly displayed in browsers and as static prototypes.
+* Apache Freemarker
+	* Java library to generate text output (HTML web pages, e-mails, configuration files, source code, etc.) based on templates and changing data.
+* Mustache
+	* Logic-less Templates. There are no if statements, else clauses, or for loops. Instead there are only tags.
+* Groovy Templates
+	* Groovy templating engine.
+
+#### Security
+
+* Spring Security
+	* Highly customizable authentication and access-control framework for Spring applications.
+* OAuth2 Client
+	* Spring Boot integration for Spring Security's OAuth2/OpenID Connect client features.
+* OAuth2 Resource Server
+	* Spring Boot integration for Spring Security's OAuth2 resource server features.
+* Spring LDAP
+	* Makes it easier to build Spring based applications that use the Lightweight Directory Access Protocol.
+* Okta
+	* Okta specific configuration for Spring Security/Spring Boot OAuth2 features. Enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.
+
+#### SQL
+
+* JDBC API
+	* Database Connectivity API that defines how a client may connect and query a database.
+* Spring Data JPA
+	* Persist data in SQL stores with Java Persistence API using Spring Data and Hibernate.
+* Spring Data JDBC
+	* Persist data in SQL stores with plain JDBC using Spring Data.
+* Spring Data R2DBC
+	* Provides Reactive Relational Database Connectivity to persist data in SQL stores using Spring Data in reactive applications.
+* MyBatis Framework
+	* Persistence framework with support for custom SQL, stored procedures and advanced mappings. MyBatis couples objects with stored procedures or SQL statements using a XML descriptor or annotations.
+* Liquibase Migration
+	* Liquibase database migration and source control library.
+* Flyway Migration
+	* Version control for your database so you can migrate from any version (incl. an empty database) to the latest version of the schema.
+* JOOQ Access Layer
+	* Generate Java code from your database and build type safe SQL queries through a fluent API.
+* IBM DB2 Driver
+	* A JDBC driver that provides access to IBM DB2.
+* Apache Derby Database
+	* An open source relational database implemented entirely in Java.
+* H2 Database
+	* Provides a fast in-memory database that supports JDBC API and R2DBC access, with a small (2mb) footprint. Supports embedded and server modes as well as a browser based console application.
+* HyperSQL Database
+	* Lightweight 100% Java SQL Database Engine.
+* MariaDB Driver
+	* MariaDB JDBC and R2DBC driver.
+* MS SQL Server Driver
+	* A JDBC and R2DBC driver that provides access to Microsoft SQL Server and Azure SQL Database from any Java application.
+* MySQL Driver
+	* MySQL JDBC and R2DBC driver.
+* Oracle Driver
+	* A JDBC driver that provides access to Oracle.
+* PostgreSQL Driver
+	* A JDBC and R2DBC driver that allows Java programs to connect to a PostgreSQL database using standard, database independent Java code.
+
+#### NoSQL
+
+* Spring Data Redis (Access+Driver)
+	* Advanced and thread-safe Java Redis client for synchronous, asynchronous, and reactive usage. Supports Cluster, Sentinel, Pipelining, Auto-Reconnect, Codecs and much more.
+* Spring Data Reactive Redis
+	* Access Redis key-value data stores in a reactive fashion with Spring Data Redis.
+* Spring Data MongoDB
+	* Store data in flexible, JSON-like documents, meaning fields can vary from document to document and data structure can be changed over time.
+* Spring Data Reactive MongoDB
+	* Provides asynchronous stream processing with non-blocking back pressure for MongoDB.
+* Spring Data Elasticsearch (Access+Driver)
+	* A distributed, RESTful search and analytics engine with Spring Data Elasticsearch.
+* Spring Data for Apache Cassandra
+	* A free and open-source, distributed, NoSQL database management system that offers high-scalability and high-performance.
+* Spring Data Reactive for Apache Cassandra
+	* Access Cassandra NoSQL Database in a reactive fashion.
+* Spring for Apache Geode
+	* Apache Geode is a data management platform that helps users build real-time, highly concurrent, highly performant and reliable Spring Boot applications at scale that is compatible with Pivotal Cloud Cache.
+* Spring Data Couchbase
+	* NoSQL document-oriented database that offers in memory-first architecture, geo-distributed deployments, and workload isolation.
+* Spring Data Reactive Couchbase
+	* Access Couchbase NoSQL database in a reactive fashion with Spring Data Couchbase.
+* Spring Data Neo4j
+	* An open source NoSQL database that stores data structured as graphs consisting of nodes, connected by relationships.
+
+#### Messaging
+
+* Spring Integration
+	* Adds support for Enterprise Integration Patterns. Enables lightweight messaging and supports integration with external systems via declarative adapters.
+* Spring for RabbitMQ
+	* Gives your applications a common platform to send and receive messages, and your messages a safe place to live until received.
+* Spring for Apache Kafka
+	* Publish, subscribe, store, and process streams of records.
+* Spring for Apache Kafka Streams
+	* Building stream processing applications with Apache Kafka Streams.
+* Spring for Apache ActiveMQ 5
+	* Spring JMS support with Apache ActiveMQ 'Classic'.
+* Spring for Apache ActiveMQ Artemis
+	* Spring JMS support with Apache ActiveMQ Artemis.
+* WebSocket
+	* Build WebSocket applications with SockJS and STOMP.
+* RSocket
+	* RSocket.io applications with Spring Messaging and Netty.
+* Apache Camel
+	* Apache Camel is an open source integration framework that empowers you to quickly and easily integrate various systems consuming or producing data.
+* Solace PubSub+
+	* Connect to a Solace PubSub+ Advanced Event Broker to publish, subscribe, request/reply and store/replay messages
+
+#### I/O
+
+* Spring Batch
+	* Batch applications with transactions, retry/skip and chunk based processing.
+* Validation
+	* Bean Validation with Hibernate validator.
+* Java Mail Sender
+	* Send email using Java Mail and Spring Framework's JavaMailSender.
+* Quartz Scheduler
+	* Schedule jobs using Quartz.
+* Spring cache abstraction
+	* Provides cache-related operations, such as the ability to update the content of the cache, but does not provide the actual data store.
+* Picocli
+	* Build command line applications with picocli.
+
+#### Ops
+
+* Spring Boot Actuator
+	* Supports built in (or custom) endpoints that let you monitor and manage your application - such as application health, metrics, sessions, etc.
+* Codecentric's Spring Boot Admin (Client)
+	* Required for your application to register with a Codecentric's Spring Boot Admin Server instance.
+* Codecentric's Spring Boot Admin (Server)
+	* A community project to manage and monitor your Spring Boot applications. Provides a UI on top of the Spring Boot Actuator endpoints.
+
+#### Observability
+
+* Datadog
+	* Publish Micrometer metrics to Datadog, a dimensional time-series SaaS with built-in dashboarding and alerting.
+* Influx
+	* Publish Micrometer metrics to InfluxDB, a dimensional time-series server that support real-time stream processing of data.
+* Graphite
+	* Publish Micrometer metrics to Graphite, a hierarchical metrics system backed by a fixed-size database.
+* New Relic
+	* Publish Micrometer metrics to New Relic, a SaaS offering with a full UI and a query language called NRQL.
+* Prometheus
+	* Expose Micrometer metrics in Prometheus format, an in-memory dimensional time series database with a simple built-in UI, a custom query language, and math operations.
+* Sleuth
+	* Distributed tracing via logs with Spring Cloud Sleuth.
+* Wavefront
+	* Publish Micrometer metrics to Tanzu Observability by Wavefront, a SaaS-based metrics monitoring and analytics platform that lets you visualize, query, and alert over data from across your entire stack.
+* Zipkin Client
+	* Distributed tracing with an existing Zipkin installation and Spring Cloud Sleuth Zipkin.
+
+#### Testing
+
+* Spring REST Docs
+	* Document RESTful services by combining hand-written with Asciidoctor and auto-generated snippets produced with Spring MVC Test.
+* Testcontainers
+	* Provide lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.
+* Contract Verifier
+	* Moves TDD to the level of software architecture by enabling Consumer Driven Contract (CDC) development.
+* Contract Stub Runner
+	* Stub Runner for HTTP/Messaging based communication. Allows creating WireMock stubs from RestDocs tests.
+* Embedded LDAP Server
+	* Provides a platform neutral way for running a LDAP server in unit tests.
+* Embedded MongoDB Database
+	* Provides a platform neutral way for running MongoDB in unit tests.
+
+#### Spring Cloud
+
+* Cloud Bootstrap
+	* Non-specific Spring Cloud features, unrelated to external libraries or integrations (e.g. Bootstrap context and @RefreshScope).
+* Function
+	* Promotes the implementation of business logic via functions and supports a uniform programming model across serverless providers, as well as the ability to run standalone (locally or in a PaaS).
+* Task
+	* Allows a user to develop and run short lived microservices using Spring Cloud. Run them locally, in the cloud, and on Spring Cloud Data Flow.
+
+#### Spring Cloud Tools
+
+* Open Service Broker
+	* Framework for building Spring Boot apps that implement the Open Service Broker API, which can deliver services to applications running within cloud native platforms such as Cloud Foundry, Kubernetes and OpenShift.
+
+#### Spring Cloud Config
+
+* Config Client
+	* Client that connects to a Spring Cloud Config Server to fetch the application's configuration.
+* Config Server
+	* Central management for configuration via Git, SVN, or HashiCorp Vault.
+* Vault Configuration
+	* Provides client-side support for externalized configuration in a distributed system. Using HashiCorp's Vault you have a central place to manage external secret properties for applications across all environments.
+* Apache Zookeeper Configuration
+	* Enable and configure common patterns inside your application and build large distributed systems with Apache Zookeeper based components. The provided patterns include Service Discovery and Configuration.
+* Consul Configuration
+	* Enable and configure the common patterns inside your application and build large distributed systems with Hashicorp’s Consul. The patterns provided include Service Discovery, Distributed Configuration and Control Bus.
+
+#### Spring Cloud Discovery
+
+* Eureka Discovery Client
+	* A REST based service for locating services for the purpose of load balancing and failover of middle-tier servers.
+* Eureka Server
+	* spring-cloud-netflix Eureka Server.
+* Apache Zookeeper Discovery
+	* Service discovery with Apache Zookeeper.
+* Cloud Foundry Discovery
+	* Service discovery with Cloud Foundry.
+* Consul Discovery
+	* Service discovery with Hashicorp Consul.
+
+#### Spring Cloud Routing
+
+* Gateway
+	* Provides a simple, yet effective way to route to APIs and provide cross cutting concerns to them such as security, monitoring/metrics, and resiliency.
+* OpenFeign
+	* Declarative REST Client. OpenFeign creates a dynamic implementation of an interface decorated with JAX-RS or Spring MVC annotations.
+* Cloud LoadBalancer
+	* Client-side load-balancing with Spring Cloud LoadBalancer.
+
+#### Spring Cloud Circuit Breaker
+
+* Resilience4J
+	* Spring Cloud Circuit breaker with Resilience4j as the underlying implementation.
+
+#### Spring Cloud Messaging
+
+* Cloud Bus
+	* Links nodes of a distributed system with a lightweight message broker which can used to broadcast state changes or other management instructions (requires a binder, e.g. Apache Kafka or RabbitMQ).
+* Cloud Stream
+	* Framework for building highly scalable event-driven microservices connected with shared messaging systems (requires a binder, e.g. Apache Kafka, RabbitMQ or Solace PubSub+).
+
+#### VMware Tanzu Application Service
+
+* Config Client (TAS)
+	* Config client on VMware Tanzu Application Service.
+* Service Registry (TAS)
+	* Eureka service discovery client on VMware Tanzu Application Service.
+
+#### Microsoft Azure
+
+* Azure Support
+	* Auto-configuration for Azure Services (Service Bus, Storage, Active Directory, Key Vault, and more).
+* Azure Active Directory
+	* Spring Security integration with Azure Active Directory for authentication.
+* Azure Cosmos DB
+	* Fully managed NoSQL database service for modern app development, including Spring Data support.
+* Azure Key Vault
+	* Manage application secrets.
+* Azure Storage
+	* Azure Storage service integration.
+
+#### Google Cloud Platform
+
+* GCP Support
+	* Contains auto-configuration support for every Spring Cloud GCP integration. Most of the auto-configuration code is only enabled if other dependencies are added to the classpath.
+* GCP Messaging
+	* Adds the GCP Support entry and all the required dependencies so that the Google Cloud Pub/Sub integration work out of the box.
+* GCP Storage
+	* Adds the GCP Support entry and all the required dependencies so that the Google Cloud Storage integration work out of the box.
+	
