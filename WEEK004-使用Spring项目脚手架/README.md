@@ -62,17 +62,41 @@ public class DemoApplication {
 
 至此一个简单的 Web 项目就完成了，然后执行 `./mvnw spring-boot:run` 命令，第一次执行可能比较慢，这是在下载程序所需要的依赖，等启动结束后打开浏览器，访问 `http://localhost:8080/hello` 页面，就可以看到我们熟悉的 `Hello World` 了。
 
-## STS
+## Spring Tool Suite
 
-https://spring.io/tools
+[Spring Tool Suite](https://spring.io/tools) 被简称为 STS，是 Spring 官方推出的一套用于方便开发 Spring 项目的工具集，它可以集成到几乎所有的 IDE 中，比如：Eclipse、VS Code 或 Theia IDE 等。
 
-https://docs.spring.io/initializr/docs/current-SNAPSHOT/reference/html/
+这里以 VS Code 为例，体验下使用 STS 快速创建 Spring 项目脚手架代码。首先在 VS Code 的插件市场搜索 [`Spring Boot Extension Pack`](https://marketplace.visualstudio.com/items?itemName=Pivotal.vscode-boot-dev-pack)：
 
-https://github.com/spring-io/initializr
+![](./images/vscode-sts.png)
 
-https://github.com/spring-io/start.spring.io
+可以看到 STS 是一套工具集，包含了：
 
-https://start.aliyun.com/
+* Spring Boot Tools
+* Spring Boot Dashboard
+* Spring Initializr Java Support
+
+如果我们只想体验 Spring Initializr 的功能，也可以只安装 [`Spring Initializr Java Support`](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-spring-initializr) 这个插件即可。安装完成后，通过 `Ctrl + Shift + P` 打开命令面板，输入 `Spring Initializr` 按提示就可以快速创建一个 Spring 项目，放一张官方的动图：
+
+![](./images/spring-initializr-vsc.gif)
+
+## Spring Boot CLI
+
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#cli
+
+## 实现自己的 Spring Initializr
+
+Spring Initializr 是一个完全开源的项目，我们可以通过它实现自己的代码脚手架。上面所介绍的 `start.spring.io`、STS 和 Spring Boot CLI 其实都是通过 Spring Initializr 来实现的，首先我们下载源码：
+
+```
+# git clone https://github.com/spring-io/initializr
+```
+
+```
+# git clone https://github.com/spring-io/start.spring.io
+```
+
+另外，阿里的知行动手实验室也基于 Spring Initializr 做了一个类似于 `start.spring.io` 的脚手架生成站点 [start.aliyun.com](https://start.aliyun.com/)，在依赖列表中新增了阿里的一些开源项目，而且还提供了常见的几种应用架构的代码示例，有兴趣的同学可以体验下。
 
 ## Maven Archetype
 
@@ -85,6 +109,7 @@ https://www.jhipster.tech/
 ## 参考
 
 1. [Spring Quickstart Guide](https://spring.io/quickstart)
+1. [Spring Initializr Reference Guide](https://docs.spring.io/initializr/docs/current-SNAPSHOT/reference/html/)
 
 ## 更多
 
