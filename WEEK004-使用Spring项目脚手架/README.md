@@ -82,21 +82,50 @@ public class DemoApplication {
 
 ## Spring Boot CLI
 
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#cli
+`Spring Boot CLI` 的安装非常方便，我们可以直接从 Spring 仓库中下载 [spring-boot-cli-2.6.4-bin.zip](https://repo.spring.io/release/org/springframework/boot/spring-boot-cli/2.6.4/spring-boot-cli-2.6.4-bin.zip)，将其解压到某个目录中，然后将 bin 目录添加到 PATH 环境变量。
 
-## 实现自己的 Spring Initializr
-
-Spring Initializr 是一个完全开源的项目，我们可以通过它实现自己的代码脚手架。上面所介绍的 `start.spring.io`、STS 和 Spring Boot CLI 其实都是通过 Spring Initializr 来实现的，首先我们下载源码：
+使用 `spring --version` 验证 `Spring Boot CLI` 是否安装成功：
 
 ```
-# git clone https://github.com/spring-io/initializr
+> spring --version
+Spring CLI v2.6.4
 ```
 
+`Spring Boot CLI` 可以用来执行 Groovy 脚本，也可以用来初始化新的 Spring 项目。下面是一个执行 Groovy 脚本的例子，首先创建一个文件 `hello.groovy`： 
+
 ```
-# git clone https://github.com/spring-io/start.spring.io
+@RestController
+class ThisWillActuallyRun {
+    @RequestMapping("/")
+    String home() {
+        "Hello World!"
+    }
+}
 ```
 
-另外，阿里的知行动手实验室也基于 Spring Initializr 做了一个类似于 `start.spring.io` 的脚手架生成站点 [start.aliyun.com](https://start.aliyun.com/)，在依赖列表中新增了阿里的一些开源项目，而且还提供了常见的几种应用架构的代码示例，有兴趣的同学可以体验下。
+然后执行命令：
+
+```
+> spring run hello.groovy
+```
+
+这样，一个简单的 Web 项目就启动好了，`Spring Boot CLI` 会自动解析 Groovy 脚本中的依赖并运行，打开浏览器访问 `http://localhost:8080` 就看见我们熟悉的 `Hello World` 了。
+
+下面是通过 `Spring Boot CLI` 初始化项目的例子：
+
+```
+> spring init --name demo \
+	--artifact-id demo \
+	--group-id com.example \
+	--language java \
+	--java-version 11 \
+	--boot-version 2.6.4 \
+	--type maven-project \
+	--dependencies web \
+	demo
+```
+
+这个命令和从 `start.spring.io` 上生成项目是完全一样的。可以通过 `spring help init` 了解各个参数的含义，每个参数都有默认值，所以你也可以直接使用 `spring init demo` 生成一个默认的示例项目。
 
 ## Maven Archetype
 
@@ -110,6 +139,7 @@ https://www.jhipster.tech/
 
 1. [Spring Quickstart Guide](https://spring.io/quickstart)
 1. [Spring Initializr Reference Guide](https://docs.spring.io/initializr/docs/current-SNAPSHOT/reference/html/)
+1. [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#cli)
 
 ## 更多
 
@@ -407,4 +437,17 @@ https://www.jhipster.tech/
 	* Adds the GCP Support entry and all the required dependencies so that the Google Cloud Pub/Sub integration work out of the box.
 * GCP Storage
 	* Adds the GCP Support entry and all the required dependencies so that the Google Cloud Storage integration work out of the box.
-	
+
+### 2. 实现自己的 Spring Initializr
+
+Spring Initializr 是一个完全开源的项目，我们可以通过它实现自己的代码脚手架。上面所介绍的 `start.spring.io`、STS 和 Spring Boot CLI 其实都是通过 Spring Initializr 来实现的，源码如下：
+
+```
+# git clone https://github.com/spring-io/initializr
+```
+
+```
+# git clone https://github.com/spring-io/start.spring.io
+```
+
+另外，阿里的知行动手实验室也基于 Spring Initializr 做了一个类似于 `start.spring.io` 的脚手架生成站点 [start.aliyun.com](https://start.aliyun.com/)，在依赖列表中新增了阿里的一些开源项目，而且还提供了常见的几种应用架构的代码示例，有兴趣的同学可以体验下。
