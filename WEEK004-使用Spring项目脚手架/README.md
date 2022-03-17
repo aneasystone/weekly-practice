@@ -172,13 +172,24 @@ demo
             └── application.properties
 ```
 
-我们也可以直接使用一行命令生成：
+我们也可以不用交互模式，直接一行命令生成：
 
 ```
-TODO
+$ mvn archetype:generate \
+     -DarchetypeGroupId=org.springframework.boot \
+     -DarchetypeArtifactId=spring-boot-sample-simple-archetype \
+     -DarchetypeVersion=1.0.2.RELEASE \
+     -DgroupId=com.example \
+     -DartifactId=demo \
+     -Dversion=1.0.0-SNAPSHOT \
+     -DinteractiveMode=false
 ```
 
-TODO 其他例子
+除了官方的 Maven Archetype，网上还有很多人自己写的 Archetype，集成了一些常用的框架和工具，也值得尝试：
+
+* https://github.com/Romeh/spring-boot-quickstart-archtype
+* https://github.com/netyjq/spring-boot-archetype
+* https://github.com/drtrang/maven-archetype-springboot
 
 ## Spring Initializr
 
@@ -339,7 +350,12 @@ https://www.jhipster.tech/
 
 ## 更多
 
-### 1. Spring Initializr 支持的依赖一览
+### 1. 创建自己的 Maven Archetype
+
+* [Guide to Creating Archetypes](https://maven.apache.org/guides/mini/guide-creating-archetypes.html)
+* [Multi-Module Maven Archetypes](https://bryanbende.com/development/2015/01/06/multi-module-maven-archetypes)
+
+### 2. Spring Initializr 支持的依赖一览
 
 在 Spring Initializr 上创建项目时，可以手工添加项目依赖，支持的依赖列表如下（记住这些依赖，大多是 Spring 生态中必学必会的技术）：
 
@@ -634,7 +650,7 @@ https://www.jhipster.tech/
 * GCP Storage
 	* Adds the GCP Support entry and all the required dependencies so that the Google Cloud Storage integration work out of the box.
 
-### 2. 实现自己的 Spring Initializr
+### 3. 实现自己的 Spring Initializr
 
 Spring Initializr 是一个完全开源的项目，我们可以通过它实现自己的代码脚手架。上面所介绍的 `start.spring.io`、STS 和 Spring Boot CLI 其实都是通过 Spring Initializr 来实现的，源码如下：
 
