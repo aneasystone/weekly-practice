@@ -663,3 +663,25 @@ Spring Initializr 是一个完全开源的项目，我们可以通过它实现�
 ```
 
 另外，阿里的知行动手实验室也基于 Spring Initializr 做了一个类似于 `start.spring.io` 的脚手架生成站点 [start.aliyun.com](https://start.aliyun.com/)，在依赖列表中新增了阿里的一些开源项目，而且还提供了常见的几种应用架构的代码示例，有兴趣的同学可以体验下。
+
+### 4. mvnw 设置代理
+
+直接使用 mvn 命令构建项目时，可以通过 Maven 的配置文件 `~/.m2/settings.xml` 来配置代理服务器，如下：
+
+```
+  <proxies>
+	<proxy>
+      <id>optional</id>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>localhost</host>
+      <port>10809</port>
+    </proxy>
+  </proxies>
+```
+
+但是使用 mvnw 时，它会自动下载 Maven 并执行而不会使用 `settings.xml` 中的 Maven 配置。这时我们可以通过 `MAVEN_OPTS` 环境变量来设置代理：
+
+```
+export MAVEN_OPTS="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=10809 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=10809"
+```
