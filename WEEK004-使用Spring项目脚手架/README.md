@@ -4,9 +4,185 @@
 
 实际上，这样操作后保留下来的基本框架代码就是 **脚手架** 代码，有很多的工具可以帮我们自动生成脚手架代码。
 
+## Maven Archetype
+
+说起项目脚手架，我们最先想到的肯定是 [`Maven Archetype`](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html)，在命令行中输入 `mvn archetype:generate` 进入交互模式，默认情况下会列出所有的 Archetype，这个清单可能非常长，让你不知道选哪个，可以通过 `-Dfilter` 参数进行过滤：
+
+```
+> mvn archetype:generate -Dfilter=org.apache.maven:
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------< org.apache.maven:standalone-pom >-------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] >>> maven-archetype-plugin:3.2.1:generate (default-cli) > generate-sources @ standalone-pom >>>
+[INFO]
+[INFO] <<< maven-archetype-plugin:3.2.1:generate (default-cli) < generate-sources @ standalone-pom <<<
+[INFO]
+[INFO]
+[INFO] --- maven-archetype-plugin:3.2.1:generate (default-cli) @ standalone-pom ---
+[INFO] Generating project in Interactive mode
+[INFO] No archetype defined. Using maven-archetype-quickstart (org.apache.maven.archetypes:maven-archetype-quickstart:1.0)
+Choose archetype:
+1: remote -> org.apache.maven.archetypes:maven-archetype-archetype (An archetype which contains a sample archetype.)
+2: remote -> org.apache.maven.archetypes:maven-archetype-j2ee-simple (An archetype which contains a simplified sample J2EE application.)
+3: remote -> org.apache.maven.archetypes:maven-archetype-marmalade-mojo (-)
+4: remote -> org.apache.maven.archetypes:maven-archetype-mojo (An archetype which contains a sample a sample Maven plugin.)
+5: remote -> org.apache.maven.archetypes:maven-archetype-plugin (An archetype which contains a sample Maven plugin.)
+6: remote -> org.apache.maven.archetypes:maven-archetype-plugin-site (An archetype which contains a sample Maven plugin site. This archetype can be layered upon an
+    existing Maven plugin project.)
+7: remote -> org.apache.maven.archetypes:maven-archetype-portlet (An archetype which contains a sample JSR-268 Portlet.)
+8: remote -> org.apache.maven.archetypes:maven-archetype-profiles (-)
+9: remote -> org.apache.maven.archetypes:maven-archetype-quickstart (An archetype which contains a sample Maven project.)
+10: remote -> org.apache.maven.archetypes:maven-archetype-simple (An archetype which contains a simple Maven project.)
+11: remote -> org.apache.maven.archetypes:maven-archetype-site (An archetype which contains a sample Maven site which demonstrates some of the supported document types like
+    APT, XDoc, and FML and demonstrates how to i18n your site. This archetype can be layered
+    upon an existing Maven project.)
+12: remote -> org.apache.maven.archetypes:maven-archetype-site-simple (An archetype which contains a sample Maven site.)
+13: remote -> org.apache.maven.archetypes:maven-archetype-site-skin (An archetype which contains a sample Maven Site Skin.)
+14: remote -> org.apache.maven.archetypes:maven-archetype-webapp (An archetype which contains a sample Maven Webapp project.)
+Choose a number or apply filter (format: [groupId:]artifactId, case sensitive contains): 9:
+```
+
+我们这边使用 `-Dfilter=org.apache.maven:` 过滤条件列出了 Maven 官方的 14 个 Archetype，系统默认会选中 `maven-archetype-quickstart`，这是官方推荐的 Maven 项目脚手架，然后我们需要选择版本号，并填写项目的 `groupId`、`artifactId`、`version` 和 `package`：
+
+```
+Choose org.apache.maven.archetypes:maven-archetype-quickstart version:
+1: 1.0-alpha-1
+2: 1.0-alpha-2
+3: 1.0-alpha-3
+4: 1.0-alpha-4
+5: 1.0
+6: 1.1
+7: 1.3
+8: 1.4
+Choose a number: 8:
+
+Define value for property 'groupId': com.example
+Define value for property 'artifactId': demo
+Define value for property 'version' 1.0-SNAPSHOT: :
+Define value for property 'package' com.example: :
+Confirm properties configuration:
+groupId: com.example
+artifactId: demo
+version: 1.0-SNAPSHOT
+package: com.example
+ Y: : Y
+[INFO] ----------------------------------------------------------------------------
+[INFO] Using following parameters for creating project from Archetype: maven-archetype-quickstart:1.4
+[INFO] ----------------------------------------------------------------------------
+[INFO] Parameter: groupId, Value: com.example
+[INFO] Parameter: artifactId, Value: demo
+[INFO] Parameter: version, Value: 1.0-SNAPSHOT
+[INFO] Parameter: package, Value: com.example
+[INFO] Parameter: packageInPathFormat, Value: com/example
+[INFO] Parameter: package, Value: com.example
+[INFO] Parameter: groupId, Value: com.example
+[INFO] Parameter: artifactId, Value: demo
+[INFO] Parameter: version, Value: 1.0-SNAPSHOT
+[INFO] Project created from Archetype in dir: C:\Users\aneasystone\Desktop\demo
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  04:07 min
+[INFO] Finished at: 2022-03-17T07:04:14+08:00
+[INFO] ------------------------------------------------------------------------
+```
+
+这样，一个简单的 Maven 项目就生成了，生成的项目结构如下：
+
+```
+$ tree demo
+demo
+├── pom.xml
+└── src
+    ├── main
+    │   └── java
+    │       └── com
+    │           └── example
+    │               └── App.java
+    └── test
+        └── java
+            └── com
+                └── example
+                    └── AppTest.java
+```
+
+当然，这个示例代码还是太简单了，我们希望能能自动生成一个 Spring Boot 项目的代码框架，好在 Spring 官方也提供了很多种不同的 Maven Archetype，通过 `-Dfilter=org.springframework:` 参数过滤下看看：
+
+```
+Choose archetype:
+1: remote -> org.springframework.boot:spring-boot-sample-actuator-archetype (Spring Boot Actuator Sample)
+2: remote -> org.springframework.boot:spring-boot-sample-actuator-log4j-archetype (Spring Boot Actuator Log4J Sample)
+3: remote -> org.springframework.boot:spring-boot-sample-actuator-noweb-archetype (Spring Boot Actuator Non-Web Sample)
+4: remote -> org.springframework.boot:spring-boot-sample-actuator-ui-archetype (Spring Boot Actuator UI Sample)
+5: remote -> org.springframework.boot:spring-boot-sample-amqp-archetype (Spring Boot AMQP Sample)
+6: remote -> org.springframework.boot:spring-boot-sample-aop-archetype (Spring Boot AOP Sample)
+7: remote -> org.springframework.boot:spring-boot-sample-batch-archetype (Spring Boot Batch Sample)
+8: remote -> org.springframework.boot:spring-boot-sample-data-jpa-archetype (Spring Boot Data JPA Sample)
+9: remote -> org.springframework.boot:spring-boot-sample-data-mongodb-archetype (Spring Boot Data MongoDB Sample)
+10: remote -> org.springframework.boot:spring-boot-sample-data-redis-archetype (Spring Boot Data Redis Sample)
+11: remote -> org.springframework.boot:spring-boot-sample-data-rest-archetype (Spring Boot Data REST Sample)
+12: remote -> org.springframework.boot:spring-boot-sample-integration-archetype (Spring Boot Integration Sample)
+13: remote -> org.springframework.boot:spring-boot-sample-jetty-archetype (Spring Boot Jetty Sample)
+14: remote -> org.springframework.boot:spring-boot-sample-profile-archetype (Spring Boot Profile Sample)
+15: remote -> org.springframework.boot:spring-boot-sample-secure-archetype (Spring Boot Security Sample)
+16: remote -> org.springframework.boot:spring-boot-sample-servlet-archetype (Spring Boot Servlet Sample)
+17: remote -> org.springframework.boot:spring-boot-sample-simple-archetype (Spring Boot Simple Sample)
+18: remote -> org.springframework.boot:spring-boot-sample-tomcat-archetype (Spring Boot Tomcat Sample)
+19: remote -> org.springframework.boot:spring-boot-sample-traditional-archetype (Spring Boot Traditional Sample)
+20: remote -> org.springframework.boot:spring-boot-sample-web-jsp-archetype (Spring Boot Web JSP Sample)
+21: remote -> org.springframework.boot:spring-boot-sample-web-method-security-archetype (Spring Boot Web Method Security Sample)
+22: remote -> org.springframework.boot:spring-boot-sample-web-secure-archetype (Spring Boot Web Secure Sample)
+23: remote -> org.springframework.boot:spring-boot-sample-web-static-archetype (Spring Boot Web Static Sample)
+24: remote -> org.springframework.boot:spring-boot-sample-web-ui-archetype (Spring Boot Web UI Sample)
+25: remote -> org.springframework.boot:spring-boot-sample-websocket-archetype (Spring Boot WebSocket Sample)
+26: remote -> org.springframework.boot:spring-boot-sample-xml-archetype (Spring Boot XML Sample)
+27: remote -> org.springframework.osgi:spring-osgi-bundle-archetype (Spring OSGi Maven2 Archetype)
+28: remote -> org.springframework.ws:spring-ws-archetype (Spring Web Services Maven2 Archetype.)
+```
+
+我们选择 `spring-boot-sample-simple-archetype` 就可以生成一个简单的 Spring Boot 项目，生成的项目结构如下：
+
+```
+$ tree demo
+demo
+├── build.gradle
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── example
+    │   │           └── simple
+    │   │               ├── SampleSimpleApplication.java
+    │   │               └── service
+    │   │                   └── HelloWorldService.java
+    │   └── resources
+    │       └── application.properties
+    └── test
+        ├── java
+        │   └── com
+        │       └── example
+        │           └── simple
+        │               ├── SampleSimpleApplicationTests.java
+        │               └── SpringTestSampleSimpleApplicationTests.java
+        └── resources
+            └── application.properties
+```
+
+我们也可以直接使用一行命令生成：
+
+```
+TODO
+```
+
+TODO 其他例子
+
 ## Spring Initializr
 
-创建 Spring 项目最简单的方式就是使用官方提供的 [Spring Initializr](https://start.spring.io/)，下图是使用 Spring Initializr 生成项目脚手架代码的一个示例：
+虽然使用 Maven Archetype 创建 Spring 项目非常简单，但是通过 Maven Archetype 生成的代码比较死板，如果想在生成的时候动态添加一些依赖，就需要手工去修改 pom.xml 文件了。Spring 官方提供了另一种创建项目的方式：[Spring Initializr](https://start.spring.io/)，下图是使用 Spring Initializr 生成项目脚手架代码的一个示例：
 
 ![](./images/spring-initializr.png)
 
@@ -32,7 +208,30 @@
 
 这里我选择的是 Maven 项目，语言类型为 Java，Spring Boot 版本为 2.6.4，项目基本信息为默认的 demo，打包方式为 jar，并添加了一个 Spring Web 依赖。生成的项目代码结构如下：
 
-![](./images/demo-project-structure.png)
+```
+demo
+├── HELP.md
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── example
+    │   │           └── demo
+    │   │               └── DemoApplication.java
+    │   └── resources
+    │       ├── application.properties
+    │       ├── static
+    │       └── templates
+    └── test
+        └── java
+            └── com
+                └── example
+                    └── demo
+                        └── DemoApplicationTests.java
+```
 
 按照 [Spring Boot 快速入门教程](https://spring.io/quickstart)，我们在 `DemoApplication.java` 里加几行代码：
 
@@ -127,16 +326,13 @@ class ThisWillActuallyRun {
 
 这个命令和从 `start.spring.io` 上生成项目是完全一样的。可以通过 `spring help init` 了解各个参数的含义，每个参数都有默认值，所以你也可以直接使用 `spring init demo` 生成一个默认的示例项目。
 
-## Maven Archetype
-
-https://maven.apache.org/guides/introduction/introduction-to-archetypes.html
-
 ## JHipster
 
 https://www.jhipster.tech/
 
 ## 参考
 
+1. [Introduction to Archetypes](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html)
 1. [Spring Quickstart Guide](https://spring.io/quickstart)
 1. [Spring Initializr Reference Guide](https://docs.spring.io/initializr/docs/current-SNAPSHOT/reference/html/)
 1. [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#cli)
