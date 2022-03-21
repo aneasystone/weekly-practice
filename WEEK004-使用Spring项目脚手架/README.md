@@ -337,10 +337,6 @@ class ThisWillActuallyRun {
 
 这个命令和从 `start.spring.io` 上生成项目是完全一样的。可以通过 `spring help init` 了解各个参数的含义，每个参数都有默认值，所以你也可以直接使用 `spring init demo` 生成一个默认的示例项目。
 
-## JHipster
-
-https://www.jhipster.tech/
-
 ## 参考
 
 1. [Introduction to Archetypes](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html)
