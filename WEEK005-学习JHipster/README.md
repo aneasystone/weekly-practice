@@ -15,16 +15,286 @@
 
 JHipster Online 是一个非常类似于 `start.spring.io` 的站点，用于在线生成代码，它一般是提供给第一次接触 JHipster 的用户使用的，用于展示 JHipster 的特性。虽然这种方式很简单，不过官方更推荐 NPM 安装方式。
 
+首先确保你已经安装了 Java 和 Node：
+
+```
+> java -version
+java version "11.0.8" 2020-07-14 LTS
+Java(TM) SE Runtime Environment 18.9 (build 11.0.8+10-LTS)
+Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.8+10-LTS, mixed mode)
+
+> node --version
+v16.14.2
+
+> npm --version
+8.5.0
+```
+
+然后使用下面的命令安装 JHipster：
+
+```
+> npm install -g generator-jhipster
+```
+
+如果你需要使用 JHipster 的 `module` 或 `blueprint`，还需要安装 [`Yeoman`](https://yeoman.io/)，它是一款现代化的项目脚手架工具：
+
+```
+> npm install -g yo
+```
+
+### 2. 创建应用
+
+接下来就可以使用 JHipster 帮我们快速创建一个应用的脚手架代码了。首先创建一个空目录：
+
+```
+> mkdir demo
+> cd demo
+```
+
+然后执行 `jhipster` 命令：
+
+```
+> jhipster
+INFO! Using bundled JHipster
+
+        ██╗ ██╗   ██╗ ████████╗ ███████╗   ██████╗ ████████╗ ████████╗ ███████╗
+        ██║ ██║   ██║ ╚══██╔══╝ ██╔═══██╗ ██╔════╝ ╚══██╔══╝ ██╔═════╝ ██╔═══██╗
+        ██║ ████████║    ██║    ███████╔╝ ╚█████╗     ██║    ██████╗   ███████╔╝
+  ██╗   ██║ ██╔═══██║    ██║    ██╔════╝   ╚═══██╗    ██║    ██╔═══╝   ██╔══██║
+  ╚██████╔╝ ██║   ██║ ████████╗ ██║       ██████╔╝    ██║    ████████╗ ██║  ╚██╗
+   ╚═════╝  ╚═╝   ╚═╝ ╚═══════╝ ╚═╝       ╚═════╝     ╚═╝    ╚═══════╝ ╚═╝   ╚═╝
+                            https://www.jhipster.tech
+Welcome to JHipster v7.7.0
+
+Application files will be generated in folder: D:\code\demo
+ _______________________________________________________________________________________________________________
+
+  Documentation for creating an application is at https://www.jhipster.tech/creating-an-app/
+  If you find JHipster useful, consider sponsoring the project at https://opencollective.com/generator-jhipster
+ _______________________________________________________________________________________________________________
+```
+
+接下来 JHipster 会向你提一系列的问题，你需要根据项目需要进行选择。首先选择的是应用类型，这里我们选择 `Monolithic application`（单体应用）：
+
+```
+? Which *type* of application would you like to create?
+> Monolithic application (recommended for simple projects)
+  Gateway application
+  Microservice application
+```
+
+接下来需要填写应用名称和 Java 包名：
+
+```
+? What is the base name of your application? demo
+? What is your default Java package name? com.example.demo
+```
+
+是否需要使用 `Spring WebFlux` 创建响应式应用？我们选 No：
+
+```
+? Do you want to make it reactive with Spring WebFlux? No
+```
+
+然后要选择应用的认证方式，默认选的是 JWT：
+
+```
+? Which *type* of authentication would you like to use? (Use arrow keys)
+> JWT authentication (stateless, with a token)
+  OAuth 2.0 / OIDC Authentication (stateful, works with Keycloak and Okta)
+  HTTP Session Authentication (stateful, default Spring Security mechanism)
+```
+
+然后选择我们要使用什么类型的数据库，JHipster 支持不同类型的数据库，包括 MySQL、MongoDB、Cassandra 等，我们选择最常用的 SQL：
+
+```
+? Which *type* of database would you like to use? (Use arrow keys)
+> SQL (H2, PostgreSQL, MySQL, MariaDB, Oracle, MSSQL)
+  MongoDB
+  Cassandra
+  [BETA] Couchbase
+  [BETA] Neo4j
+  No database
+```
+
+紧接着上一个问题，JHipster 会让我们选择生产环境使用的数据库，我们选择 MySQL：
+
+```
+? Which *production* database would you like to use?
+  PostgreSQL
+> MySQL
+  MariaDB
+  Oracle
+  Microsoft SQL Server
+```
+
+接着又会让我们选择开发环境使用的数据库，我们选择 `H2 with disk-based persistence`：
+
+```
+? Which *development* database would you like to use?
+> H2 with disk-based persistence
+  H2 with in-memory persistence
+  MySQL
+```
+
+然后继续选择一个缓存类型，默认选择的是 `Ehcache`：
+
+```
+? Which cache do you want to use? (Spring cache abstraction) (Use arrow keys)
+> Ehcache (local cache, for a single node)
+  Caffeine (local cache, for a single node)
+  Hazelcast (distributed cache, for multiple nodes, supports rate-limiting for gateway applications)
+  Infinispan (hybrid cache, for multiple nodes)
+  Memcached (distributed cache) - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!
+  Redis (distributed cache)
+  No cache - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!
+```
+
+是否开启 Hibernate 的二级缓存，选择 Y：
+
+```
+? Do you want to use Hibernate 2nd level cache? (Y/n)
+```
+
+后端的打包工具我们选择 Maven：
+
+```
+? Would you like to use Maven or Gradle for building the backend? (Use arrow keys)
+> Maven
+  Gradle
+```
+
+是否需要使用 `JHipster Registry` 注册中心？我们选 No:
+
+```
+? Do you want to use the JHipster Registry to configure, monitor and scale your application? (Use arrow keys)
+> No
+  Yes
+```
+
+是否需要使用 JHipster 支持的一些其他技术，包括：Elasticsearch、WebSockets、Kafka 等，我们这里可以直接跳过：
+
+```
+? Which other technologies would you like to use? (Press <space> to select, <a> to toggle all, <i> to invert selection, and <enter> to proceed)
+>( ) Elasticsearch as search engine
+ ( ) WebSockets using Spring Websocket
+ ( ) Apache Kafka as asynchronous messages broker
+ ( ) API first development using OpenAPI-generator
+```
+
+前端框架我们选择 `Vue`：
+
+```
+? Which *Framework* would you like to use for the client?
+  Angular
+  React
+> Vue
+  No client
+```
+
+并生成管理页面：
+
+```
+? Do you want to generate the admin UI? (Y/n)
+```
+
+然后选择一个前端主题，直接使用 JHipster 默认的即可：
+
+```
+? Would you like to use a Bootswatch theme (https://bootswatch.com/)?
+  Vapor
+  Yeti
+  Zephyr
+> Default JHipster
+  Cerulean
+  Cosmo
+  Cyborg
+(Move up and down to reveal more choices)
+```
+
+是否需要开启国际化，选择 Y：
+
+```
+? Would you like to enable internationalization support? (Y/n)
+```
+
+如果开启国际化之后，就会让我们选要支持的语言，我们选简体中文和英文：
+
+```
+? Please choose the native language of the application Chinese (Simplified)
+? Please choose additional languages to install
+```
+
+除了 JUnit 和 Jest，还可以选择其他的测试框架，这里我们直接跳过：
+
+```
+? Besides JUnit and Jest, which testing frameworks would you like to use? (Press <space> to select, <a> to toggle all, <i> to invert selection, and <enter> to proceed)
+>( ) Cypress
+ ( ) [DEPRECATED] Protractor
+ ( ) Gatling
+ ( ) Cucumber
+```
+
+最后 JHipster 问是否需要安装其他的 generator？选择 N：
+
+```
+? Would you like to install other generators from the JHipster Marketplace? (y/N)
+```
+
+然后 JHipster 就开始按我们的选择自动生成代码了。
+
+```
+Application successfully committed to Git from D:\code\demo.
+
+If you find JHipster useful consider sponsoring the project https://www.jhipster.tech/sponsors/
+
+Server application generated successfully.
+
+Run your Spring Boot application:
+./mvnw (mvnw if using Windows Command Prompt)
+
+Client application generated successfully.
+
+Start your Webpack development server with:
+ npm start
+
+
+> demo@0.0.0 clean-www
+> rimraf target/classes/static/app/{src,target/}
+
+Congratulations, JHipster execution is complete!
+```
+
 ## 参考
 
 1. [Installing JHipster](https://www.jhipster.tech/installation/)
+2. [Creating an application](https://www.jhipster.tech/creating-an-app/)
 
 ## 更多
 
-### 1. JHipster 前端技术一览
+### 1. 在 PowerShell 中运行 `jhipster` 报 UnauthorizedAccess 错误
+
+```
+> jhipster
+jhipster : 无法加载文件 C:\Users\aneasystone\AppData\Roaming\npm\jhipster.ps1，因为在此系统上禁止运行脚本。有关详细信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=1351
+70 中的 about_Execution_Policies。
+所在位置 行:1 字符: 1
++ jhipster
++ ~~~~~~~~
+    + CategoryInfo          : SecurityError: (:) []，PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+```
+
+解决方法是使用 `set-ExecutionPolicy` 命令将系统的执行策略设置为 `RemoteSigned`：
+
+```
+> set-ExecutionPolicy RemoteSigned
+```
+
+### 2. JHipster 前端技术一览
 
 TODO
 
-### 2. JHipster 后端技术一览
+### 3. JHipster 后端技术一览
 
 TODO
