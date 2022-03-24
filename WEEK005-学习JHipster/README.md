@@ -265,10 +265,59 @@ Start your Webpack development server with:
 Congratulations, JHipster execution is complete!
 ```
 
+代码生成完成后，执行 `./mvnw` 运行我们的应用：
+
+```
+> ./mvnw
+```
+
+> 注意，`./mvnw` 命令只会编译后端代码并运行，如果修改了前端代码，需要使用 `./mvnw -Pwebapp` 命令来编译运行。也可以使用 `npm start` 命令来启动前端代码，这样在修改前端代码后可以立即生效，这被称为 `live reload`。
+
+打开浏览器，输入 `http://localhost:8080/`：
+
+![](./images/jhipster-demo.png)
+
+系统默认内置了两个用户：管理员 admin 和普通用户 user，可以直接登录，管理员登录后可以看到一个管理菜单：
+
+![](./images/admin-login.png)
+
+### 用户管理
+
+![](./images/user-management.png)
+
+### 资源监控
+
+![](./images/metrics.png)
+
+### 服务状态
+
+![](./images/health.png)
+
+### 配置
+
+![](./images/configuration.png)
+
+### 日志
+
+![](./images/logs.png)
+
+### API
+
+![](./images/docs.png)
+
+### 数据库
+
+![](./images/h2-console.png)
+
+## 新增数据
+
+TODO
+
 ## 参考
 
 1. [Installing JHipster](https://www.jhipster.tech/installation/)
 2. [Creating an application](https://www.jhipster.tech/creating-an-app/)
+3. [Creating an entity](https://www.jhipster.tech/creating-an-entity/)
 
 ## 更多
 
