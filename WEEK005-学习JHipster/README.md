@@ -271,47 +271,63 @@ Congratulations, JHipster execution is complete!
 > ./mvnw
 ```
 
-> 注意，`./mvnw` 命令只会编译后端代码并运行，如果修改了前端代码，需要使用 `./mvnw -Pwebapp` 命令来编译运行。也可以使用 `npm start` 命令来启动前端代码，这样在修改前端代码后可以立即生效，这被称为 `live reload`。
+> 注意，`./mvnw` 命令只会编译后端代码并运行，如果修改了前端代码，需要使用 `./mvnw -Pwebapp` 命令来编译运行。或者使用 `npm start` 命令来启动前端代码，这样在修改前端代码后可以立即生效，这被称为 `live reload`。
 
 打开浏览器，输入 `http://localhost:8080/`：
 
 ![](./images/jhipster-demo.png)
 
-系统默认内置了两个用户：管理员 admin 和普通用户 user，可以直接登录，管理员登录后可以看到一个管理菜单：
+系统默认内置了两个用户：管理员 admin 和普通用户 user，可以直接登录，管理员登录后可以看到一个管理菜单，JHipster 为我们内置了很多非常实用的系统管理功能：
 
 ![](./images/admin-login.png)
 
 ### 用户管理
 
+在这里可以对系统用户进行增删改查，新注册的用户也可以在这里进行激活。
+
 ![](./images/user-management.png)
 
 ### 资源监控
+
+在这里可以查看系统资源占用情况和统计信息，比如：CPU 负载、内存占用、线程数、GC 情况等。
 
 ![](./images/metrics.png)
 
 ### 服务状态
 
+在这里可以看到系统的健康状态，比如：数据库是否连接正常、磁盘空间是否已满等等。
+
 ![](./images/health.png)
 
 ### 配置
+
+这里列出了系统所有的配置项，并支持按前缀过滤。
 
 ![](./images/configuration.png)
 
 ### 日志
 
+这里列出了系统所有的日志配置，并支持实时修改刷新。
+
 ![](./images/logs.png)
 
 ### API
+
+这里通过 Swagger 列出系统的接口文档，可以在这里对接口进行调试。
 
 ![](./images/docs.png)
 
 ### 数据库
 
+对于 H2 数据库，JHipster 还提供了一个可视化的管理页面来方便我们对 H2 中的数据进行增删改查。
+
 ![](./images/h2-console.png)
 
 ## 新增数据
 
-TODO
+可以看出，JHipster 内置了很多系统管理功能，不过这时应用里还没有任何数据，可以使用 `jhipster entity <entityName> --[options]` 子命令来创建实体，这被称之为 `sub-generator`。
+
+
 
 ## 参考
 
