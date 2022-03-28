@@ -1,0 +1,8 @@
+{
+  "generator-jhipster:7.7.0": {
+    "promptValues": {
+      "packageName": "com.example.demo",
+      "nativeLanguage": "zh-cn"
+    }
+  }
+}

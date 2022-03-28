@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src/main/webapp/app",
+    "outDir": "target/out-tsc/dist",
+    "target": "es5",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["es7", "dom"],
+    "typeRoots": ["node_modules/@types"],
+    "paths": {
+      "@/*": ["*"]
+    },
+    "types": ["node"],
+    "importHelpers": false,
+    "allowJs": true
+  },
+  "include": ["src/main/webapp/app"],
+  "exclude": ["node_modules"]
+}
