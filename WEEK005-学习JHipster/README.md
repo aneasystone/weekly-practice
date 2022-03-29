@@ -327,7 +327,156 @@ Congratulations, JHipster execution is complete!
 
 可以看出，JHipster 内置了很多系统管理功能，不过这时应用里还没有任何数据，可以使用 `jhipster entity <entityName> --[options]` 子命令来创建实体，这被称之为 `sub-generator`。
 
+下面我们来创建一个 `Foo` 实体：
 
+```
+> jhipster entity Foo
+```
+
+和上面生成代码的过程一样，JHipster 还会问一系列的问题。首先会问你是否要创建字段：
+
+```
+The entity Foo is being created.
+
+
+Generating field #1
+
+? Do you want to add a field to your entity? (Y/n)
+```
+
+这里我们就加一个字段 `name` 测试一下：
+
+```
+Generating field #1
+
+? Do you want to add a field to your entity? Yes
+? What is the name of your field? name
+? What is the type of your field? String
+? Do you want to add validation rules to your field? No
+
+================= Foo =================
+Fields
+name (String)
+
+Generating field #2
+
+? Do you want to add a field to your entity? (Y/n)
+```
+
+输入字段名之后，还会让你选择字段类型，并填写校验规则。一个字段填写完成后，接着填写下一个字段，这里我们输入 `n` 结束添加。
+
+然后选择实体和其他实体之间的关系，这里我们直接输入 `n`：
+
+```
+Generating relationships to other entities
+
+? Do you want to add a relationship to another entity? (Y/n)
+```
+
+接下来的问题是是否创建 Service 层代码，也就是业务逻辑层，有三个选项：
+
+* 不生成，直接在 Controller 里访问数据库
+* 生成 Service 类
+* 生成 Service 接口和相应的实现类
+
+```
+? Do you want to use separate service class for your business logic? (Use arrow keys)
+  No, the REST controller should use the repository directly
+  Yes, generate a separate service class
+> Yes, generate a separate service interface and implementation
+```
+
+一般我们生成代码后都会进行一些修改，添加自己的业务逻辑，所以最好选择第三个选项，方便后面的改动。如果只是简单的演示程序，选第一个也未尝不可。
+
+接下来，是否要创建 DTO 类，一般选择 `Yes`，对于代码后期维护上要方便点，如果选 `No` 的话，Controller 层的代码会直接使用 Entity 类：
+
+```
+? Do you want to use a Data Transfer Object (DTO)? (Use arrow keys)
+  No, use the entity directly
+> Yes, generate a DTO with MapStruct
+```
+
+然后是否要添加 `filtering` 功能，这是 JHipster 提供的一个很方便有用的特性，通过一定的参数形式，可以组装出非常通用的查询条件，具体的规则可以参考 [官方文档](https://www.jhipster.tech/entities-filtering/)：
+
+```
+? Do you want to add filtering? (Use arrow keys)
+  Not needed
+> Dynamic filtering for the entities with JPA Static metamodel
+```
+
+是否只读？我们选 `N`：
+
+```
+? Is this entity read-only? (y/N)
+```
+
+是否支持分页和排序？这里有两种不同的分页选项：`pagination links` 和 `infinite scroll`，一般选择第一个分页选项：
+
+```
+? Do you want pagination and sorting on your entity?
+  No
+> Yes, with pagination links and sorting headers
+  Yes, with infinite scroll and sorting headers
+```
+
+至此，问题回答完毕，JHipster 自动为我们创建了下面这些文件：
+
+```
+Everything is configured, generating the entity...
+
+     info Creating changelog for entities Foo
+    force .yo-rc-global.json
+    force .yo-rc.json
+    force .jhipster\Foo.json
+   create src\main\resources\config\liquibase\changelog\20220329001104_added_entity_Foo.xml
+   create src\main\resources\config\liquibase\fake-data\foo.csv
+ conflict src\main\resources\config\liquibase\master.xml
+? Overwrite src\main\resources\config\liquibase\master.xml? overwrite this and all others
+    force src\main\resources\config\liquibase\master.xml
+   create src\main\java\com\example\demo\service\FooQueryService.java
+   create src\main\java\com\example\demo\service\mapper\FooMapper.java
+   create src\main\webapp\app\entities\foo\foo.component.ts
+   create src\main\java\com\example\demo\repository\FooRepository.java
+   create src\main\webapp\app\entities\foo\foo.service.ts
+   create src\main\webapp\app\entities\foo\foo-update.vue
+   create src\test\java\com\example\demo\domain\FooTest.java
+   create src\main\webapp\app\entities\foo\foo-update.component.ts
+   create src\test\javascript\spec\app\entities\foo\foo.component.spec.ts
+   create src\test\java\com\example\demo\service\dto\FooDTOTest.java
+   create src\test\javascript\spec\app\entities\foo\foo-details.component.spec.ts
+   create src\main\java\com\example\demo\service\FooService.java
+   create src\test\java\com\example\demo\service\mapper\FooMapperTest.java
+   create src\test\javascript\spec\app\entities\foo\foo.service.spec.ts
+   create src\main\java\com\example\demo\domain\Foo.java
+   create src\main\java\com\example\demo\service\impl\FooServiceImpl.java
+   create src\main\webapp\app\shared\model\foo.model.ts
+   create src\test\javascript\spec\app\entities\foo\foo-update.component.spec.ts
+   create src\main\java\com\example\demo\service\dto\FooDTO.java
+   create src\main\webapp\app\entities\foo\foo-details.vue
+   create src\main\webapp\i18n\zh-cn\foo.json
+   create src\main\webapp\app\entities\foo\foo-details.component.ts
+   create src\main\java\com\example\demo\service\criteria\FooCriteria.java
+   create src\main\java\com\example\demo\web\rest\FooResource.java
+   create src\main\java\com\example\demo\service\mapper\EntityMapper.java
+   create src\main\webapp\app\entities\foo\foo.vue
+   create src\test\java\com\example\demo\web\rest\FooResourceIT.java
+    force src\main\java\com\example\demo\config\CacheConfiguration.java
+    force src\main\webapp\app\router\entities.ts
+    force src\main\webapp\app\entities\entities.component.ts
+    force src\main\webapp\app\entities\entities-menu.vue
+    force src\main\webapp\i18n\zh-cn\global.json
+    force .yo-rc.json
+    force .jhipster\Foo.json
+
+No change to package.json was detected. No package manager install will be executed.
+Entity Foo generated successfully.
+```
+
+JHipster 生成代码之后会自动进行编译，你可以直接执行 `./mvnw` 启动服务，查看新生成的实体是否生效。
+
+## 使用 JDL
+
+TODO
 
 ## 参考
 
