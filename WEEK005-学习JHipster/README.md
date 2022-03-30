@@ -476,6 +476,12 @@ JHipster 生成代码之后会自动进行编译，你可以直接执行 `./mvnw
 
 ## 使用 JDL
 
+当要生成的实体类非常多时，使用 `jhipster entity` 命令一个个的生成就太麻烦了。为此官方特意创造了一种新的领域语言 `JDL` （[JHipster Domain Language](https://www.jhipster.tech/jdl/intro)）来解决这个问题，通过可视化的方式完成 JDL 的编写，再使用脚本转换为代码。
+
+官方提供了多种方式来编写 JDL 文件，比如在线工具 [JDL-Studio](https://start.jhipster.tech/jdl-studio/)， 或者使用各个 IDE 的 JDL 插件，不过最方便的还是使用 JDL-Studio 在线编写：
+
+![](./images/jdl-studio.png)
+
 TODO
 
 ## 参考
