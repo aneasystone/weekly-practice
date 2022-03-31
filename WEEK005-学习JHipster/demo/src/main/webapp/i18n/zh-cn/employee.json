@@ -1,0 +1,36 @@
+{
+  "demoApp": {
+    "employee": {
+      "home": {
+        "title": "Employees",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Employee",
+        "createOrEditLabel": "创建或编辑 Employee",
+        "notFound": "No Employees found"
+      },
+      "created": "Employee {{ param }} 创建成功",
+      "updated": "Employee {{ param }} 更新成功",
+      "deleted": "Employee {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Employee {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Employee"
+      },
+      "id": "ID",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "hireDate": "Hire Date",
+      "salary": "Salary",
+      "commissionPct": "Commission Pct",
+      "job": "Job",
+      "manager": "Manager",
+      "department": "Department",
+      "help": {
+        "firstName": "The firstname attribute."
+      }
+    }
+  }
+}

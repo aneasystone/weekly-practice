@@ -1,0 +1,24 @@
+{
+  "demoApp": {
+    "region": {
+      "home": {
+        "title": "Regions",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Region",
+        "createOrEditLabel": "创建或编辑 Region",
+        "notFound": "No Regions found"
+      },
+      "created": "Region {{ param }} 创建成功",
+      "updated": "Region {{ param }} 更新成功",
+      "deleted": "Region {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Region {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Region"
+      },
+      "id": "ID",
+      "regionName": "Region Name"
+    }
+  }
+}

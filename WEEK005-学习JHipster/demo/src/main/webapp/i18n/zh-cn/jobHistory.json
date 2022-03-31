@@ -1,0 +1,29 @@
+{
+  "demoApp": {
+    "jobHistory": {
+      "home": {
+        "title": "Job Histories",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Job History",
+        "createOrEditLabel": "创建或编辑 Job History",
+        "notFound": "No Job Histories found"
+      },
+      "created": "Job History {{ param }} 创建成功",
+      "updated": "Job History {{ param }} 更新成功",
+      "deleted": "Job History {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Job History {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Job History"
+      },
+      "id": "ID",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "language": "Language",
+      "job": "Job",
+      "department": "Department",
+      "employee": "Employee"
+    }
+  }
+}

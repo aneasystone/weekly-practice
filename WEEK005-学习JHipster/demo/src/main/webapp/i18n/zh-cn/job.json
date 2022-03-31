@@ -1,0 +1,28 @@
+{
+  "demoApp": {
+    "job": {
+      "home": {
+        "title": "Jobs",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Job",
+        "createOrEditLabel": "创建或编辑 Job",
+        "notFound": "No Jobs found"
+      },
+      "created": "Job {{ param }} 创建成功",
+      "updated": "Job {{ param }} 更新成功",
+      "deleted": "Job {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Job {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Job"
+      },
+      "id": "ID",
+      "jobTitle": "Job Title",
+      "minSalary": "Min Salary",
+      "maxSalary": "Max Salary",
+      "task": "Task",
+      "employee": "Employee"
+    }
+  }
+}

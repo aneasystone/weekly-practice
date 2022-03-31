@@ -8,6 +8,14 @@
       "entities": {
         "main": "数据",
         "foo": "Foo",
+        "region": "Region",
+        "country": "Country",
+        "location": "Location",
+        "department": "Department",
+        "task": "Task",
+        "employee": "Employee",
+        "job": "Job",
+        "jobHistory": "Job History",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

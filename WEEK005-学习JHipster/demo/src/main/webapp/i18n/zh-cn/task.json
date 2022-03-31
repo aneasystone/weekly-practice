@@ -1,0 +1,26 @@
+{
+  "demoApp": {
+    "task": {
+      "home": {
+        "title": "Tasks",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Task",
+        "createOrEditLabel": "创建或编辑 Task",
+        "notFound": "No Tasks found"
+      },
+      "created": "Task {{ param }} 创建成功",
+      "updated": "Task {{ param }} 更新成功",
+      "deleted": "Task {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Task {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Task"
+      },
+      "id": "ID",
+      "title": "Title",
+      "description": "Description",
+      "job": "Job"
+    }
+  }
+}

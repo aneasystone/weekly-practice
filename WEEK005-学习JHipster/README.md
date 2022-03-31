@@ -482,7 +482,29 @@ JHipster 生成代码之后会自动进行编译，你可以直接执行 `./mvnw
 
 ![](./images/jdl-studio.png)
 
-TODO
+我们选择官网提供的示例 `default sample` 并下载文件，执行下面的命令：
+
+```
+> jhipster jdl .\default-sample.jdl
+```
+
+JHipster 会自动生成下面 8 个实体类对应的代码：
+
+```
+INFO! Executing import-jdl .\default-sample.jdl
+INFO! The JDL is being parsed.
+warn: In the One-to-Many relationship from Employee to Job, only bidirectionality is supported for a One-to-Many association. The other side will be automatically added.
+warn: In the One-to-Many relationship from Department to Employee, only bidirectionality is supported for a One-to-Many association. The other side will be automatically added.
+INFO! Found entities: Region, Country, Location, Department, Task, Employee, Job, JobHistory.
+INFO! The JDL has been successfully parsed
+INFO! Generating 0 applications.
+INFO! Generating 8 entities.
+INFO! Generating entities for application undefined in a new parallel process
+```
+
+重新执行 `./mvnw` 启动程序，可以看到数据菜单里多了新增的几个实体，可以在这里对实体进行简单的增删改查。
+
+![](./images/new-entity-by-jdl.png)
 
 ## 参考
 
@@ -511,10 +533,14 @@ jhipster : 无法加载文件 C:\Users\aneasystone\AppData\Roaming\npm\jhipster.
 > set-ExecutionPolicy RemoteSigned
 ```
 
-### 2. JHipster 前端技术一览
+### 2. 管理实体之间的关系
 
-TODO
+https://www.jhipster.tech/managing-relationships/
 
-### 3. JHipster 后端技术一览
+### 3. 使用 JHipster 生成微服务
 
-TODO
+https://www.jhipster.tech/microservices-architecture/
+
+### 4. 关于 JHipster 的更多文档
+
+### 5. JHipster 技术一览

@@ -1,0 +1,26 @@
+{
+  "demoApp": {
+    "department": {
+      "home": {
+        "title": "Departments",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "创建新 Department",
+        "createOrEditLabel": "创建或编辑 Department",
+        "notFound": "No Departments found"
+      },
+      "created": "Department {{ param }} 创建成功",
+      "updated": "Department {{ param }} 更新成功",
+      "deleted": "Department {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Department {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Department"
+      },
+      "id": "ID",
+      "departmentName": "Department Name",
+      "location": "Location",
+      "employee": "Employee"
+    }
+  }
+}
