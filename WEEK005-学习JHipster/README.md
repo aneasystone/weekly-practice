@@ -533,14 +533,92 @@ jhipster : 无法加载文件 C:\Users\aneasystone\AppData\Roaming\npm\jhipster.
 > set-ExecutionPolicy RemoteSigned
 ```
 
-### 2. 管理实体之间的关系
+### 2. 关于 JHipster 的更多文档
 
-https://www.jhipster.tech/managing-relationships/
-
-### 3. 使用 JHipster 生成微服务
-
-https://www.jhipster.tech/microservices-architecture/
-
-### 4. 关于 JHipster 的更多文档
-
-### 5. JHipster 技术一览
+* [Release notes](https://www.jhipster.tech/releases/)
+* JHipster in a few minutes
+  * [Technology stack](https://www.jhipster.tech/tech-stack/)
+  * [Official JHipster slides](https://www.jhipster.tech/presentation/#/)
+  * [Online guides](https://github.com/jhipster/jhipster-guides)
+* Setting up your environment
+  * [Installing JHipster](https://www.jhipster.tech/installation/)
+  * [Configuring a corporate proxy](https://www.jhipster.tech/configuring-a-corporate-proxy/)
+  * [Configuring your IDE](https://www.jhipster.tech/configuring-ide/)
+  * [Docker and Docker Compose](https://www.jhipster.tech/docker-compose/)
+  * [JHipster Shell Plugins](https://www.jhipster.tech/shell-plugins/)
+* Core JHipster tasks
+  * [Creating an application](https://www.jhipster.tech/creating-an-app/)
+  * [Creating an entity](https://www.jhipster.tech/creating-an-entity/)
+  * [Creating a Spring controller](https://www.jhipster.tech/creating-a-spring-controller/)
+  * [Creating a Spring service](https://www.jhipster.tech/creating-a-spring-service/)
+  * [Using DTOs](https://www.jhipster.tech/using-dtos/)
+  * [Managing relationships](https://www.jhipster.tech/managing-relationships/)
+  * [Internationalization](https://www.jhipster.tech/installing-new-languages/)
+  * [Upgrading an application](https://www.jhipster.tech/upgrading-an-application/)
+* JDL
+  * [JHipster Domain Language (JDL)](https://www.jhipster.tech/jdl/intro)
+  * [JHipster Domain Language (JDL) - Applications](https://www.jhipster.tech/jdl/applications)
+  * [JHipster Domain Language (JDL) - Entities](https://www.jhipster.tech/jdl/entities-fields)
+  * [JHipster Domain Language (JDL) - Enums](https://www.jhipster.tech/jdl/enums)
+  * [JHipster Domain Language (JDL) - Relationships](https://www.jhipster.tech/jdl/relationships)
+  * [JHipster Domain Language (JDL) - Options](https://www.jhipster.tech/jdl/options)
+  * [JHipster Domain Language (JDL) - Deployments](https://www.jhipster.tech/jdl/deployments)
+  * [JHipster Domain Language (JDL)
+Troubleshooting](https://www.jhipster.tech/jdl/troubleshooting)
+* Microservices
+  * [Doing microservices with JHipster](https://www.jhipster.tech/microservices-architecture/)
+  * [The JHipster API Gateway](https://www.jhipster.tech/api-gateway/)
+  * [The JHipster Registry](https://www.jhipster.tech/jhipster-registry/)
+  * [Consul](https://www.jhipster.tech/consul/)
+  * [Creating microservices](https://www.jhipster.tech/creating-microservices/)
+  * [Microservices in production](https://www.jhipster.tech/microservices-in-production/)
+  * [The JHipster Control Center](https://www.jhipster.tech/jhipster-control-center/)
+* Options
+  * [Securing your application](https://www.jhipster.tech/security/)
+  * [Filtering your entities](https://www.jhipster.tech/entities-filtering/)
+  * [Using Elasticsearch](https://www.jhipster.tech/using-elasticsearch/)
+  * [Using WebSockets](https://www.jhipster.tech/using-websockets/)
+  * [Doing API-First development](https://www.jhipster.tech/doing-api-first-development/)
+  * [Using a cache](https://www.jhipster.tech/using-cache/)
+  * [Using Oracle](https://www.jhipster.tech/using-oracle/)
+  * [Using MongoDB](https://www.jhipster.tech/using-mongodb/)
+  * [Using Couchbase](https://www.jhipster.tech/using-couchbase/)
+  * [Using Neo4j](https://www.jhipster.tech/using-neo4j/)
+  * [Using Cassandra](https://www.jhipster.tech/using-cassandra/)
+  * [Using Kafka](https://www.jhipster.tech/using-kafka/)
+* Development
+  * [Profiles](https://www.jhipster.tech/profiles/)
+  * [Common application properties](https://www.jhipster.tech/common-application-properties/)
+  * [Common ports](https://www.jhipster.tech/common-ports/)
+  * [Separating the front-end and the API server](https://www.jhipster.tech/separating-front-end-and-api/)
+  * [Managing server errors](https://www.jhipster.tech/managing-server-errors/)
+  * [Using Angular](https://www.jhipster.tech/using-angular/)
+  * [Using React (with Redux)](https://www.jhipster.tech/using-react/)
+  * [Using Vue](https://www.jhipster.tech/using-vue/)
+  * [Customizing Bootstrap 4](https://www.jhipster.tech/customizing-bootstrap-4/)
+  * [Using TLS and HTTP/2 in development](https://www.jhipster.tech/tls/)
+* Test & QA
+  * [Running tests](https://www.jhipster.tech/running-tests/)
+  * [Code quality](https://www.jhipster.tech/code-quality/)
+  * [Dependency Vulnerabilities Check](https://www.jhipster.tech/dependency-vulnerabities-check/)
+  * [Setting up Continuous Integration](https://www.jhipster.tech/setting-up-ci/)
+* Production
+  * [Using JHipster in production](https://www.jhipster.tech/production/)
+  * [Monitoring your JHipster Applications](https://www.jhipster.tech/monitoring/)
+  * [Docker Hub](https://www.jhipster.tech/docker-hub/)
+  * [Deploying to AWS](https://www.jhipster.tech/aws/)
+  * [Deploying to Microsoft Azure](https://www.jhipster.tech/azure/)
+  * [Deploying to AWS with CloudCaptain](https://www.jhipster.tech/cloudcaptain/)
+  * [Deploying to Clever Cloud](https://www.jhipster.tech/clever-cloud/)
+  * [Deploying to Cloud Foundry](https://www.jhipster.tech/cloudfoundry/)
+  * [Deploying to Google Cloud Platform](https://www.jhipster.tech/gcp/)
+  * [Deploying to Heroku](https://www.jhipster.tech/heroku/)
+  * [Deploying to Kubernetes](https://www.jhipster.tech/kubernetes/)
+  * [Deploying to OpenShift](https://www.jhipster.tech/openshift/)
+* Modules & Blueprints
+  * [Officially supported blueprints](https://www.jhipster.tech/modules/official-blueprints/)
+  * [Marketplace](https://www.jhipster.tech/modules/marketplace/#/list)
+  * [Creating a module](https://www.jhipster.tech/modules/creating-a-module/)
+  * [Creating a blueprint](https://www.jhipster.tech/modules/creating-a-blueprint/)
+  * [Quarkus](https://www.jhipster.tech/blueprints/quarkus/)
+* [Tips’n tricks](https://www.jhipster.tech/tips/)
