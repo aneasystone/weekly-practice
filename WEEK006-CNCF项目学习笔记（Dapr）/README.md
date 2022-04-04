@@ -90,7 +90,134 @@ a8d3a7c93e12   redis               "docker-entrypoint.s…"   About an hour ago 
 
 ## 使用 Dapr API
 
-https://docs.dapr.io/getting-started/get-started-api/
+`dapr run` 是最常用的 Dapr 命令之一， 这个命令用于启动一个应用，同时启动一个 Dapr 边车进程，你也可以不指定应用，只启动 Dapr 边车：
+
+```
+[root@localhost ~]# dapr run --app-id myapp --dapr-http-port 3500
+WARNING: no application command found.
+ℹ️  Starting Dapr with id myapp. HTTP Port: 3500. gRPC Port: 39736
+ℹ️  Checking if Dapr sidecar is listening on HTTP port 3500
+INFO[0000] starting Dapr Runtime -- version 1.6.1 -- commit 2fa6bd832d34f5a78c5e336190207d46b761093a  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] log level set to: info                        app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] metrics server started on :46773/             app_id=myapp instance=localhost.localdomain scope=dapr.metrics type=log ver=1.6.1
+INFO[0000] standalone mode configured                    app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] app id: myapp                                 app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] mTLS is disabled. Skipping certificate request and tls validation  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] local service entry announced: myapp -> 10.0.2.8:45527  app_id=myapp instance=localhost.localdomain scope=dapr.contrib type=log ver=1.6.1
+INFO[0000] Initialized name resolution to mdns           app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] loading components                            app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] component loaded. name: pubsub, type: pubsub.redis/v1  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] waiting for all outstanding components to be processed  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] detected actor state store: statestore        app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] component loaded. name: statestore, type: state.redis/v1  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] all outstanding components processed          app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] enabled gRPC tracing middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.grpc.api type=log ver=1.6.1
+INFO[0000] enabled gRPC metrics middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.grpc.api type=log ver=1.6.1
+INFO[0000] API gRPC server is running on port 39736      app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] enabled metrics http middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.http type=log ver=1.6.1
+INFO[0000] enabled tracing http middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.http type=log ver=1.6.1
+INFO[0000] http server is running on port 3500           app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] The request body size parameter is: 4         app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] enabled gRPC tracing middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.grpc.internal type=log ver=1.6.1
+INFO[0000] enabled gRPC metrics middleware               app_id=myapp instance=localhost.localdomain scope=dapr.runtime.grpc.internal type=log ver=1.6.1
+INFO[0000] internal gRPC server is running on port 45527  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+WARN[0000] app channel is not initialized. did you make sure to configure an app-port?  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] actor runtime started. actor idle timeout: 1h0m0s. actor scan interval: 30s  app_id=myapp instance=localhost.localdomain scope=dapr.runtime.actor type=log ver=1.6.1
+WARN[0000] app channel not initialized, make sure -app-port is specified if pubsub subscription is required  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+WARN[0000] failed to read from bindings: app channel not initialized   app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+INFO[0000] dapr initialized. Status: Running. Init Elapsed 267.56237799999997ms  app_id=myapp instance=localhost.localdomain scope=dapr.runtime type=log ver=1.6.1
+ℹ️  Checking if Dapr sidecar is listening on GRPC port 39736
+ℹ️  Dapr sidecar is up and running.
+✅  You're up and running! Dapr logs will appear here.
+
+INFO[0002] placement tables updated, version: 0          app_id=myapp instance=localhost.localdomain scope=dapr.runtime.actor.internal.placement type=log ver=1.6.1
+```
+
+上面的命令通过参数 `--app-id myapp` 启动了一个名为 `myapp` 的空白应用，并让 Dapr 监听 3500 HTTP 端口（`--dapr-http-port 3500`）。由于没有指定组件目录，Dapr 会使用 `dapr init` 时创建的默认组件定义，可以在 `/root/.dapr/components` 目录查看：
+
+```
+[root@localhost ~]# ls /root/.dapr/components
+pubsub.yaml  statestore.yaml
+```
+
+这个目录默认有两个组件：pubsub 和 statestore。我们查看组件的定义，可以发现两个组件都是基于 Redis 实现的。
+
+pubsub 定义：
+
+```
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6379
+  - name: redisPassword
+    value: ""
+```
+
+statestore 定义：
+
+```
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6379
+  - name: redisPassword
+    value: ""
+  - name: actorStateStore
+    value: "true"
+```
+
+`statestore` 组件可以为分布式应用提供状态管理功能，你可以使用 Dapr 的状态管理 API 来对状态进行保存、读取和查询等。通过配置，Dapr 支持 [不同类型的存储后端](https://docs.dapr.io/reference/components-reference/supported-state-stores/)，如：Redis、MySQL、MongoDB、Zookeeper 等，如下图所示：
+
+![](./images/state-management-overview.png)
+
+下面我们来体验下 Dapr 的状态管理 API。
+
+使用 POST 请求向 `statestore` 中保存一个 `key` 为 `name`，`value` 为 `Bruce Wayne` 的键值对（注意这里的 `statestore` 必须和组件定义中的 `name` 一致）：
+
+```
+[root@localhost ~]# curl -X POST -H "Content-Type: application/json" -d '[{ "key": "name", "value": "Bruce Wayne"}]' http://localhost:3500/v1.0/state/statestore
+```
+
+使用 GET 请求查询 `statestore` 中 `key` 为 `name` 的值：
+
+```
+[root@localhost ~]# curl http://localhost:3500/v1.0/state/statestore/name
+"Bruce Wayne"
+```
+
+为了进一步了解状态信息是如何保存在 Redis 中的，可以使用下面的命令进到容器里查看：
+
+```
+[root@localhost ~]# docker exec -it dapr_redis redis-cli
+127.0.0.1:6379> keys *
+1) "myapp||name"
+127.0.0.1:6379> hgetall myapp||name
+1) "data"
+2) "\"Bruce Wayne\""
+3) "version"
+4) "1"
+127.0.0.1:6379> exit
+```
+
+## 服务调用（Service Invocation）
+
+https://docs.dapr.io/getting-started/quickstarts/serviceinvocation-quickstart/
+
+## 发布订阅（Publish and Subscribe）
+
+https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
 
 ## 参考
 
@@ -100,3 +227,6 @@ https://docs.dapr.io/getting-started/get-started-api/
 
 ## 更多
 
+### 1. Dapr Tutorials
+
+https://docs.dapr.io/getting-started/tutorials/
