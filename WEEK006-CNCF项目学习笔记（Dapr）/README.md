@@ -211,7 +211,38 @@ spec:
 127.0.0.1:6379> exit
 ```
 
-## 服务调用（Service Invocation）
+## 组件和构建块
+
+Dapr 有两个基本概念我们需要了解：`组件（component）` 和 `构建块（building block）`。每个组件代表一个原子功能，有一个接口定义，并且可以有不同的实现，比如 `statestore` 组件，可以使用 Redis 实现，也可以使用 MySQL 实现。而构建块是基于一个或多个组件实现的一套用于在分布式系统中使用的 API 接口（HTTP 或 gRPC），比如上面的例子中我们使用的接口 `/v1.0/state/**` 就是 一个 `State management` 构建块，它是由 `statestore` 组件组成的，而这个 `statestore` 组件是由 Redis 实现的。下面是构建块和组件的示例图：
+
+![](./images/concepts-building-blocks.png)
+
+Dapr 提供了下面这些组件：
+
+* [State stores](https://docs.dapr.io/reference/components-reference/supported-state-stores/)
+* [Name resolution](https://docs.dapr.io/reference/components-reference/supported-name-resolution/)
+* [Pub/sub brokers](https://docs.dapr.io/reference/components-reference/supported-pubsub/)
+* [Bindings](https://docs.dapr.io/reference/components-reference/supported-bindings/)
+* [Secret stores](https://docs.dapr.io/reference/components-reference/supported-secret-stores/)
+* [Configuration stores](https://docs.dapr.io/reference/components-reference/supported-configuration-stores/)
+* [Middleware](https://docs.dapr.io/reference/components-reference/supported-middleware/)
+
+可以在 [这里](https://github.com/dapr/components-contrib) 查看 Dapr 支持的组件接口定义和实现。
+
+Dapr 提供了下面这些构建块：
+
+* [Service-to-service invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/)
+* [State management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/)
+* [Publish and subscribe](https://docs.dapr.io/developing-applications/building-blocks/pubsub/pubsub-overview/)
+* [Resource bindings](https://docs.dapr.io/developing-applications/building-blocks/bindings/bindings-overview/)
+* [Actors](https://docs.dapr.io/developing-applications/building-blocks/actors/actors-overview/)
+* [Observability](https://docs.dapr.io/concepts/observability-concept/)
+* [Secrets](https://docs.dapr.io/developing-applications/building-blocks/secrets/secrets-overview/)
+* [Configuration](https://docs.dapr.io/developing-applications/building-blocks/configuration/configuration-api-overview/)
+
+下面我们来体验下最常用的两个构建块：`Service-to-service invocation` 和 `Publish and subscribe`。
+
+## 服务调用（Service-to-service Invocation）
 
 https://docs.dapr.io/getting-started/quickstarts/serviceinvocation-quickstart/
 
@@ -230,3 +261,103 @@ https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
 ### 1. Dapr Tutorials
 
 https://docs.dapr.io/getting-started/tutorials/
+
+### 2. Dapr 组件一览
+
+* [State stores](https://docs.dapr.io/reference/components-reference/supported-state-stores/)
+  * Aerospike
+  * Apache Cassandra
+  * Couchbase
+  * Hashicorp Consul
+  * Hazelcast
+  * Memcached
+  * MongoDB
+  * MySQL
+  * PostgreSQL
+  * Redis
+  * RethinkDB
+  * Zookeeper
+  * AWS DynamoDB
+  * GCP Firestore
+  * Azure Blob Storage
+  * Azure CosmosDB
+  * Azure SQL Server
+  * Azure Table Storage
+  * OCI Object Storage
+* [Name resolution](https://docs.dapr.io/reference/components-reference/supported-name-resolution/)
+  * HashiCorp Consul
+  * mDNS
+  * Kubernetes
+* [Pub/sub brokers](https://docs.dapr.io/reference/components-reference/supported-pubsub/)
+  * Apache Kafka
+  * Hazelcast
+  * MQTT
+  * NATS Streaming
+  * In Memory
+  * JetStream
+  * Pulsar
+  * RabbitMQ
+  * Redis Streams
+  * AWS SNS/SQS
+  * GCP Pub/Sub
+  * Azure Event Hubs
+  * Azure Service Bus
+* [Bindings](https://docs.dapr.io/reference/components-reference/supported-bindings/)
+  * Apple Push Notifications (APN)
+  * Cron (Scheduler)
+  * GraphQL
+  * HTTP
+  * InfluxDB
+  * Kafka
+  * Kubernetes Events
+  * Local Storage
+  * MQTT
+  * MySQL
+  * PostgreSql
+  * Postmark
+  * RabbitMQ
+  * Redis
+  * SMTP
+  * Twilio
+  * Twitter
+  * SendGrid
+  * Alibaba Cloud DingTalk
+  * Alibaba Cloud OSS
+  * Alibaba Cloud Tablestore
+  * AWS DynamoDB	
+  * AWS S3
+  * AWS SES
+  * AWS SNS
+  * AWS SQS
+  * AWS Kinesis
+  * GCP Cloud Pub/Sub
+  * GCP Storage Bucket
+  * Azure Blob Storage
+  * Azure CosmosDB
+  * Azure CosmosDBGremlinAPI	
+  * Azure Event Grid
+  * Azure Event Hubs
+  * Azure Service Bus Queues
+  * Azure SignalR
+  * Azure Storage Queues
+  * Zeebe Command
+  * Zeebe Job Worker
+* [Secret stores](https://docs.dapr.io/reference/components-reference/supported-secret-stores/)
+  * Local environment variables
+  * Local file
+  * HashiCorp Vault
+  * Kubernetes secrets
+  * AWS Secrets Manager
+  * AWS SSM Parameter Store
+  * GCP Secret Manager
+  * Azure Key Vault
+  * AlibabaCloud OOS Parameter Store
+* [Configuration stores](https://docs.dapr.io/reference/components-reference/supported-configuration-stores/)
+  * Redis
+* [Middleware](https://docs.dapr.io/reference/components-reference/supported-middleware/)
+  * Rate limit
+  * OAuth2
+  * OAuth2 client credentials
+  * Bearer
+  * Open Policy Agent
+  * Uppercase
