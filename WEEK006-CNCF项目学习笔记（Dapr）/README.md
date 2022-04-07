@@ -244,7 +244,81 @@ Dapr 提供了下面这些构建块：
 
 ## 服务调用（Service-to-service Invocation）
 
-https://docs.dapr.io/getting-started/quickstarts/serviceinvocation-quickstart/
+使用 Dapr 的服务调用构建块，可以让你的应用可靠并安全地与其他应用进行通信。
+
+![](./images/service-invocation-overview.png)
+
+Dapr 采用了边车架构，每个应用都有一个 Dapr 作为反向代理，在调用其他应用时，实际上是调用本应用的 Dapr 代理，并由 Dapr 来调用其他应用的 Dapr 代理，最后请求到你要调用的应用。这样做的好处是由 Dapr 来管理你的所有请求，实现了下面这些特性：
+
+* 命名空间隔离（Namespace scoping）
+* 服务调用安全（Service-to-service security）
+* 访问控制（Access control）
+* 重试（Retries）
+* 插件化的服务发现机制（Pluggable service discovery）
+* mDNS 负载均衡（Round robin load balancing with mDNS）
+* 链路跟踪和监控指标（Tracing and metrics with observability）
+* 服务调用 API（Service invocation API）
+* gRPC 代理（gRPC proxying）
+
+关于服务调用构建块，官方提供了多种语言的示例，可以下载下面的源码后，在 `service_invocation` 目录下找到你需要的语言：
+
+```
+[root@localhost ~]# git clone https://github.com/dapr/quickstarts.git
+```
+
+这里我们使用 Java 的示例来体验一下 Dapr 的服务调用，首先使用 `mvn clean package` 分别构建 `checkout` 和 `order-processor` 两个项目，得到 `CheckoutService-0.0.1-SNAPSHOT.jar` 和 `OrderProcessingService-0.0.1-SNAPSHOT.jar` 两个文件。
+
+我们先使用 `dapr run` 启动 order-processor 服务：
+
+```
+[root@localhost ~]# dapr run --app-id order-processor --app-port 6001 --app-protocol http --dapr-http-port 3501 -- java -jar target/OrderProcessingService-0.0.1-SNAPSHOT.jar
+```
+
+这时我们同时启动了两个进程，Dapr 服务监听在 3501 端口，order-processor 服务监听在 6001 端口。order-processor 服务是一个非常简单的 Spring Boot Web 项目，暴露了一个 `/orders` API 模拟订单处理流程，我们可以使用 `curl` 直接访问它的接口：
+
+```
+[root@localhost ~]# curl -H Content-Type:application/json -X POST --data '{"orderId":"123"}' http://127.0.0.1:6001/orders
+```
+
+当然这里我们更希望通过 Dapr 来调用它的接口：
+
+```
+[root@localhost ~]# curl -H Content-Type:application/json -H dapr-app-id:order-processor -X POST --data '{"orderId":"123"}' http://127.0.0.1:3501/orders
+```
+
+这里我们请求的是 Dapr 代理的端口，接口地址仍然是 `/orders`，特别注意的是，我们在请求里加了一个 `dapr-app-id` 头部，它的值就是我们要调用的应用 ID `order-processor`。但是这种做法官方是不推荐的，官方推荐每个应用都调用自己的 Dapr 代理，而不要去调别人的 Dapr 代理。
+
+于是我们使用 `dapr run` 启动 checkout 服务：
+
+```
+[root@localhost ~]# dapr run --app-id checkout --app-protocol http --dapr-http-port 3500 -- java -jar target/CheckoutService-0.0.1-SNAPSHOT.jar
+```
+
+这个命令同样会启动两个进程，checkout 服务是一个简单的命令行程序，它的 Dapr 代理服务监听在 3500 端口，可以看到想让 checkout 调用 order-processor，只需要调用它自己的 Dapr 代理即可，并在请求里加了一个 `dapr-app-id` 头部：
+
+```
+	private static final String DAPR_HTTP_PORT = System.getenv().getOrDefault("DAPR_HTTP_PORT", "3500");
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+		String dapr_url = "http://localhost:"+DAPR_HTTP_PORT+"/orders";
+		for (int i=1; i<=10; i++) {
+			int orderId = i;
+			JSONObject obj = new JSONObject();
+			obj.put("orderId", orderId);
+
+			HttpRequest request = HttpRequest.newBuilder()
+					.POST(HttpRequest.BodyPublishers.ofString(obj.toString()))
+					.uri(URI.create(dapr_url))
+					.header("Content-Type", "application/json")
+					.header("dapr-app-id", "order-processor")
+					.build();
+
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			System.out.println("Order passed: "+ orderId);
+			TimeUnit.MILLISECONDS.sleep(1000);
+		}
+	}
+```
 
 ## 发布订阅（Publish and Subscribe）
 
