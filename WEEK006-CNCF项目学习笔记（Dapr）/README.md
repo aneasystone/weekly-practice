@@ -541,7 +541,7 @@ public static void main(String[] args) throws InterruptedException, IOException 
 ## 参考
 
 1. https://github.com/dapr/dapr
-1. [Dapa 官方文档](https://docs.dapr.io/getting-started/)
+1. [Dapr 官方文档](https://docs.dapr.io/getting-started/)
 1. [Dapr 知多少 | 分布式应用运行时](https://www.cnblogs.com/sheng-jie/p/how-much-you-know-about-dapr.html)
 
 ## 更多
@@ -649,3 +649,7 @@ https://docs.dapr.io/getting-started/tutorials/
   * Bearer
   * Open Policy Agent
   * Uppercase
+
+### 3. 开发自己的组件
+
+https://github.com/dapr/components-contrib/blob/master/docs/developing-component.md

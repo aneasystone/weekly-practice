@@ -294,9 +294,6 @@ Others
 	https://www.openstack.org/software/start/
 	https://www.ibm.com/developerworks/community/blogs/132cfa78-44b0-4376-85d0-d3096cd30d3f?sortby=0&order=asc&maxresults=15&page=0&lang=en
 
-	Envoy
-	https://www.envoyproxy.io/docs/envoy/latest/start/start
-
 	CoreDNS
 	https://coredns.io/
 
