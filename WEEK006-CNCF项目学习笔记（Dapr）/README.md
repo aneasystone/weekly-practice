@@ -348,7 +348,195 @@ public static void main(String[] args) throws InterruptedException, IOException 
 
 ## 发布订阅（Publish and Subscribe）
 
-https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
+在分布式系统中，发布订阅是另一种常见的服务模型，应用之间通过消息或事件来进行通信，而不是直接调用，可以实现应用之间的解耦。
+
+Dapr 的发布订阅构建块如下图所示：
+
+![](./images/pubsub-diagram.png)
+
+和上面一样，我们使用 Java 语言的示例来体验一下 Dapr 的发布订阅。使用 `mvn clean package` 分别构建 `checkout` 和 `order-processor` 两个项目，得到 `CheckoutService-0.0.1-SNAPSHOT.jar` 和 `OrderProcessingService-0.0.1-SNAPSHOT.jar` 两个文件。
+
+使用 `dapr run` 启动 order-processor 服务：
+
+```
+[root@localhost ~]# dapr run --app-id order-processor \
+  --app-port 6001 \
+  --components-path ./components \
+  -- java -jar target/OrderProcessingService-0.0.1-SNAPSHOT.jar
+```
+
+和上面的服务调用示例相比，少了 `--app-protocol http` 和 `--dapr-http-port 3501` 两个参数，这是因为我们不再使用 HTTP 来进行服务间调用了，而是改成通过消息来进行通信。既然是消息通信，那么就少不了消息中间件，Dapr 支持常见的消息中间件来作为 [Pub/sub brokers](https://docs.dapr.io/reference/components-reference/supported-pubsub/)，如：Kafka、RabbitMQ、Redis 等。
+
+我们在 components 目录下准备了一个 `pubsub.yaml` 文件，在这里对 `Pub/sub brokers` 组件进行配置：
+
+```
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: order_pub_sub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6379
+  - name: redisPassword
+    value: ""
+```
+
+其中，`metadata.name` 定义了组件名称为 `order_pub_sub`，应用就是使用这个名称来和组件进行通信的；`spec.type` 定义了组件类型是 `pubsub`，并使用 `redis` 实现；`spec.metadata` 为组件的一些配置信息。
+
+在运行 `dapr run` 时，通过 `--components-path` 参数来指定应用运行所需要的组件的定义，components 目录下可同时包含多个组件定义。
+
+和之前的例子一样，order-processor 服务是一个非常简单的 Spring Boot Web 项目，它仍然是暴露 `/orders` 接口来模拟订单处理流程，我们可以使用 `curl` 直接访问它的接口：
+
+```
+[root@localhost ~]# curl -H Content-Type:application/json \
+  -X POST \
+  --data '{"data":{"orderId":"123"}}' \
+  http://127.0.0.1:6001/orders
+```
+
+不过这里的数据结构发生了一点变化，对于消息通信的应用，Dapr 使用了一个统一的类来表示接受到的消息：
+
+```
+public class SubscriptionData<T> {
+    private T data;
+}
+```
+
+查看 order-processor 的日志，可以看到它成功接收到了订单：
+
+```
+== APP == 2022-04-03 16:26:27.265  INFO 16263 --- [nio-6001-exec-6] c.s.c.OrderProcessingServiceController   : Subscriber received: 123
+```
+
+既然 order-processor 也是使用 `/orders` 接口，那和服务调用的例子有啥区别呢？仔细翻看代码我们可以发现，order-processor 除了有一个 `/orders` 接口，还新增了一个 `/dapr/subscribe` 接口：
+
+```
+@GetMapping(path = "/dapr/subscribe", produces = MediaType.APPLICATION_JSON_VALUE)
+public DaprSubscription[] getSubscription() {
+	DaprSubscription daprSubscription = DaprSubscription.builder()
+			.pubSubName("order_pub_sub")
+			.topic("orders")
+			.route("orders")
+			.build();
+	logger.info("Subscribed to Pubsubname {} and topic {}", "order_pub_sub", "orders");
+	DaprSubscription[] arr = new DaprSubscription[]{daprSubscription};
+	return arr;
+}
+```
+
+这是一个简单的 `GET` 接口，直接返回下面这样的数据：
+
+```
+[
+    {
+        "pubSubName": "order_pub_sub",
+        "topic": "orders",
+        "route": "orders"
+    }
+]
+```
+
+这实际上是 Dapr 的一种接口规范，被称为 `Programmatically subscriptions`（编程式订阅）。Dapr 在启动时会调用这个接口，这样 Dapr 就知道你的应用需要订阅什么主题，接受到消息后通过什么接口来处理。
+
+除了编程式订阅，Dapr 还支持一种被称为 `Declarative subscriptions`（声明式订阅）的方式，这种方式的好处是对代码没有侵入性，可以不改任何代码就能将一个已有应用改造成主题订阅的模式。我们将声明式订阅定义在 `subscription.yaml` 文件中：
+
+```
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: order-pub-sub
+spec:
+  topic: orders
+  route: orders
+  pubsubname: order_pub_sub
+scopes:
+- order-processor
+- checkout
+```
+
+声明式订阅和编程式订阅的效果是一样的，其目的都是让 Dapr 订阅 **某个 Pub/sub**（`pubsubname: order_pub_sub`）的 **某个主题**（`topic: orders`），并将接受到的消息路由到 **某个接口**（`route: orders`）来处理。区别在于，声明式订阅方便一个主题注册多个应用，编程式订阅方便一个应用注册多个主题。
+
+我们使用 `dapr publish` 发布一个消息：
+
+```
+[root@localhost ~]# dapr publish --publish-app-id order-processor \
+  --pubsub order_pub_sub \
+  --topic orders \
+  --data '{"orderId": 100}'
+✅  Event published successfully
+```
+
+查看 order-processor 的日志，可以看到它又一次成功接收到了订单。这一次我们不是直接调用 `/orders` 接口，而是通过 order-processor 的 Dapr 将消息发送到 Redis，同时 order-processor 的 Dapr 通过订阅接受到该消息，并转发给 `/orders` 接口。
+
+实际上这里我偷懒了，发布和订阅用的都是 order-processor 的 Dapr，在真实场景下，发布者会使用发布者自己的 Dapr。我们启一个新的 Dapr 实例（注意使用和 order-processor 相同的组件）：
+
+```
+[root@localhost ~]# dapr run --app-id checkout \
+  --dapr-http-port 3601 \
+  --components-path ./components/
+```
+
+然后通过 checkout 发布消息：
+
+```
+[root@localhost ~]# dapr publish --publish-app-id checkout \
+  --pubsub order_pub_sub \
+  --topic orders \
+  --data '{"orderId": 100}'
+✅  Event published successfully
+```
+
+到这里我们实现了两个 Dapr 之间的消息通信，一个 Dapr 发布消息，另一个 Dapr
+订阅消息，并将接受到的消息转发给我们的应用接口。不过这里我们是使用 `dapr publish` 命令来发布消息的，在我们的应用代码中，当然不能使用这种方式，而应用使用发布订阅构建块提供的接口。
+
+我们使用 `dapr run` 启动 checkout 服务：
+
+```
+[root@localhost ~]# dapr run --app-id checkout \
+  --components-path ./components \
+  -- java -jar target/CheckoutService-0.0.1-SNAPSHOT.jar
+```
+
+查看 checkout 和 order-processor 的日志，它们分别完成了订单信息的发布和接受处理。浏览代码可以发现，checkout 服务其实使用了发布订阅构建块提供的 `/v1.0/publish` 接口：
+
+```
+private static final String PUBSUB_NAME = "order_pub_sub";
+private static final String TOPIC = "orders";
+private static String DAPR_HOST = System.getenv().getOrDefault("DAPR_HOST", "http://localhost");
+private static String DAPR_HTTP_PORT = System.getenv().getOrDefault("DAPR_HTTP_PORT", "3500");
+
+public static void main(String[] args) throws InterruptedException, IOException {
+	String uri = DAPR_HOST +":"+ DAPR_HTTP_PORT + "/v1.0/publish/"+PUBSUB_NAME+"/"+TOPIC;
+	for (int i = 0; i <= 10; i++) {
+		int orderId = i;
+		JSONObject obj = new JSONObject();
+		obj.put("orderId", orderId);
+
+		// Publish an event/message using Dapr PubSub via HTTP Post
+		HttpRequest request = HttpRequest.newBuilder()
+				.POST(HttpRequest.BodyPublishers.ofString(obj.toString()))
+				.uri(URI.create(uri))
+				.header("Content-Type", "application/json")
+				.build();
+
+		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		logger.info("Published data: {}", orderId);
+		TimeUnit.MILLISECONDS.sleep(3000);
+	}
+}
+```
+
+知道原理后，使用 curl 命令也可以模拟出完全相同的请求：
+
+```
+[root@localhost ~]# curl -H Content-Type:application/json \
+  -X POST \
+  --data '{"orderId": "100"}' \
+  http://localhost:3601/v1.0/publish/order_pub_sub/orders
+```
 
 ## 参考
 
