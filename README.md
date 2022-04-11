@@ -264,6 +264,14 @@ Front End
 	Vue.js
 	https://cn.vuejs.org/v2/guide/index.html
 
+Hardware
+
+	Raspberry Pi
+	https://www.raspberrypi.org/
+
+	Arduino
+	https://www.arduino.cc/
+
 Others
 
 	Websocket
