@@ -50,32 +50,55 @@ Envoy 支持很多高级负载均衡功能，比如：自动重试、熔断、�
 
 * **支持前端代理和边缘代理**
 
+Envoy 一般有三种部署方式：
+
+1. Front Proxy：前端代理，也叫边缘代理，通常是部署在整个服务网格的边缘，用于接收来自于服务网格外的请求；
+2. Ingress Listener：服务代理，通常部署在服务网格内服务的前面，用于接收发给该服务的请求，并转发给该服务；
+3. Egress Listener：与 Ingress Listener 相反，用于代理服务发出的所有请求，并将请求转发给其他服务（可能是网格内服务，也可能是网格外服务）。
+
+![](./images/envoy-deployment.png)
+
 * **可观测性**
 
 Envoy 的主要目标是使网络透明，可以生成许多流量方面的统计数据，这是其它代理软件很难取代的地方，内置 `stats` 模块，可以集成诸如 prometheus/statsd 等监控方案。还可以集成分布式追踪系统，对请求进行追踪。
+
+## Envoy 整体架构与基本概念
+
+下图是 Envoy 代理的整体架构图：[图片来源](https://github.com/yangchuansheng/envoy-handbook)
+
+![](./images/envoy-architecture.png)
+
+Envoy 接收到请求后，会经过过滤器链（filter chain），通过 L3/L4 或 L7 的过滤器对请求进行微处理，然后路由到指定集群，并通过负载均衡获取一个目标地址，最后再转发出去。这个过程中的每一个环节，可以静态配置，也可以通过 `xDS` 动态配置。
+
+* Downstream：即客户端（Client），向 Envoy 发起请求的终端。
+* Upstream：后端服务器，处理客户端请求的服务。
+* Listener：监听器，它的作用就是打开一个监听端口，用于接收来自 Downstream 的请求。
+* Cluster：一组逻辑上相似的上游主机组成一个集群。
+* Route：用于将请求路由到不同的集群。
+* xDS：各种服务发现 API 的统称，如：CDS、EDS、LDS、RDS 和 SDS 等。
 
 ## 安装 Envoy
 
 
 
+
+
 ## 参考
 
+1. [Envoy 官方文档](https://www.envoyproxy.io/docs/envoy/latest/)
+1. [Envoy 官方文档中文版（ServiceMesher）](https://www.servicemesher.com/envoy/)
+1. [Istio 服务网格进阶实战（ServiceMesher）](https://www.servicemesher.com/istio-handbook/concepts/envoy.html)
+1. [Envoy 官方文档中文版（CloudNative）](https://cloudnative.to/envoy/index.html)
+1. [Envoy 基础教程（Jimmy Song）](https://jimmysong.io/envoy-handbook/)
+1. [Kubernetes 中文指南（Jimmy Song）](https://jimmysong.io/kubernetes-handbook/usecases/envoy.html)
+1. [Envoy Handbook（米开朗基杨）](https://github.com/yangchuansheng/envoy-handbook)
 1. [What is Envoy](https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy)
+1. [Envoy基础介绍](https://www.linux-note.cn/?p=1543)
 
 https://cloud.tencent.com/developer/article/1554609
 https://www.jianshu.com/p/d9db52330c0f
-https://github.com/yangchuansheng/envoy-handbook
+
 https://www.bbsmax.com/A/Ae5RK6VLdQ/
-https://www.linux-note.cn/?p=1543
-
-
-https://www.envoyproxy.io/docs/envoy/latest/
-https://cloudnative.to/envoy/
-
-https://jimmysong.io/envoy-handbook/
-https://jimmysong.io/kubernetes-handbook/usecases/envoy.html
-
-https://www.servicemesher.com/istio-handbook/concepts/envoy.html
 
 
 ## 更多
