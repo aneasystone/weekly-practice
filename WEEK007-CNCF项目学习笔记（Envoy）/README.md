@@ -79,8 +79,95 @@ Envoy 接收到请求后，会经过过滤器链（filter chain），通过 L3/L
 
 ## 安装 Envoy
 
+安装 Envoy 最简单的方式是使用官方的 Docker 镜像，首先获取镜像：
 
+```
+[root@localhost ~]# docker pull envoyproxy/envoy:v1.23-latest
+```
 
+使用 `docker run` 运行：
+
+```
+[root@localhost ~]# docker run -d -p 10000:10000 -p 9901:9901 envoyproxy/envoy:v1.22-latest
+```
+
+此时使用的是 Envoy 的默认配置文件，默认会监听两个端口，9901 为 Envoy 的管理端口，10000 为 Envoy 监听的代理端口，后端地址为 Envoy 官网：`www.envoyproxy.io`。
+
+我们进入容器，查看 Envoy 配置文件如下：
+
+```
+root@localhost:/# cat /etc/envoy/envoy.yaml 
+admin:
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 9901
+static_resources:
+  listeners:
+  - name: listener_0
+    address:
+      socket_address:
+        protocol: TCP
+        address: 0.0.0.0
+        port_value: 10000
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          scheme_header_transformation:
+            scheme_to_overwrite: https
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  host_rewrite_literal: www.envoyproxy.io
+                  cluster: service_envoyproxy_io
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+  - name: service_envoyproxy_io
+    connect_timeout: 30s
+    type: LOGICAL_DNS
+    # Comment out the following line to test on v6 networks
+    dns_lookup_family: V4_ONLY
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: service_envoyproxy_io
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: www.envoyproxy.io
+                port_value: 443
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+        sni: www.envoyproxy.io
+```
+
+我们打开浏览器，访问 http://127.0.0.1:10000 就可以看到 Envoy 的首页了。
+
+## Envoy 静态配置
+
+## Envoy 动态配置
+
+https://cloud.tencent.com/developer/article/1554609
+https://www.jianshu.com/p/d9db52330c0f
+https://www.bbsmax.com/A/Ae5RK6VLdQ/
+https://www.envoyproxy.io/docs/envoy/latest/start/install
+https://github.com/yangchuansheng/envoy-handbook/blob/master/content/zh/docs/gettingstarted/setup.md
 
 
 ## 参考
@@ -94,12 +181,14 @@ Envoy 接收到请求后，会经过过滤器链（filter chain），通过 L3/L
 1. [Envoy Handbook（米开朗基杨）](https://github.com/yangchuansheng/envoy-handbook)
 1. [What is Envoy](https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy)
 1. [Envoy基础介绍](https://www.linux-note.cn/?p=1543)
-
-https://cloud.tencent.com/developer/article/1554609
-https://www.jianshu.com/p/d9db52330c0f
-
-https://www.bbsmax.com/A/Ae5RK6VLdQ/
-
+1. [史上最全的高性能代理服务器 Envoy 中文实战教程 ！](https://cloud.tencent.com/developer/article/1554609)
 
 ## 更多
 
+### 1. Envoy 的管理页面
+
+默认情况下，Envoy 会暴露出 9901 的管理端口，我们访问 http://127.0.0.1:9901 可以看到 Envoy 的管理页面：
+
+![](./images/envoy-admin.png)
+
+这里有很多很有用的功能，比如：查看 Envoy 统计信息，查看 Prometheus 监控指标，开启或关闭 CPU Profiler，开启或关闭 Heap Profiler 等等。
