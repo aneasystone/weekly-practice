@@ -67,6 +67,9 @@ Database libraries
 		https://www.ibm.com/developerworks/cn/opensource/os-cn-spring-jpa/index.html
 		https://www.jianshu.com/p/06beda1a0831
 		https://www.cnblogs.com/dreamroute/p/5173896.html
+		
+		Hibernate
+		https://hibernate.org/orm/documentation/getting-started/
 
 	Version Management
 
@@ -207,6 +210,24 @@ Java Utils
 	Hutool
 	https://hutool.cn/
 	
+	Apache Commons
+	https://commons.apache.org/
+	
+	Apache HttpClient 5
+	https://hc.apache.org/httpcomponents-client-5.1.x/
+	
+	OkHttp
+	https://square.github.io/okhttp/
+	
+	Netty
+	https://netty.io/
+	
+	Jersey
+	https://eclipse-ee4j.github.io/jersey/
+	
+	Docker Client
+	https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md
+	
 Microservice
 	
 	Spring Cloud
@@ -271,6 +292,11 @@ Hardware
 
 	Arduino
 	https://www.arduino.cc/
+
+Machine Learning
+
+	PaddlePaddle
+	https://www.paddlepaddle.org.cn/
 
 Others
 
