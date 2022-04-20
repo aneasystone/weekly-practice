@@ -77,7 +77,7 @@ Envoy 接收到请求后，会经过过滤器链（filter chain），通过 L3/L
 * Route：用于将请求路由到不同的集群。
 * xDS：各种服务发现 API 的统称，如：CDS、EDS、LDS、RDS 和 SDS 等。
 
-## 安装 Envoy
+## 安装和运行 Envoy
 
 安装 Envoy 最简单的方式是使用官方的 Docker 镜像，首先获取镜像：
 
@@ -159,6 +159,16 @@ static_resources:
 
 我们打开浏览器，访问 http://127.0.0.1:10000 就可以看到 Envoy 的首页了。
 
+如果要使用自己的配置文件，可以写一个 yaml 文件，并挂载到容器中覆盖 `/etc/envoy/envoy.yaml` 文件，或者通过 `-c` 参数指定配置文件：
+
+```
+[root@localhost ~]# docker run -d \
+    -v $(pwd)/envoy-custom.yaml:/envoy-custom.yaml \
+    -p 10000:10000 \
+    -p 9901:9901 \
+    envoyproxy/envoy:v1.22-latest -c /envoy-custom.yaml
+```
+
 ## Envoy 静态配置
 
 ## Envoy 动态配置
@@ -191,4 +201,42 @@ https://github.com/yangchuansheng/envoy-handbook/blob/master/content/zh/docs/get
 
 ![](./images/envoy-admin.png)
 
-这里有很多很有用的功能，比如：查看 Envoy 统计信息，查看 Prometheus 监控指标，开启或关闭 CPU Profiler，开启或关闭 Heap Profiler 等等。
+这里可以看到有很多很有用的功能，比如：查看 Envoy 统计信息，查看 Prometheus 监控指标，开启或关闭 CPU Profiler，开启或关闭 Heap Profiler 等等。
+
+关于管理接口可以参考官方文档 [Administration interface](https://www.envoyproxy.io/docs/envoy/latest/operations/admin)。
+
+### 2. 体验 Sandboxes
+
+Envoy 通过 Docker Compose 创建了很多沙盒环境用于测试 Envoy 的特性，感兴趣的同学可以挨个体验一下：
+
+* [Brotli](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/brotli)
+* [Cache filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/cache)
+* [CORS filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/cors)
+* [CSRF filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/csrf)
+* [Double proxy (with mTLS encryption)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/double-proxy)
+* [Dynamic configuration (filesystem)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-filesystem)
+* [Dynamic configuration (control plane)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane)
+* [External authorization (ext_authz) filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/ext_authz)
+* [Fault injection filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/fault_injection)
+* [Front proxy](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/front_proxy)
+* [gRPC bridge](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/grpc_bridge)
+* [Gzip](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/gzip)
+* [Jaeger native tracing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/jaeger_native_tracing)
+* [Jaeger tracing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/jaeger_tracing)
+* [Load reporting service (LRS)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/load_reporting_service)
+* [Locality Weighted Load Balancing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/locality_load_balancing)
+* [Local Ratelimit](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/local_ratelimit)
+* [Lua filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/lua)
+* [MySQL filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/mysql)
+* [PostgreSQL filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/postgres)
+* [Redis filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/redis)
+* [SkyWalking tracing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/skywalking_tracing)
+* [TLS Inspector Listener Filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/tls-inspector)
+* [TLS Server name indication (SNI)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/tls-sni)
+* [Transport layer security (TLS)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/tls)
+* [User Datagram Protocol (UDP)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/udp)
+* [Wasm C++ filter](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/wasm-cc)
+* [WebSockets](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/websocket)
+* [Windows based Front proxy](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/win32_front_proxy)
+* [Zipkin tracing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/zipkin_tracing)
+* [Zstd](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/zstd)
