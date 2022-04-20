@@ -82,7 +82,7 @@ Envoy 接收到请求后，会经过过滤器链（filter chain），通过 L3/L
 安装 Envoy 最简单的方式是使用官方的 Docker 镜像，首先获取镜像：
 
 ```
-[root@localhost ~]# docker pull envoyproxy/envoy:v1.23-latest
+[root@localhost ~]# docker pull envoyproxy/envoy:v1.22-latest
 ```
 
 使用 `docker run` 运行：
