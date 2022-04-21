@@ -171,13 +171,167 @@ static_resources:
 
 ## Envoy 静态配置
 
+Envoy 的配置遵循 [xDS API v3](https://www.envoyproxy.io/docs/envoy/latest/api-v3/api) 规范，Evnoy 的配置文件也被称为 **Bootstrap 配置**，使用的接口为 [config.bootstrap.v3.Bootstrap](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#config-bootstrap-v3-bootstrap)，它的整体结构如下：
+
+```
+{
+  "node": "{...}",
+  "static_resources": "{...}",
+  "dynamic_resources": "{...}",
+  "cluster_manager": "{...}",
+  "hds_config": "{...}",
+  "flags_path": "...",
+  "stats_sinks": [],
+  "stats_config": "{...}",
+  "stats_flush_interval": "{...}",
+  "stats_flush_on_admin": "...",
+  "watchdog": "{...}",
+  "watchdogs": "{...}",
+  "tracing": "{...}",
+  "layered_runtime": "{...}",
+  "admin": "{...}",
+  "overload_manager": "{...}",
+  "enable_dispatcher_stats": "...",
+  "header_prefix": "...",
+  "stats_server_version_override": "{...}",
+  "use_tcp_for_dns_lookups": "...",
+  "dns_resolution_config": "{...}",
+  "typed_dns_resolver_config": "{...}",
+  "bootstrap_extensions": [],
+  "fatal_actions": [],
+  "default_socket_interface": "...",
+  "inline_headers": [],
+  "perf_tracing_file_path": "..."
+}
+```
+
+Envoy 自带的默认配置文件中包含了两个部分：`admin` 和 `static_resources`。
+
+`admin` 部分是 Envoy 管理接口的配置，接口定义为 [config.bootstrap.v3.Admin](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#config-bootstrap-v3-admin)：
+
+```
+admin:
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 9901
+```
+
+该配置让 Envoy 暴露出 9901 的管理端口，我们可以通过 http://127.0.0.1:9901 访问 Envoy 的管理页面。
+
+
+`static_resources` 部分就是 Envoy 的静态配置，接口定义为 [config.bootstrap.v3.Bootstrap.StaticResources](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#config-bootstrap-v3-bootstrap-staticresources)，结构如下：
+
+```
+{
+  "listeners": [],
+  "clusters": [],
+  "secrets": []
+}
+```
+
+其中，`listeners` 用于配置 Envoy 的监听地址，Envoy 会暴露一个或多个 Listener 来监听客户端的请求。而 `clusters` 用于配置服务集群，Envoy 通过服务发现定位集群成员并获取服务，具体路由到哪个集群成员由负载均衡策略决定。
+
+`listeners` 的接口定义为 [config.listener.v3.Listener](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/listener/v3/listener.proto#envoy-v3-api-msg-config-listener-v3-listener)，其中最重要的几项有：`name`、`address` 和 `filter_chain`。
+
+```
+  listeners:
+  - name: listener_0
+    address:
+      socket_address:
+        protocol: TCP
+        address: 0.0.0.0
+        port_value: 10000
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          scheme_header_transformation:
+            scheme_to_overwrite: https
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  host_rewrite_literal: www.envoyproxy.io
+                  cluster: service_envoyproxy_io
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+```
+
+其中 `address` 表示 Envoy 监听的地址，`filter_chain` 为过滤器链，Envoy 通过一系列的过滤器对请求进行处理，下面是 Envoy 包含的过滤器链示意图：
+
+![](./images/envoy-filters.png)
+
+这里使用的是 `http_connection_manager` 来代理 HTTP 请求，`route_config` 为路由配置，当请求路径以 `/` 开头时（`match prefix "/"`），路由到 `service_envoyproxy_io` 集群。集群使用 `clusters` 来配置，它的接口定义为 [config.cluster.v3.Cluster](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#envoy-v3-api-msg-config-cluster-v3-cluster)，配置的内容如下：
+
+```
+  clusters:
+  - name: service_envoyproxy_io
+    connect_timeout: 30s
+    type: LOGICAL_DNS
+    # Comment out the following line to test on v6 networks
+    dns_lookup_family: V4_ONLY
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: service_envoyproxy_io
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: www.envoyproxy.io
+                port_value: 443
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+        sni: www.envoyproxy.io
+```
+
+Envoy 通过服务发现来定位集群成员，[服务发现的方式](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#enum-config-cluster-v3-cluster-discoverytype) 有以下几种：
+
+* [STATIC](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/service_discovery#arch-overview-service-discovery-types-static)
+* [STRICT_DNS](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/service_discovery#arch-overview-service-discovery-types-strict-dns)
+* [LOGICAL_DNS](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/service_discovery#arch-overview-service-discovery-types-logical-dns)
+* [EDS](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/service_discovery#arch-overview-service-discovery-types-eds)
+* [ORIGINAL_DST](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/service_discovery#arch-overview-service-discovery-types-original-destination)
+
+然后 Envoy 使用某种负载均衡策略从集群中找出一个服务来调用，Envoy 支持的 [负载均衡策略有](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#enum-config-cluster-v3-cluster-lbpolicy)：
+
+* [ROUND_ROBIN](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types-round-robin)
+* [LEAST_REQUEST](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types-least-request)
+* [RING_HASH](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types-ring-hash)
+* [RANDOM](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types-random)
+* [MAGLEV](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types-maglev)
+* CLUSTER_PROVIDED
+* LOAD_BALANCING_POLICY_CONFIG
+
+而在我们的例子中，集群的服务发现方式为 `LOGICAL_DNS`，并使用 `ROUND_ROBIN` 方式来负载均衡。
+
 ## Envoy 动态配置
+
+在上面的例子中，我们配置的地址都是固定的，但在实际应用中，我们更希望以一种动态的方式来配置，比如 K8S 环境下服务的地址随 Pod 地址变化而变化，我们不可能每次都去手工修改 Envoy 的配置文件。Envoy 使用了一套被称为 **[xDS](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration)** 的 API 来动态发现资源。`xDS` 包括 LDS(Listener Discovery Service)、CDS(Cluster Discovery Service)、RDS(Route Discovery Service)、EDS(Endpoint Discovery Service)，以及 ADS(Aggregated Discovery Service)，每个 xDS 都对应着配置文件中的一小块内容，如下所示（[图片来源](https://www.bbsmax.com/A/Ae5RK6VLdQ/)）：
+
+![](./images/xds.png)
+
+Envoy 通过订阅的方式来获取资源，如监控指定路径下的文件、启动 gRPC 流或轮询 REST-JSON URL。后两种方式会发送 [DiscoveryRequest](https://www.envoyproxy.io/docs/envoy/latest/api-v3/service/discovery/v3/discovery.proto.html#service-discovery-v3-discoveryrequest) 请求消息，发现的对应资源则包含在响应消息 [DiscoveryResponse](https://www.envoyproxy.io/docs/envoy/latest/api-v3/service/discovery/v3/discovery.proto.html#service-discovery-v3-discoveryresponse) 中。
+
+https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-filesystem
+
+https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane
 
 https://cloud.tencent.com/developer/article/1554609
 https://www.jianshu.com/p/d9db52330c0f
-https://www.bbsmax.com/A/Ae5RK6VLdQ/
-https://www.envoyproxy.io/docs/envoy/latest/start/install
-https://github.com/yangchuansheng/envoy-handbook/blob/master/content/zh/docs/gettingstarted/setup.md
 
 
 ## 参考
@@ -192,6 +346,7 @@ https://github.com/yangchuansheng/envoy-handbook/blob/master/content/zh/docs/get
 1. [What is Envoy](https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy)
 1. [Envoy基础介绍](https://www.linux-note.cn/?p=1543)
 1. [史上最全的高性能代理服务器 Envoy 中文实战教程 ！](https://cloud.tencent.com/developer/article/1554609)
+1. [Envoy 中的 xDS REST 和 gRPC 协议详解](https://www.servicemesher.com/blog/envoy-xds-protocol/)
 
 ## 更多
 
@@ -240,3 +395,7 @@ Envoy 通过 Docker Compose 创建了很多沙盒环境用于测试 Envoy 的特
 * [Windows based Front proxy](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/win32_front_proxy)
 * [Zipkin tracing](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/zipkin_tracing)
 * [Zstd](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/zstd)
+
+### 3. 如何从 Nginx 迁移到 Envoy？
+
+https://github.com/yangchuansheng/envoy-handbook/blob/master/content/zh/docs/practice/migrating-from-nginx-to-envoy.md
