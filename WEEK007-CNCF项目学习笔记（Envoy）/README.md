@@ -331,7 +331,6 @@ https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuratio
 https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane
 
 https://cloud.tencent.com/developer/article/1554609
-https://www.jianshu.com/p/d9db52330c0f
 
 
 ## 参考
