@@ -440,12 +440,67 @@ resources:
 
 刷新浏览器，可以看到页面变成了 Baidu 的首页了，我们没有重启 Envoy，就实现了配置的动态更新。
 
-> 这里有一点需要特别注意，我们不能直接使用 `vi` 去编辑 `lds.yaml` 和  `cds.yaml` 文件，我们必须将文件复制一份出来，编辑，然后再替换原文件，才可以让配置生效。而 `sed -i` 命令的 `inplace edit` 功能就是这样实现的。
+> 这里有一点需要特别注意，如果我们直接使用 `vi` 去编辑 `lds.yaml` 和  `cds.yaml` 文件，有时候可能不会生效，这时我们可以将文件复制一份出来，编辑，然后再替换原文件，才可以让配置生效。而 `sed -i` 命令的 `inplace edit` 功能就是这样实现的。为什么需要这样做呢？因为 [Docker 在有些环境下对 `inotify` 的支持不是很好](https://github.com/moby/moby/issues/18246)，特别是 VirtualBox 环境。
 
 ### 基于控制平面（Control Plane）的动态配置
 
-https://cloud.tencent.com/developer/article/1554609
+网络层一般被分为 **数据平面（Data Plane）** 和 **控制平面（Control Plane）**。控制平面主要为数据包的快速转发准备必要信息；而数据平面则主要负责高速地处理和转发数据包。这样划分的目的是把不同类型的工作分离开，避免不同类型的处理相互干扰。数据平面的转发工作无疑是网络层的重要工作，需要最高的优先级；而控制平面的路由协议等不需要在短时间内处理大量的包，可以将其放到次一级的优先级中。数据平面可以专注使用定制序列化等各种技术来提高传输速率，而控制平面则可以借助于通用库来达到更好的控制与保护效果。
 
+得益于 Envoy 的高性能易扩展等特性，Envoy 可以说已经是云原生时代数据平面的事实标准。新兴微服务网关如 `Gloo`，`Ambassador` 都基于 Envoy 进行扩展开发；而在服务网格中，`Istio`、Kong 社区的 `Kuma`、亚马逊的 `AWS App Mesh` 都使用 Envoy 作为默认的数据平面。那么作为数据平面的 Envoy 要怎么通过控制平面来动态配置呢？答案就是：[xDS 协议](https://www.servicemesher.com/istio-handbook/ecosystem/xds.html)。
+
+有很多已经实现的控制平面可以直接使用：
+
+![](./images/control-plane.png)
+
+也可以使用 Envoy 的 xDS API 开发自己的控制平面，官方提供了 Go 和 Java 的示例可供参考：
+
+* [go-control-plane](https://github.com/envoyproxy/go-control-plane)
+* [java-control-plane](https://github.com/envoyproxy/java-control-plane)
+
+在官网的 [Dynamic configuration (control plane)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane) 例子中，使用 Go 实现了一个控制平面。
+
+在控制平面服务启动之后，Envoy 的配置文件类似下面这样：
+
+```
+node:
+  cluster: test-cluster
+  id: test-id
+
+dynamic_resources:
+  ads_config:
+    api_type: GRPC
+    transport_api_version: V3
+    grpc_services:
+    - envoy_grpc:
+        cluster_name: xds_cluster
+  cds_config:
+    resource_api_version: V3
+    ads: {}
+  lds_config:
+    resource_api_version: V3
+    ads: {}
+
+static_resources:
+  clusters:
+  - type: STRICT_DNS
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    name: xds_cluster
+    load_assignment:
+      cluster_name: xds_cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: go-control-plane
+                port_value: 18000
+```
+
+其中，`static_resources` 中定义了控制平面的地址，而 `dynamic_resources` 中的 `ads_config` 则指定使用控制平面来动态获取配置。
 
 ## 参考
 
@@ -462,6 +517,8 @@ https://cloud.tencent.com/developer/article/1554609
 1. [Envoy 中的 xDS REST 和 gRPC 协议详解](https://www.servicemesher.com/blog/envoy-xds-protocol/)
 1. [Dynamic configuration (filesystem)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-filesystem)
 1. [Dynamic configuration (control plane)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane)
+1. [通过 xDS 实现 Envoy 动态配置](https://segmentfault.com/a/1190000039006547)
+1. [如何为 Envoy 构建一个控制面来管理集群网络流量](https://cloudnative.to/blog/guidance-for-building-a-control-plane-to-manage-envoy-proxy-based-infrastructure/)
 
 ## 更多
 
