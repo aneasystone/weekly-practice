@@ -236,36 +236,36 @@ admin:
 `listeners` 的接口定义为 [config.listener.v3.Listener](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/listener/v3/listener.proto#envoy-v3-api-msg-config-listener-v3-listener)，其中最重要的几项有：`name`、`address` 和 `filter_chain`。
 
 ```
-  listeners:
-  - name: listener_0
-    address:
-      socket_address:
-        protocol: TCP
-        address: 0.0.0.0
-        port_value: 10000
-    filter_chains:
-    - filters:
-      - name: envoy.filters.network.http_connection_manager
-        typed_config:
-          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-          scheme_header_transformation:
-            scheme_to_overwrite: https
-          stat_prefix: ingress_http
-          route_config:
-            name: local_route
-            virtual_hosts:
-            - name: local_service
-              domains: ["*"]
-              routes:
-              - match:
-                  prefix: "/"
-                route:
-                  host_rewrite_literal: www.envoyproxy.io
-                  cluster: service_envoyproxy_io
-          http_filters:
-          - name: envoy.filters.http.router
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+listeners:
+- name: listener_0
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 10000
+  filter_chains:
+  - filters:
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        scheme_header_transformation:
+          scheme_to_overwrite: https
+        stat_prefix: ingress_http
+        route_config:
+          name: local_route
+          virtual_hosts:
+          - name: local_service
+            domains: ["*"]
+            routes:
+            - match:
+                prefix: "/"
+              route:
+                host_rewrite_literal: www.envoyproxy.io
+                cluster: service_envoyproxy_io
+        http_filters:
+        - name: envoy.filters.http.router
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 ```
 
 其中 `address` 表示 Envoy 监听的地址，`filter_chain` 为过滤器链，Envoy 通过一系列的过滤器对请求进行处理，下面是 Envoy 包含的过滤器链示意图：
@@ -275,27 +275,27 @@ admin:
 这里使用的是 `http_connection_manager` 来代理 HTTP 请求，`route_config` 为路由配置，当请求路径以 `/` 开头时（`match prefix "/"`），路由到 `service_envoyproxy_io` 集群。集群使用 `clusters` 来配置，它的接口定义为 [config.cluster.v3.Cluster](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#envoy-v3-api-msg-config-cluster-v3-cluster)，配置的内容如下：
 
 ```
-  clusters:
-  - name: service_envoyproxy_io
-    connect_timeout: 30s
-    type: LOGICAL_DNS
-    # Comment out the following line to test on v6 networks
-    dns_lookup_family: V4_ONLY
-    lb_policy: ROUND_ROBIN
-    load_assignment:
-      cluster_name: service_envoyproxy_io
-      endpoints:
-      - lb_endpoints:
-        - endpoint:
-            address:
-              socket_address:
-                address: www.envoyproxy.io
-                port_value: 443
-    transport_socket:
-      name: envoy.transport_sockets.tls
-      typed_config:
-        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-        sni: www.envoyproxy.io
+clusters:
+- name: service_envoyproxy_io
+  connect_timeout: 30s
+  type: LOGICAL_DNS
+  # Comment out the following line to test on v6 networks
+  dns_lookup_family: V4_ONLY
+  lb_policy: ROUND_ROBIN
+  load_assignment:
+    cluster_name: service_envoyproxy_io
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: www.envoyproxy.io
+              port_value: 443
+  transport_socket:
+    name: envoy.transport_sockets.tls
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+      sni: www.envoyproxy.io
 ```
 
 Envoy 通过服务发现来定位集群成员，[服务发现的方式](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#enum-config-cluster-v3-cluster-discoverytype) 有以下几种：
@@ -326,9 +326,123 @@ Envoy 通过服务发现来定位集群成员，[服务发现的方式](https://
 
 Envoy 通过订阅的方式来获取资源，如监控指定路径下的文件、启动 gRPC 流或轮询 REST-JSON URL。后两种方式会发送 [DiscoveryRequest](https://www.envoyproxy.io/docs/envoy/latest/api-v3/service/discovery/v3/discovery.proto.html#service-discovery-v3-discoveryrequest) 请求消息，发现的对应资源则包含在响应消息 [DiscoveryResponse](https://www.envoyproxy.io/docs/envoy/latest/api-v3/service/discovery/v3/discovery.proto.html#service-discovery-v3-discoveryresponse) 中。
 
-https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-filesystem
+### 基于文件的动态配置
 
-https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane
+基于文件的动态配置比较简单，Envoy 通过监听文件的变动来动态更新配置，我们创建一个文件 `envoy.yaml`，内容如下：
+
+```
+node:
+  id: id_1
+  cluster: test
+
+admin:
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 9901
+
+dynamic_resources:
+  cds_config:
+    path_config_source:
+      path: /var/lib/envoy/cds.yaml
+  lds_config:
+    path_config_source:
+      path: /var/lib/envoy/lds.yaml
+```
+
+这里我们可以看出，和静态配置的 `static_resources` 不一样，没有 `clusters` 和 `listeners` 的配置了，而是在 `dynamic_resources` 中定义了 `cds_config` 和 `lds_config`，并指定了 `clusters` 和 `listeners` 的配置文件的路径。
+
+> 注意：在动态配置中，`node` 参数是必须的，用于区分 Envoy 是属于哪个集群。
+
+我们再分别创建 `cds.yaml` 文件和 `lds.yaml` 文件。`cds.yaml` 的内容如下：
+
+```
+resources:
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: service_envoyproxy_io
+  connect_timeout: 30s
+  type: LOGICAL_DNS
+  # Comment out the following line to test on v6 networks
+  dns_lookup_family: V4_ONLY
+  lb_policy: ROUND_ROBIN
+  load_assignment:
+    cluster_name: service_envoyproxy_io
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: www.envoyproxy.io
+              port_value: 443
+  transport_socket:
+    name: envoy.transport_sockets.tls
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+      sni: www.envoyproxy.io
+```
+
+和静态配置的 `clusters` 是一样的，只不过换成了 `resources` 配置，并指定了 `type` 为 `envoy.config.cluster.v3.Cluster`。`lds.yaml` 的内容如下：
+
+```
+resources:
+- "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+  name: listener_0
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 10000
+  filter_chains:
+  - filters:
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        scheme_header_transformation:
+          scheme_to_overwrite: https
+        stat_prefix: ingress_http
+        route_config:
+          name: local_route
+          virtual_hosts:
+          - name: local_service
+            domains: ["*"]
+            routes:
+            - match:
+                prefix: "/"
+              route:
+                host_rewrite_literal: www.envoyproxy.io
+                cluster: service_envoyproxy_io
+        http_filters:
+        - name: envoy.filters.http.router
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+```
+
+这个配置和静态配置的 `listeners` 是一样的，只不过换成了 `resources` 配置，并指定了 `type` 为 `envoy.config.listener.v3.Listener`。
+
+然后，运行下面的命令：
+
+```
+[root@localhost ~]# docker run -d \
+    -v $(pwd):/var/lib/envoy \
+    -p 10000:10000 \
+    -p 9901:9901 \
+    envoyproxy/envoy:v1.22-latest -c /var/lib/envoy/envoy.yaml
+```
+
+我们打开浏览器，访问 http://127.0.0.1:10000 就可以看到 Envoy 的首页了。
+
+然后我们使用 `sed` 将文件中的 `www.envoy.io` 替换为 `www.baidu.com`：
+
+```
+[root@localhost ~]# sed -i s/www.envoyproxy.io/www.baidu.com/ lds.yaml cds.yaml
+```
+
+刷新浏览器，可以看到页面变成了 Baidu 的首页了，我们没有重启 Envoy，就实现了配置的动态更新。
+
+> 这里有一点需要特别注意，我们不能直接使用 `vi` 去编辑 `lds.yaml` 和  `cds.yaml` 文件，我们必须将文件复制一份出来，编辑，然后再替换原文件，才可以让配置生效。而 `sed -i` 命令的 `inplace edit` 功能就是这样实现的。
+
+### 基于控制平面（Control Plane）的动态配置
 
 https://cloud.tencent.com/developer/article/1554609
 
@@ -346,6 +460,8 @@ https://cloud.tencent.com/developer/article/1554609
 1. [Envoy基础介绍](https://www.linux-note.cn/?p=1543)
 1. [史上最全的高性能代理服务器 Envoy 中文实战教程 ！](https://cloud.tencent.com/developer/article/1554609)
 1. [Envoy 中的 xDS REST 和 gRPC 协议详解](https://www.servicemesher.com/blog/envoy-xds-protocol/)
+1. [Dynamic configuration (filesystem)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-filesystem)
+1. [Dynamic configuration (control plane)](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/dynamic-configuration-control-plane)
 
 ## 更多
 
