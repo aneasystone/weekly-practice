@@ -25,6 +25,12 @@ Cloud Native
 		Minikube
 		https://minikube.sigs.k8s.io/docs/start/
 
+    KubeVela
+    https://github.com/oam-dev/kubevela
+
+    Rancher
+    https://rancher.com/
+
 CI/CD
 
 	Jenkins
@@ -32,6 +38,9 @@ CI/CD
 	
 	Drone
 	https://docs.drone.io/quickstart/
+	
+	Earthly
+	https://github.com/earthly/earthly
 
 Databases and caches
 
@@ -162,6 +171,10 @@ Troubleshooting
 
 	Arthas
 	https://arthas.aliyun.com/doc/
+
+    XPocket
+    https://xpocket.perfma.com/
+    https://github.com/PerfMa/XPocket
 
 Java Framework
 

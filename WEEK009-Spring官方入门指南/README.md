@@ -1,5 +1,24 @@
 # WEEK009 - Spring 官方入门指南
 
+[Spring 官方提供了大量的教程文档](https://spring.io/guides)，方便初学者快速入门，并且每篇教程都极具操作性，我们可以一步一步按顺序进行体验。这些教程被官方分为了三类：
+
+* Getting Started Guides（耗时 15 到 30 分钟，完成一个 Hello World 类型的项目）
+* Topical Guides（需要至少 1 小时的阅读和理解，提供一些覆盖面更广的内容）
+* Tutorials（需要 2 - 3 小时才能完成，提供一些更深入的主题，并且更适用于真实场景）
+
+不过我感觉这种分类方式并不是很友好，由于官方文档特别多，所以看上去显得乱糟糟的。我希望通过教程的内容来进行分类，在这篇笔记中，我将尝试着把 Spring 官方教程全部体验一遍，并按照我的理解来重新分类。
+
+## 开始
+
+* [Working a Getting Started guide with STS](https://spring.io/guides/gs/sts/)
+* [Working a Getting Started guide with IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/)
+* [Building a Guide with VS Code](https://spring.io/guides/gs/guides-with-vscode/)
+
+## 项目构建
+
+* [Building Java Projects with Maven](https://spring.io/guides/gs/maven/)
+* [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/)
+
 ## Getting Started Guides
 
 * [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
@@ -13,14 +32,6 @@ Learn how to schedule tasks with Spring.
 * [Consuming a RESTful Web Service](https://spring.io/guides/gs/consuming-rest/)
 
 Learn how to retrieve web page data with Spring's RestTemplate.
-
-* [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/)
-
-Learn how to build a Java project with Gradle.
-
-* [Building Java Projects with Maven](https://spring.io/guides/gs/maven/)
-
-Learn how to build a Java project with Maven.
 
 * [Accessing Relational Data using JDBC with Spring](https://spring.io/guides/gs/relational-data-access/)
 
@@ -118,10 +129,6 @@ Learn how to build an application with minimal configuration.
 
 Learn how to the send and receive messages between a browser and the server over a WebSocket
 
-* [Working a Getting Started guide with STS](https://spring.io/guides/gs/sts/)
-
-Learn how to import a Getting Started guide with Spring Tool Suite (STS).
-
 * [Consuming a RESTful Web Service with AngularJS](https://spring.io/guides/gs/consuming-rest-angularjs/)
 
 Learn how to retrieve web page data with AngularJS.
@@ -169,10 +176,6 @@ Learn how to deploy a Spring application to Cloud Foundry from STS
 * [Spring Boot with Docker](https://spring.io/guides/gs/spring-boot-docker/)
 
 Learn how to create a Docker container from a Spring Boot application with Maven or Gradle
-
-* [Working a Getting Started guide with IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/)
-
-Learn how to work a Getting Started guide with IntelliJ IDEA.
 
 * [Creating CRUD UI with Vaadin](https://spring.io/guides/gs/crud-with-vaadin/)
 
@@ -265,10 +268,6 @@ How to Use Spring Cloud Circuit Breaker
 * [Observability with Spring](https://spring.io/guides/gs/tanzu-observability/)
 
 Learn how to send application metrics to Tanzu Observability
-
-* [Building a Guide with VS Code](https://spring.io/guides/gs/guides-with-vscode/)
-
-Learn how to import and work with a Spring Getting Started Guide in VS Code.
 
 * [Accessing Data with Cassandra](https://spring.io/guides/gs/accessing-data-cassandra/)
 
