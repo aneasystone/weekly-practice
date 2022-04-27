@@ -10,8 +10,8 @@
 
 ## 开始
 
-* [Working a Getting Started guide with STS](https://spring.io/guides/gs/sts/) - [*学习笔记*](./sts/README.md)
-* [Working a Getting Started guide with IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/)
+* [Working a Getting Started guide with STS](https://spring.io/guides/gs/sts/) - [*学习笔记*](./guides/gs/sts/README.md)
+* [Working a Getting Started guide with IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/) - [*学习笔记*](./guides/gs/intellij-idea/README.md)
 * [Building a Guide with VS Code](https://spring.io/guides/gs/guides-with-vscode/)
 
 ## 项目构建
