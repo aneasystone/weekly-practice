@@ -16,7 +16,7 @@
 
 ## 项目构建
 
-* [Building Java Projects with Maven](https://spring.io/guides/gs/maven/)
+* [Building Java Projects with Maven](https://spring.io/guides/gs/maven/) - [*学习笔记*](./guides/gs/maven/README.md)
 * [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/)
 * [Creating a Multi Module Project](https://spring.io/guides/gs/multi-module/)
 
