@@ -1,4 +1,4 @@
-# WEEK006 CNCF 项目学习笔记（Dapr）
+# WEEK006 - Dapr 学习笔记
 
 [Dapr](https://dapr.io/) 的全称为 `Distributed Application Runtime`（分布式应用运行时），顾名思义，它的目的就是为分布式应用提供运行所依赖的的执行环境。Dapr 为开发者提供了服务间调用（`service to service invocation`）、消息队列（`message queue`）和事件驱动（`event driven`）等服务模型，它可以让开发人员更聚焦业务代码，而不用去关心分布式系统所带来的其他复杂挑战，比如：服务发现（`service discovery`）、状态存储（`state management`）、加密数据存储（`secret management`）、可观察性（`observability`）等。
 

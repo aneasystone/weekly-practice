@@ -1,4 +1,4 @@
-# WEEK007 CNCF 项目学习笔记（Envoy）
+# WEEK007 - Envoy 学习笔记
 
 [Envoy](https://www.envoyproxy.io/) 是一款专为大型的 SOA 架构（面向服务架构，service oriented architectures）设计的 L7 代理和通信总线，它的诞生源于以下理念：
 

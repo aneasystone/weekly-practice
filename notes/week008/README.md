@@ -1,4 +1,4 @@
-# WEEK007 CNCF 项目学习笔记（Prometheus）
+# WEEK008 - 实战 Prometheus 搭建监控系统
 
 > 本笔记写于 2018年11月
 
