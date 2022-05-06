@@ -17,12 +17,12 @@
 ## 项目构建
 
 * [Building Java Projects with Maven](https://spring.io/guides/gs/maven/) - [*学习笔记*](./guides/gs/maven/README.md)
-* [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/)
-* [Creating a Multi Module Project](https://spring.io/guides/gs/multi-module/)
+* [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/) - [*学习笔记*](./guides/gs/gradle/README.md)
 
 ## Spring Boot
 
 * [Building an Application with Spring Boot](https://spring.io/guides/gs/spring-boot/)
+* [Creating a Multi Module Project](https://spring.io/guides/gs/multi-module/)
 * [Converting a Spring Boot JAR Application to a WAR](https://spring.io/guides/gs/convert-jar-to-war/)
 * [Creating Asynchronous Methods](https://spring.io/guides/gs/async-method/)
 
