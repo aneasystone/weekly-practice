@@ -11,3 +11,4 @@
 * WEEK007 - [Envoy 学习笔记](./notes/week007/README.md)
 * WEEK008 - [实战 Prometheus 搭建监控系统](./notes/week008/README.md)
 * WEEK009 - [Spring 官方入门指南](./notes/week009/README.md)
+* WEEK010 - [Kubernetes 安装小记](./notes/week010/README.md)
