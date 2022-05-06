@@ -241,6 +241,22 @@ Java Utils
 	Docker Client
 	https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md
 	
+Package Manager
+
+	SDKMAN
+	https://sdkman.io/
+
+	Homebrew
+	https://brew.sh/
+
+Build Tools
+
+	Maven
+	https://maven.apache.org/
+
+	Gradle
+	https://gradle.org/
+
 Microservice
 	
 	Spring Cloud
@@ -346,7 +362,5 @@ Others
 
 	JFrog
 	https://www.jfrog.com/confluence/display/JFROG/JFrog+Documentation
-	
-	Maven
-	https://maven.apache.org/
+
 	
