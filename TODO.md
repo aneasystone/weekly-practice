@@ -257,6 +257,23 @@ Build Tools
 	Gradle
 	https://gradle.org/
 
+Shell
+
+	Bash
+	https://www.gnu.org/software/bash/
+
+	Fish
+	https://fishshell.com/
+
+	Zsh
+	https://www.zsh.org/
+
+	Oh My Zsh
+	https://ohmyz.sh/
+
+	PowerShell
+	https://docs.microsoft.com/en-us/powershell/
+
 Microservice
 	
 	Spring Cloud
