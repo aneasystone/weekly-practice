@@ -98,7 +98,7 @@ Creating cluster "kind" ...
  ✓ Ensuring node image (kindest/node:v1.23.4) 🖼 
  ✓ Preparing nodes 📦  
  ✓ Writing configuration 📜 
- ✓ Starting control-plane
+ ✓ Starting control-plane 🕹️
  ✓ Installing CNI 🔌 
  ✓ Installing StorageClass 💾 
 Set kubectl context to "kind-kind"
@@ -217,7 +217,19 @@ root        3010  0.0  0.1   6900  1420 pts/1    R+   11:48   0:00 ps aux
 
 ## 使用 minikube 安装 Kubernetes
 
-https://minikube.sigs.k8s.io/docs/start/
+### 安装 minikube
+
+`minikube` 的安装也和上面的 `kind` 和 `kubectl` 一样，先使用 `curl` 下载：
+
+```
+$ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+```
+
+再通过 `install` 将其安装到 `/usr/local/bin` 目录：
+
+```
+$ sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
 
 ## 使用 kubeadm 安装 Kubernetes
 
@@ -232,3 +244,4 @@ https://github.com/labring/sealos
 1. [kubectl 安装文档](https://kubernetes.io/docs/reference/kubectl/)
 1. [kind 官网文档](https://kind.sigs.k8s.io/docs/user/quick-start/)
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
+1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
