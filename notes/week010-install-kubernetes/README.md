@@ -245,3 +245,71 @@ https://github.com/labring/sealos
 1. [kind 官网文档](https://kind.sigs.k8s.io/docs/user/quick-start/)
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
 1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
+
+## 更多
+
+### 1. 为 Docker 设置代理
+
+第一种情况是 [为 Docker Daemon 设置代理](https://docs.docker.com/config/daemon/systemd/#httphttps-proxy)，影响 docker pull 下载镜像。首先创建如下目录：
+
+```
+[root@localhost ~]# mkdir -p /etc/systemd/system/docker.service.d
+```
+
+在该目录下创建文件 `http-proxy.conf`：
+
+```
+[root@localhost ~]# cd /etc/systemd/system/docker.service.d
+[root@localhost docker.service.d]# vi http-proxy.conf
+```
+
+文件内容如下：
+
+```
+[Service]
+Environment="HTTP_PROXY=192.168.1.36:10809"
+Environment="HTTPS_PROXY=192.168.1.36:10809"
+```
+
+重启 Docker 服务：
+
+```
+[root@localhost ~]# systemctl daemon-reload
+[root@localhost ~]# systemctl restart docker
+```
+
+验证代理设置是否生效：
+
+```
+[root@localhost ~]# systemctl show --property=Environment docker
+Environment=HTTP_PROXY=192.168.1.36:10809 HTTPS_PROXY=192.168.1.36:10809
+```
+
+第二种情况是 [为 Docker 容器设置代理](https://docs.docker.com/network/proxy/)，影响容器内访问外部网络。这个配置比较简单，只需要在用户目录下创建一个 `~/.docker/config.json` 文件：
+
+```
+[root@localhost ~]# mkdir -p ~/.docker
+[root@localhost ~]# vi ~/.docker/config.json
+```
+
+文件内容如下：
+
+```
+{
+  "proxies":
+  {
+    "default":
+    {
+      "httpProxy": "192.168.1.36:10809",
+      "httpsProxy": "192.168.1.36:10809"
+    }
+  }
+}
+```
+
+使用 `alpine/curl` 镜像启动一个容器，验证配置是否生效：
+
+```
+[root@localhost ~]# docker run --rm alpine/curl -fsSL ifconfig.me
+103.168.154.81
+```
