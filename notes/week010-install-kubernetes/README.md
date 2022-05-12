@@ -217,6 +217,8 @@ root        3010  0.0  0.1   6900  1420 pts/1    R+   11:48   0:00 ps aux
 
 ## 使用 minikube 安装 Kubernetes
 
+[minikube](https://minikube.sigs.k8s.io/docs/) 是由 Google 发布的一款轻量级工具，让开发者可以在本机上轻易运行一个 Kubernetes 集群，快速上手 Kubernetes 的指令与环境。`minikube` 会在本机运行一个虚拟机，并且在这个虚拟机上启动一个 single-node Kubernetes 集群，它不支持 HA，不推荐在生产环境使用。
+
 ### 安装 minikube
 
 `minikube` 的安装也和上面的 `kind` 和 `kubectl` 一样，先使用 `curl` 下载：
@@ -231,6 +233,113 @@ $ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linu
 $ sudo install minikube-linux-amd64 /usr/local/bin/minikube
 ```
 
+### 创建 Kubernetes 集群
+
+```
+X Exiting due to RSRC_INSUFFICIENT_CORES: Requested cpu count 2 is greater than the available cpus of 1
+```
+
+```
+X Exiting due to DRV_AS_ROOT: The "docker" driver should not be used with root privileges.
+```
+
+```
+[root@localhost ~]# grep docker /etc/group
+docker:x:995:
+[root@localhost ~]# adduser -g 995 -c "Docker" docker
+[root@localhost ~]# id docker
+uid=1000(docker) gid=995(docker) 组=995(docker)
+[root@localhost ~]# su - docker
+[docker@localhost ~]$ minikube start
+```
+
+```
+X Exiting due to RSRC_INSUFFICIENT_CONTAINER_MEMORY: docker only has 990MiB available, less than the required 1800MiB for Kubernetes
+```
+
+```
+[docker@localhost ~]$ minikube start
+* Centos 7.9.2009 上的 minikube v1.25.2
+* 根据现有的配置文件使用 docker 驱动程序
+* Starting control plane node minikube in cluster minikube
+* Pulling base image ...
+    > index.docker.io/kicbase/sta...: 0 B [____________________] ?% ? p/s 6m29s
+! minikube was unable to download gcr.io/k8s-minikube/kicbase:v0.0.30, but successfully downloaded docker.io/kicbase/stable:v0.0.30 as a fallback image
+* Creating docker container (CPUs=2, Memory=2200MB) ...
+
+X Docker is nearly out of disk space, which may cause deployments to fail! (90% of capacity)
+* 建议：
+
+    Try one or more of the following to free up space on the device:
+    
+    1. Run "docker system prune" to remove unused Docker data (optionally with "-a")
+    2. Increase the storage allocated to Docker for Desktop by clicking on:
+    Docker icon > Preferences > Resources > Disk Image Size
+    3. Run "minikube ssh -- docker system prune" if using the Docker container runtime
+* Related issue: https://github.com/kubernetes/minikube/issues/9024
+
+! This container is having trouble accessing https://k8s.gcr.io
+* To pull new external images, you may need to configure a proxy: https://minikube.sigs.k8s.io/docs/reference/networking/proxy/
+* 正在 Docker 20.10.12 中准备 Kubernetes v1.23.3…
+  - kubelet.housekeeping-interval=5m
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: default-storageclass, storage-provisioner
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+```
+
+```
+[docker@localhost ~]$ docker ps -a
+CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS         PORTS                                                                                                                                  NAMES
+d7e2ffaba188   kicbase/stable:v0.0.30   "/usr/local/bin/entr…"   2 minutes ago   Up 2 minutes   127.0.0.1:49157->22/tcp, 127.0.0.1:49156->2376/tcp, 127.0.0.1:49155->5000/tcp, 127.0.0.1:49154->8443/tcp, 127.0.0.1:49153->32443/tcp   minikube
+```
+
+```
+[docker@localhost ~]$ docker exec -it minikube bash
+root@minikube:/# ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.7  0.2  21848  8112 ?        Ss   00:44   0:01 /sbin/init
+root         178  0.3  0.1  29028  5956 ?        S<s  00:44   0:00 /lib/systemd/systemd-journald
+message+     189  0.0  0.0   6992  2048 ?        Ss   00:44   0:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activ
+root         194  0.9  0.9 1493012 36696 ?       Ssl  00:44   0:01 /usr/bin/containerd
+root         201  0.0  0.1  12168  3888 ?        Ss   00:44   0:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+root         445  2.6  1.9 1900036 74280 ?       Ssl  00:44   0:04 /usr/bin/dockerd -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock --default-ulimi
+root        1205  0.0  0.1 711432  6092 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id d7248cb46ce6675cd8571237b2d97b14
+root        1234  0.0  0.1 711432  5916 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c64eab39fcc84a16cf781946b19208a8
+root        1235  0.0  0.1 711688  6052 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 160d78a5a6af0460766ea18b52712194
+root        1248  0.0  0.1 711432  5540 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 60addc91e8a0ac5163c7aec249d4df17
+65535       1284  0.0  0.0    956     4 ?        Ss   00:44   0:00 /pause
+65535       1308  0.0  0.0    956     4 ?        Ss   00:44   0:00 /pause
+65535       1319  0.0  0.0    956     4 ?        Ss   00:44   0:00 /pause
+65535       1328  0.0  0.0    956     4 ?        Ss   00:44   0:00 /pause
+root        1385  0.0  0.2 711176 10580 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id dacd9db0524cde32c07b69922e85eb22
+root        1386  0.0  0.1 712840  6084 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 9d6e09b49fe389729643b4c000132fab
+root        1426  0.0  0.1 712840  5892 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c72e327a1759494f99936930c846abda
+root        1439  0.0  0.1 711176  5880 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 8ffdf3f55725c550e703a3d9f3d0f5b3
+root        1458  3.2  0.8 754020 32528 ?        Ssl  00:44   0:04 kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authoriza
+root        1477 14.6  8.0 1110392 312444 ?      Ssl  00:44   0:21 kube-apiserver --advertise-address=192.168.49.2 --allow-privileged=true --authorizati
+root        1494  7.4  1.9 824644 76552 ?        Ssl  00:44   0:11 kube-controller-manager --allocate-node-cidrs=true --authentication-kubeconfig=/etc/k
+root        1506 12.1  0.9 11214516 38160 ?      Ssl  00:44   0:17 etcd --advertise-client-urls=https://192.168.49.2:2379 --cert-file=/var/lib/minikube/
+root        1733  5.2  1.8 1862712 71784 ?       Ssl  00:45   0:06 /var/lib/minikube/binaries/v1.23.3/kubelet --bootstrap-kubeconfig=/etc/kubernetes/boo
+root        1999  0.0  0.1 711688  7116 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 6bcfb5ef991c43859df52e82267a4ea2
+65535       2023  0.0  0.0    956     4 ?        Ss   00:45   0:00 /pause
+root        2097  0.0  0.1 711432  5820 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id acee309420d41df02c11a0c5b581527e
+65535       2123  0.0  0.0    956     4 ?        Ss   00:45   0:00 /pause
+root        2142  0.0  0.1 711432  5676 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 4c4d52d6bb2f9d2a1ca9f198c6d7e61f
+root        2162  0.3  0.5 748424 21668 ?        Ssl  00:45   0:00 /usr/local/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-overrid
+root        2195  0.0  0.1 710920  5932 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c1fcfbe957680299873562cfb7d3d8a3
+65535       2222  0.0  0.0    956     4 ?        Ss   00:45   0:00 /pause
+root        2337  0.0  0.1 711688  5708 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id d7dafa8e76578114f8aeaff1a4e6edd0
+root        2357  0.5  0.6 750824 24468 ?        Ssl  00:45   0:00 /coredns -conf /etc/coredns/Corefile
+root        2436  0.0  0.1 711432  5688 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 7d3a10b807c67b41603e66b2a1527e4d
+root        2457  1.4  0.4 735712 16776 ?        Ssl  00:45   0:01 /storage-provisioner
+root        2673  1.0  0.0   4236  2232 pts/1    Ss   00:47   0:00 bash
+root        2687  0.0  0.0   5888  1520 pts/1    R+   00:47   0:00 ps aux
+```
+
 ## 使用 kubeadm 安装 Kubernetes
 
 https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
@@ -242,7 +351,7 @@ https://github.com/labring/sealos
 ## 参考
 
 1. [kubectl 安装文档](https://kubernetes.io/docs/reference/kubectl/)
-1. [kind 官网文档](https://kind.sigs.k8s.io/docs/user/quick-start/)
+1. [kind 官方文档](https://kind.sigs.k8s.io/docs/user/quick-start/)
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
 1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
 
