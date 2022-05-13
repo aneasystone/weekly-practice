@@ -217,7 +217,7 @@ root        3010  0.0  0.1   6900  1420 pts/1    R+   11:48   0:00 ps aux
 
 ## 使用 minikube 安装 Kubernetes
 
-[minikube](https://minikube.sigs.k8s.io/docs/) 是由 Google 发布的一款轻量级工具，让开发者可以在本机上轻易运行一个 Kubernetes 集群，快速上手 Kubernetes 的指令与环境。`minikube` 会在本机运行一个虚拟机，并且在这个虚拟机上启动一个 single-node Kubernetes 集群，它不支持 HA，不推荐在生产环境使用。
+[minikube](https://minikube.sigs.k8s.io/docs/) 是由 Google 发布的一款轻量级工具，让开发者可以在本机上轻易运行一个 Kubernetes 集群，快速上手 Kubernetes 的指令与环境。`minikube` 会在本机运行一个容器或虚拟机，并且在这个容器或虚拟机中启动一个 single-node Kubernetes 集群，它不支持 HA，不推荐在生产环境使用。
 
 ### 安装 minikube
 
@@ -235,27 +235,47 @@ $ sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
 ### 创建 Kubernetes 集群
 
+使用 `minikube` 创建 Kubernetes 集群比 `kind` 稍微多一些限制：
+
+* 2 CPUs or more
+* 2GB of free memory
+* 20GB of free disk space
+
+否则会报下面这些错误。
+
+CPU 核数不够：
+
 ```
 X Exiting due to RSRC_INSUFFICIENT_CORES: Requested cpu count 2 is greater than the available cpus of 1
 ```
+
+内存不够：
+
+```
+X Exiting due to RSRC_INSUFFICIENT_CONTAINER_MEMORY: docker only has 990MiB available, less than the required 1800MiB for Kubernetes
+```
+
+另外，当我们使用 Docker 作为驱动时，需要以非 root 用户运行：
 
 ```
 X Exiting due to DRV_AS_ROOT: The "docker" driver should not be used with root privileges.
 ```
 
+Docker 在安装时会默认创建一个叫 `docker` 的用户组，可以在 `/etc/group` 文件中找到 `docker` 用户组的 id，然后使用 `adduser` 在该用户组下添加一个 `docker` 用户，`su - docker` 切换到 `docker` 用户就可以以非 root 用户运行 Docker 了：
+
 ```
 [root@localhost ~]# grep docker /etc/group
 docker:x:995:
+
 [root@localhost ~]# adduser -g 995 -c "Docker" docker
+
 [root@localhost ~]# id docker
 uid=1000(docker) gid=995(docker) 组=995(docker)
+
 [root@localhost ~]# su - docker
-[docker@localhost ~]$ minikube start
 ```
 
-```
-X Exiting due to RSRC_INSUFFICIENT_CONTAINER_MEMORY: docker only has 990MiB available, less than the required 1800MiB for Kubernetes
-```
+一切准备就绪，执行 `minikube start` 创建 Kubernetes 集群：
 
 ```
 [docker@localhost ~]$ minikube start
