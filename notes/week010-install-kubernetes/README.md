@@ -206,6 +206,7 @@ root        3010  0.0  0.1   6900  1420 pts/1    R+   11:48   0:00 ps aux
 * kindnetd - *一款简单的 CNI 插件*
 * containerd - *使用 containerd 作为容器运行时，弃用 Dockershim 对 kind 没有影响*
 * containerd-shim-runc-v2
+* pause
 * coredns - *为集群提供 DNS 和服务发现的功能*
 * etcd - *服务发现的后端，并存储集群状态和配置*
 * kubelet - *运行在每个节点上的代理，用来处理 Master 节点下发到本节点的任务*
@@ -367,6 +368,7 @@ root        2687  0.0  0.0   5888  1520 pts/1    R+   00:47   0:00 ps aux
 
 * containerd
 * containerd-shim-runc-v2
+* pause
 * coredns
 * etcd
 * kubelet
