@@ -391,11 +391,157 @@ root        2687  0.0  0.0   5888  1520 pts/1    R+   00:47   0:00 ps aux
 
 ## 使用 kubeadm 安装 Kubernetes
 
-https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+`kubeadm` 是 Kubernetes 社区提供的集群构建工具，它负责构建一个最小化可用集群并执行启动等必要的基本步骤，简单来讲，`kubeadm` 是 Kubernetes 集群全生命周期管理工具，可用于实现集群的部署、升级/降级及卸载等。按照设计，它只关注启动引导，而非配置机器。同样的，安装各种 “锦上添花” 的扩展，例如 Kubernetes Dashboard、监控方案、以及特定云平台的扩展，都不在讨论范围内。
 
-## 使用 sealos 安装 Kubernetes
+### 安装 kubeadm、kubelet 和 kubectl
 
-https://github.com/labring/sealos
+首先我们需要安装这三个组件：
+
+* `kubeadm` - 用于启动集群
+* `kubelet` - 运行在集群中的每一台机器上，用于启动 Pod 和 容器
+* `kubectl` - 用于管理集群
+
+虽然官方提供了 [yum 和 apt-get 的安装方式](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl)，但是这里我打算手工安装下，这样可以更好的加深理解。
+
+#### 下载 CNI 插件
+
+绝大多数 Pod 网络都需要 CNI 插件。
+
+```
+[root@localhost ~]# mkdir -p /opt/cni/bin
+[root@localhost ~]# curl -L "https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz" | sudo tar -C /opt/cni/bin -xz
+```
+
+可以看到这里提供了很多不同的 CNI 插件：
+
+```
+[root@localhost ~]# ls /opt/cni/bin/
+bandwidth  bridge  dhcp  firewall  flannel  host-device  host-local  ipvlan  loopback  macvlan  portmap  ptp  sbr  static  tuning  vlan
+```
+
+#### 安装 crictl
+
+`crictl` 是 `CRI` 兼容的容器运行时命令行接口。你可以使用它来检查和调试 Kubernetes 节点上的容器运行时和应用程序。
+
+```
+[root@localhost ~]# curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.22.0/crictl-v1.22.0-linux-amd64.tar.gz" | sudo tar -C /usr/local/bin -xz
+```
+
+使用 `crictl --help` 查看帮助：
+
+```
+[root@localhost ~]# crictl --help
+NAME:
+   crictl - client for CRI
+
+USAGE:
+   crictl [global options] command [command options] [arguments...]
+
+VERSION:
+   v1.22.0
+
+COMMANDS:
+   attach              Attach to a running container
+   create              Create a new container
+   exec                Run a command in a running container
+   version             Display runtime version information
+   images, image, img  List images
+   inspect             Display the status of one or more containers
+   inspecti            Return the status of one or more images
+   imagefsinfo         Return image filesystem info
+   inspectp            Display the status of one or more pods
+   logs                Fetch the logs of a container
+   port-forward        Forward local port to a pod
+   ps                  List containers
+   pull                Pull an image from a registry
+   run                 Run a new container inside a sandbox
+   runp                Run a new pod
+   rm                  Remove one or more containers
+   rmi                 Remove one or more images
+   rmp                 Remove one or more pods
+   pods                List pods
+   start               Start one or more created containers
+   info                Display information of the container runtime
+   stop                Stop one or more running containers
+   stopp               Stop one or more running pods
+   update              Update one or more running containers
+   config              Get and set crictl client configuration options
+   stats               List container(s) resource usage statistics
+   completion          Output shell completion code
+   help, h             Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --config value, -c value            Location of the client config file. If not specified and the default does not exist, the program's directory is searched as well (default: "/etc/crictl.yaml") [$CRI_CONFIG_FILE]
+   --debug, -D                         Enable debug mode (default: false)
+   --image-endpoint value, -i value    Endpoint of CRI image manager service (default: uses 'runtime-endpoint' setting) [$IMAGE_SERVICE_ENDPOINT]
+   --runtime-endpoint value, -r value  Endpoint of CRI container runtime service (default: uses in order the first successful one of [unix:///var/run/dockershim.sock unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock]). Default is now deprecated and the endpoint should be set instead. [$CONTAINER_RUNTIME_ENDPOINT]
+   --timeout value, -t value           Timeout of connecting to the server in seconds (e.g. 2s, 20s.). 0 or less is set to default (default: 2s)
+   --help, -h                          show help (default: false)
+   --version, -v                       print the version (default: false)
+```
+
+#### 安装 kubeadm、kubelet 和 kubectl
+
+```
+[root@localhost ~]# cd /usr/local/bin
+[root@localhost bin]# curl -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/{kubeadm,kubelet,kubectl}
+[root@localhost bin]# chmod +x {kubeadm,kubelet,kubectl}
+```
+
+这三个组件安装好之后，我们需要将 `kubelet` 添加到 systemd 服务。首先直接从官方下载服务定义的模板，修改其中 kubelet 的路径：
+
+```
+[root@localhost ~]# curl -sSL "https://raw.githubusercontent.com/kubernetes/release/v0.4.0/cmd/kubepkg/templates/latest/deb/kubelet/lib/systemd/system/kubelet.service" | sed "s:/usr/bin:/usr/local/bin:g" | tee /etc/systemd/system/kubelet.service
+
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/home/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/kubelet
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+然后再下载 kubeadm 的配置文件：
+
+```
+[root@localhost ~]# mkdir -p /etc/systemd/system/kubelet.service.d
+[root@localhost ~]# curl -sSL "https://raw.githubusercontent.com/kubernetes/release/v0.4.0/cmd/kubepkg/templates/latest/deb/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:/usr/local/bin:g" | tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+# Note: This dropin only works with kubeadm and kubelet v1.11+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+# This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+# This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
+# the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
+EnvironmentFile=-/etc/default/kubelet
+ExecStart=
+ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+```
+
+最后，启动 `kubelet` 服务：
+
+```
+[root@localhost ~]# systemctl enable --now kubelet
+Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
+```
+
+### 使用 kubeadm 创建 Kubernetes 集群
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+
+## 其他安装 Kubernetes 的方式
+
+* [sealos](https://github.com/labring/sealos)
 
 ## 参考
 
@@ -403,6 +549,7 @@ https://github.com/labring/sealos
 1. [kind 官方文档](https://kind.sigs.k8s.io/docs/user/quick-start/)
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
 1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
+1. [Bootstrapping clusters with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)
 
 ## 更多
 
