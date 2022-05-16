@@ -539,9 +539,13 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service
 
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 
-## 其他安装 Kubernetes 的方式
+## 其他安装或管理 Kubernetes 的工具
 
+* [Kubernetes Dashboard](https://github.com/kubernetes/dashboard)
 * [sealos](https://github.com/labring/sealos)
+* [Rancher](https://rancher.com/quick-start)
+* [Kuboard](https://kuboard.cn/)
+* [Kubernetes Web View](https://kube-web-view.readthedocs.io/en/latest/index.html)
 
 ## 参考
 
