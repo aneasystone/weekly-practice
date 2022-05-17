@@ -480,6 +480,61 @@ GLOBAL OPTIONS:
    --version, -v                       print the version (default: false)
 ```
 
+不过在执行 `crictl ps` 的时候报错了：
+
+```
+[root@localhost ~]# crictl ps
+WARN[0000] runtime connect using default endpoints: [unix:///var/run/dockershim.sock unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock]. As the default settings are now deprecated, you should set the endpoint instead. 
+ERRO[0002] connect endpoint 'unix:///var/run/dockershim.sock', make sure you are running as root and the endpoint has been started: context deadline exceeded 
+WARN[0002] image connect using default endpoints: [unix:///var/run/dockershim.sock unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock]. As the default settings are now deprecated, you should set the endpoint instead. 
+ERRO[0004] connect endpoint 'unix:///var/run/dockershim.sock', make sure you are running as root and the endpoint has been started: context deadline exceeded 
+FATA[0004] listing containers: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService 
+```
+
+我们检查 containerd 的配置文件 `/etc/containerd/config.toml`：
+
+```
+[root@localhost ~]# cat /etc/containerd/config.toml
+#   Copyright 2018-2020 Docker Inc.
+
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+disabled_plugins = ["cri"]
+
+#root = "/var/lib/containerd"
+#state = "/run/containerd"
+#subreaper = true
+#oom_score = 0
+
+#[grpc]
+#  address = "/run/containerd/containerd.sock"
+#  uid = 0
+#  gid = 0
+
+#[debug]
+#  address = "/run/containerd/debug.sock"
+#  uid = 0
+#  gid = 0
+#  level = "info"
+```
+
+发现里面有一行 `disabled_plugins = ["cri"]`，这是 Docker 默认安装时的配置，我们将这个配置删除，并重启 containerd：
+
+```
+[root@localhost ~]# rm /etc/containerd/config.toml
+[root@localhost ~]# systemctl restart containerd
+```
+
 #### 安装 kubeadm、kubelet 和 kubectl
 
 ```
