@@ -592,7 +592,62 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service
 
 ### 使用 kubeadm 创建 Kubernetes 集群
 
-https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+接下来我们使用 `kubeadm init` 来初始化 Kubernetes 集群，这个命令的作用是帮助你启动和 master 节点相关的组件：`kube-apiserver`、`kube-controller-manager`、`kube-scheduler` 和 `etcd` 等。在运行之前，我们可以使用 `kubeadm config images list` 命令查看使用 kubeadm 创建 Kubernetes 集群所需要的镜像：
+
+```
+[root@localhost ~]# kubeadm config images list
+k8s.gcr.io/kube-apiserver:v1.24.0
+k8s.gcr.io/kube-controller-manager:v1.24.0
+k8s.gcr.io/kube-scheduler:v1.24.0
+k8s.gcr.io/kube-proxy:v1.24.0
+k8s.gcr.io/pause:3.7
+k8s.gcr.io/etcd:3.5.3-0
+k8s.gcr.io/coredns/coredns:v1.8.6
+```
+
+使用 `kubeadm config images pull` 提前将镜像下载下来：
+
+```
+[root@localhost ~]# kubeadm config images pull
+failed to pull image "k8s.gcr.io/kube-apiserver:v1.24.0": output: time="2022-05-15T12:18:29+08:00" level=fatal msg="pulling image: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService"
+, error: exit status 1
+To see the stack trace of this error execute with --v=5 or higher
+```
+
+我们发现下载镜像报错，这是因为国内没办法访问 `k8s.gcr.io`，而且无论是在环境变量中设置代理，还是为 Docker Daemon 设置代理，都不起作用。后来才意识到，`kubeadm config images pull` 命令貌似不走 docker 服务，而是直接请求 containerd 服务，所以我们为 containerd 服务设置代理：
+
+```
+[root@localhost ~]# mkdir /etc/systemd/system/containerd.service.d
+[root@localhost ~]# vi /etc/systemd/system/containerd.service.d/http_proxy.conf
+```
+
+文件内容如下：
+
+```
+[Service]
+Environment="HTTP_PROXY=192.168.1.36:10809"
+Environment="HTTPS_PROXY=192.168.1.36:10809"
+```
+
+重启 containerd 服务：
+
+```
+[root@localhost ~]# systemctl daemon-reload
+[root@localhost ~]# systemctl restart containerd
+```
+
+然后重新下载镜像：
+
+```
+[root@localhost ~]# kubeadm config images pull
+[config/images] Pulled k8s.gcr.io/kube-apiserver:v1.24.0
+[config/images] Pulled k8s.gcr.io/kube-controller-manager:v1.24.0
+[config/images] Pulled k8s.gcr.io/kube-scheduler:v1.24.0
+[config/images] Pulled k8s.gcr.io/kube-proxy:v1.24.0
+[config/images] Pulled k8s.gcr.io/pause:3.7
+[config/images] Pulled k8s.gcr.io/etcd:3.5.3-0
+[config/images] Pulled k8s.gcr.io/coredns/coredns:v1.8.6
+```
 
 ## 其他安装或管理 Kubernetes 的工具
 
