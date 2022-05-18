@@ -649,6 +649,226 @@ Environment="HTTPS_PROXY=192.168.1.36:10809"
 [config/images] Pulled k8s.gcr.io/coredns/coredns:v1.8.6
 ```
 
+接下来使用 `kubeadm init` 初始化 Kubernetes 的控制平面：
+
+```
+[root@localhost ~]# kubeadm init
+W0515 14:36:22.763487   21958 version.go:103] could not fetch a Kubernetes version from the internet: unable to get URL "https://dl.k8s.io/release/stable-1.txt": Get "https://dl.k8s.io/release/stable-1.txt": x509: certificate has expired or is not yet valid: current time 2022-05-15T14:36:22+08:00 is before 2022-05-17T21:21:32Z
+W0515 14:36:22.763520   21958 version.go:104] falling back to the local client version: v1.24.0
+[init] Using Kubernetes version: v1.24.0
+[preflight] Running pre-flight checks
+	[WARNING Firewalld]: firewalld is active, please ensure ports [6443 10250] are open or your cluster may not function correctly
+	[WARNING Swap]: swap is enabled; production deployments should disable swap unless testing the NodeSwap feature gate of the kubelet
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local localhost.localdomain] and IPs [10.96.0.1 10.0.2.10]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-ca" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Generating "etcd/ca" certificate and key
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [localhost localhost.localdomain] and IPs [10.0.2.10 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [localhost localhost.localdomain] and IPs [10.0.2.10 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "sa" key and public key
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
+[kubelet-check] Initial timeout of 40s passed.
+[kubelet-check] It seems like the kubelet isn't running or healthy.
+[kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get "http://localhost:10248/healthz": dial tcp [::1]:10248: connect: connection refused.
+[kubelet-check] It seems like the kubelet isn't running or healthy.
+[kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get "http://localhost:10248/healthz": dial tcp [::1]:10248: connect: connection refused.
+[kubelet-check] It seems like the kubelet isn't running or healthy.
+[kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get "http://localhost:10248/healthz": dial tcp [::1]:10248: connect: connection refused.
+[kubelet-check] It seems like the kubelet isn't running or healthy.
+[kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get "http://localhost:10248/healthz": dial tcp [::1]:10248: connect: connection refused.
+[kubelet-check] It seems like the kubelet isn't running or healthy.
+[kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get "http://localhost:10248/healthz": dial tcp [::1]:10248: connect: connection refused.
+
+Unfortunately, an error has occurred:
+	timed out waiting for the condition
+
+This error is likely caused by:
+	- The kubelet is not running
+	- The kubelet is unhealthy due to a misconfiguration of the node in some way (required cgroups disabled)
+
+If you are on a systemd-powered system, you can try to troubleshoot the error with the following commands:
+	- 'systemctl status kubelet'
+	- 'journalctl -xeu kubelet'
+
+Additionally, a control plane component may have crashed or exited when started by the container runtime.
+To troubleshoot, list all containers using your preferred container runtimes CLI.
+Here is one example how you may list all running Kubernetes containers by using crictl:
+	- 'crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock ps -a | grep kube | grep -v pause'
+	Once you have found the failing container, you can inspect its logs with:
+	- 'crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock logs CONTAINERID'
+error execution phase wait-control-plane: couldn't initialize a Kubernetes cluster
+To see the stack trace of this error execute with --v=5 or higher
+```
+
+根据报错信息，应该是 `swap` 的问题，通过下面的命令关闭 `swap`：
+
+```
+[root@localhost ~]# swapoff  -a
+```
+
+然后重新执行 `kubeadm init`，注意要先执行 `kubeadm reset`：
+
+```
+[root@localhost ~]# kubeadm reset
+[reset] Reading configuration from the cluster...
+[reset] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'
+W0515 15:03:11.771080   25796 reset.go:103] [reset] Unable to fetch the kubeadm-config ConfigMap from cluster: failed to get config map: Get "https://10.0.2.10:6443/api/v1/namespaces/kube-system/configmaps/kubeadm-config?timeout=10s": dial tcp 10.0.2.10:6443: connect: connection refused
+W0515 15:03:11.773814   25796 preflight.go:55] [reset] WARNING: Changes made to this host by 'kubeadm init' or 'kubeadm join' will be reverted.
+[reset] Are you sure you want to proceed? [y/N]: y
+[preflight] Running pre-flight checks
+W0515 15:03:13.272040   25796 removeetcdmember.go:84] [reset] No kubeadm config, using etcd pod spec to get data directory
+[reset] Stopping the kubelet service
+[reset] Unmounting mounted directories in "/var/lib/kubelet"
+[reset] Deleting contents of directories: [/etc/kubernetes/manifests /etc/kubernetes/pki]
+[reset] Deleting files: [/etc/kubernetes/admin.conf /etc/kubernetes/kubelet.conf /etc/kubernetes/bootstrap-kubelet.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf]
+[reset] Deleting contents of stateful directories: [/var/lib/etcd /var/lib/kubelet /var/lib/dockershim /var/run/kubernetes /var/lib/cni]
+
+The reset process does not clean CNI configuration. To do so, you must remove /etc/cni/net.d
+
+The reset process does not reset or clean up iptables rules or IPVS tables.
+If you wish to reset iptables, you must do so manually by using the "iptables" command.
+
+If your cluster was setup to utilize IPVS, run ipvsadm --clear (or similar)
+to reset your system's IPVS tables.
+
+The reset process does not clean your kubeconfig files and you must remove them manually.
+Please, check the contents of the $HOME/.kube/config file.
+```
+
+再次执行 `kubeadm init` 成功：
+
+```
+[root@localhost ~]# kubeadm init
+W0515 15:03:21.229843   25821 version.go:103] could not fetch a Kubernetes version from the internet: unable to get URL "https://dl.k8s.io/release/stable-1.txt": Get "https://dl.k8s.io/release/stable-1.txt": x509: certificate has expired or is not yet valid: current time 2022-05-15T15:03:21+08:00 is before 2022-05-17T21:21:32Z
+W0515 15:03:21.229869   25821 version.go:104] falling back to the local client version: v1.24.0
+[init] Using Kubernetes version: v1.24.0
+[preflight] Running pre-flight checks
+	[WARNING Firewalld]: firewalld is active, please ensure ports [6443 10250] are open or your cluster may not function correctly
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local localhost.localdomain] and IPs [10.96.0.1 10.0.2.10]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-ca" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Generating "etcd/ca" certificate and key
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [localhost localhost.localdomain] and IPs [10.0.2.10 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [localhost localhost.localdomain] and IPs [10.0.2.10 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "sa" key and public key
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
+[apiclient] All control plane components are healthy after 22.259518 seconds
+[upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config" in namespace kube-system with the configuration for the kubelets in the cluster
+[upload-certs] Skipping phase. Please see --upload-certs
+[mark-control-plane] Marking the node localhost.localdomain as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+[mark-control-plane] Marking the node localhost.localdomain as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule node-role.kubernetes.io/control-plane:NoSchedule]
+[bootstrap-token] Using token: cjpeqg.yvf2lka5i5epqcis
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to get nodes
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstrap-token] Configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstrap-token] Configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 10.0.2.10:6443 --token cjpeqg.yvf2lka5i5epqcis \
+	--discovery-token-ca-cert-hash sha256:2c662bccbb9491d97b141a2b4b578867f240614ddcc399949c803d1f5093bba5 
+```
+
+根据提示，我们将配置文件复制到 `~/.kube` 目录：
+
+```
+[root@localhost ~]# mkdir -p $HOME/.kube
+[root@localhost ~]# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+[root@localhost ~]# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+然后安装一个 [Pod 网络插件](https://kubernetes.io/docs/concepts/cluster-administration/addons/)，这里我们选择安装 `flannel`：
+
+```
+[root@localhost ~]# curl -LO https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+
+[root@localhost ~]# kubectl apply -f kube-flannel.yml
+Warning: policy/v1beta1 PodSecurityPolicy is deprecated in v1.21+, unavailable in v1.25+
+podsecuritypolicy.policy/psp.flannel.unprivileged created
+clusterrole.rbac.authorization.k8s.io/flannel created
+clusterrolebinding.rbac.authorization.k8s.io/flannel created
+serviceaccount/flannel created
+configmap/kube-flannel-cfg created
+daemonset.apps/kube-flannel-ds created
+```
+
+然后在另一台机器上执行 `kubeadm join` 将工作节点加入 Kubernetes 集群（这台机器也需要提前安装好 kubeadm）：
+
+```
+[root@localhost ~]# kubeadm join 10.0.2.10:6443 --token cjpeqg.yvf2lka5i5epqcis \
+	--discovery-token-ca-cert-hash sha256:2c662bccbb9491d97b141a2b4b578867f240614ddcc399949c803d1f5093bba5 
+```
+
 ## 其他安装或管理 Kubernetes 的工具
 
 * [Kubernetes Dashboard](https://github.com/kubernetes/dashboard)
@@ -664,6 +884,7 @@ Environment="HTTPS_PROXY=192.168.1.36:10809"
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
 1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
 1. [Bootstrapping clusters with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)
+1. [一文搞懂容器运行时 Containerd](https://www.qikqiak.com/post/containerd-usage/)
 
 ## 更多
 
