@@ -428,7 +428,14 @@ ERRO[0004] connect endpoint 'unix:///var/run/dockershim.sock', make sure you are
 FATA[0004] listing containers: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService 
 ```
 
-我们检查 containerd 的配置文件 `/etc/containerd/config.toml`：
+前面几行报错信息是因为 `crictl` 默认会按照顺序：`dockershim.sock` -> `containerd.sock` -> `crio.sock` 来检查系统内是否存在对应的运行时环境，所以会报 `dockershim.sock` 的连接报错信息，我们这里通过下面的命令将 `crictl` 的默认运行时修改成 `containerd.sock`：
+
+```
+[root@localhost ~]# crictl config runtime-endpoint unix:///run/containerd/containerd.sock
+[root@localhost ~]# crictl config image-endpoint unix:///run/containerd/containerd.sock
+```
+
+而最后一行报错，是一个比较坑的地方，是因为 containerd 的配置有问题，我们检查 containerd 的配置文件 `/etc/containerd/config.toml`：
 
 ```
 [root@localhost ~]# cat /etc/containerd/config.toml
