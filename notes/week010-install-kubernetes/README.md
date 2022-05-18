@@ -326,69 +326,6 @@ CONTAINER ID   IMAGE                    COMMAND                  CREATED        
 d7e2ffaba188   kicbase/stable:v0.0.30   "/usr/local/bin/entr…"   2 minutes ago   Up 2 minutes   127.0.0.1:49157->22/tcp, 127.0.0.1:49156->2376/tcp, 127.0.0.1:49155->5000/tcp, 127.0.0.1:49154->8443/tcp, 127.0.0.1:49153->32443/tcp   minikube
 ```
 
-我们进到容器内部看看：
-
-```
-[docker@localhost ~]$ docker exec -it minikube bash
-root@minikube:/# ps aux
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root           1  0.7  0.2  21848  8112 ?        Ss   00:44   0:01 /sbin/init
-root         178  0.3  0.1  29028  5956 ?        S<s  00:44   0:00 /lib/systemd/systemd-journald
-message+     189  0.0  0.0   6992  2048 ?        Ss   00:44   0:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activ
-root         194  0.9  0.9 1493012 36696 ?       Ssl  00:44   0:01 /usr/bin/containerd
-root         201  0.0  0.1  12168  3888 ?        Ss   00:44   0:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
-root         445  2.6  1.9 1900036 74280 ?       Ssl  00:44   0:04 /usr/bin/dockerd -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock --default-ulimi
-root        1205  0.0  0.1 711432  6092 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id d7248cb46ce6675cd8571237b2d97b14
-root        1234  0.0  0.1 711432  5916 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c64eab39fcc84a16cf781946b19208a8
-root        1235  0.0  0.1 711688  6052 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 160d78a5a6af0460766ea18b52712194
-root        1248  0.0  0.1 711432  5540 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 60addc91e8a0ac5163c7aec249d4df17
-root        1385  0.0  0.2 711176 10580 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id dacd9db0524cde32c07b69922e85eb22
-root        1386  0.0  0.1 712840  6084 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 9d6e09b49fe389729643b4c000132fab
-root        1426  0.0  0.1 712840  5892 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c72e327a1759494f99936930c846abda
-root        1439  0.0  0.1 711176  5880 ?        Sl   00:44   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 8ffdf3f55725c550e703a3d9f3d0f5b3
-root        1458  3.2  0.8 754020 32528 ?        Ssl  00:44   0:04 kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authoriza
-root        1477 14.6  8.0 1110392 312444 ?      Ssl  00:44   0:21 kube-apiserver --advertise-address=192.168.49.2 --allow-privileged=true --authorizati
-root        1494  7.4  1.9 824644 76552 ?        Ssl  00:44   0:11 kube-controller-manager --allocate-node-cidrs=true --authentication-kubeconfig=/etc/k
-root        1506 12.1  0.9 11214516 38160 ?      Ssl  00:44   0:17 etcd --advertise-client-urls=https://192.168.49.2:2379 --cert-file=/var/lib/minikube/
-root        1733  5.2  1.8 1862712 71784 ?       Ssl  00:45   0:06 /var/lib/minikube/binaries/v1.23.3/kubelet --bootstrap-kubeconfig=/etc/kubernetes/boo
-root        1999  0.0  0.1 711688  7116 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 6bcfb5ef991c43859df52e82267a4ea2
-root        2097  0.0  0.1 711432  5820 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id acee309420d41df02c11a0c5b581527e
-root        2142  0.0  0.1 711432  5676 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 4c4d52d6bb2f9d2a1ca9f198c6d7e61f
-root        2162  0.3  0.5 748424 21668 ?        Ssl  00:45   0:00 /usr/local/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-overrid
-root        2195  0.0  0.1 710920  5932 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id c1fcfbe957680299873562cfb7d3d8a3
-root        2337  0.0  0.1 711688  5708 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id d7dafa8e76578114f8aeaff1a4e6edd0
-root        2357  0.5  0.6 750824 24468 ?        Ssl  00:45   0:00 /coredns -conf /etc/coredns/Corefile
-root        2436  0.0  0.1 711432  5688 ?        Sl   00:45   0:00 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 7d3a10b807c67b41603e66b2a1527e4d
-root        2457  1.4  0.4 735712 16776 ?        Ssl  00:45   0:01 /storage-provisioner
-root        2673  1.0  0.0   4236  2232 pts/1    Ss   00:47   0:00 bash
-root        2687  0.0  0.0   5888  1520 pts/1    R+   00:47   0:00 ps aux
-```
-
-可以看到下面这些进程和 `kind` 一样：
-
-* containerd
-* containerd-shim-runc-v2
-* pause
-* coredns
-* etcd
-* kubelet
-* kube-apiserver
-* kube-proxy
-* kube-controller-manager
-* kube-scheduler
-
-下面这些进程不一样：
-
-* dbus-daemon
-* sshd
-* dockerd
-* storage-provisioner
-
-少了这两个进程：
-
-* kindnetd
-* local-path-provisioner
-
 ## 使用 kubeadm 安装 Kubernetes
 
 `kubeadm` 是 Kubernetes 社区提供的集群构建工具，它负责构建一个最小化可用集群并执行启动等必要的基本步骤，简单来讲，`kubeadm` 是 Kubernetes 集群全生命周期管理工具，可用于实现集群的部署、升级/降级及卸载等。按照设计，它只关注启动引导，而非配置机器。同样的，安装各种 “锦上添花” 的扩展，例如 Kubernetes Dashboard、监控方案、以及特定云平台的扩展，都不在讨论范围内。
