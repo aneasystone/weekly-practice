@@ -787,11 +787,11 @@ kubeadm join 10.0.2.10:6443 --token cjpeqg.yvf2lka5i5epqcis \
 
 ```
 [root@localhost ~]# mkdir -p $HOME/.kube
-[root@localhost ~]# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-[root@localhost ~]# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+[root@localhost ~]# cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+[root@localhost ~]# chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-然后安装一个 [Pod 网络插件](https://kubernetes.io/docs/concepts/cluster-administration/addons/)，这里我们选择安装 `flannel`：
+然后安装一个 [网络插件](https://kubernetes.io/docs/concepts/cluster-administration/addons/)，网络插件是用于 Pod 之间的网络通信，这里我们选择安装 `flannel`：
 
 ```
 [root@localhost ~]# curl -LO https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
@@ -805,6 +805,109 @@ serviceaccount/flannel created
 configmap/kube-flannel-cfg created
 daemonset.apps/kube-flannel-ds created
 ```
+
+安装结束后，可以使用 `kubectl get pods -A` 查看 Pod 的状态：
+
+```
+[root@localhost ~]# kubectl get pods -A
+NAMESPACE     NAME                                            READY   STATUS              RESTARTS        AGE
+kube-system   coredns-6d4b75cb6d-6xvx5                        0/1     ContainerCreating   0               41m
+kube-system   coredns-6d4b75cb6d-d4pd6                        0/1     ContainerCreating   0               41m
+kube-system   etcd-localhost.localdomain                      1/1     Running             0               42m
+kube-system   kube-apiserver-localhost.localdomain            1/1     Running             0               42m
+kube-system   kube-controller-manager-localhost.localdomain   1/1     Running             0               42m
+kube-system   kube-flannel-ds-2mgf5                           0/1     CrashLoopBackOff    9 (2m31s ago)   24m
+kube-system   kube-proxy-ftmb9                                1/1     Running             0               42m
+kube-system   kube-scheduler-localhost.localdomain            1/1     Running             0               42m
+
+```
+
+我们发现 `flannel` 一直处于 `CrashLoopBackOff` 的状态，使用 `kubectl logs` 检查 `flannel` 的启动日志：
+
+```
+[root@localhost ~]# kubectl logs kube-flannel-ds-2mgf5 -n kube-system
+Defaulted container "kube-flannel" out of: kube-flannel, install-cni-plugin (init), install-cni (init)
+I0515 07:43:21.480968       1 main.go:205] CLI flags config: {etcdEndpoints:http://127.0.0.1:4001,http://127.0.0.1:2379 etcdPrefix:/coreos.com/network etcdKeyfile: etcdCertfile: etcdCAFile: etcdUsername: etcdPassword: version:false kubeSubnetMgr:true kubeApiUrl: kubeAnnotationPrefix:flannel.alpha.coreos.com kubeConfigFile: iface:[] ifaceRegex:[] ipMasq:true subnetFile:/run/flannel/subnet.env publicIP: publicIPv6: subnetLeaseRenewMargin:60 healthzIP:0.0.0.0 healthzPort:0 iptablesResyncSeconds:5 iptablesForwardRules:true netConfPath:/etc/kube-flannel/net-conf.json setNodeNetworkUnavailable:true}
+W0515 07:43:21.480968       1 client_config.go:614] Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
+I0515 07:43:21.882364       1 kube.go:120] Waiting 10m0s for node controller to sync
+I0515 07:43:21.975972       1 kube.go:378] Starting kube subnet manager
+I0515 07:43:22.977270       1 kube.go:127] Node controller sync successful
+I0515 07:43:22.977294       1 main.go:225] Created subnet manager: Kubernetes Subnet Manager - localhost.localdomain
+I0515 07:43:22.977298       1 main.go:228] Installing signal handlers
+I0515 07:43:22.977380       1 main.go:454] Found network config - Backend type: vxlan
+I0515 07:43:22.977398       1 match.go:189] Determining IP address of default interface
+I0515 07:43:22.978102       1 match.go:242] Using interface with name enp0s3 and address 10.0.2.10
+I0515 07:43:22.978128       1 match.go:264] Defaulting external address to interface address (10.0.2.10)
+I0515 07:43:22.978176       1 vxlan.go:138] VXLAN config: VNI=1 Port=0 GBP=false Learning=false DirectRouting=false
+E0515 07:43:22.978490       1 main.go:317] Error registering network: failed to acquire lease: node "localhost.localdomain" pod cidr not assigned
+I0515 07:43:22.978337       1 main.go:434] Stopping shutdownHandler...
+W0515 07:43:22.979266       1 reflector.go:436] github.com/flannel-io/flannel/subnet/kube/kube.go:379: watch of *v1.Node ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+```
+
+其中有一行错误信息比较明显：`Error registering network: failed to acquire lease: node "localhost.localdomain" pod cidr not assigned`。想起来在执行 `kubeadm init` 时确实有一个 cidr 的参数，但是我并没有设置，因为不知道设置啥，我们可以打开 `kube-flannel.yml` 文件，其中的 `ConfigMap` 里的内容给了我们答案（当然，不同的网络插件 cidr 也可能不一样，你也可以改成自己想要的值）：
+
+```
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-flannel-cfg
+  namespace: kube-system
+  labels:
+    tier: node
+    app: flannel
+data:
+  cni-conf.json: |
+    {
+      "name": "cbr0",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "type": "flannel",
+          "delegate": {
+            "hairpinMode": true,
+            "isDefaultGateway": true
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+  net-conf.json: |
+    {
+      "Network": "10.244.0.0/16",
+      "Backend": {
+        "Type": "vxlan"
+      }
+    }
+```
+
+于是使用 `kubeadm reset` 和 `kubeadm init` 重新安装一次：
+
+```
+[root@localhost ~]# kubeadm reset
+[root@localhost ~]# kubeadm init --pod-network-cidr 10.244.0.0/16
+```
+
+然后和上面的步骤一样，先复制配置文件到 `~/.kube/config`，然后安装 `flannel`，最终 `flannel` 安装完成：
+
+```
+[root@localhost ~]# kubectl get pods -A
+NAMESPACE     NAME                                            READY   STATUS    RESTARTS      AGE
+kube-system   coredns-6d4b75cb6d-kfsrb                        0/1     Running   0             6m25s
+kube-system   coredns-6d4b75cb6d-mwmhg                        0/1     Running   0             6m25s
+kube-system   etcd-localhost.localdomain                      1/1     Running   2 (14s ago)   6m44s
+kube-system   kube-apiserver-localhost.localdomain            1/1     Running   1             7m1s
+kube-system   kube-controller-manager-localhost.localdomain   1/1     Running   0             7m
+kube-system   kube-flannel-ds-s89f2                           1/1     Running   0             5m6s
+kube-system   kube-proxy-9rsb4                                1/1     Running   0             6m24s
+kube-system   kube-scheduler-localhost.localdomain            1/1     Running   3             6m44s
+```
+
+可以看到 `coredns` 的状态也变成了 `Running`，在网络插件没有安装时，它的状态一直是 `ContainerCreating`。
 
 然后在另一台机器上执行 `kubeadm join` 将工作节点加入 Kubernetes 集群（这台机器也需要提前安装好 kubeadm）：
 
