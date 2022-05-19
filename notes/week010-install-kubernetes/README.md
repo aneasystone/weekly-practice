@@ -534,7 +534,7 @@ ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $
 Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
 ```
 
-### 使用 kubeadm 创建 Kubernetes 集群
+### 使用 `kubeadm init` 创建 Kubernetes 集群
 
 接下来我们使用 `kubeadm init` 来初始化 Kubernetes 集群，这个命令的作用是帮助你启动和 master 节点相关的组件：`kube-apiserver`、`kube-controller-manager`、`kube-scheduler` 和 `etcd` 等。在运行之前，我们可以使用 `kubeadm config images list` 命令查看使用 kubeadm 创建 Kubernetes 集群所需要的镜像：
 
@@ -929,12 +929,42 @@ kube-system   kube-scheduler-localhost.localdomain            1/1     Running   
 
 可以看到 `coredns` 的状态也变成了 `Running`，在网络插件没有安装时，它的状态一直是 `ContainerCreating`。
 
-然后在另一台机器上执行 `kubeadm join` 将工作节点加入 Kubernetes 集群（这台机器也需要提前安装好 kubeadm）：
+### 使用 `kubeadm join` 加入 Kubernetes 集群
+
+这时 Kubernetes 的 master 节点（又叫做 `控制平面`）就安装好了，接下来可以在另一台机器上执行 `kubeadm join` 将工作节点加入 Kubernetes 集群（这台机器也需要提前安装好 kubeadm）：
 
 ```
 [root@localhost ~]# kubeadm join 10.0.2.10:6443 --token cjpeqg.yvf2lka5i5epqcis \
 	--discovery-token-ca-cert-hash sha256:2c662bccbb9491d97b141a2b4b578867f240614ddcc399949c803d1f5093bba5 
 ```
+
+不过我这里就只有一台机器，能不能让一台机器既是 master 节点又是工作节点呢？当然可以！
+
+默认情况下 Kubernetes 在分配 Pod 的时候，是不会分配到 master 节点的，这是因为 kubeadm 给我们的 master 节点打上了一个 `taint` 信息（又被称为 `污点`）。我们通过下面的 `kubectl taint` 命令，将 master 节点的污点信息去掉：
+
+```
+[root@localhost ~]# kubectl taint node localhost.localdomain node-role.kubernetes.io/master-
+node/localhost.localdomain untainted
+```
+
+其中 `node-role.kubernetes.io/master` 就是污点的名字，后面的 `-` 号表示删除，`localhost.localdomain` 是 master 节点的名字，可以通过 `kubectl get nodes` 查看：
+
+```
+[root@localhost ~]# kubectl get nodes
+NAME                    STATUS   ROLES           AGE   VERSION
+localhost.localdomain   Ready    control-plane   42m   v1.24.0
+```
+
+在最新版本的 Kubernetes 中，污点的名字被改为了 `node-role.kubernetes.io/control-plane`，我们也把它去掉：
+
+```
+[root@localhost ~]# kubectl taint node localhost.localdomain node-role.kubernetes.io/control-plane-
+node/localhost.localdomain untainted
+```
+
+> 如果要查看一个节点的污点信息，可以使用 `kubectl describe node <node-name>` 命令。
+
+到这里一个单机版的 Kubernetes 最小集群就搭建好了。
 
 ## 其他安装或管理 Kubernetes 的工具
 
@@ -951,7 +981,9 @@ kube-system   kube-scheduler-localhost.localdomain            1/1     Running   
 1. [kind：Kubernetes in Docker，单机运行 Kubernetes 群集的最佳方案](https://sysin.org/blog/kind/)
 1. [minikube 官方文档](https://minikube.sigs.k8s.io/docs/start/)
 1. [Bootstrapping clusters with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)
+1. [How to use a Single VM as a Kubernetes Cluster with Kubeadm](https://alta3.com/blog/singlevmk8s)
 1. [一文搞懂容器运行时 Containerd](https://www.qikqiak.com/post/containerd-usage/)
+1. [重学容器02: 部署容器运行时Containerd](https://blog.frognew.com/2021/04/relearning-container-02.html)
 
 ## 更多
 
