@@ -668,7 +668,27 @@ error execution phase wait-control-plane: couldn't initialize a Kubernetes clust
 To see the stack trace of this error execute with --v=5 or higher
 ```
 
-根据报错信息，应该是 `swap` 的问题，通过下面的命令关闭 `swap`：
+根据报错信息，是因为 `kubelet` 服务没有启动成功。使用 `systemctl status` 查看 `kubelet` 服务状态为 `code=exited, status=1/FAILURE`：
+
+```
+[root@localhost ~]# systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: disabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: activating (auto-restart) (Result: exit-code) since 五 2022-05-20 06:46:25 CST; 951ms ago
+     Docs: https://kubernetes.io/docs/home/
+  Process: 2787 ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS (code=exited, status=1/FAILURE)
+ Main PID: 2787 (code=exited, status=1/FAILURE)
+```
+
+使用 `journalctl -xefu kubelet` 进一步排查日志，我们发现这么一行线索（日志非常多，排查需要一点耐心）：
+
+```
+5月 20 06:49:29 localhost.localdomain kubelet[3009]: Error: failed to run Kubelet: running with swap on is not supported, please disable swap! or set --fail-swap-on flag to false.
+```
+
+应该是 `swap` 的问题，通过下面的命令关闭 `swap`：
 
 ```
 [root@localhost ~]# swapoff  -a
