@@ -114,11 +114,11 @@
 
 ## 容器与服务上云
 
-* [Spring Boot with Docker](https://spring.io/guides/gs/spring-boot-docker/)
+* [Spring Boot with Docker](https://spring.io/guides/gs/spring-boot-docker/) - [*学习笔记*](./guides/gs/spring-boot-docker/README.md)
 * [Spring Boot Kubernetes](https://spring.io/guides/gs/spring-boot-kubernetes/)
 * [Deploying a Spring Boot app to Azure](https://spring.io/guides/gs/spring-boot-for-azure/)
 * [Deploying to Cloud Foundry from STS](https://spring.io/guides/gs/sts-cloud-foundry-deployment/)
-* [【Topical Guides】Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
+* [【Topical Guides】Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/) - [*学习笔记*](../week011-spring-boot-on-docker/README.md)
 * [【Topical Guides】Spring on Kubernetes](https://spring.io/guides/topicals/spring-on-kubernetes/)
 
 ## API 文档
