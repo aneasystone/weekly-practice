@@ -472,6 +472,34 @@ Picked up JAVA_TOOL_OPTIONS: -Djava.security.properties=/layers/paketo-buildpack
 $ docker run -e "SPRING_PROFILES_ACTIVE=prod" -p 8080:8080 springio/gs-spring-boot-docker
 ```
 
+## 在容器中调试程序
+
+我们可以使用 JPDA Transport 来远程调试一个 Java 程序。在运行上面的镜像时，通过在 `JAVA_TOOL_OPTIONS` 环境变量中添加一个 Java Agent 参数可以让程序以调试模式启动：
+
+```
+$ docker run -e "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n" -p 8080:8080 -p 5005:5005 springio/gs-spring-boot-docker
+```
+
+这里使用了环境变量 `JAVA_TOOL_OPTIONS`，在有些应用中，我们不方便设置 JVM 参数，比如命令行应用、通过 JNI API 调用虚拟机的应用、脚本嵌入虚拟机中的应用等。这种情况下 `JAVA_TOOL_OPTIONS` 是非常有用的，它会被 JNI API 的 `JNI_CreateJavaVM` 函数使用，在启动应用的过程中，可以看到 "Picked up" 这样的提示信息。
+
+我们偶尔还能遇到其他几个和 `JAVA_TOOL_OPTIONS` 类似的环境变量：`JAVA_OPTS` 常用于一些应用的配置，如 Tomcat，但它一般不作为环境变量，也不能被 JVM 识别，是那些应用的自定义配置；`_JAVA_OPTIONS` 也可以作为环境变量来替代命令行参数，但它是 JVM 厂家自定义的，可以覆盖 `JAVA_TOOL_OPTIONS`，但各厂家的不同，`_JAVA_OPTIONS` 是 Oracle 的 JVM，而 IBM 的则是用 `IBM_JAVA_OPTIONS`，不像 `JAVA_TOOL_OPTIONS` 是标准的，所有虚拟机都能识别。
+
+在我们这个例子中，因为我们在 Dockerfile 的 `ENTRYPOINT` 中已经指定了启动命令：`java -jar /app.jar`，如果要改 JVM 参数，必须修改 Dockerfile 重新构建镜像：
+
+```
+FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n","-jar","/app.jar"]
+```
+
+这就很麻烦了。通过使用 `JAVA_TOOL_OPTIONS` 就不用修改 Dockerfile 了。
+
+## 参考
+
+1. [The JAVA_TOOL_OPTIONS Environment Variable](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+1. [理解环境变量 JAVA_TOOL_OPTIONS](https://segmentfault.com/a/1190000008545160)
+
 ## 更多
 
 1. [Spring Boot Maven Plugin Documentation](https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/htmlsingle/)
