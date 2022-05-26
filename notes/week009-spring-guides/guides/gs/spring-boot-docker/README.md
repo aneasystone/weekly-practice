@@ -495,6 +495,28 @@ ENTRYPOINT ["java","-agentlib:jdwp=transport=dt_socket,address=5005,server=y,sus
 
 这就很麻烦了。通过使用 `JAVA_TOOL_OPTIONS` 就不用修改 Dockerfile 了。
 
+容器启动之后，就可以在我们的 IDE 中连接 5005 端口来远程调试了。我使用的是 VS Code，所以先创建一个 `lauch.json` 文件，在 configurations 里添加如下配置：
+
+```
+{
+  "type": "java",
+  "name": "Attach to Remote Program",
+  "request": "attach",
+  "hostName": "127.0.0.1",
+  "port": "5005"
+}
+```
+
+然后启动调试，直接就报错了 `Failed to attach to remote debuggee VM` ：
+
+![](./images/attach-remote-debuggee-failed.png)
+
+这是因为调试端口 5005 没有对所有的 IP 开放，将启动参数中的 `address=5005` 改为 `address=*:5005` 即可：
+
+```
+$ docker run -e "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n" -p 8080:8080 -p 5005:5005 springio/gs-spring-boot-docker
+```
+
 ## 参考
 
 1. [The JAVA_TOOL_OPTIONS Environment Variable](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
