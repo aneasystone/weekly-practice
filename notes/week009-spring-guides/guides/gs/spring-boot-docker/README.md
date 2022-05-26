@@ -464,7 +464,13 @@ Picked up JAVA_TOOL_OPTIONS: -Djava.security.properties=/layers/paketo-buildpack
 
 > 从日志可以看到程序在启动时，使用 [Memory Calculator](https://paketo.io/docs/reference/java-reference/#memory-calculator) 来动态调整 JVM 内存参数。
 
-https://spring.io/guides/gs/spring-boot-docker/
+## Spring Profiles
+
+在运行上面的镜像时，还可以通过 `SPRING_PROFILES_ACTIVE` 环境变量来指定 Spring Profile：
+
+```
+$ docker run -e "SPRING_PROFILES_ACTIVE=prod" -p 8080:8080 springio/gs-spring-boot-docker
+```
 
 ## 更多
 
