@@ -179,32 +179,6 @@ Troubleshooting
 
 Java Framework
 
-    Github Study Projects
-    https://github.com/wuyouzhuguli/SpringAll
-    https://github.com/ityouknow/spring-boot-examples
-    https://github.com/xkcoding/spring-boot-demo
-    https://github.com/527515025/springBoot
-    https://github.com/javahongxi/whatsmars
-    https://github.com/Jackson0714/PassJava-Platform
-    https://github.com/superhj1987/pragmatic-java-engineer
-    https://github.com/chengxy-nds/Springboot-Notebook
-    https://github.com/Snailclimb/JavaGuide
-    https://github.com/caison/java-knowledge-mind-map
-    https://github.com/javagrowing/JGrowing
-    https://github.com/doocs/advanced-java
-    https://github.com/JeffLi1993/springboot-learning-example
-    https://github.com/qibaoguang/Spring-Boot-Reference-Guide
-    https://github.com/liaozihong/SpringBoot-Learning
-    https://github.com/zhoutaoo/SpringCloud
-    https://github.com/eugenp/tutorials
-    https://github.com/RedSpider1/concurrent
-    https://github.com/ityouknow/awesome-spring-boot
-    https://github.com/Jstarfish/JavaKeeper
-    https://github.com/singgel/JAVA
-    https://github.com/RongleXie/java-books-collections
-    https://github.com/hansonwang99/Spring-Boot-In-Action
-    https://github.com/cicadasmile/middle-ware-parent
-
 	Spring MVC
 	https://www.mkyong.com/spring-mvc/spring-4-mvc-ajax-hello-world-example/
 	
