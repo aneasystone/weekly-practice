@@ -94,7 +94,12 @@ ENTRYPOINT ["java","-jar","/app.jar"]
 Exception in thread "main" java.lang.UnsupportedClassVersionError: com/example/demo/DemoApplication has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0
 ```
 
-* `ARG`：定义一个 JAR_FILE 参数，可以在构建镜像时通过 `--build-arg` 设置参数值，譬如你如果是 Gradle 项目，打包后的 jar 文件在 build/libs 目录，而不是 target 目录，你就可以这样构建镜像：`docker build --build-arg JAR_FILE=build/libs/\*.jar -t springio/gs-spring-boot-docker .`；
+* `ARG`：定义一个 JAR_FILE 参数，可以在构建镜像时通过 `--build-arg` 设置参数值，譬如你如果是 Gradle 项目，打包后的 jar 文件在 build/libs 目录，而不是 target 目录，你就可以这样构建镜像：
+
+```
+# docker build --build-arg JAR_FILE=build/libs/\*.jar -t springio/gs-spring-boot-docker .
+```
+
 * `COPY`：将 jar 文件拷贝到镜像中；
 * `ENTRYPOINT`：指定容器启动后需要执行的命令。
 

@@ -31,6 +31,9 @@ Cloud Native
     Rancher
     https://rancher.com/
 
+	Knative
+	https://knative.dev/docs/
+
 CI/CD
 
 	Jenkins
@@ -41,6 +44,12 @@ CI/CD
 	
 	Earthly
 	https://github.com/earthly/earthly
+
+	Skaffold
+	https://skaffold.dev/
+
+	Tekton Pipelines
+	https://tekton.dev/
 
 Databases and caches
 
