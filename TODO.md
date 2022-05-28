@@ -12,6 +12,12 @@ Cloud Native
 	containerd
 	https://containerd.io/
 
+	Istio
+	https://istio.io/latest/docs/
+
+	CoreDNS
+	https://coredns.io/
+
 	Docker
 	https://docs.docker.com/get-started/overview/
 
@@ -50,6 +56,9 @@ CI/CD
 
 	Tekton Pipelines
 	https://tekton.dev/
+
+	Concourse
+	https://concourse-ci.org/
 
 Databases and caches
 
@@ -255,6 +264,9 @@ Build Tools
 	Gradle
 	https://gradle.org/
 
+	Buildpacks
+	https://buildpacks.io/docs/tools/pack/
+
 Shell
 
 	Bash
@@ -356,9 +368,6 @@ Others
 	Visual Studio Code
 	https://code.visualstudio.com/docs
 
-	Istio
-	https://istio.io/latest/docs/
-
 	CRIU
 	https://criu.org/Main_Page
 
@@ -372,10 +381,8 @@ Others
 	https://www.openstack.org/software/start/
 	https://www.ibm.com/developerworks/community/blogs/132cfa78-44b0-4376-85d0-d3096cd30d3f?sortby=0&order=asc&maxresults=15&page=0&lang=en
 
-	CoreDNS
-	https://coredns.io/
-
 	JFrog
 	https://www.jfrog.com/confluence/display/JFROG/JFrog+Documentation
 
-	
+	Project V
+	https://www.v2fly.org/
