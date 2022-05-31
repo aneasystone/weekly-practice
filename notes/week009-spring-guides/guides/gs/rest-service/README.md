@@ -66,3 +66,32 @@ public class GreetingController {
 
 由于 Spring Web 内置了 [Jackson JSON](https://github.com/FasterXML/jackson) 的依赖，所以会自动使用 `MappingJackson2HttpMessageConverter` 来将 Greeting 对象转换为 JSON。
 
+## 打包测试
+
+使用 Maven 打包：
+
+```
+$ ./mvnw clean package
+```
+
+启动应用：
+
+```
+$ java -jar .\target\demo-0.0.1-SNAPSHOT.jar
+```
+
+使用 `curl` 测试接口：
+
+```
+$ curl http://localhost:8080/greeting
+{"id":1,"content":"Hello, World!"}
+```
+
+通过传入 `name` 参数，改变返回的 content 内容：
+
+```
+$ curl http://localhost:8080/greeting?name=zhang
+{"id":2,"content":"Hello, zhang!"}
+```
+
+要注意的是，这里的 id 字段是一个 `AtomicLong` 类型的计数器，每次请求都会自增，这也说明了 `GreetingController` 类是一个单例。
