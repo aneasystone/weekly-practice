@@ -20,6 +20,7 @@ Cloud Native
 
 	Docker
 	https://docs.docker.com/get-started/overview/
+	https://docs.docker.com/engine/reference/builder/
 
 	Kubernetes
 	https://kubernetes.io/docs/tutorials/
@@ -68,6 +69,7 @@ Databases and caches
 	
 	Redis
 	https://redis.io/documentation
+	http://www.redis.cn/documentation.html
 	
 	MySQL
 	https://dev.mysql.com/doc/
@@ -218,6 +220,9 @@ Java Framework
 		Shiro
 		https://shiro.apache.org/
 		https://github.com/zhangkaitao/shiro-example
+
+	Unit Test
+	https://www.baeldung.com/spring-boot-testing
 	
 Java Utils
 
@@ -247,6 +252,14 @@ Java Utils
 	
 	Docker Client
 	https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md
+
+	Documentation
+
+		Swagger
+		https://swagger.io/docs/
+
+		Smart doc
+		https://gitee.com/smart-doc-team/smart-doc
 	
 Package Manager
 
@@ -266,6 +279,7 @@ Build Tools
 
 	Buildpacks
 	https://buildpacks.io/docs/tools/pack/
+	https://segmentfault.com/a/1190000041235825
 
 Shell
 
@@ -358,9 +372,6 @@ Others
 
 	Websocket
 	https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
-
-	Swagger
-	https://swagger.io/docs/
 
 	Minio
 	https://docs.min.io/docs/minio-quickstart-guide.html

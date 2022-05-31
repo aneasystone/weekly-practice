@@ -19,6 +19,10 @@
 * [Building Java Projects with Maven](https://spring.io/guides/gs/maven/) - [*学习笔记*](./guides/gs/maven/README.md)
 * [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/) - [*学习笔记*](./guides/gs/gradle/README.md)
 
+## Spring MVC
+
+* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
+
 ## Spring Boot
 
 * [Building an Application with Spring Boot](https://spring.io/guides/gs/spring-boot/)
@@ -26,27 +30,45 @@
 * [Converting a Spring Boot JAR Application to a WAR](https://spring.io/guides/gs/convert-jar-to-war/)
 * [Creating Asynchronous Methods](https://spring.io/guides/gs/async-method/)
 
-## Web 服务
+### Restful Web Service
+
+* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/) - [*学习笔记*](./guides/gs/rest-service/README.md)
+* [【Tutorials】Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+* [Consuming a RESTful Web Service](https://spring.io/guides/gs/consuming-rest/) - [*学习笔记*](./guides/gs/consuming-rest/README.md)
+* [Consuming a RESTful Web Service with AngularJS](https://spring.io/guides/gs/consuming-rest-angularjs/)
+* [Consuming a RESTful Web Service with jQuery](https://spring.io/guides/gs/consuming-rest-jquery/)
+
+### Hypermedia-Driven RESTful Web Service
+
+* [Building a Hypermedia-Driven RESTful Web Service](https://spring.io/guides/gs/rest-hateoas/)
+
+### Spring Boot Actuator
+
+* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
+
+### Basics
 
 * [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
 * [Validating Form Input](https://spring.io/guides/gs/validating-form-input/)
 * [Uploading Files](https://spring.io/guides/gs/uploading-files/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Consuming a RESTful Web Service](https://spring.io/guides/gs/consuming-rest/)
-* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
-* [Building a Hypermedia-Driven RESTful Web Service](https://spring.io/guides/gs/rest-hateoas/)
-* [Consuming a RESTful Web Service with AngularJS](https://spring.io/guides/gs/consuming-rest-angularjs/)
-* [Consuming a RESTful Web Service with jQuery](https://spring.io/guides/gs/consuming-rest-jquery/)
+
+### SOAP
+
 * [Producing a SOAP web service](https://spring.io/guides/gs/producing-web-service/)
 * [Consuming a SOAP web service](https://spring.io/guides/gs/consuming-web-service/)
-* [【Tutorials】Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [【Tutorials】React.js and Spring Data REST](https://spring.io/guides/tutorials/react-and-spring-data-rest/)
+
+### CORS
+
+* [Enabling Cross Origin Requests for a RESTful Web Service](https://spring.io/guides/gs/rest-service-cors/)
+
+### Reactive
+
+* [Building a Reactive RESTful Web Service](https://spring.io/guides/gs/reactive-rest-service/)
+
+### Kotlin
+
 * [【Tutorials】Building web applications with Spring Boot and Kotlin](https://spring.io/guides/tutorials/spring-boot-kotlin/)
 * [【Tutorials】Spring Boot with Kotlin Coroutines and RSocket](https://spring.io/guides/tutorials/spring-webflux-kotlin-rsocket/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building a Reactive RESTful Web Service](https://spring.io/guides/gs/reactive-rest-service/)
-* [Enabling Cross Origin Requests for a RESTful Web Service](https://spring.io/guides/gs/rest-service-cors/)
-* [Consumer Driven Contracts](https://spring.io/guides/gs/contract-rest/)
 
 ## WebSocket
 
@@ -71,6 +93,7 @@
 * [Vault Configuration](https://spring.io/guides/gs/vault-config/)
 * [Creating CRUD UI with Vaadin](https://spring.io/guides/gs/crud-with-vaadin/)
 * [Integrating Data](https://spring.io/guides/gs/integration/)
+* [【Tutorials】React.js and Spring Data REST](https://spring.io/guides/tutorials/react-and-spring-data-rest/)
 
 ## 事务处理
 
@@ -106,6 +129,7 @@
 * [Spring Cloud Data Flow](https://spring.io/guides/gs/spring-cloud-dataflow/)
 * [Spring Cloud Task](https://spring.io/guides/gs/spring-cloud-task/)
 * [Spring Cloud Circuit Breaker Guide](https://spring.io/guides/gs/cloud-circuit-breaker/)
+* [Consumer Driven Contracts](https://spring.io/guides/gs/contract-rest/)
 
 ## 日志与监控
 
@@ -243,6 +267,8 @@
 * 【1.3K】https://github.com/Jstarfish/JavaKeeper
 * 【3.7K】https://github.com/RongleXie/java-books-collections
 * 【1.4K】https://github.com/DreamCats/java-notes
+* 【1.1K】https://github.com/dunwu/java-tutorial
+* 【1.1K】https://github.com/DuHouAn/Java
 
 #### Spring
 
@@ -261,3 +287,4 @@
 * 【0.8K】https://github.com/cicadasmile/middle-ware-parent
 * 【1.5K】https://github.com/yzcheng90/X-SpringBoot
 * 【4.5K】https://github.com/spring-projects/spring-data-examples
+* 【1.9K】https://github.com/vector4wang/spring-boot-quick
