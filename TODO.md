@@ -260,6 +260,20 @@ Java Utils
 
 		Smart doc
 		https://gitee.com/smart-doc-team/smart-doc
+
+		Springfox
+		https://github.com/springfox/springfox
+
+		SpringDoc
+		https://github.com/springdoc/springdoc-openapi
+
+	Template Engine
+
+		Velocity
+		https://velocity.apache.org/
+
+		Freemarker
+		https://freemarker.apache.org/
 	
 Package Manager
 

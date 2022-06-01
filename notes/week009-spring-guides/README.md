@@ -294,3 +294,8 @@
 * 【1.5K】https://github.com/yzcheng90/X-SpringBoot
 * 【4.5K】https://github.com/spring-projects/spring-data-examples
 * 【1.9K】https://github.com/vector4wang/spring-boot-quick
+
+### 3. 其他学习站点
+
+* https://www.baeldung.com/full_archive
+* https://www.petrikainulainen.net/tutorials/
