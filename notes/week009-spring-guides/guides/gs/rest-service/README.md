@@ -1,4 +1,4 @@
-# 构建一个 Restful 的 Web 服务
+# 构建一个简单的 Restful Web 服务
 
 这篇教程介绍了如何使用 Spring Boot 创建一个简单的 `Hello World` Restful Web 服务。
 

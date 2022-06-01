@@ -10,11 +10,15 @@
 
 ## 开始
 
+这部分内容介绍了如何使用常用的 IDE 工具创建一个 Spring Boot 项目脚手架，包括：`Spring Tool Suite`、`IntelliJ IDEA` 和 `Visual Studio Code`。
+
 * [Working a Getting Started guide with STS](https://spring.io/guides/gs/sts/) - [*学习笔记*](./guides/gs/sts/README.md)
 * [Working a Getting Started guide with IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/) - [*学习笔记*](./guides/gs/intellij-idea/README.md)
 * [Building a Guide with VS Code](https://spring.io/guides/gs/guides-with-vscode/) - [*学习笔记*](./guides/gs/vscode/README.md)
 
 ## 项目构建
+
+这部分内容介绍了如何使用 Maven 或 Gradle 来构建 Spring Boot 项目。
 
 * [Building Java Projects with Maven](https://spring.io/guides/gs/maven/) - [*学习笔记*](./guides/gs/maven/README.md)
 * [Building Java Projects with Gradle](https://spring.io/guides/gs/gradle/) - [*学习笔记*](./guides/gs/gradle/README.md)
@@ -31,6 +35,8 @@
 * [Creating Asynchronous Methods](https://spring.io/guides/gs/async-method/)
 
 ### Restful Web Service
+
+这部分内容介绍了如何使用 Spring Boot 构建一个简单的 Restful 的 Web 服务，并使用 `RestTemplate` 或前端 JavaScript 来调用它。
 
 * [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/) - [*学习笔记*](./guides/gs/rest-service/README.md)
 * [【Tutorials】Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
