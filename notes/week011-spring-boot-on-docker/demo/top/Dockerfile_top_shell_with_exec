@@ -1,0 +1,2 @@
+FROM ubuntu
+ENTRYPOINT exec top -b
