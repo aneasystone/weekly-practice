@@ -90,13 +90,107 @@ ENTRYPOINT exec java -jar /app.java
 
 而 `exec 格式` 就是使用 `exec` 来执行的，可以确保容器中 PID 为 1 的进程是 ENTRYPOINT 中指定的进程，一般推荐使用这种格式，而且还可以配合 `CMD` 指令内置程序的命令行参数，`shell 格式` 下 `CMD` 是无效的。
 
-为了验证上面的说法，我写了三个 Dockerfile 文件，第一个是 `Dockerfile_exec`：
+当 `ENTRYPOINT` 中的命令比较长时，可以编写一个简单的 Shell 脚本，这时 Dockerfile 的内容如下：
+
+```
+FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+COPY run_without_exec.sh run.sh
+RUN chmod +x run.sh
+ENTRYPOINT ["./run.sh"]
+```
+
+脚本 `run_without_exec.sh` 内容如下：
+
+```
+#!/bin/sh
+java -jar /app.jar
+```
+
+构建镜像并运行，这时再执行 `docker stop` 命令，我们发现会等待 10s 左右才退出，这是因为程序 Java 程序不是容器里 PID 为 1 的进程，它接收不到退出信号，导致 `docker` 等 10s 后将容器强制 kill 掉了。解决这个问题的方法是在 Shell 脚本中使用 `exec` 执行命令：
+
+```
+#!/bin/sh
+exec java -jar /app.jar
+```
+
+另外在 Shell 脚本中要慎用 `sudo` 命令，而应该使用 `gosu`，可以参见 [docker 与 gosu](https://cloud.tencent.com/developer/article/1454344) 这篇文章查看他们之间的区别。
+
+还有一点需要注意的是，如果我们在 Dockerfile 中使用环境变量，下面这样的 `exec 格式` 是不行的：
+
+```
+ENTRYPOINT ["java", "${JAVA_OPTS}", "-jar", "/app.jar"]
+```
+
+因为 `${JAVA_OPTS}` 这种变量需要 Shell 才能解析，而上面的 `ENTRYPOINT` 直接使用 `exec` 执行，并没有使用 Shell。解决方法是将启动命令写到一个 Shell 文件里，或者直接在 `ENTRYPOINT` 中使用 Shell：
+
+```
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app.jar"]
+```
+
+使用下面的命令验证 `${JAVA_OPTS}` 是否生效：
+
+```
+# docker run -p 8080:8080 -e "JAVA_OPTS=-Ddebug -Xmx128m" myorg/myapp
+```
+
+到目前为止，我们还没有用到命令行参数，如果像下面这样运行：
+
+```
+# docker run -p 8080:8080 myorg/myapp --debug
+```
+
+我们的本意是向 Java 进程传入 `--debug` 参数，可惜的是这并不生效，因为这个命令行参数被传给 `sh` 进程了。解决方法是在启动命令中使用 Shell 的两个特殊变量 `${0}` 和 `${@}`：
+
+```
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app.jar ${0} ${@}"]
+```
+
+如果运行的是 Shell 脚本，直接使用 `${@}` 变量即可：
+
+```
+#!/bin/sh
+exec java ${JAVA_OPTS} -jar /app.jar ${@}
+```
+
+### 更小的镜像
+
+## 使用分层优化 Dockerfile
+
+## 一些优化技巧
+
+## 多阶段构建（Multi-Stage Build）
+
+## 安全性
+
+## 构建插件
+
+## 持续集成
+
+## Buildpacks
+
+## Knative
+
+## 参考
+
+1. [Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
+1. [docker 与 gosu](https://cloud.tencent.com/developer/article/1454344)
+1. [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
+
+## 更多
+
+### 关于 `ENTRYPOINT` 的几点疑惑
+
+为了验证上面说的 `ENTRYPOINT` 中必须使用 `exec` 来启动程序的说法，我写了三个 Dockerfile 文件，第一个是 `Dockerfile_exec`：
+
 ```
 FROM openjdk:17-jdk-alpine
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
 ```
+
 第二个是 `Dockerfile_shell_without_exec`：
 
 ```
@@ -158,7 +252,7 @@ sha256:xxx   18 minutes ago   /bin/sh -c #(nop)  ENTRYPOINT ["/bin/sh" "-c" "exe
 sha256:xxx   18 minutes ago   /bin/sh -c #(nop)  ENTRYPOINT ["/bin/sh" "-c" "java -jar /app.jar"]
 ```
 
-可以发现 `java-shell-without-exec` 镜像中的 `ENTRYPOINT java -jar /app.jar` 被替换成了 `ENTRYPOINT ["/bin/sh" "-c" "java -jar /app.jar"]`，怀疑是 `docker build` 时对镜像做了什么优化导致的，但是并没有什么证据。
+可以发现 `java-shell-without-exec` 镜像中的 `ENTRYPOINT java -jar /app.jar` 被替换成了 `ENTRYPOINT ["/bin/sh" "-c" "java -jar /app.jar"]`，难道是 `docker build` 时对镜像做了什么优化导致的吗？但是目前并没有什么证据。
 
 然后去看了 Dockerfile 官方文档中的 [`ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint) 的例子，又写了三个 Dockerfile，第一个是 `Dockerfile_top_exec`：
 
@@ -223,33 +317,18 @@ sha256:xxx   14 minutes ago   /bin/sh -c #(nop)  ENTRYPOINT ["/bin/sh" "-c" "exe
 sha256:xxx   14 minutes ago   /bin/sh -c #(nop)  ENTRYPOINT ["/bin/sh" "-c" "top -b"]
 ```
 
-和上面的例子几乎是一模一样的，结果证明，并不是 `docker build` 做的手脚。难道是 Java 进程比较特殊吗？
+和上面的例子几乎是一模一样的，结果证明，并不是 `docker build` 做的手脚。难道是 Java 进程比较特殊吗？为什么不使用 `exec` Java 进程也能优雅退出呢？后面可以使用 Python 或 Go 写两个小程序，验证其他进程是不是一样的？
 
-### 更小的镜像
+另一个疑惑是，在 `ENTRYPOINT` 中指定命令行参数时：
 
-## 使用分层优化 Dockerfile
+```
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app.jar ${0} ${@}"]
+```
 
-## 一些优化技巧
+上面的 `${0}` 表示第 0 个参数，也就是被执行的程序，类似的，`${1}` 表示第一个参数，`${2}` 表示第二个参数，以此类推，`${@}` 表示所有的参数。但是很显然，在这个命令中，直接使用 `${@}` 应该就可以了，这里的 `${0}` 参数是起什么作用呢？而且如果我们和上面一样去执行 `sh -c` 命令：
 
-## 多阶段构建（Multi-Stage Build）
+```
+# sh -c "java -jar /app.jar ${0} ${@}" --debug
+```
 
-## 安全性
-
-## 构建插件
-
-## 持续集成
-
-## Buildpacks
-
-## Knative
-
-## 参考
-
-1. [Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
-1. [docker 与 gosu](https://cloud.tencent.com/developer/article/1454344)
-
-## 更多
-
-### 为什么不使用 `exec` Java 进程也能优雅退出？
-
-使用 Python 或 Go 写两个小程序，验证其他进程是不是一样？
+命令行参数是不能生效的，那么 `docker run` 到底是如何启动 `ENTRYPOINT` 中指定的命令的呢？
