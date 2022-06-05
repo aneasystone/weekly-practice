@@ -156,6 +156,14 @@ exec java ${JAVA_OPTS} -jar /app.jar ${@}
 
 ### 更小的镜像
 
+注意上面所使用的基础镜像是 `openjdk:17-jdk-alpine`，`alpine` 镜像相对于标准的 [openjdk](https://hub.docker.com/_/openjdk) 镜像要小，不过不能保证所有的 Java 版本都有 `alpine` 镜像，比如 [Java 11 就没有对应的 `alpine` 镜像](https://stackoverflow.com/questions/53375613/why-is-the-java-11-base-docker-image-so-large-openjdk11-jre-slim)。
+
+或者你可以使用 label 中带 jre 的镜像，jre 比 jdk 要小一点，不过也不是所有的版本都有对应的 jre 镜像，而且要注意的是，有些程序的运行可能依赖 jdk，在 jre 环境下是运行不了的。
+
+另外一个方法是使用 [Jigsaw 项目的 JLink 工具](https://openjdk.java.net/projects/jigsaw/quick-start#linker)。`Jigsaw` 是 OpenJDK 项目下的一个子项目，旨在为 Java SE 平台设计、实现一个标准的 **模块系统**（Module System），并应用到该平台和 JDK 中。使用 JLink 可以让你按需选择模块来构建出自定义的 JRE 环境，这比官方提供的 JRE 要更小。不过这种方法不具备通用性，你要为不同的应用构建不同的 JRE 环境，虽然你能得到一个更小的单个镜像，但是不同的 JRE 基础镜像加起来还是不小的。
+
+综上所述，构建镜像时我们并不一定非要追求镜像的体积能最小。镜像的体积能小一点当然很好，可以让上传和下载都很快，不过一旦镜像被缓存过，这个优势也就没有了。所以，不要凭自己的小聪明来构建更小的镜像，而让镜像缓存失效。如果你使用的都是同样的基础镜像，那么应该尝试去优化应用层，尽可能的将那些变动最多的内容放在镜像的最高层，那些体积大的变动不多的内容放在镜像的低层。
+
 ## 使用分层优化 Dockerfile
 
 ## 一些优化技巧
