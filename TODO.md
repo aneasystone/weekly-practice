@@ -41,6 +41,11 @@ Cloud Native
 	Knative
 	https://knative.dev/docs/
 
+Serverless
+
+	阿里云 SAE
+	https://www.aliyun.com/product/sae
+
 CI/CD
 
 	Jenkins
@@ -71,12 +76,25 @@ Databases and caches
 	https://redis.io/documentation
 	http://www.redis.cn/documentation.html
 	
+	Redisearch
+	https://redis.io/docs/stack/search/
+
 	MySQL
 	https://dev.mysql.com/doc/
 	
 	Hazelcast
 	https://github.com/hazelcast/hazelcast
 	https://medium.com/@igorkosandyak/spring-boot-with-hazelcast-b04d13927745
+
+	Elasticsearch
+		https://www.elastic.co/guide/index.html
+		https://fuxiaopang.gitbooks.io/learnelasticsearch/
+
+	ClickHouse
+	https://clickhouse.com/docs/zh/
+
+	HBase
+	https://hbase.apache.org/
 
 Database libraries
 
@@ -154,10 +172,6 @@ Observability
 
 	Logging
 
-		Elasticsearch
-		https://www.elastic.co/guide/index.html
-		https://fuxiaopang.gitbooks.io/learnelasticsearch/
-
 		Logstash
 		https://www.elastic.co/logstash/
 		https://doc.yonyoucloud.com/doc/logstash-best-practice-cn/index.html
@@ -197,6 +211,36 @@ Troubleshooting
     https://xpocket.perfma.com/
     https://github.com/PerfMa/XPocket
 
+Testing
+
+	Unit Test
+	https://www.baeldung.com/spring-boot-testing
+
+		JUnit 5
+		https://junit.org/junit5/
+
+	Performance Test
+
+		Apache JMeter
+		https://jmeter.apache.org/
+
+		阿里云性能测试服务 PTS
+		https://www.aliyun.com/product/pts
+
+Job
+
+	Quartz
+	http://www.quartz-scheduler.org/
+
+	XXL-JOB
+	https://www.xuxueli.com/xxl-job/
+
+	ElasticJob
+	https://shardingsphere.apache.org/elasticjob/current/cn/overview/
+
+	Kubernetes Job
+	https://kubernetes.io/zh/docs/concepts/workloads/controllers/job/
+
 Java Framework
 
 	Spring MVC
@@ -220,9 +264,6 @@ Java Framework
 		Shiro
 		https://shiro.apache.org/
 		https://github.com/zhangkaitao/shiro-example
-
-	Unit Test
-	https://www.baeldung.com/spring-boot-testing
 	
 Java Utils
 
@@ -354,6 +395,26 @@ Microservice
 	
 		Sentinel
 		https://github.com/alibaba/Sentinel
+
+	Gateway
+
+		Spring Cloud Gateway
+		https://spring.io/projects/spring-cloud-gateway
+
+		Envoy
+		https://www.envoyproxy.io/
+
+		Kong
+		https://github.com/Kong/kong
+
+		Kubernetes Ingress
+		https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+	阿里云微服务引擎 MSE
+	https://www.aliyun.com/product/aliware/mse
+
+	Seata
+	https://seata.io/
 
 Front End
 

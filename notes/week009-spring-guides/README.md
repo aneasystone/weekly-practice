@@ -275,6 +275,8 @@
 * 【1.4K】https://github.com/DreamCats/java-notes
 * 【1.1K】https://github.com/dunwu/java-tutorial
 * 【1.1K】https://github.com/DuHouAn/Java
+* 【1.8K】https://github.com/kanwangzjm/funiture
+* 【1.1K】https://github.com/Wasabi1234/Java-Concurrency-Progamming-Tutorial
 
 #### Spring
 
@@ -294,6 +296,7 @@
 * 【1.5K】https://github.com/yzcheng90/X-SpringBoot
 * 【4.5K】https://github.com/spring-projects/spring-data-examples
 * 【1.9K】https://github.com/vector4wang/spring-boot-quick
+* 【2.2K】https://github.com/qq53182347/liugh-parent
 
 ### 3. 其他学习站点
 
