@@ -166,6 +166,59 @@ exec java ${JAVA_OPTS} -jar /app.jar ${@}
 
 ## 使用分层优化 Dockerfile
 
+Spring Boot 应用使用了一种 [可执行的 JAR 文件格式](https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html)，这种 JAR 文件天然具有分层的特点。我们可以使用下面的命令将 JAR 文件解压：
+
+```
+# mkdir target/dependency && cd target/dependency
+# jar -xf ../*.jar
+```
+
+JAR 文件的结构类似下面这样：
+
+```
+example.jar
+ |
+ +-META-INF
+ |  +-MANIFEST.MF
+ +-org
+ |  +-springframework
+ |     +-boot
+ |        +-loader
+ |           +-<spring boot loader classes>
+ +-BOOT-INF
+    +-classes
+    |  +-com
+    |     +-example
+    |        +-YourClasses.class
+    +-lib
+       +-dependency1.jar
+       +-dependency2.jar
+```
+
+所有的应用类放在 `BOOT-INF/classes` 目录下，而所有的依赖都在 `BOOT-INF/lib` 目录下。另外，`org.springframework.boot.loader` 目录下是 Spring Boot loader 的相关代码，是整个 JAR 文件能执行的关键，可以在 `META-INF/MANIFEST.MF` 文件中看到一些端倪：
+
+```
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: com.example.demo.DemoApplication
+```
+
+接下来我们创建一个带分层的 Dockerfile 文件：
+
+```
+FROM openjdk:17-jdk-alpine
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.demo.DemoApplication"]
+```
+
+这个文件中包含了三层，其中 `BOOT-INF/lib` 目录是程序的依赖部分，几乎很少变动，我们将这一层放在第一层，而变动最多的应用代码 `/BOOT-INF/classes` 放在第三层，这样每次构建时都可以充分利用第一层的缓存，加快构建和启动速度。
+
+> 有一点值得注意的是，我们上面看到 JAR 文件中还包括 Spring Boot loader 的相关代码，但是在 Dockerfile 里并没有用到，所以我们在 `ENTRYPOINT` 中需要手工指定启动类 `com.example.demo.DemoApplication`。不过我们也可以将 Spring Boot loader 拷贝到容器里，使用 `org.springframework.boot.loader.JarLauncher` 来启动应用。
+
+### Spring Boot Layer Index
+
 ## 一些优化技巧
 
 ## 多阶段构建（Multi-Stage Build）
