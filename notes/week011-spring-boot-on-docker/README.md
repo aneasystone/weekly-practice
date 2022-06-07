@@ -215,7 +215,14 @@ ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.demo.DemoApplication"]
 
 这个文件中包含了三层，其中 `BOOT-INF/lib` 目录是程序的依赖部分，几乎很少变动，我们将这一层放在第一层，而变动最多的应用代码 `/BOOT-INF/classes` 放在第三层，这样每次构建时都可以充分利用第一层的缓存，加快构建和启动速度。
 
-> 有一点值得注意的是，我们上面看到 JAR 文件中还包括 Spring Boot loader 的相关代码，但是在 Dockerfile 里并没有用到，所以我们在 `ENTRYPOINT` 中需要手工指定启动类 `com.example.demo.DemoApplication`。不过我们也可以将 Spring Boot loader 拷贝到容器里，使用 `org.springframework.boot.loader.JarLauncher` 来启动应用。
+而且当 JAR 文件比较大时，解压后的 JAR 文件启动速度要更快一点。
+
+> 有一点值得注意的是，我们上面看到 JAR 文件中还包括 Spring Boot loader 的相关代码，但是在 Dockerfile 里并没有用到，所以我们在 `ENTRYPOINT` 中需要手工指定启动类 `com.example.demo.DemoApplication`。不过我们也可以将 Spring Boot loader 拷贝到容器里，使用 `org.springframework.boot.loader.JarLauncher` 来启动应用。下面直接使用 `JarLauncher` 来启动应用：
+> ```
+> $ jar -xf demo.jar
+> $ java org.springframework.boot.loader.JarLauncher
+> ```
+> 使用 `JarLauncher` 启动应用的好处是不用再硬编码启动类，对于任意的 Spring Boot 项目都适用，而且还可以保证 classpath 的加载顺序，在 `BOOT-INF` 目录下可以看到一个 `classpath.idx` 文件，`JarLauncher` 就是用它来构建 classpath 的。
 
 ### Spring Boot Layer Index
 
@@ -238,6 +245,7 @@ ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.demo.DemoApplication"]
 1. [Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
 1. [docker 与 gosu](https://cloud.tencent.com/developer/article/1454344)
 1. [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
+1. [Spring Boot Reference Documentation: Container Images](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#container-images)
 
 ## 更多
 

@@ -164,7 +164,7 @@ ENTRYPOINT ["java","-jar","/app.jar"]
 * /META-INF
 * /BOOT-INF/classes
 
-其中 `/BOOT-INF/lib` 和 `/META-INF` 都是变动不多的部分，变动最多的是 `/BOOT-INF/classes` 目录下的程序代码。我们稍微修改下 Dockerfile 文件，将 jar 文件中的内容分层添加：
+其中 `/BOOT-INF/lib` 目录是程序的依赖，是变动不多的部分，变动最多的是 `/BOOT-INF/classes` 目录下的程序代码。我们稍微修改下 Dockerfile 文件，将 jar 文件中的内容分层添加：
 
 ```
 FROM openjdk:17-jdk-alpine
