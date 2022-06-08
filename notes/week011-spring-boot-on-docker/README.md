@@ -241,7 +241,20 @@ ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.demo.DemoApplication"]
   - "META-INF/"
 ```
 
-使用 `layertools` 可以将 JAR 文件按照分层信息解压出来：
+除了 `layers.idx` 文件，在 lib 目录我们还可以看到一个 `spring-boot-jarmode-layertools.jar` 文件，这个依赖文件可以让你的应用以一种新的模式来运行（`jarmode=layertools`）：
+
+```
+$ java -Djarmode=layertools -jar ./target/demo-0.0.1-SNAPSHOT.jar
+Usage:
+  java -Djarmode=layertools -jar demo-0.0.1-SNAPSHOT.jar
+
+Available commands:
+  list     List layers from the jar that can be extracted
+  extract  Extracts layers from the jar for image creation
+  help     Help about any command
+```
+
+可以使用 `layertools` 的 `extract` 命令将 JAR 文件按照分层信息解压出来：
 
 ```
 $ mkdir target/extracted
@@ -289,6 +302,7 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 1. [docker 与 gosu](https://cloud.tencent.com/developer/article/1454344)
 1. [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 1. [Spring Boot Reference Documentation: Container Images](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#container-images)
+1. [体验SpringBoot(2.3)应用制作Docker镜像(官方方案)](https://blog.csdn.net/boling_cavalry/article/details/106597358)
 
 ## 更多
 
