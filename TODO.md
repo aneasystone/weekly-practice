@@ -416,6 +416,32 @@ Microservice
 	Seata
 	https://seata.io/
 
+Storage System
+	
+	Minio
+	https://docs.min.io/docs/minio-quickstart-guide.html
+
+	Ceph
+	https://ceph.com/en/
+
+	Gluster
+	https://www.gluster.org/
+
+	HDFS
+	https://hadoop.apache.org/docs/r1.2.1/hdfs_user_guide.html
+
+	MongoDB GridFS
+	https://www.mongodb.com/docs/manual/core/gridfs/
+
+	MooseFS 
+	https://moosefs.com/
+
+	FastDFS 
+	https://github.com/happyfish100/fastdfs
+
+	ROOK
+	https://rook.io/
+
 Front End
 
 	axios
@@ -447,9 +473,6 @@ Others
 
 	Websocket
 	https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
-
-	Minio
-	https://docs.min.io/docs/minio-quickstart-guide.html
 
 	Visual Studio Code
 	https://code.visualstudio.com/docs
