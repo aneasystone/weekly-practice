@@ -284,6 +284,18 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 
 ## 一些优化技巧
 
+下面这些技巧可以让你的应用启动速度更快：
+
+* 使用 [`spring-context-indexer`](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-scanning-index)
+* 不使用 [`Actuator`](https://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#actuator)
+* 使用 Spring Boot 2.1 & Spring 5.1 以上版本
+* 使用 [`spring.config.location`](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-application-property-files) 指定 Spring Boot 配置文件的位置
+* 使用 `spring.jmx.enabled=false` 关闭 JMX
+* 使用 `-noverify` 参数，关闭 JVM 的字节码校验（bytecode verification）
+* 使用 `-XX:TieredStopAtLevel=1` 参数，开启 JIT 的 C1 编译器，也就是 `Client Compiler`
+* 在 Java 8 中使用 `-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap` 参数，在 Java 11 中已默认启用
+* 尽可能使用多个 CPU 核启动应用，至少 2 个，最好 4 个；如果少于 4 个 CPU 核，可以考虑使用 `-Dspring.backgroundpreinitializer.ignore=true` 参数关闭预初始化，这可以阻止 Spring Boot 创建额外的线程
+
 ## 多阶段构建（Multi-Stage Build）
 
 ## 安全性
