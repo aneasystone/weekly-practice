@@ -226,6 +226,49 @@ ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.demo.DemoApplication"]
 
 ### Spring Boot Layer Index
 
+从 Spring Boot 2.3.0 开始，构建出的 JAR 文件中多了一个 `layers.idx` 文件，这个文件包含了 JAR 文件的分层信息，类似于下面这样：
+
+```
+- "dependencies":
+  - "BOOT-INF/lib/"
+- "spring-boot-loader":
+  - "org/"
+- "snapshot-dependencies":
+- "application":
+  - "BOOT-INF/classes/"
+  - "BOOT-INF/classpath.idx"
+  - "BOOT-INF/layers.idx"
+  - "META-INF/"
+```
+
+使用 `layertools` 可以将 JAR 文件按照分层信息解压出来：
+
+```
+$ mkdir target/extracted
+$ java -Djarmode=layertools -jar target/demo-0.0.1-SNAPSHOT.jar extract --destination target/extracted
+```
+
+可以看出这里包括了四个分层：
+
+* dependencies
+* spring-boot-loader
+* snapshot-dependencies
+* application
+
+和之前我们手工创建的分层相比，多了一层 `snapshot-dependencies`，这比之前直接将所有的依赖都放在一层更好，因为 SNAPSHOT 依赖也是很容易发生变化的。使用这个分层信息，我们重新编写 Dockerfile：
+
+```
+FROM openjdk:11-jdk-alpine
+ARG EXTRACTED=target/extracted
+COPY ${EXTRACTED}/dependencies/ ./
+COPY ${EXTRACTED}/spring-boot-loader/ ./
+COPY ${EXTRACTED}/snapshot-dependencies/ ./
+COPY ${EXTRACTED}/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+```
+
+> 分层信息文件 `layers.idx` 是 Maven 或 Gradle 的 Spring Boot 插件在打包时自动生成的，如果要自定义 `layers.idx`，可以对插件进行配置，参见 Maven 文档 [Layered Jar or War](https://docs.spring.io/spring-boot/docs/2.7.0/maven-plugin/reference/htmlsingle/#packaging.layers)。
+
 ## 一些优化技巧
 
 ## 多阶段构建（Multi-Stage Build）
