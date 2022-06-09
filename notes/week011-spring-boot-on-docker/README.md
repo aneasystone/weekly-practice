@@ -298,6 +298,48 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 
 ## 多阶段构建（Multi-Stage Build）
 
+在使用上面的 Dockerfile 构建镜像时，都有一个前提条件，就是 JAR 文件已经提前编译打包好了。我们可以将打包这一步也放在 Dockerfile 中，通过使用多阶段构建，将 JAR 文件从一个镜像复制到另一个镜像：
+
+```
+FROM openjdk:17-jdk-alpine as build
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+RUN ./mvnw install -DskipTests
+
+FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=/app/target/*.jar
+COPY --from=build ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+我们也可以将解压分层的步骤也放在 Dockerfile 里：
+
+```
+FROM openjdk:17-jdk-alpine as build
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+RUN ./mvnw install -DskipTests
+RUN mkdir -p target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
+
+FROM openjdk:17-jdk-alpine
+ARG EXTRACTED=/app/target/extracted
+COPY --from=build ${EXTRACTED}/dependencies/ ./
+COPY --from=build ${EXTRACTED}/spring-boot-loader/ ./
+COPY --from=build ${EXTRACTED}/snapshot-dependencies/ ./
+COPY --from=build ${EXTRACTED}/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+```
+
+上面的第一个 `FROM` 为构建的第一阶段，被标记为 `build`，在第一阶段中，我们先将源码复制到容器里，然后执行 `./mvnw` 打包，最后使用 `layertools` 解压。注意这里的源码被分成了四层，前两层是构建工具 Maven Wrapper，后两层是 POM 配置文件和应用代码，这也算是一个比较小的优化。
+
+在第二个阶段中，我们通过 `COPY --from=build` 可以从第一阶段构建的结果中复制文件。
+
 ## 安全性
 
 ## 构建插件
