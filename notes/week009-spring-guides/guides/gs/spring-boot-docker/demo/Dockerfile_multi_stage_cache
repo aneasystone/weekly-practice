@@ -1,0 +1,12 @@
+FROM openjdk:17-jdk-alpine as build
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests
+
+FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=/app/target/*.jar
+COPY --from=build ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]

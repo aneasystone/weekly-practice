@@ -340,6 +340,53 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 
 在第二个阶段中，我们通过 `COPY --from=build` 可以从第一阶段构建的结果中复制文件。
 
+### 实验特性
+
+在上面的 Dockerfile 中，我们使用命令 `./mvnw install -DskipTests` 来构建并打包 Java 代码，每次构建时，Maven 会先从本地仓库获取依赖，如果本地仓库不存在，则会从远程仓库下载依赖。如果我们对代码做了一点点修改，也就意味了应用代码后面的分层缓存全部失效，这时 Maven 又会从远程仓库下载依赖，构建速度可想而知。
+
+那么能不能将 Maven 构建时用到的本地仓库缓存起来呢？
+
+从 Docker 18.09 版本开始，Docker 内置了一种新的构建工具 [BuildKit](https://github.com/moby/buildkit)，它被称为 Docker 下一代构建神器，它比 Docker 自带的构建工具提供了更丰富的构建特性。其中一个特性叫 [`Build Mounts`](https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#build-mounts-run---mount)，能够将 `RUN` 指令的结果缓存起来，类似于数据卷的功能，并在其他地方复用。
+
+在 Docker 18.09 之前的版本中，需要开启 Docker 的实验特性（在 Docker daemon 配置文件中添加）：
+
+```
+{
+  "experimental": true
+}
+```
+
+并在 Dockerfile 文件第一行写上：
+
+```
+# syntax=docker/dockerfile:experimental
+```
+
+不过 `Build Mounts` 特性已经内置在最新版本的 Docker 中了，如果你使用的是 Docker 18.09 以上的版本，这一步可以忽略。
+
+然后对 Dockerfile 做一点修改：
+
+```
+FROM openjdk:17-jdk-alpine as build
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests
+
+FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=/app/target/*.jar
+COPY --from=build ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+可以看出在 `RUN` 指令上加了一个新的参数 `--mount=type=cache,target=/root/.m2`，这个意思是将构建后的 `/root/.m2` 目录缓存起来，多次构建可以重复使用。
+
+然后我们重新构建镜像，第一次构建仍然需要一点时间，但是后面无论你怎么修改代码，构建速度都会非常快了。
+
+> 如果构建不生效，可以在 `docker build` 命令前面加上 `DOCKER_BUILDKIT=1` 开启 BuildKit 特性。
+
 ## 安全性
 
 ## 构建插件
@@ -357,6 +404,7 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 1. [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 1. [Spring Boot Reference Documentation: Container Images](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#container-images)
 1. [体验SpringBoot(2.3)应用制作Docker镜像(官方方案)](https://blog.csdn.net/boling_cavalry/article/details/106597358)
+1. [BuildKit](https://yeasy.gitbook.io/docker_practice/buildx/buildkit)
 
 ## 更多
 
