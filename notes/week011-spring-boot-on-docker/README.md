@@ -404,7 +404,41 @@ USER demo
 
 ## 构建插件
 
+除了 `docker build` 命令，有很多的 Maven 和 Gradle 插件也可以用来构建镜像。
+
+### Spring Boot Maven and Gradle Plugins
+
+你可以使用 Spring Boot 官方的 Maven 和 Gradle 插件来构建镜像，这个插件使用了 [Buildpacks](https://buildpacks.io/) 来生成 OCI 格式的镜像（这和 `docker build` 是一样的）。你不需要编写 Dockerfile 文件，只要有能访问的 Docker 服务即可，无论是本地服务还是远程服务，如果是远程服务，使用 `DOCKER_HOST` 环境变量配置 Docker 地址。
+
+使用下面的 Maven 命令构建镜像：
+
+```
+$ ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=myorg/myapp
+```
+
+Buildpacks 对 Spring Boot 应用做了一些优化，也和上面一样对镜像进行分层，另外启动时还使用 [Memory Calculator](https://paketo.io/docs/reference/java-reference/#memory-calculator) 来动态调整 JVM 内存参数。
+
+### Spotify Maven Plugin
+
+另一个 Maven 插件 [Spotify](https://github.com/spotify/dockerfile-maven) 也是一个不错的选择，它可以不仅可以用于 Spring Boot 项目，也可以用于任意的 Maven 项目。它使用 Dockerfile 来构建 Docker 镜像，和 `docker build` 命令一样，只不过将这个过程集成到 Maven 的生命周期中。使用下面的命令构建镜像：
+
+```
+$ mvn com.spotify:dockerfile-maven-plugin:build -Ddockerfile.repository=myorg/myapp
+```
+
+> 不过看 [这个项目的首页](https://github.com/spotify/dockerfile-maven)，已经好几年没有维护了。
+
+### Palantir Gradle Plugin
+
+如果你使用的构建工具是 Gradle，还可以尝试下 [Palantir](https://github.com/palantir/gradle-docker) 这一款插件。它和 `Spotify` 一样，依赖于 Dockerfile 来构建镜像，就和执行 `docker build` 命令一样。
+
+### Jib Maven and Gradle Plugins
+
 ## 持续集成
+
+### Concourse
+
+### Jenkins
 
 ## Buildpacks
 
