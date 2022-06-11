@@ -389,6 +389,19 @@ ENTRYPOINT ["java","-jar","/app.jar"]
 
 ## 安全性
 
+在容器中我们应该以非 root 账号启动应用程序，为了做到这一点，我们需要在 Dockerfile 中加一层，添加一个用户组和用户，并将该用户设置为当前用户：
+
+```
+RUN addgroup -S demo && adduser -S demo -G demo
+USER demo
+```
+
+第一个 `RUN` 指令运行 `addgroup` 命令添加了一个用户组 `demo`，接着运行 `adduser` 命令添加一个用户 `demo` 并添加到用户组 `demo` 中，第二个指令 `USER` 用于设置当前用户为 `demo`，这样后面的命令都将以 `demo` 用户运行。
+
+以非 root 账号启动应用程序这种做法也被称为 *最小权限原则*（the principle of least privilege）。
+
+除了这个原则外，另一个值得注意的地方是，并不是所有的应用都需要完整的 JDK 环境，所以我们可以将基础镜像替换为 JRE，这不仅能减小镜像体积，也能提高一定的安全性。
+
 ## 构建插件
 
 ## 持续集成
