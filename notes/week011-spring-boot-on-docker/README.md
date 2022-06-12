@@ -446,11 +446,11 @@ Google 开源了一款名为 [Jib](https://github.com/GoogleContainerTools/jib) 
 
 ```
 {
-	"auths": {
-		"https://index.docker.io/v1/": {
-			"auth": "..."
-		}
-	}
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "..."
+    }
+  }
 }
 ```
 

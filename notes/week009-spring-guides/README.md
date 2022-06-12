@@ -278,6 +278,7 @@
 * 【1.8K】https://github.com/kanwangzjm/funiture
 * 【1.1K】https://github.com/Wasabi1234/Java-Concurrency-Progamming-Tutorial
 * 【2.4K】https://github.com/zq2599/blog_demos
+* 【1.0K】https://github.com/lenve/javaboy-code-samples
 
 #### Spring
 
@@ -299,6 +300,8 @@
 * 【1.9K】https://github.com/vector4wang/spring-boot-quick
 * 【2.2K】https://github.com/qq53182347/liugh-parent
 * 【3.1K】https://github.com/lenve/JavaEETest
+* 【2.1K】https://github.com/forezp/SpringBootLearning
+* 【4.3K】https://github.com/zuihou/lamp-cloud
 
 ### 3. 其他学习站点
 

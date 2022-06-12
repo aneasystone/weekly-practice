@@ -224,6 +224,9 @@ Testing
 		Apache JMeter
 		https://jmeter.apache.org/
 
+		ab - Apache HTTP server benchmarking tool
+		https://httpd.apache.org/docs/2.4/programs/ab.html
+
 		阿里云性能测试服务 PTS
 		https://www.aliyun.com/product/pts
 
@@ -315,6 +318,9 @@ Java Utils
 
 		Freemarker
 		https://freemarker.apache.org/
+
+		Thymeleaf
+		https://www.thymeleaf.org/
 	
 Package Manager
 
@@ -335,6 +341,9 @@ Build Tools
 	Buildpacks
 	https://buildpacks.io/docs/tools/pack/
 	https://segmentfault.com/a/1190000041235825
+
+	Paketo Buildpacks
+	https://paketo.io/
 
 Shell
 
@@ -469,6 +478,17 @@ Machine Learning
 	PaddlePaddle
 	https://www.paddlepaddle.org.cn/
 
+Coding
+
+	华山版《Java开发手册》
+	https://developer.aliyun.com/special/tech-java
+
+	SonarQube
+	https://docs.sonarqube.org/latest/
+
+	FindBugs
+	http://findbugs.sourceforge.net/
+
 Others
 
 	Websocket
@@ -482,9 +502,6 @@ Others
 
 	Gogs
 	https://gogs.io/
-
-	SonarQube
-	https://docs.sonarqube.org/latest/
 
 	OpenStack
 	https://www.openstack.org/software/start/
