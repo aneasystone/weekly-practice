@@ -420,7 +420,7 @@ Buildpacks 对 Spring Boot 应用做了一些优化，也和上面一样对镜�
 
 ### Spotify Maven Plugin
 
-另一个 Maven 插件 [Spotify](https://github.com/spotify/dockerfile-maven) 也是一个不错的选择，它可以不仅可以用于 Spring Boot 项目，也可以用于任意的 Maven 项目。它使用 Dockerfile 来构建 Docker 镜像，和 `docker build` 命令一样，只不过将这个过程集成到 Maven 的生命周期中。使用下面的命令构建镜像：
+另一个 Maven 插件 [Spotify](https://github.com/spotify/dockerfile-maven) 也是一个不错的选择，它不仅可以用于 Spring Boot 项目，也可以用于任意的 Maven 项目。它使用 Dockerfile 来构建 Docker 镜像，和 `docker build` 命令一样，只不过将这个过程集成到 Maven 的生命周期中。使用下面的命令构建镜像：
 
 ```
 $ mvn com.spotify:dockerfile-maven-plugin:build -Ddockerfile.repository=myorg/myapp
@@ -433,6 +433,81 @@ $ mvn com.spotify:dockerfile-maven-plugin:build -Ddockerfile.repository=myorg/my
 如果你使用的构建工具是 Gradle，还可以尝试下 [Palantir](https://github.com/palantir/gradle-docker) 这一款插件。它和 `Spotify` 一样，依赖于 Dockerfile 来构建镜像，就和执行 `docker build` 命令一样。
 
 ### Jib Maven and Gradle Plugins
+
+Google 开源了一款名为 [Jib](https://github.com/GoogleContainerTools/jib) 的构建工具，它非常有意思。首先它不依赖于 Docker 环境，在没有安装 Docker 的情况下也可以使用，其次它也不需要 Dockerfile 文件，Jib 会自动使用分层技术来构建镜像，它会将应用代码和依赖分开来，并且将 snapshot 依赖单独放在一层，因为它变动的可能性更大。
+
+如果没有 Docker 环境，那么 Jib 构建出来的镜像放在哪呢？答案是 Jib 会自动推送到镜像仓库，默认是 [Docker Hub](https://hub.docker.com/)，根据你镜像的名字也可以推送到其他镜像仓库。
+
+所以在运行 Jib 之前确保你有权限访问镜像仓库，你可以注册一个 Docker Hub 账号，然后配置镜像仓库的用户名和密码，有两种配置方式：
+
+* `${HOME}/.docker/config.json`
+
+这个是默认的 Docker 配置文件，如果你机器上已经安装了 Docker，那么直接运行 `docker login` 命令登录镜像仓库就可以了，账号信息会自动配置在这个文件里:
+
+```
+{
+	"auths": {
+		"https://index.docker.io/v1/": {
+			"auth": "..."
+		}
+	}
+}
+```
+
+* `${HOME}/.m2/settings.xml`
+
+这个是 Maven 的配置文件，如果你的机器上没有按照 Docker，可以将镜像仓库信息写在这个文件的 `servers` 配置项里：
+
+```
+    <server>
+      <id>registry.hub.docker.com</id>
+      <username>aneasystone</username>
+      <password>...</password>
+    </server>
+```
+
+配置完成后，执行下面的命令构建镜像：
+
+```
+$ mvn com.google.cloud.tools:jib-maven-plugin:build -Dimage=aneasystone/myapp
+
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --------------------------< com.example:demo >--------------------------
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- jib-maven-plugin:3.2.1:build (default-cli) @ demo ---
+[WARNING] 'mainClass' configured in 'maven-jar-plugin' is not a valid Java class: ${start-class}
+[INFO]
+[INFO] Containerizing application to aneasystone/myapp...
+[WARNING] Base image 'eclipse-temurin:11-jre' does not use a specific image digest - build may not be reproducible
+[INFO] Using credentials from Docker config (C:\Users\aneasystone\.docker\config.json) for aneasystone/myapp
+[INFO] The base image requires auth. Trying again for eclipse-temurin:11-jre...
+[INFO] Using credentials from Docker config (C:\Users\aneasystone\.docker\config.json) for eclipse-temurin:11-jre
+[INFO] Using base image with digest: sha256:dfc65cf47f7190abee866dc1236b18fd52bd1db94918b6d70f238d3cd2538606
+[INFO]
+[INFO] Container entrypoint set to [java, -cp, @/app/jib-classpath-file, com.example.demo.DemoApplication]
+[INFO]
+[INFO] Built and pushed image as aneasystone/myapp
+[INFO] Executing tasks:
+[INFO] [==============================] 100.0% complete
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:58 min
+[INFO] Finished at: 2022-06-12T09:42:42+08:00
+[INFO] ------------------------------------------------------------------------
+```
+
+构建结束后，可以看到镜像被推送到 [我的 Docker Hub 账户下](https://hub.docker.com/repository/docker/aneasystone/myapp) 了。
+
+Jib 也支持使用 docker 来构建镜像，只需要将 `build` 改成 `dockerBuild` 即可：
+
+```
+$ mvn com.google.cloud.tools:jib-maven-plugin:dockerBuild -Dimage=aneasystone/myapp
+```
 
 ## 持续集成
 
