@@ -559,6 +559,14 @@ node {
 
 ## Buildpacks
 
+Spring Boot 官方的 Maven 或 Gradle 插件使用 [Buildpacks](https://buildpacks.io/) 来构建 Docker 镜像，和下面直接使用 [Pack CLI](https://buildpacks.io/docs/tools/pack/) 是完全一样的：
+
+```
+$ pack build myorg/myapp --builder=paketobuildpacks/builder:base --path=.
+```
+
+使用 Buildpacks 构建镜像无需编写 Dockerfile 文件，Buildpacks 会自动对镜像的分层进行优化，开发者不需要了解和关心镜像构建的细节。在低层（比如包含操作系统的基础镜像）和高层（包含中间件或语言特定的依赖）之间有一个叫做 ABI 的接口（[Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface)），这可以让一些类似于 Cloud Foundry 的平台，在不影响应用程序功能的前提下，对低层镜像进行安全更新和升级。
+
 ## Knative
 
 ## 参考
