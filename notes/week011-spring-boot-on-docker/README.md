@@ -511,9 +511,51 @@ $ mvn com.google.cloud.tools:jib-maven-plugin:dockerBuild -Dimage=aneasystone/my
 
 ## 持续集成
 
+自动化是应用开发流程中的重要一环。现代化的自动化工具几乎都支持将源码构建成 Docker 镜像，下面稍微介绍几个这样的工具。
+
 ### Concourse
 
+[Concourse](https://concourse-ci.org/) 是由 VMware Cloud Foundry 开发的一款基于流水线的自动化平台，用于 CI/CD。除 CLI 之外，Concourse 中的所有东西都是无状态的，并运行在容器中，所以它对容器有着很好的支持。[Docker Image Resource](https://github.com/concourse/docker-image-resource) 用于实时跟踪和构建 Docker 镜像。
+
+下面是用 Concourse 构建 Docker 镜像的流水线示例：
+
+```
+resources:
+- name: myapp
+  type: git
+  source:
+    uri: https://github.com/myorg/myapp.git
+- name: myapp-image
+  type: docker-image
+  source:
+    email: {{docker-hub-email}}
+    username: {{docker-hub-username}}
+    password: {{docker-hub-password}}
+    repository: myorg/myapp
+
+jobs:
+- name: main
+  plan:
+  - task: build
+    file: myapp/src/main/ci/build.yml
+  - put: myapp-image
+    params:
+      build: myapp
+```
+
+流水线结构还是比较清晰的，你需要定义两个东西：**resources**（用于描述输入或输出）和 **jobs**（用于指定对资源的动作），如果输入资源发生变动，就会触发一次新的构建。
+
 ### Jenkins
+
+[Jenkins](https://jenkins.io/) 是另一款流行的自动化平台，它拥有非常丰富的特性，其中有一点特性和上面是类似的：[流水线](https://jenkins.io/doc/book/pipeline/docker/)。下面的 `Jenkinsfile` 文件使用 Maven 对 Spring Boot 项目进行构建，然后使用 Dockerfile 构建 Docker 镜像并推送到镜像仓库：
+
+```
+node {
+    checkout scm
+    sh './mvnw -B -DskipTests clean package'
+    docker.build("myorg/myapp").push()
+}
+```
 
 ## Buildpacks
 
