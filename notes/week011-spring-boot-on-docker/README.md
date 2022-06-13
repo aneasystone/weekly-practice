@@ -569,6 +569,10 @@ $ pack build myorg/myapp --builder=paketobuildpacks/builder:base --path=.
 
 ## Knative
 
+[Knative](https://cloud.google.com/knative/) 是一个基于 Kubernetes 的平台，用于构建、部署和管理现代无服务器的工作负载（serverless workloads）。它的一大特性是将源码构建成 Docker 镜像，对开发人员和运维人员非常友好，这个工作主要是由 [Knative Build](https://github.com/knative/build) 完成的，它提供了 [很多的模板](https://github.com/knative/build-templates)，比如：[Kaniko](https://github.com/GoogleContainerTools/kaniko) 和 [Buildpacks](https://github.com/knative/build-templates/tree/master/buildpacks) 等。
+
+> 目前，Knative Build 已经被 [Tekton Pipelines](https://github.com/tektoncd/pipeline) 所取代。
+
 ## 参考
 
 1. [Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
