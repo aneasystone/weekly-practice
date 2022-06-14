@@ -22,9 +22,13 @@ Cloud Native
 	https://docs.docker.com/get-started/overview/
 	https://docs.docker.com/engine/reference/builder/
 
-	Kubernetes
+Kubernetes
+
+	Basics
 	https://kubernetes.io/docs/tutorials/
 	https://github.com/zhangjiongdev/k8s/blob/master/k8shacluster.md
+
+	Installation
 
 		Kind
 		https://kind.sigs.k8s.io/docs/user/quick-start/
@@ -32,16 +36,27 @@ Cloud Native
 		Minikube
 		https://minikube.sigs.k8s.io/docs/start/
 
-    KubeVela
-    https://github.com/oam-dev/kubevela
+Kubernetes Management Platform
 
     Rancher
     https://rancher.com/
 
-	Knative
-	https://knative.dev/docs/
+	TKEStack - Tencent Kubernetes Engine Stack
+	https://github.com/tkestack/tke
+
+	KubeSphere
+	https://kubesphere.io/zh/
+
+	Kuboard
+	https://kuboard.cn/
+
+    KubeVela
+    https://github.com/oam-dev/kubevela
 
 Serverless
+
+	Knative
+	https://knative.dev/docs/
 
 	阿里云 SAE
 	https://www.aliyun.com/product/sae
@@ -87,8 +102,8 @@ Databases and caches
 	https://medium.com/@igorkosandyak/spring-boot-with-hazelcast-b04d13927745
 
 	Elasticsearch
-		https://www.elastic.co/guide/index.html
-		https://fuxiaopang.gitbooks.io/learnelasticsearch/
+	https://www.elastic.co/guide/index.html
+	https://fuxiaopang.gitbooks.io/learnelasticsearch/
 
 	ClickHouse
 	https://clickhouse.com/docs/zh/
@@ -267,6 +282,10 @@ Java Framework
 		Shiro
 		https://shiro.apache.org/
 		https://github.com/zhangkaitao/shiro-example
+
+		OAuth2
+		https://oauth.net/2/
+		https://spring.io/guides/tutorials/spring-boot-oauth2/
 	
 Java Utils
 

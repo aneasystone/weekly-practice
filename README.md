@@ -14,3 +14,4 @@
 * WEEK010 - [Kubernetes 安装小记](./notes/week010-install-kubernetes/README.md)
 * WEEK011 - [在 Docker 环境中开发 Spring Boot 项目](./notes/week011-spring-boot-on-docker/README.md)
 * WEEK012 - [搭建自己的 Git 服务器](./notes/week012-build-your-own-git-server/README.md)
+* WEEK013 - [Kubernetes 使用小记](./notes/week013-playing-with-kubernetes/README.md)
