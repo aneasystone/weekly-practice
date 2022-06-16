@@ -297,11 +297,12 @@
 * 【0.8K】https://github.com/cicadasmile/middle-ware-parent
 * 【1.5K】https://github.com/yzcheng90/X-SpringBoot
 * 【4.5K】https://github.com/spring-projects/spring-data-examples
-* 【1.9K】https://github.com/vector4wang/spring-boot-quick
+* 【2.0K】https://github.com/vector4wang/spring-boot-quick
 * 【2.2K】https://github.com/qq53182347/liugh-parent
 * 【3.1K】https://github.com/lenve/JavaEETest
 * 【2.1K】https://github.com/forezp/SpringBootLearning
 * 【4.3K】https://github.com/zuihou/lamp-cloud
+* 【2.4K】https://github.com/yizhiwazi/springboot-socks
 
 ### 3. 其他学习站点
 

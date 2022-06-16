@@ -53,6 +53,9 @@ Kubernetes Management Platform
     KubeVela
     https://github.com/oam-dev/kubevela
 
+	HashiCorp Nomad
+	https://www.nomadproject.io/docs
+
 Serverless
 
 	Knative
@@ -381,6 +384,14 @@ Shell
 	PowerShell
 	https://docs.microsoft.com/en-us/powershell/
 
+Version Control
+
+	Git
+	https://git-scm.com/
+
+	Gogs
+	https://gogs.io/
+
 Microservice
 	
 	Spring Cloud
@@ -484,6 +495,9 @@ Front End
 	Vue.js
 	https://cn.vuejs.org/v2/guide/index.html
 
+	qiankun
+	https://qiankun.umijs.org/zh/guide/tutorial
+
 Hardware
 
 	Raspberry Pi
@@ -518,9 +532,6 @@ Others
 
 	CRIU
 	https://criu.org/Main_Page
-
-	Gogs
-	https://gogs.io/
 
 	OpenStack
 	https://www.openstack.org/software/start/
