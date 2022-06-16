@@ -79,7 +79,222 @@ minikube   Ready    control-plane,master   4m51s   v1.20.2
 
 ## 使用 kubectl 创建 Deployment
 
-https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/
+一旦我们有了一个可用的 Kubernetes 集群，我们就可以在集群里部署应用程序了。在 Kubernetes 中，Deployment 负责创建和更新应用程序的实例，所以我们需要创建一个 Deployment，然后 Kubernetes Master 就会将应用程序实例调度到集群中的各个节点上。
+
+而且，Kubernetes 还提供了一种自我修复机制，当应用程序实例创建之后，Deployment 控制器会持续监视这些实例，如果托管实例的节点关闭或被删除，则 Deployment 控制器会将该实例替换为集群中另一个节点上的实例。
+
+使用命令行工具 `kubectl` 可以创建和管理 Deployment，它通过 Kubernetes API 与集群进行交互。使用 `kubectl create deployment` 部署我们的第一个应用程序：
+
+```
+$ kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
+deployment.apps/kubernetes-bootcamp created
+```
+
+其中 `kubernetes-bootcamp` 为 Deployment 名称，`--image` 为要运行的应用程序镜像地址。
+
+可以使用 `kubectl get deployments` 查看所有的 Deployment：
+
+```
+$ kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+kubernetes-bootcamp   1/1     1            1           5m8s
+```
+
+可以看到 `kubernetes-bootcamp` 这个 Deployment 里包含了一个应用实例，并且运行在 Pod 中。
+
+```
+$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-57978f5f5d-fwmqq   1/1     Running   0          19m
+```
+
+Pod 处于一个完全隔离的网络，默认情况下，只能从集群内的其他 Pod 或 Service 访问，从集群外面是不能访问的。我们可以使用 `kubectl` 启动一个代理，通过代理我们就可以访问集群内部网络：
+
+```
+$ kubectl proxy
+Starting to serve on 127.0.0.1:8001
+```
+
+使用下面的 API 接口检查代理是否正常运行：
+
+```
+$ curl http://localhost:8001/version
+{
+  "major": "1",
+  "minor": "20",
+  "gitVersion": "v1.20.2",
+  "gitCommit": "faecb196815e248d3ecfb03c680a4507229c2a56",
+  "gitTreeState": "clean",
+  "buildDate": "2021-01-13T13:20:00Z",
+  "goVersion": "go1.15.5",
+  "compiler": "gc",
+  "platform": "linux/amd64"
+}
+```
+
+然后通过下面的 API 接口来访问 Pod（其中 `kubernetes-bootcamp-57978f5f5d-fwmqq` 是 Pod 名称，可以通过上面的 `kubectl get pods` 查看）：
+
+```
+$ curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-57978f5f5d-fwmqq/
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "kubernetes-bootcamp-57978f5f5d-fwmqq",
+    "generateName": "kubernetes-bootcamp-57978f5f5d-",
+    "namespace": "default",
+    "uid": "7bc3c22e-aa33-4290-a1b4-62b80f593cc9",
+    "resourceVersion": "714",
+    "creationTimestamp": "2022-06-15T23:39:52Z",
+    "labels": {
+      "app": "kubernetes-bootcamp",
+      "pod-template-hash": "57978f5f5d"
+    },
+    "ownerReferences": [
+      {
+        "apiVersion": "apps/v1",
+        "kind": "ReplicaSet",
+        "name": "kubernetes-bootcamp-57978f5f5d",
+        "uid": "a786a3e5-9d41-44be-8b1c-44d38e9bc3db",
+        "controller": true,
+        "blockOwnerDeletion": true
+      }
+    ],
+    "managedFields": [
+      {
+        "manager": "kube-controller-manager",
+        "operation": "Update",
+        "apiVersion": "v1",
+        "time": "2022-06-15T23:39:52Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {"f:metadata":{"f:generateName":{},"f:labels":{".":{},"f:app":{},"f:pod-template-hash":{}},"f:ownerReferences":{".":{},"k:{\"uid\":\"a786a3e5-9d41-44be-8b1c-44d38e9bc3db\"}":{".":{},"f:apiVersion":{},"f:blockOwnerDeletion":{},"f:controller":{},"f:kind":{},"f:name":{},"f:uid":{}}}},"f:spec":{"f:containers":{"k:{\"name\":\"kubernetes-bootcamp\"}":{".":{},"f:image":{},"f:imagePullPolicy":{},"f:name":{},"f:resources":{},"f:terminationMessagePath":{},"f:terminationMessagePolicy":{}}},"f:dnsPolicy":{},"f:enableServiceLinks":{},"f:restartPolicy":{},"f:schedulerName":{},"f:securityContext":{},"f:terminationGracePeriodSeconds":{}}}
+      },
+      {
+        "manager": "kubelet",
+        "operation": "Update",
+        "apiVersion": "v1",
+        "time": "2022-06-15T23:39:55Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {"f:status":{"f:conditions":{"k:{\"type\":\"ContainersReady\"}":{".":{},"f:lastProbeTime":{},"f:lastTransitionTime":{},"f:status":{},"f:type":{}},"k:{\"type\":\"Initialized\"}":{".":{},"f:lastProbeTime":{},"f:lastTransitionTime":{},"f:status":{},"f:type":{}},"k:{\"type\":\"Ready\"}":{".":{},"f:lastProbeTime":{},"f:lastTransitionTime":{},"f:status":{},"f:type":{}}},"f:containerStatuses":{},"f:hostIP":{},"f:phase":{},"f:podIP":{},"f:podIPs":{".":{},"k:{\"ip\":\"172.18.0.6\"}":{".":{},"f:ip":{}}},"f:startTime":{}}}
+      }
+    ]
+  },
+  "spec": {
+    "volumes": [
+      {
+        "name": "default-token-cctqg",
+        "secret": {
+          "secretName": "default-token-cctqg",
+          "defaultMode": 420
+        }
+      }
+    ],
+    "containers": [
+      {
+        "name": "kubernetes-bootcamp",
+        "image": "gcr.io/google-samples/kubernetes-bootcamp:v1",
+        "resources": {
+          
+        },
+        "volumeMounts": [
+          {
+            "name": "default-token-cctqg",
+            "readOnly": true,
+            "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+          }
+        ],
+        "terminationMessagePath": "/dev/termination-log",
+        "terminationMessagePolicy": "File",
+        "imagePullPolicy": "IfNotPresent"
+      }
+    ],
+    "restartPolicy": "Always",
+    "terminationGracePeriodSeconds": 30,
+    "dnsPolicy": "ClusterFirst",
+    "serviceAccountName": "default",
+    "serviceAccount": "default",
+    "nodeName": "minikube",
+    "securityContext": {
+      
+    },
+    "schedulerName": "default-scheduler",
+    "tolerations": [
+      {
+        "key": "node.kubernetes.io/not-ready",
+        "operator": "Exists",
+        "effect": "NoExecute",
+        "tolerationSeconds": 300
+      },
+      {
+        "key": "node.kubernetes.io/unreachable",
+        "operator": "Exists",
+        "effect": "NoExecute",
+        "tolerationSeconds": 300
+      }
+    ],
+    "priority": 0,
+    "enableServiceLinks": true,
+    "preemptionPolicy": "PreemptLowerPriority"
+  },
+  "status": {
+    "phase": "Running",
+    "conditions": [
+      {
+        "type": "Initialized",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2022-06-15T23:39:52Z"
+      },
+      {
+        "type": "Ready",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2022-06-15T23:39:55Z"
+      },
+      {
+        "type": "ContainersReady",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2022-06-15T23:39:55Z"
+      },
+      {
+        "type": "PodScheduled",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2022-06-15T23:39:52Z"
+      }
+    ],
+    "hostIP": "10.0.0.9",
+    "podIP": "172.18.0.6",
+    "podIPs": [
+      {
+        "ip": "172.18.0.6"
+      }
+    ],
+    "startTime": "2022-06-15T23:39:52Z",
+    "containerStatuses": [
+      {
+        "name": "kubernetes-bootcamp",
+        "state": {
+          "running": {
+            "startedAt": "2022-06-15T23:39:54Z"
+          }
+        },
+        "lastState": {
+          
+        },
+        "ready": true,
+        "restartCount": 0,
+        "image": "jocatalin/kubernetes-bootcamp:v1",
+        "imageID": "docker-pullable://jocatalin/kubernetes-bootcamp@sha256:0d6b8ee63bb57c5f5b6156f446b3bc3b3c143d233037f3a2f00e279c8fcc64af",
+        "containerID": "docker://f00a2e64ec2a46d03f98ddd300dffdefde2ef306f545f873e4e596e2fa74c359",
+        "started": true
+      }
+    ],
+    "qosClass": "BestEffort"
+  }
+}
+```
 
 ## 查看 Pod 和工作节点
 
