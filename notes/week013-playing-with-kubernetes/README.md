@@ -108,7 +108,9 @@ NAME                                   READY   STATUS    RESTARTS   AGE
 kubernetes-bootcamp-57978f5f5d-fwmqq   1/1     Running   0          19m
 ```
 
-Pod 处于一个完全隔离的网络，默认情况下，只能从集群内的其他 Pod 或 Service 访问，从集群外面是不能访问的。我们可以使用 `kubectl` 启动一个代理，通过代理我们就可以访问集群内部网络：
+Pod 处于一个完全隔离的网络，默认情况下，只能从集群内的其他 Pod 或 Service 访问，从集群外面是不能访问的。我们会在后面的内容中学习如何访问 Pod 里的内容。
+
+`kubectl` 是通过 Kubernetes API 来创建和管理我们的 Pod 的，我们可以使用 `kubectl` 启动一个代理，通过代理我们也可以访问 Kubernetes API：
 
 ```
 $ kubectl proxy
@@ -132,7 +134,7 @@ $ curl http://localhost:8001/version
 }
 ```
 
-然后通过下面的 API 接口来访问 Pod（其中 `kubernetes-bootcamp-57978f5f5d-fwmqq` 是 Pod 名称，可以通过上面的 `kubectl get pods` 查看）：
+然后通过下面的 API 接口获取 Pod 信息（其中 `kubernetes-bootcamp-57978f5f5d-fwmqq` 是 Pod 名称，可以通过上面的 `kubectl get pods` 查看）：
 
 ```
 $ curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-57978f5f5d-fwmqq/
@@ -298,7 +300,150 @@ $ curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-
 
 ## 查看 Pod 和工作节点
 
-https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/explore/explore-intro/
+在上一节中，我们使用 `kubectl get pods` 查看集群中运行的 `Pod`，`Pod` 是 Kubernetes 中的原子单元，当我们在 Kubernetes 上创建 Deployment 时，该 Deployment 会在其中创建包含容器的 Pod，而不是直接创建容器。每个 Pod 都包含了一组应用程序容器（一个或多个），这些容器之间共享存储和网络，它们始终位于同一位置并且共同调度。
+
+一个 Pod 总是运行在工作节点，工作节点是 Kubernetes 中参与计算的机器，每个工作节点由主节点管理，主节点会根据每个工作节点上的可用资源自动调度 Pod。每个工作节点上至少运行着：
+
+* Kubelet，负责主节点和工作节点之间的通信，它还负责管理工作节点上的 Pod 和容器；
+* 容器运行时
+
+接下来我们使用 `kubelctl` 命令对 Pod 展开更深入的了解，大多数命令和 Docker 命令很类似，如果有一定的 Docker 基础，可以很快上手。使用 `kubectl get pods` 可以查看 Pod 列表，列表中显示着 Pod 名称和状态一些简单的信息，如果需要更详细的信息，可以使用 `kubectl describe` 命令：
+
+```
+$ kubectl describe pods
+Name:         kubernetes-bootcamp-fb5c67579-8sm7d
+Namespace:    default
+Priority:     0
+Node:         minikube/10.0.0.8
+Start Time:   Thu, 16 Jun 2022 22:38:03 +0000
+Labels:       app=kubernetes-bootcamp
+              pod-template-hash=fb5c67579
+Annotations:  <none>
+Status:       Running
+IP:           172.18.0.3
+IPs:
+  IP:           172.18.0.3
+Controlled By:  ReplicaSet/kubernetes-bootcamp-fb5c67579
+Containers:
+  kubernetes-bootcamp:
+    Container ID:   docker://ac8e5d785a8c7d8a550febdec1720f6d2a1ebe66f90ce970a963340b9f33c032
+    Image:          gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image ID:       docker-pullable://jocatalin/kubernetes-bootcamp@sha256:0d6b8ee63bb57c5f5b6156f446b3bc3b3c143d233037f3a2f00e279c8fcc64af
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Thu, 16 Jun 2022 22:38:06 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-rn6wn (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-rn6wn:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-rn6wn
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  77s   default-scheduler  Successfully assigned default/kubernetes-bootcamp-fb5c67579-8sm7d to minikube
+  Normal  Pulled     75s   kubelet            Container image "gcr.io/google-samples/kubernetes-bootcamp:v1" already present on machine
+  Normal  Created    75s   kubelet            Created container kubernetes-bootcamp
+  Normal  Started    74s   kubelet            Started container kubernetes-bootcamp
+```
+
+这里不仅显示了 Pod 的名称和状态，还显示了 Pod 的 IP 地址，Pod 里的容器信息，以及 Pod 生命周期中的一些关键事件。
+
+我们可以直接使用 Pod 这里的 IP 地址来访问应用程序：
+
+```
+$ curl 172.18.0.3:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v=1
+```
+
+但是要注意的是，Kubernetes 每次调度 Pod 的时候，都会随机分配一个新的 IP 地址，所以这种做法是不推荐的，后面我们会学习更好的做法。
+
+当我们的应用程序有问题时，查看日志是最常用的排查问题的方法，要查看 Pod 的日志，使用 `kubectl logs` 命令：
+
+```
+$ kubectl logs kubernetes-bootcamp-fb5c67579-8sm7d
+Kubernetes Bootcamp App Started At: 2022-06-16T22:38:06.372Z | Running On:  kubernetes-bootcamp-fb5c67579-8sm7d 
+```
+
+注意由于我们的 Pod 里只有一个容器，所以不需要指定容器名。
+
+当一个 Pod 是运行中状态时，我们可以使用 `kubectl exec` 在 Pod 中直接执行命令，比如下面的命令列出容器内的环境变量：
+
+```
+$ kubectl exec kubernetes-bootcamp-fb5c67579-8sm7d -- env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=kubernetes-bootcamp-fb5c67579-8sm7d
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+NPM_CONFIG_LOGLEVEL=info
+NODE_VERSION=6.3.1
+HOME=/root
+```
+
+下面的命令在容器内启动一个可交互的 Shell：
+
+```
+$ kubectl exec -ti kubernetes-bootcamp-fb5c67579-8sm7d -- bash
+```
+
+在这个 Shell 中我们可以做很多事情，和操作远程 SSH 完全一样，比如使用 `cat` 查看 `server.js` 的源码：
+
+```
+root@kubernetes-bootcamp-fb5c67579-8sm7d:/# cat server.js
+var http = require('http');
+var requests=0;
+var podname= process.env.HOSTNAME;
+var startTime;
+var host;
+var handleRequest = function(request, response) {
+  response.setHeader('Content-Type', 'text/plain');
+  response.writeHead(200);
+  response.write("Hello Kubernetes bootcamp! | Running on: ");
+  response.write(host);
+  response.end(" | v=1\n");
+  console.log("Running On:" ,host, "| Total Requests:", ++requests,"| App Uptime:", (new Date() - startTime)/1000 , "seconds", "| Log Time:",new Date());
+}
+var www = http.createServer(handleRequest);
+www.listen(8080,function () {
+    startTime = new Date();;
+    host = process.env.HOSTNAME;
+    console.log ("Kubernetes Bootcamp App Started At:",startTime, "| Running On: " ,host, "\n" );
+});
+```
+
+在容器里使用 `curl` 访问我们的应用：
+
+```
+root@kubernetes-bootcamp-fb5c67579-8sm7d:/# curl localhost:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v=1
+```
+
+注意这里我们访问的是 `localhost`，这是因为我们现在处于容器内部。最后使用 `exit` 退出 Shell：
+
+```
+root@kubernetes-bootcamp-fb5c67579-8sm7d:/# exit
+```
 
 ## 使用 Service 暴露你的应用
 
