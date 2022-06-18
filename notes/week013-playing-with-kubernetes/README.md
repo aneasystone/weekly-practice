@@ -447,7 +447,198 @@ root@kubernetes-bootcamp-fb5c67579-8sm7d:/# exit
 
 ## 使用 Service 暴露你的应用
 
-https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/expose/expose-intro/
+在上一节中，我们了解到我们的应用程序运行在 Pod 中，外部是无法访问的，虽然通过 Pod 的内部 IP 可以访问，但是要注意的是，Pod 是转瞬即逝的，当一个工作节点挂掉后，该工作节点上的 Pod 也会消亡，`ReplicaSet` 会自动地创建新的 Pod 让集群恢复到目标状态，保证应用程序正常运行。所以我们需要一种固定的方式来访问 Pod 中的应用，无论 Pod 如何变化，Kubernetes 通过服务（也就是 `Service`）来实现这一点。
+
+`Service` 有如下几种类型：
+
+* *ClusterIP* - 这是 Service 的默认类型，在集群内部 IP 上公开 Service，这种类型的 Service 只能从集群内部访问。
+* *NodePort* - 使用 NAT 在集群中每个选定 Node 的相同端口上公开 Service，可以通过 NodeIP:NodePort 从集群外部访问 Service，是 ClusterIP 的超集。
+* *LoadBalancer* - 在集群中创建一个外部负载均衡器（如果支持的话），并为 Service 分配一个固定的外部 IP，是 NodePort 的超集。
+* *ExternalName* - 通过返回带有该名称的 CNAME 记录，使用任意名称公开 Service，需要 kube-dns v1.7 或更高版本。
+
+可以使用 `kubectl get services` 命令查看目前集群中的 Service：
+
+```
+$ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   71s
+```
+
+从上面可以看出，minikube 在创建集群时默认会创建一个名为 `kubernetes` 的 Service。使用 `kubectl expose` 创建一个新的 Service：
+
+```
+$ kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
+service/kubernetes-bootcamp exposed
+```
+
+这里使用了 `--type="NodePort"` 参数指定了 Service 的类型为 NodePort，这让我们可以从集群外部访问我们的应用，另外 `--port 8080` 表示希望将 8080 端口暴露出去，暴露出去的端口号随机生成。再次执行 `kubectl get services` 命令：
+
+```
+$ kubectl get services
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1        <none>        443/TCP          50s
+kubernetes-bootcamp   NodePort    10.111.158.145   <none>        8080:31006/TCP   4s
+```
+
+此时集群中多了一个名为 `kubernetes-bootcamp` 的 Service，这个 Service 在集群内的 IP 为 `10.111.158.145`，暴露的端口为 `8080:31006`，这两个端口很容易混淆，8080 为集群内端口，31006 为集群外端口。
+
+使用 Service 在集群内的 IP 和端口来访问服务：
+
+```
+$ curl 10.111.158.145:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v=1
+```
+
+从集群外访问服务：
+
+```
+$ curl $(minikube ip):31006
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v=1
+```
+
+还可以使用 `kubectl describe` 查看 Service 的详细信息：
+
+```
+$ kubectl describe services/kubernetes-bootcamp
+Name:                     kubernetes-bootcamp
+Namespace:                default
+Labels:                   app=kubernetes-bootcamp
+Annotations:              <none>
+Selector:                 app=kubernetes-bootcamp
+Type:                     NodePort
+IP Families:              <none>
+IP:                       10.111.158.145
+IPs:                      10.111.158.145
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  31006/TCP
+Endpoints:                172.18.0.3:8080
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+注意这里还有一个 IP 地址和上面的 IP 也很容易混淆，那就是 `Endpoints`，这个是 Pod 的地址。
+
+创建 Service 时，该 Service 下的 Pod 是由标签（*Label*）和选择器（*Selector*）来匹配的，可以通过这种方式来对 Kubernetes 中的对象进行逻辑分组。标签（*Label*）是附加在对象上的键值对，可以以多种方式使用：
+
+* 用于区分开发，测试和生产环境
+* 用于区分不同的版本
+* 使用 Label 将对象进行分类
+
+实际上，当我们创建 Deployment 时，会为我们的 Pod 自带一个默认的 Label，使用 `kubectl describe deployment` 可以看出：
+
+```
+$ kubectl describe deployment
+Name:                   kubernetes-bootcamp
+Namespace:              default
+CreationTimestamp:      Sat, 18 Jun 2022 01:24:48 +0000
+Labels:                 app=kubernetes-bootcamp
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=kubernetes-bootcamp
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=kubernetes-bootcamp
+  Containers:
+   kubernetes-bootcamp:
+    Image:        gcr.io/google-samples/kubernetes-bootcamp:v1
+    Port:         8080/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   kubernetes-bootcamp-fb5c67579 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  39m   deployment-controller  Scaled up replica set kubernetes-bootcamp-fb5c67579 to 1
+```
+
+执行 `kubectl get` 命令时，通过 `-l` 参数可以按指定标签查询列表，比如查询 Pod 列表：
+
+```
+$ kubectl get pods -l app=kubernetes-bootcamp
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-8sm7d   1/1     Running   0          49m
+```
+
+同样的，使用标签查询 Service 列表：
+
+```
+$ kubectl get services -l app=kubernetes-bootcamp
+NAME                  TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes-bootcamp   NodePort   10.111.158.145   <none>        8080:31006/TCP   51m
+```
+
+当然，我们也可以给某个对象手工指定标签，执行 `kubectl label` 命令：
+
+```
+$ kubectl label pods kubernetes-bootcamp-fb5c67579-8sm7d version=v1
+pod/kubernetes-bootcamp-fb5c67579-8sm7d labeled
+```
+
+执行 `kubectl describe pods` 命令确认标签是否添加成功：
+
+```
+$ kubectl describe pods kubernetes-bootcamp-fb5c67579-8sm7d
+Name:         kubernetes-bootcamp-fb5c67579-8sm7d
+Namespace:    default
+Priority:     0
+Node:         minikube/10.0.0.8
+Start Time:   Thu, 16 Jun 2022 22:38:03 +0000
+Labels:       app=kubernetes-bootcamp
+              pod-template-hash=fb5c67579
+              version=v1
+......
+```
+
+使用新标签查询 Pod 列表：
+
+```
+$ kubectl get pods -l version=v1
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-8sm7d   1/1     Running   0          7m52s
+```
+
+最后，使用 `kubectl delete service` 删除刚刚创建的 Service，可以使用 `-l` 根据标签删除指定的 Service：
+
+```
+$ kubectl delete service -l app=kubernetes-bootcamp
+service "kubernetes-bootcamp" deleted
+```
+
+确认下 Service 已经删除：
+
+```
+$ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   8m59s
+```
+
+此时，从集群外已经无法访问我们的服务了：
+
+```
+$ curl $(minikube ip):31006
+curl: (7) Failed to connect to 10.0.0.10 port 31151: Connection refused
+```
+
+但是，我们的服务还是处于运行状态的，可以通过 Pod 的 IP 访问或进入 Pod 内部访问：
+
+```
+$ kubectl exec -ti kubernetes-bootcamp-fb5c67579-8sm7d -- curl localhost:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v=1
+```
+
+如果要停止服务，需要将 Deployment 删除掉才可以。
 
 ## 运行应用程序的多个实例
 
