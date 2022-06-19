@@ -100,6 +100,14 @@ NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
 kubernetes-bootcamp   1/1     1            1           5m8s
 ```
 
+这里的几个字段分别表示：
+
+* `NAME` - Deployment 的名称。
+* `READY` - 应用程序的可用副本数，显示格式为：就绪个数/期望个数。
+* `UP-TO-DATE` - 显示为了达到期望状态已经更新的副本数。
+* `AVAILABLE` - 可供用户使用的副本数。
+* `AGE` - 应用程序运行的时间。
+
 可以看到 `kubernetes-bootcamp` 这个 Deployment 里包含了一个应用实例，并且运行在 Pod 中。
 
 ```
@@ -628,7 +636,7 @@ kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   8m59s
 
 ```
 $ curl $(minikube ip):31006
-curl: (7) Failed to connect to 10.0.0.10 port 31151: Connection refused
+curl: (7) Failed to connect to 10.0.0.10 port 31006: Connection refused
 ```
 
 但是，我们的服务还是处于运行状态的，可以通过 Pod 的 IP 访问或进入 Pod 内部访问：
@@ -642,7 +650,145 @@ Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-8sm7d | v
 
 ## 运行应用程序的多个实例
 
-https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/scale/scale-intro/
+通过上面的学习，我们创建了一个 Deployment，然后通过 Service 让其可以从外部访问。默认情况下，Deployment 为我们的应用程序创建了一个 Pod，当然，我们可以根据需要，对我们的应用程序进行扩缩（扩容或缩容），改变 Pod 的副本集数量。
+
+> ReplicaSet 实现了 Pod 的多副本管理，使用 Deployment 时会自动创建 ReplicaSet，我们通常不需要直接使用 ReplicaSet。Deployment 提供了比 ReplicaSet 更丰富的功能，比如版本记录和回滚等。
+
+使用 `kubectl get rs` 查看集群中运行中的 `ReplicaSet` 列表：
+
+```
+$ kubectl get rs
+NAME                            DESIRED   CURRENT   READY   AGE
+kubernetes-bootcamp-fb5c67579   1         1         1       28m
+```
+
+如果要调整副本集数量，使用 `kubectl scale` 命令：
+
+```
+$ kubectl scale deployments/kubernetes-bootcamp --replicas=4
+deployment.apps/kubernetes-bootcamp scaled
+```
+
+其中，`--replicas=4` 表示将应用程序扩容到 4 个副本：
+
+```
+$ kubectl get rs
+NAME                            DESIRED   CURRENT   READY   AGE
+kubernetes-bootcamp-fb5c67579   4         4         4       30m
+```
+
+使用 `kubectl get pods` 可以看到启动了 4 个 Pod，每个 Pod 都分配了一个独立的 IP：
+
+```
+$ kubectl get pods -o wide
+NAME                                  READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+kubernetes-bootcamp-fb5c67579-cgwjm   1/1     Running   0          65s   172.18.0.7   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-d7l4n   1/1     Running   0          65s   172.18.0.9   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-mpn68   1/1     Running   0          30m   172.18.0.2   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-tk2lm   1/1     Running   0          65s   172.18.0.8   minikube   <none>           <none>
+```
+
+执行 `kubectl describe deployments` 可以看到副本集调整的事件：
+
+```
+$ kubectl describe deployments/kubernetes-bootcamp
+Name:                   kubernetes-bootcamp
+Namespace:              default
+CreationTimestamp:      Sun, 19 Jun 2022 03:16:25 +0000
+Labels:                 app=kubernetes-bootcamp
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=kubernetes-bootcamp
+Replicas:               4 desired | 4 updated | 4 total | 4 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=kubernetes-bootcamp
+  Containers:
+   kubernetes-bootcamp:
+    Image:        gcr.io/google-samples/kubernetes-bootcamp:v1
+    Port:         8080/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Progressing    True    NewReplicaSetAvailable
+  Available      True    MinimumReplicasAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   kubernetes-bootcamp-fb5c67579 (4/4 replicas created)
+Events:
+  Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  32m    deployment-controller  Scaled up replica set kubernetes-bootcamp-fb5c67579 to 1
+  Normal  ScalingReplicaSet  2m38s  deployment-controller  Scaled up replica set kubernetes-bootcamp-fb5c67579 to 4
+```
+
+执行 `kubectl describe services` 可以看到 `Endpoints` 变成了多个：
+
+```
+$ kubectl describe services/kubernetes-bootcamp
+Name:                     kubernetes-bootcamp
+Namespace:                default
+Labels:                   app=kubernetes-bootcamp
+Annotations:              <none>
+Selector:                 app=kubernetes-bootcamp
+Type:                     NodePort
+IP Families:              <none>
+IP:                       10.96.61.243
+IPs:                      10.96.61.243
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  31955/TCP
+Endpoints:                172.18.0.2:8080,172.18.0.7:8080,172.18.0.8:8080 + 1 more...
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+Service 会对请求自动进行负载均衡，我们发送多次请求，可以看到请求会落到不同的 Pod 上：
+
+```
+$ curl $(minikube ip):31955
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-d7l4n | v=1
+
+$ curl $(minikube ip):31955
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-mpn68 | v=1
+
+$ curl $(minikube ip):31955
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-cgwjm | v=1
+
+$ curl $(minikube ip):31955
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-tk2lm | v=1
+```
+
+我们再次执行 `kubectl scale`，将副本数改成 2：
+
+```
+$ kubectl scale deployments/kubernetes-bootcamp --replicas=2
+deployment.apps/kubernetes-bootcamp scaled
+```
+
+查看 Deployment 列表显示当前的副本集个数：
+
+```
+$ kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+kubernetes-bootcamp   2/2     2            2           45m
+```
+
+再次查看 Pod 列表，可以发现有两个 Pod 被停止（Terminating）了：
+
+```
+$ kubectl get pods -o wide
+NAME                                  READY   STATUS        RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+kubernetes-bootcamp-fb5c67579-cgwjm   1/1     Terminating   0          15m   172.18.0.7   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-d7l4n   1/1     Running       0          15m   172.18.0.9   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-mpn68   1/1     Running       0          45m   172.18.0.2   minikube   <none>           <none>
+kubernetes-bootcamp-fb5c67579-tk2lm   1/1     Terminating   0          15m   172.18.0.8   minikube   <none>           <none>
+```
 
 ## 执行滚动更新
 
