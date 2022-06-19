@@ -792,7 +792,73 @@ kubernetes-bootcamp-fb5c67579-tk2lm   1/1     Terminating   0          15m   172
 
 ## 执行滚动更新
 
-https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/update/update-intro/
+当我们的应用程序运行多个实例时，我们就可以对我们的应用进行零停机的滚动更新（*Rolling Update*），而且所有的更新都是经过版本控制的，任何 Deployment 更新都可以恢复到以前的（稳定）版本。
+
+下面使用 `kubectl set image` 命令执行滚动更新，将应用版本升级到 v2：
+
+```
+$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=jocatalin/kubernetes-bootcamp:v2
+deployment.apps/kubernetes-bootcamp image updated
+```
+
+等待应用更新完毕后，再次访问我们的应用，成功升级到 v2：
+
+```
+$ curl $(minikube ip):31955
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-7d44784b7c-4ntgh | v=2
+```
+
+也可以使用 `kubectl rollout status` 查看更新是否成功：
+
+```
+$ kubectl rollout status deployments/kubernetes-bootcamp
+deployment "kubernetes-bootcamp" successfully rolled out
+```
+
+如果我们更新的时候出错了，比如更新到一个不存在的镜像：
+
+```
+$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=gcr.io/google-samples/kubernetes-bootcamp:v10
+deployment.apps/kubernetes-bootcamp image updated
+```
+
+可以发现 Kubernetes 并不会直接将四个 Pod 一股脑都升级到错误的镜像，而是先停止一个 Pod，等待这个 Pod 更新成功，再更新下一个，保证应用服务一直是可访问的（也就是零停机）。
+
+执行 `kubectl get deployments` 可以看到当前有 3 个可用的应用实例，有 2 个正在更新：
+
+```
+$ kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+kubernetes-bootcamp   3/4     2            3           13m
+```
+
+使用 `kubectl get pods` 可以看到有 2 个 Pod 一直处于 `ImagePullBackOff` 状态（因为这个镜像不存在）：
+
+```
+$ kubectl get pods
+NAME                                   READY   STATUS             RESTARTS   AGE
+kubernetes-bootcamp-59b7598c77-8nfsh   0/1     ImagePullBackOff   0          2m35s
+kubernetes-bootcamp-59b7598c77-rcdfq   0/1     ImagePullBackOff   0          2m35s
+kubernetes-bootcamp-7d44784b7c-9vwn2   1/1     Running            0          13m
+kubernetes-bootcamp-7d44784b7c-qcgnn   1/1     Running            0          13m
+kubernetes-bootcamp-7d44784b7c-vfn79   1/1     Running            0          13m
+```
+
+下面是 `kubectl rollout status` 命令的输出：
+
+```
+$ kubectl rollout status deployments/kubernetes-bootcampWaiting for deployment "kubernetes-bootcamp" rollout to finish: 2 out of 4 new replicas have been updated...
+```
+
+这时可以使用 `kubectl rollout undo` 执行回滚操作，应用程序将会全部恢复到之前的 v2 版本：
+
+```
+$ kubectl rollout undo deployments/kubernetes-bootcamp
+deployment.apps/kubernetes-bootcamp rolled back
+
+$ kubectl rollout status deployments/kubernetes-bootcamp
+deployment "kubernetes-bootcamp" successfully rolled out
+```
 
 ## 参考
 
