@@ -868,6 +868,55 @@ deployment "kubernetes-bootcamp" successfully rolled out
 
 ## 更多
 
+### 了解 Kubernetes 基本概念
+
+#### Cluster
+
+Cluster 是计算、存储和网络资源的集合，Kubernete 利用这些资源运行各种基于容器的应用。
+
+#### Master
+
+Master 的主要职责是调度，决定将应用放在哪个 Node 上运行。
+
+#### Node
+
+Node 的主要职责是运行容器应用，同时监控并汇报容器状态。
+
+#### Pod
+
+Kubernetes 以 Pod 作为最小工作单元进行调度和管理，每个 Pod 包含一个或多个容器，Pod 中的容器会作为一个整体被调度到一个 Node 上运行。
+
+Pod 中的所有容器使用同一个网络，即相同的 IP 地址和 Port 空间，它们可以直接使用 localhost 通信。这些容器之间也共享存储，当 Kubernetes 挂载 Volumne 到 Pod，本质上是将 Volumne 挂载到 Pod 里的每个容器。
+
+#### Controller
+
+Kubernetes 通常不会直接创建 Pod，而是通过 Controller 来管理 Pod 的。为满足不同的业务场景，Kubernete 提供了多种 Controller：
+
+1. Deployment - 通过 ReplicaSet 实现 Pod 的多副本管理，还提供版本升级和回滚等功能
+2. ReplicaSet - 实现 Pod 的多副本管理
+3. DaemonSet - 每个 Node 最多只运行一个 Pod 副本
+4. StatefulSet - 保证 Pod 的每个副本在整个生命周期中名称不变
+5. Job - 运行一次性的任务，运行结束后自动删除
+
+#### Service
+
+Deployment 可以部署多个副本，每个 Pod 都有自己的 IP，但是我们不能通过 Pod 的 IP 直接来访问，因为 Pod 很可能会被频繁地销毁和重启，它们的 IP 会发生变化。
+
+于是引入了 Service 的概念，Service 提供了访问一组特定 Pod 的方式，它有自己的 IP 和端口，并为 Pod 提供负载均衡。
+
+#### Namespace
+
+Namespace 一般用于多租户隔离，它将一个物理的 Cluster 划分成多个虚拟 Cluster，不同 Namespace 里的资源是完全隔离的。Kubernetes 默认创建了两个 Namespace：
+
+```
+$ kubectl get namespace
+NAME                   STATUS   AGE
+default                Active   28s
+kube-system            Active   29s
+```
+
+创建资源时如果不指定 Namespace，默认会放在 `default` 中，Kubernetes 自己创建的系统资源放在 `kube-system` 中。
+
 ### Kubernetes 其他教程
 
 https://kubernetes.io/docs/tutorials/
