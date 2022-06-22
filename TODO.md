@@ -12,9 +12,6 @@ Cloud Native
 	containerd
 	https://containerd.io/
 
-	Istio
-	https://istio.io/latest/docs/
-
 	CoreDNS
 	https://coredns.io/
 
@@ -36,6 +33,12 @@ Kubernetes
 		Minikube
 		https://minikube.sigs.k8s.io/docs/start/
 
+	容器服务 ACK
+	https://www.aliyun.com/product/kubernetes
+
+	分布式云容器平台 ACK One
+	https://www.aliyun.com/product/aliware/adcp
+
 Kubernetes Management Platform
 
     Rancher
@@ -51,7 +54,11 @@ Kubernetes Management Platform
 	https://kuboard.cn/
 
     KubeVela
-    https://github.com/oam-dev/kubevela
+	https://kubevela.io/zh/
+    https://github.com/kubevela/kubevela
+
+		Open Application Model
+		https://oam.dev/
 
 	HashiCorp Nomad
 	https://www.nomadproject.io/docs
@@ -63,6 +70,14 @@ Serverless
 
 	阿里云 SAE
 	https://www.aliyun.com/product/sae
+
+Autoscaling
+
+	KEDA | Kubernetes Event-driven Autoscaling
+	https://keda.sh/
+
+	HPA | Horizontal Pod Autoscaling
+	https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 
 CI/CD
 
@@ -84,6 +99,9 @@ CI/CD
 	Concourse
 	https://concourse-ci.org/
 
+	Argo CD
+	https://argo-cd.readthedocs.io/en/stable/
+
 Databases and caches
 
 	MongoDB
@@ -93,6 +111,15 @@ Databases and caches
 	Redis
 	https://redis.io/documentation
 	http://www.redis.cn/documentation.html
+
+		HyperLogLog
+		https://www.cnblogs.com/54chensongxia/p/13803465.html
+
+		Bloom Filter
+		https://blog.csdn.net/jiaomeng/article/details/1495500
+
+		Roaring Bitmaps
+		https://cloud.tencent.com/developer/article/1136054
 	
 	Redisearch
 	https://redis.io/docs/stack/search/
@@ -188,6 +215,21 @@ Observability
 		Alertmanager
 		https://prometheus.io/docs/alerting/latest/alertmanager/
 
+		Open-Falcon
+		http://open-falcon.org/
+
+		Nightingale | 夜莺监控
+		https://n9e.github.io/
+
+		Telegraf
+		https://www.influxdata.com/time-series-platform/telegraf/
+
+		Datadog
+		https://www.datadoghq.com/
+
+		Zabbix
+		https://www.zabbix.com/
+
 	Logging
 
 		Logstash
@@ -204,6 +246,9 @@ Observability
 		
 		Fluentd
 		https://www.fluentd.org/
+
+		Grafana Loki
+		https://grafana.com/oss/loki/
 
 	Tracing
 
@@ -262,7 +307,7 @@ Job
 	Kubernetes Job
 	https://kubernetes.io/zh/docs/concepts/workloads/controllers/job/
 
-Java Framework
+Spring Boot
 
 	Spring MVC
 	https://www.mkyong.com/spring-mvc/spring-4-mvc-ajax-hello-world-example/
@@ -352,6 +397,9 @@ Package Manager
 	Homebrew
 	https://brew.sh/
 
+	Helm | The package manager for Kubernetes
+	https://helm.sh/
+
 Build Tools
 
 	Maven
@@ -400,6 +448,15 @@ Microservice
 	
 	Dubbo
 	https://dubbo.apache.org/zh/docs/
+
+	Service Mesh
+	https://jimmysong.io/blog/what-is-a-service-mesh/
+
+		Istio
+		https://istio.io/latest/docs/
+
+		阿里云 ASM
+		https://www.aliyun.com/product/cs/servicemesh
 	
 	gRPC
 	https://grpc.io/docs/guides/
@@ -446,8 +503,14 @@ Microservice
 		Kong
 		https://github.com/Kong/kong
 
+		Traefik
+		https://github.com/traefik/traefik
+
 		Kubernetes Ingress
 		https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+		Nginx
+		https://www.nginx.com/
 
 	阿里云微服务引擎 MSE
 	https://www.aliyun.com/product/aliware/mse
@@ -480,6 +543,11 @@ Storage System
 
 	ROOK
 	https://rook.io/
+
+Stream
+
+	Flink
+	https://flink.apache.org/
 
 Front End
 
@@ -522,13 +590,19 @@ Coding
 	FindBugs
 	http://findbugs.sourceforge.net/
 
+Editors & IDEs
+
+	Visual Studio Code
+	https://code.visualstudio.com/docs
+	https://zhuanlan.zhihu.com/p/532031362
+
+	Vim
+	https://www.runoob.com/linux/linux-vim.html
+
 Others
 
 	Websocket
 	https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
-
-	Visual Studio Code
-	https://code.visualstudio.com/docs
 
 	CRIU
 	https://criu.org/Main_Page
@@ -542,3 +616,9 @@ Others
 
 	Project V
 	https://www.v2fly.org/
+
+Learn resources
+
+	https://learn.lianglianglee.com/
+
+	https://github.com/eryajf/learning-weekly

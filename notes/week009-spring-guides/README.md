@@ -280,6 +280,7 @@
 * 【2.4K】https://github.com/zq2599/blog_demos
 * 【1.0K】https://github.com/lenve/javaboy-code-samples
 * 【1.3K】https://github.com/bin392328206/six-finger
+* 【1.4K】https://github.com/qiurunze123/threadandjuc
 
 #### Spring
 
@@ -304,6 +305,7 @@
 * 【2.1K】https://github.com/forezp/SpringBootLearning
 * 【4.3K】https://github.com/zuihou/lamp-cloud
 * 【2.4K】https://github.com/yizhiwazi/springboot-socks
+* 【3.6K】https://github.com/zlt2000/microservices-platform
 
 ### 3. 其他学习站点
 
