@@ -15,3 +15,4 @@
 * WEEK011 - [在 Docker 环境中开发 Spring Boot 项目](./notes/week011-spring-boot-on-docker/README.md)
 * WEEK012 - [搭建自己的 Git 服务器](./notes/week012-build-your-own-git-server/README.md)
 * WEEK013 - [Kubernetes 使用小记](./notes/week013-playing-with-kubernetes/README.md)
+* WEEK014 - [Spring Boot 生产就绪特性 Actuator](./notes/week014-spring-boot-actuator/README.md)
