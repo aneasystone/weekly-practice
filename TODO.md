@@ -268,7 +268,14 @@ Observability
 Troubleshooting
 
 	Arthas
-	https://arthas.aliyun.com/doc/
+	https://arthas.aliyun.com/zh-cn/
+	https://github.com/alibaba/arthas
+	
+	vjtools
+	https://github.com/vipshop/vjtools
+
+	bistoury
+	https://github.com/qunarcorp/bistoury
 
     XPocket
     https://xpocket.perfma.com/
@@ -330,6 +337,7 @@ Spring Boot
 		Shiro
 		https://shiro.apache.org/
 		https://github.com/zhangkaitao/shiro-example
+		https://github.com/Heeexy/SpringBoot-Shiro-Vue
 
 		OAuth2
 		https://oauth.net/2/
@@ -515,6 +523,11 @@ Microservice
 	阿里云微服务引擎 MSE
 	https://www.aliyun.com/product/aliware/mse
 
+Transactions
+
+	TCC
+	https://github.com/changmingxie/tcc-transaction
+
 	Seata
 	https://seata.io/
 
@@ -545,6 +558,9 @@ Storage System
 	https://rook.io/
 
 Stream
+
+	Spark
+	https://spark.apache.org/
 
 	Flink
 	https://flink.apache.org/
