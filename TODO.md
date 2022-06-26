@@ -127,6 +127,12 @@ Databases and caches
 	MySQL
 	https://dev.mysql.com/doc/
 	
+	PostgreSQL
+	https://www.postgresql.org/
+	
+	PolarDB
+	https://github.com/ApsaraDB/PolarDB-for-PostgreSQL
+	
 	Hazelcast
 	https://github.com/hazelcast/hazelcast
 	https://medium.com/@igorkosandyak/spring-boot-with-hazelcast-b04d13927745
@@ -140,6 +146,9 @@ Databases and caches
 
 	HBase
 	https://hbase.apache.org/
+	
+	OceanBase
+	https://github.com/oceanbase/oceanbase
 
 Database libraries
 
@@ -184,6 +193,9 @@ Message Queue
 
 	RabbitMQ
 	https://www.rabbitmq.com/
+	
+	RocketMQ
+	https://rocketmq.apache.org/
 
 Graph Database
 
@@ -454,6 +466,9 @@ Microservice
 	https://spring.io/projects/spring-cloud
 	https://www.springcloud.cc/
 	
+	Spring Cloud Alibaba
+	https://spring-cloud-alibaba-group.github.io/github-pages/hoxton/zh-cn/index.html
+	
 	Dubbo
 	https://dubbo.apache.org/zh/docs/
 
@@ -519,6 +534,10 @@ Microservice
 
 		Nginx
 		https://www.nginx.com/
+		
+		Tengine
+		https://github.com/alibaba/tengine
+		https://tengine.taobao.org/
 
 	阿里云微服务引擎 MSE
 	https://www.aliyun.com/product/aliware/mse
