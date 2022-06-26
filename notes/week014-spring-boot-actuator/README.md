@@ -167,7 +167,7 @@ Spring Boot Actuator 暴露的原生端点大概可以分成三大类：
 
 ### Beans (beans)
 
-端点 `/beans` 列出了应用程序中所有 Bean 的信息。
+端点 `/beans` 列出了应用程序中所有 Bean 的信息，包括 Bean 的名称、别名、类型、是否单例、依赖等等。
 
 ```
 $ curl -s http://localhost:8080/actuator/beans | jq
@@ -205,6 +205,214 @@ $ curl -s http://localhost:8080/actuator/beans | jq
 ### Caches (caches)
 
 ### Health (health)
+
+`/health` 端点用来检查应用程序的健康情况，默认情况下它只会显示应用程序的状态为 `UP` 或 `DOWN`：
+
+```
+$ curl -s http://localhost:8080/actuator/health | jq
+{
+  "status": "UP"
+}
+```
+
+通过 `management.endpoint.health.show-details` 配置可以控制接口返回的内容：
+
+| 配置值 | 描述 |
+| ---- | ---- |
+| never | 不展示详情信息，只显示 `UP` 或 `DOWN` 状态，默认配置 |
+| always | 对所有用户展示详情信息 |
+| when-authorized | 只对通过认证的用户展示详情信息，授权的角色可以通过`management.endpoint.health.roles` 配置 |
+
+我们将其设置为 `always`：
+
+```
+management.endpoint.health.show-details=always
+```
+
+此时接口返回内容如下：
+
+```
+$ curl -s http://localhost:8080/actuator/health | jq
+{
+  "status": "UP",
+  "components": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 174500155392,
+        "free": 34697940992,
+        "threshold": 10485760,
+        "exists": true
+      }
+    },
+    "ping": {
+      "status": "UP"
+    }
+  }
+}
+```
+
+由于我这个只是一个 Demo 项目，没有其他的依赖组件，所以健康状态的详情信息有点少。可以在 `pom.xml` 中添加一个 Mongo 的依赖：
+
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+```
+
+此时再查看 `/health` 端点，详情里就多个 Mongo 的信息了：
+
+```
+$ curl -s http://localhost:8080/actuator/health | jq
+{
+  "status": "UP",
+  "components": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 174500155392,
+        "free": 34691891200,
+        "threshold": 10485760,
+        "exists": true
+      }
+    },
+    "mongo": {
+      "status": "UP",
+      "details": {
+        "version": "4.0.27"
+      }
+    },
+    "ping": {
+      "status": "UP"
+    }
+  }
+}
+```
+
+我们将 Mongo 服务手工停掉，再访问 `/health` 端点，可以看出，尽管我们的服务还是运行着的，但是我们服务的健康状态已经是 `DOWN` 了：
+
+```
+$ curl -s http://localhost:8080/actuator/health | jq
+{
+  "status": "DOWN",
+  "components": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 174500155392,
+        "free": 34691891200,
+        "threshold": 10485760,
+        "exists": true
+      }
+    },
+    "mongo": {
+      "status": "DOWN",
+      "details": {
+        "error": "org.springframework.dao.DataAccessResourceFailureException: Timed out after 30000 ms while waiting to connect. Client view of cluster state is {type=UNKNOWN, servers=[{address=localhost:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketOpenException: Exception opening socket}, caused by {java.net.ConnectException: Connection refused: connect}}]; nested exception is com.mongodb.MongoTimeoutException: Timed out after 30000 ms while waiting to connect. Client view of cluster state is {type=UNKNOWN, servers=[{address=localhost:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketOpenException: Exception opening socket}, caused by {java.net.ConnectException: Connection refused: connect}}]"
+      }
+    },
+    "ping": {
+      "status": "UP"
+    }
+  }
+}
+```
+
+#### 健康指示器（`HealthIndicator`）
+
+Spring Boot Actuator 提供了很多自动配置的 `健康指示器（HealthIndicator）`，当你的项目依赖某个组件的时候，该组件对应的健康指示器就会被自动装配，继而采集对应的信息。比如上面我们添加 Mongo 依赖后，`MongoHealthIndicator` 就会自动被用来采集 Mongo 的信息。
+
+每个健康指示器都有一个 `key`，默认是指示器的 Bean 名称去掉 `HealthIndicator` 后缀，比如 Mongo 的健康指示器就是 `mongo`。可以使用 `management.health.<key>.enabled` 配置关闭某个指示器。可以通过下面这个配置关闭 Mongo 的健康检查：
+
+```
+management.health.mongo.enabled=false
+```
+
+常见的健康指示器和对应的 key 如下：
+
+| Key | HealthIndicator |
+| --- | --------------- |
+| cassandra | CassandraDriverHealthIndicator
+| couchbase | CouchbaseHealthIndicator |
+| db | DataSourceHealthIndicator |
+| diskspace | DiskSpaceHealthIndicator |
+| elasticsearch | ElasticsearchRestHealthIndicator |
+| hazelcast | HazelcastHealthIndicator |
+| influxdb | InfluxDbHealthIndicator |
+| jms | JmsHealthIndicator |
+| ldap | LdapHealthIndicator |
+| mail | MailHealthIndicator |
+| mongo | MongoHealthIndicator |
+| neo4j | Neo4jHealthIndicator |
+| ping | PingHealthIndicator |
+| rabbit | RabbitHealthIndicator |
+| redis | RedisHealthIndicator |
+| solr | SolrHealthIndicator |
+
+可以通过下面这个配置关闭上面列表中的所有健康检查：
+
+```
+management.health.defaults.enabled=false
+```
+
+为了适应 Kubernetes 环境，Spring Boot Actuator 还提供了下面两个健康指示器，默认关闭。分别对应 Kubernetes 里的 `Liveness` 和  `Readiness` 探针，[参考 Kubernetes 官方文档](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)。
+
+| Key | HealthIndicator |
+| --- | --------------- |
+| livenessstate | LivenessStateHealthIndicator |
+| readinessstate | ReadinessStateHealthIndicator |
+
+#### 自定义健康指示器
+
+当 Actuator 自带的健康指示器不能满足我们需求时，我们也可以自定义一个健康指示器，只需要实现 `HealthIndicator` 接口或者继承`AbstractHealthIndicator` 类即可，下面是一个简单的示例：
+
+```
+/**
+ * 自定义健康指示器
+ */
+@Component
+public class TestHealthIndicator extends AbstractHealthIndicator {
+
+    @Override
+    protected void doHealthCheck(Builder builder) throws Exception {
+        builder.up()
+            .withDetail("app", "test")
+            .withDetail("error", 0);
+    }
+
+}
+```
+
+`withDetail` 用于显示健康详情，如果要显示状态 `DOWN`，就抛出一个异常即可。此时的健康详情接口返回如下：
+
+```
+$ curl -s http://localhost:8080/actuator/health | jq
+{
+  "status": "UP",
+  "components": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 174500155392,
+        "free": 34691883008,
+        "threshold": 10485760,
+        "exists": true
+      }
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "test": {
+      "status": "UP",
+      "details": {
+        "app": "test",
+        "error": 0
+      }
+    }
+  }
+}
+```
 
 ### Info (info)
 
@@ -254,7 +462,7 @@ $ curl -s http://localhost:8080/actuator/beans | jq
 
 ## 参考
 
-1. [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator)
+1. [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
 1. [Spring Boot Actuator Web API Documentation](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/)
 1. [Spring Boot Actuator 模块 详解：健康检查，度量，指标收集和监控](https://ricstudio.top/archives/spring_boot_actuator_learn)
 1. [SpringBoot - 監控工具 Actuator](https://kucw.github.io/blog/2020/7/spring-actuator/)
