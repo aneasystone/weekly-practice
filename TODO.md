@@ -86,6 +86,7 @@ CI/CD
 	
 	Drone
 	https://docs.drone.io/quickstart/
+	https://www.jianshu.com/p/15506f46f75a
 	
 	Earthly
 	https://github.com/earthly/earthly
@@ -162,7 +163,9 @@ Database libraries
 	
 		MyBatis
 		https://mybatis.org/mybatis-3/getting-started.html
+		http://www.mybatis.org/mybatis-3/zh/index.html
 		http://mybatis.org/spring/index.html
+		
 		
 		Spring Data JPA
 		https://spring.io/projects/spring-data-jpa
@@ -621,6 +624,7 @@ Coding
 
 	SonarQube
 	https://docs.sonarqube.org/latest/
+	https://blog.waterstrong.me/sonarqube-by-step/
 
 	FindBugs
 	http://findbugs.sourceforge.net/

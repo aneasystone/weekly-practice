@@ -1,0 +1,1 @@
+docker run -it --network=host --privileged=true hub-mirror.c.163.com/library/centos bash
