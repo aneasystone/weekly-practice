@@ -557,6 +557,8 @@ public class DemoController {
 }
 ```
 
+访问一次 `/hello` 接口之后，然后再访问 `/actuator/metrics/hello.counter`，可以看到这个指标的信息：
+
 ```
 $ curl -GET http://localhost:8080/actuator/metrics/hello.counter | jq
 {
@@ -602,7 +604,96 @@ public class DemoListConfiguration {
 
 ### Mappings (mappings)
 
+`/mappings` 端点用来返回应用中的所有 URI 路径，以及它们和控制器的映射关系：
+
+```
+$ curl -s http://localhost:8080/actuator/mappings | jq
+{
+  "contexts": {
+    "application": {
+      "mappings": {
+        "dispatcherServlets": {
+          "dispatcherServlet": [
+            {
+              "handler": "com.example.demo.DemoController#hello()",
+              "predicate": "{GET [/hello]}",
+              "details": {
+                "handlerMethod": {
+                  "className": "com.example.demo.DemoController",
+                  "name": "hello",
+                  "descriptor": "()Ljava/lang/String;"
+                },
+                "requestMappingConditions": {
+                  "consumes": [],
+                  "headers": [],
+                  "methods": [
+                    "GET"
+                  ],
+                  "params": [],
+                  "patterns": [
+                    "/hello"
+                  ],
+                  "produces": []
+                }
+              }
+            },
+            ...
+          ]
+        },
+        "servletFilters": [
+          {
+            "servletNameMappings": [],
+            "urlPatternMappings": [
+              "/*"
+            ],
+            "name": "webMvcMetricsFilter",
+            "className": "org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter"
+          },
+          {
+            "servletNameMappings": [],
+            "urlPatternMappings": [
+              "/*"
+            ],
+            "name": "requestContextFilter",
+            "className": "org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter"
+          },
+          ...
+        ],
+        "servlets": [
+          {
+            "mappings": [
+              "/"
+            ],
+            "name": "dispatcherServlet",
+            "className": "org.springframework.web.servlet.DispatcherServlet"
+          }
+        ]
+      },
+      "parentId": null
+    }
+  }
+}
+
+```
+
+从结果中可以看到应用程序都定义了哪些接口（包含了每个接口的地址，处理器，匹配条件等等），包括 Actuator 接口，列表有点长，[这里是完整的结果](./mappings.json)。
+
+除此之外，还可以看到应用中定义了哪些 `servlets`，默认就只有一个 `dispatcherServlet`，以及有哪些 `servletFilters`，比如 `requestContextFilter` 和 `webMvcMetricsFilter` 等。
+
 ### Shutdown (shutdown)
+
+`/shutdown` 端点用于关闭程序，默认是不开放的，需要通过下面的配置打开：
+
+```
+management.endpoint.shutdown.enabled=true
+```
+
+开启后就可以向该端点发送 POST 请求来关闭程序了：
+
+```
+$ curl -s -X POST http://localhost:8080/actuator/shutdown
+{"message":"Shutting down, bye..."}
+```
 
 ## 其他端点
 
