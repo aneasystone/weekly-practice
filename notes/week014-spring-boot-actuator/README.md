@@ -202,6 +202,8 @@ $ curl -s http://localhost:8080/actuator/beans | jq
 }
 ```
 
+Spring Boot 自身会创建很多个 Bean，[这里是完整的结果](./beans.json)。
+
 ### Caches (caches)
 
 ### Health (health)
@@ -430,6 +432,172 @@ $ curl -s http://localhost:8080/actuator/health | jq
 
 ### Metrics (metrics)
 
+Spring Boot Actuator 使用 [Micrometer](https://micrometer.io/docs) 来收集指标，收集的指标可以通过 `/metrics` 端点来查询，比如：JVM 内存、线程、垃圾回收、Tomcat 会话、CPU、进程等信息。
+
+```
+$ curl -s http://localhost:8080/actuator/metrics | jq
+{
+  "names": [
+    "application.ready.time",
+    "application.started.time",
+    "disk.free",
+    "disk.total",
+    "executor.active",
+    "executor.completed",
+    "executor.pool.core",
+    "executor.pool.max",
+    "executor.pool.size",
+    "executor.queue.remaining",
+    "executor.queued",
+    "http.server.requests",
+    "jvm.buffer.count",
+    "jvm.buffer.memory.used",
+    "jvm.buffer.total.capacity",
+    "jvm.classes.loaded",
+    "jvm.classes.unloaded",
+    "jvm.gc.live.data.size",
+    "jvm.gc.max.data.size",
+    "jvm.gc.memory.allocated",
+    "jvm.gc.memory.promoted",
+    "jvm.gc.overhead",
+    "jvm.gc.pause",
+    "jvm.memory.committed",
+    "jvm.memory.max",
+    "jvm.memory.usage.after.gc",
+    "jvm.memory.used",
+    "jvm.threads.daemon",
+    "jvm.threads.live",
+    "jvm.threads.peak",
+    "jvm.threads.states",
+    "logback.events",
+    "process.cpu.usage",
+    "process.start.time",
+    "process.uptime",
+    "system.cpu.count",
+    "system.cpu.usage",
+    "tomcat.sessions.active.current",
+    "tomcat.sessions.active.max",
+    "tomcat.sessions.alive.max",
+    "tomcat.sessions.created",
+    "tomcat.sessions.expired",
+    "tomcat.sessions.rejected"
+  ]
+}
+```
+
+直接访问地址 `/actuator/metrics` 时，返回的只有指标名称，为了获取指标详情，需要在地址后面再加上指标名称，比如下面是查看应用的 `process.cpu.usage` 指标：
+
+```
+$ curl -s http://localhost:8080/actuator/metrics/process.cpu.usage | jq
+{
+  "name": "process.cpu.usage",
+  "description": "The \"recent cpu usage\" for the Java Virtual Machine process",
+  "baseUnit": null,
+  "measurements": [
+    {
+      "statistic": "VALUE",
+      "value": 0.151430864178387
+    }
+  ],
+  "availableTags": []
+}
+```
+
+#### 监控系统一览
+
+Actuator 不仅可以将指标通过 `/metrics` 端点暴露出来，而且还可以将指标转换成各种不同的监控系统的格式，集成不同的监控系统，实现监控和告警功能。集成方式很简单，只需要在 `pom.xml` 中添加 `micrometer-registry-{system}` 依赖即可，比如要集成 Promethues 监控，我们可以添加如下依赖：
+
+```
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+```
+
+Actuator 支持的监控系统如下：
+
+* [AppOptics](https://www.appoptics.com/)
+* [Atlas](https://github.com/Netflix/atlas)
+* [Datadog](https://www.datadoghq.com/)
+* [Dynatrace](https://www.dynatrace.com/)
+* [Elastic](https://www.elastic.co/cn/)
+* [Ganglia](http://ganglia.sourceforge.net/)
+* [Graphite](https://graphiteapp.org/)
+* [Humio](https://www.humio.com/getting-started/saas/)
+* [Influx](https://www.influxdata.com/)
+* [JMX](https://micrometer.io/docs/registry/jmx)
+* [KairosDB](https://kairosdb.github.io/)
+* [New Relic](https://newrelic.com/)
+* [Prometheus](https://prometheus.io/)
+* [SignalFx](https://www.signalfx.com/)
+* [Stackdriver](https://cloud.google.com/stackdriver/)
+* [StatsD](https://github.com/statsd/statsd)
+* [Wavefront](https://www.wavefront.com/)
+
+具体配置可以参考 [Micrometer](https://micrometer.io/docs/) 或 [Actuator](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.metrics.export) 的官方文档。
+
+#### 自定义指标
+
+Micrometer 提供了一个 `MeterRegistry` 类，用于实现自定义指标。下面的例子定义了一个名叫 `hello.counter` 的计数器指标，并带有 `app=demo` 的 `Tag`，每当访问一次 `/hello` 页面，计数器就会加一：
+
+```
+@RestController
+public class DemoController {
+
+    private final MeterRegistry registry;
+    public DemoController(MeterRegistry registry) {
+        this.registry = registry;
+    }
+
+    @GetMapping("/hello")
+    public String hello() {
+        this.registry.counter("hello.counter", Tags.of("app", "demo")).increment();
+        return "hello";
+    }
+}
+```
+
+```
+$ curl -GET http://localhost:8080/actuator/metrics/hello.counter | jq
+{
+  "name": "hello.counter",
+  "description": null,
+  "baseUnit": null,
+  "measurements": [
+    {
+      "statistic": "COUNT",
+      "value": 1
+    }
+  ],
+  "availableTags": [
+    {
+      "tag": "app",
+      "values": [
+        "demo"
+      ]
+    }
+  ]
+}
+```
+
+另外，如果你的指标依赖于另一个 Bean，推荐使用 `MeterBinder` 来构建指标：
+
+```
+@Configuration
+public class DemoListConfiguration {
+    
+    @Bean
+    public List<String> demoList() {
+        return new ArrayList<>();
+    }
+
+    @Bean
+    public MeterBinder demoListSize(List<String> demoList) {
+        return (registry) -> Gauge.builder("list.size", demoList::size).register(registry);
+    }
+}
+```
+
 ### Scheduled Tasks (scheduledtasks)
 
 ### Mappings (mappings)
@@ -465,7 +633,6 @@ $ curl -s http://localhost:8080/actuator/health | jq
 1. [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
 1. [Spring Boot Actuator Web API Documentation](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/)
 1. [Spring Boot Actuator 模块 详解：健康检查，度量，指标收集和监控](https://ricstudio.top/archives/spring_boot_actuator_learn)
-1. [SpringBoot - 監控工具 Actuator](https://kucw.github.io/blog/2020/7/spring-actuator/)
 1. [Spring Boot (十九)：使用 Spring Boot Actuator 监控应用](http://www.ityouknow.com/springboot/2018/02/06/spring-boot-actuator.html)
 1. [Spring Boot Actuator](https://www.baeldung.com/spring-boot-actuators)
 1. [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
