@@ -418,6 +418,209 @@ $ curl -s http://localhost:8080/actuator/health | jq
 
 ### Info (info)
 
+`/info` 端点用于展示应用程序的一些基本信息，默认情况下 `/info` 返回的是一个空 JSON。
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{}
+```
+
+Actuator 支持多种信息的收集方式，不过默认都是关闭的，需要使用 `management.info.<id>.enabled` 手动开启。支持的信息有如下几种：
+
+| ID | 说明 |
+| -- | ---- |
+| build | 显示项目的构建信息，需要在项目中生成 `META-INF/build-info.properties` 文件 |
+| env | 显示所有以 `info.` 开头的配置 |
+| git | 显示 Git 信息，需要在项目中生成 `git.properties` 文件 |
+| java | 显示 Java 运行时信息 |
+| os | 显示操作系统信息 |
+
+#### 显示构建信息
+
+如果想在 `/info` 端点中显示项目的构建信息，我们需要在项目中生成 `META-INF/build-info.properties` 文件。这个文件可以使用 `spring-boot-maven-plugin` 自动生成，只需要在插件配置中添加一个 `build-info` 的 `goal` 即可：
+
+```
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+      <executions>
+        <execution>
+          <goals>
+            <goal>build-info</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+重新构建并运行程序，再访问 `/info` 端点：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "build": {
+    "artifact": "demo",
+    "name": "demo",
+    "time": "2022-07-04T23:04:34.085Z",
+    "version": "0.0.1-SNAPSHOT",
+    "group": "com.example"
+  }
+}
+```
+
+#### 显示环境配置
+
+这个配置默认是关闭的，需要在配置文件中开启：
+
+```
+management.info.env.enabled=true
+```
+
+开启之后就可以在配置文件中添加 `info.` 开头的配置了。如果你使用的是 Maven 构建工具，你还可以在配置中使用 `@...@` 来引用 Maven 的配置，这被称为 [Maven 的自动配置展开](https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto.properties-and-configuration.expand-properties)：
+
+```
+info.env.app.name=demo
+info.env.app.encoding=@project.build.sourceEncoding@
+info.env.app.java.source=@java.version@
+info.env.app.java.target=@java.version@
+```
+
+你还可以在程序启动时，使用 `--` 动态地注入配置：
+
+```
+$ java -jar .\target\demo-0.0.1-SNAPSHOT.jar --info.env.app.name=demo
+```
+
+查看 `/info` 端点的结果如下：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "env": {
+    "app": {
+      "name": "demo",
+      "encoding": "UTF-8",
+      "java": {
+        "source": "17.0.3",
+        "target": "17.0.3"
+      }
+    }
+  }
+}
+```
+
+#### 显示 Git 信息
+
+`/info` 端点还可以显示 Git 的一些基本信息，只要在你的项目中包含了 `git.properties` 文件即可。这个文件可以通过 [git-commit-id-maven-plugin](https://github.com/git-commit-id/git-commit-id-maven-plugin) 插件生成：
+
+```
+<build>
+    <plugins>
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+```
+
+使用 `/info` 端点查看 Git 信息如下：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "git": {
+    "branch": "main",
+    "commit": {
+      "id": "61e8bd9",
+      "time": "2022-07-04T00:12:32Z"
+    }
+  }
+}
+```
+
+#### 显示 Java 运行时信息
+
+这个配置默认是关闭的，通过下面的配置开启：
+
+```
+management.info.java.enabled=true
+```
+
+查看 `/info` 端点的结果如下：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "java": {
+    "version": "11.0.8",
+    "vendor": {
+      "name": "Oracle Corporation",
+      "version": "18.9"
+    },
+    "runtime": {
+      "name": "Java(TM) SE Runtime Environment",
+      "version": "11.0.8+10-LTS"
+    },
+    "jvm": {
+      "name": "Java HotSpot(TM) 64-Bit Server VM",
+      "vendor": "Oracle Corporation",
+      "version": "11.0.8+10-LTS"
+    }
+  }
+}
+```
+
+#### 显示操作系统信息
+
+这个配置默认是关闭的，通过下面的配置开启：
+
+```
+management.info.os.enabled=true
+```
+
+查看 `/info` 端点的结果如下：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "os": {
+    "name": "Windows 10",
+    "version": "10.0",
+    "arch": "amd64"
+  }
+}
+```
+
+#### 自定义信息
+
+Spring Boot Actuator 通过在 `ApplicationContext` 中查找所有实现了 `InfoContributor` 接口的 Bean 来收集应用信息，譬如上面介绍的几种应用信息分别是通过 `BuildInfoContributor`、`EnvironmentInfoContributor`、`GitInfoContributor`、`JavaInfoContributor` 和 `OsInfoContributor` 实现的。我们也可以自己实现 `InfoContributor` 接口，来暴露自定义的应用信息。下面是一个简单的示例：
+
+```
+@Component
+public class TestInfoContributor implements InfoContributor {
+
+	@Override
+	public void contribute(Builder builder) {
+		builder.withDetail("hello", "world");
+	}
+	
+}
+```
+
+此时查看 `/info` 端点，可以看到下面的结果：
+
+```
+$ curl -s http://localhost:8080/actuator/info | jq
+{
+  "hello": "world"
+}
+```
+
 ### Conditions Evaluation Report (conditions)
 
 ### Configuration Properties (configprops)
