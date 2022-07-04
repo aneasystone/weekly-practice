@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 public class DemoController {
 
@@ -26,6 +28,7 @@ public class DemoController {
     @GetMapping("/hello")
     public String hello() {
         this.registry.counter("hello.counter", Tags.of("app", "demo")).increment();
+        log.debug("hello debug log");
         return "hello";
     }
 

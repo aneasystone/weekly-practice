@@ -426,6 +426,97 @@ $ curl -s http://localhost:8080/actuator/health | jq
 
 ### Loggers (loggers)
 
+`/loggers` 端点不仅可以查询我们在应用程序中所设置的日志等级，而且可以通过接口动态地进行修改，这在排查问题时非常有用。
+
+下面是 `/loggers` 端点返回的部分结果：
+
+```
+$ curl -s http://localhost:8080/actuator/loggers | jq
+{
+  "levels": [
+    "OFF",
+    "ERROR",
+    "WARN",
+    "INFO",
+    "DEBUG",
+    "TRACE"
+  ],
+  "loggers": {
+    "ROOT": {
+      "configuredLevel": "INFO",
+      "effectiveLevel": "INFO"
+    },
+    "com": {
+      "configuredLevel": null,
+      "effectiveLevel": "INFO"
+    },
+    "com.example": {
+      "configuredLevel": null,
+      "effectiveLevel": "INFO"
+    },
+    "com.example.demo": {
+      "configuredLevel": null,
+      "effectiveLevel": "INFO"
+    },
+    "com.example.demo.DemoApplication": {
+      "configuredLevel": null,
+      "effectiveLevel": "INFO"
+    },
+    "com.example.demo.TestHealthIndicator": {
+      "configuredLevel": null,
+      "effectiveLevel": "INFO"
+    },
+    ...
+  },
+  "groups": {
+    "web": {
+      "configuredLevel": null,
+      "members": [
+        "org.springframework.core.codec",
+        "org.springframework.http",
+        "org.springframework.web",
+        "org.springframework.boot.actuate.endpoint.web",
+        "org.springframework.boot.web.servlet.ServletContextInitializerBeans"
+      ]
+    },
+    "sql": {
+      "configuredLevel": null,
+      "members": [
+        "org.springframework.jdbc.core",
+        "org.hibernate.SQL",
+        "org.jooq.tools.LoggerListener"
+      ]
+    }
+  }
+}
+```
+
+也可以单独访问一个 logger：
+
+```
+$ curl -s http://localhost:8080/actuator/loggers/com.example.demo | jq
+{
+  "configuredLevel": null,
+  "effectiveLevel": "INFO"
+}
+```
+
+还可以使用 POST 请求来修改这个 logger 的日志等级，比如下面是一个例子，将 `com.example.demo` 的日志等级改为 `DEBUG`：
+
+```
+$ curl -s -X POST -d '{"configuredLevel": "DEBUG"}' \
+  -H "Content-Type: application/json" \
+  http://localhost:8080/actuator/loggers/com.example.demo
+```
+
+如果在生产环境中，你想要打印一些 DEBUG 信息用于诊断程序的一些异常情况，你只需要使用这个方法修改日志等级，而不需要重启应用。如果想重置日志等级，将 `configuredLevel` 设置为 `null` 即可：
+
+```
+$ curl -s -X POST -d '{"configuredLevel": null}' \
+  -H "Content-Type: application/json" \
+  http://localhost:8080/actuator/loggers/com.example.demo
+```
+
 ### Heap Dump (heapdump)
 
 ### Thread Dump (threaddump)
