@@ -722,7 +722,92 @@ $ curl -s -X POST -d '{"configuredLevel": null}' \
 
 ### Heap Dump (heapdump)
 
+访问 `/heapdump` 端点会自动生成一个 JVM 堆文件。
+
+```
+$ curl -O http://localhost:8080/actuator/heapdump
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 30.9M  100 30.9M    0     0  85.5M      0 --:--:-- --:--:-- --:--:-- 85.5M
+```
+
+这个堆文件的格式取决于你所使用的 JVM，比如 HotSpot JVM 的 [HPROF](https://docs.oracle.com/javase/8/docs/technotes/samples/hprof.html) 格式，或者 OpenJ9 的 [PHD](https://www.eclipse.org/openj9/docs/dump_heapdump/#portable-heap-dump-phd-format) 格式。我们可以使用 [VisualVM](https://visualvm.github.io/download.html) 或 [Memory Analyzer（MAT）](https://www.eclipse.org/mat/) 等工具打开这个文件对内存进行分析。
+
+![](./images/visualvm.png)
+
+![](./images/mat.png)
+
 ### Thread Dump (threaddump)
+
+`/threaddump` 端点用于查看应用程序的所有线程情况，方便我们在日常工作中定位问题。主要展示了线程名、线程ID、线程状态、是否等待锁资源、线程堆栈等信息。
+
+```
+$ curl -s http://localhost:8080/actuator/threaddump | jq
+{
+  "threads": [
+    {
+      "threadName": "Reference Handler",
+      "threadId": 2,
+      "blockedTime": -1,
+      "blockedCount": 3,
+      "waitedTime": -1,
+      "waitedCount": 0,
+      "lockName": null,
+      "lockOwnerId": -1,
+      "lockOwnerName": null,
+      "daemon": true,
+      "inNative": false,
+      "suspended": false,
+      "threadState": "RUNNABLE",
+      "priority": 10,
+      "stackTrace": [
+        {
+          "classLoaderName": null,
+          "moduleName": "java.base",
+          "moduleVersion": "11.0.8",
+          "methodName": "waitForReferencePendingList",
+          "fileName": "Reference.java",
+          "lineNumber": -2,
+          "className": "java.lang.ref.Reference",
+          "nativeMethod": true
+        },
+        {
+          "classLoaderName": null,
+          "moduleName": "java.base",
+          "moduleVersion": "11.0.8",
+          "methodName": "processPendingReferences",
+          "fileName": "Reference.java",
+          "lineNumber": 241,
+          "className": "java.lang.ref.Reference",
+          "nativeMethod": false
+        },
+        {
+          "classLoaderName": null,
+          "moduleName": "java.base",
+          "moduleVersion": "11.0.8",
+          "methodName": "run",
+          "fileName": "Reference.java",
+          "lineNumber": 213,
+          "className": "java.lang.ref.Reference$ReferenceHandler",
+          "nativeMethod": false
+        }
+      ],
+      "lockedMonitors": [],
+      "lockedSynchronizers": [],
+      "lockInfo": null
+    },
+	...
+  ]
+}
+```
+
+这里只显示了部分结果，[完整的结果在这里](threaddump.json)。
+
+默认情况下，该端点的返回结果是 JSON 格式的，这对于程序来说比较友好，比如我们想开发一个线程分析程序，通过调用该接口就能拿到结构化的线程信息。不过这个格式看起来不太直观，如果返回的结果能和 `jstack` 的输出格式一样就好了，当然 Actuator 的开发人员也想到了这一点，实现起来也非常简单，只要在请求中加上 `Accept: text/plain` 头即可：
+
+```
+$ curl -s http://localhost:8080/actuator/threaddump -H 'Accept: text/plain'
+```
 
 ### Metrics (metrics)
 
