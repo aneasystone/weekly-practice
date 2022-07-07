@@ -623,9 +623,165 @@ $ curl -s http://localhost:8080/actuator/info | jq
 
 ### Conditions Evaluation Report (conditions)
 
+Spring Boot 使用 **约定优于配置** 的理念，采用包扫描和自动化配置的机制来加载依赖程序中的 Spring Bean。虽然这样做能让我们的代码变得非常简洁，但是整个应用的实例创建和依赖关系等信息都被离散到了各个配置类的注解上，这使得我们分析整个应用中资源和实例的各种关系变得非常的困难。
+
+`/conditions` 端点可以用于排查程序中的配置类（`@Configuration`）或自动化配置类（`@AutoConfiguration`）是否生效的情况：
+
+```
+$ curl -s http://localhost:8080/actuator/conditions | jq
+{
+  "contexts": {
+    "application": {
+      "positiveMatches": {
+        "AuditEventsEndpointAutoConfiguration": [
+          {
+            "condition": "OnAvailableEndpointCondition",
+            "message": "@ConditionalOnAvailableEndpoint marked as exposed by a 'management.endpoints.jmx.exposure' property"
+          }
+        ],
+        ...
+      },
+      "negativeMatches": {
+        "RabbitHealthContributorAutoConfiguration": {
+          "notMatched": [
+            {
+              "condition": "OnClassCondition",
+              "message": "@ConditionalOnClass did not find required class 'org.springframework.amqp.rabbit.core.RabbitTemplate'"
+            }
+          ],
+          "matched": []
+        },
+        ...
+      },
+      "unconditionalClasses": [
+        "org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.availability.AvailabilityHealthContributorAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration",
+        "org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration",
+        "org.springframework.boot.autoconfigure.context.LifecycleAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.metrics.integration.IntegrationMetricsAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration",
+        "org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration",
+        "org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration",
+        "org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration"
+      ]
+    }
+  }
+}
+```
+
+返回结果较大，[完整的返回结果在这里](./conditions.json)。
+
+返回结果里包括三大部分：`positiveMatches` 表示哪些配置条件是满足的，`negativeMatches` 表示哪些配置条件是不满足的，而 `unconditionalClasses` 表示无条件的配置类，这些配置无需满足什么条件就会自动加载。
+
 ### Configuration Properties (configprops)
 
+`@ConfigurationProperties` 是 Spring Boot 提供的读取配置文件的一个注解，它可以将 application.properties 配置文件中的值注入到 Bean 对象上。`/configprops` 端点用于显示程序中所有的 `@ConfigurationProperties` Bean 以及配置值（包括默认值）：
+
+```
+$ curl -s http://localhost:8080/actuator/configprops | jq
+{
+  "contexts": {
+    "application": {
+      "beans": {
+        "management.endpoints.web-org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties": {
+          "prefix": "management.endpoints.web",
+          "properties": {
+            "pathMapping": {},
+            "exposure": {
+              "include": [
+                "*"
+              ],
+              "exclude": []
+            },
+            "basePath": "/actuator",
+            "discovery": {
+              "enabled": true
+            }
+          },
+          "inputs": {
+            "pathMapping": {},
+            "exposure": {
+              "include": [
+                {
+                  "value": "*",
+                  "origin": "class path resource [application.properties] - 2:43"
+                }
+              ],
+              "exclude": []
+            },
+            "basePath": {},
+            "discovery": {
+              "enabled": {}
+            }
+          }
+        },
+        ...
+      },
+      "parentId": null
+    }
+  }
+}
+```
+
+返回结果较大，[完整的返回结果在这里](./configprops.json)。
+
+从上面的结果可以看出，我们在配置文件中配置的 `management.endpoints.web.exposure.include=*` 实际上就对应的 `org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties` 这个配置类里的属性。
+
 ### Environment (env)
+
+`/env` 端点用于展示应用程序的环境变量配置。Spring Boot 中的环境变量配置不仅包括了操作系统中的环境变量，而且还包括了配置文件中的配置，以及命令行中配置等。返回结果较大，[这里是完整结果](./env.json)。
+
+```
+$ curl -s http://localhost:8080/actuator/env | jq
+{
+  "activeProfiles": [],
+  "propertySources": [
+    {
+      "name": "server.ports",
+      "properties": {
+        "local.server.port": {
+          "value": 8080
+        }
+      }
+    },
+    {
+      "name": "servletContextInitParams",
+      "properties": {}
+    },
+    {
+      "name": "systemProperties",
+      "properties": {
+        "sun.desktop": {
+          "value": "windows"
+        },
+        ...
+      }
+    },
+    {
+      "name": "systemEnvironment",
+      "properties": {
+        "USERDOMAIN_ROAMINGPROFILE": {
+          "value": "DESKTOP-CH85E4K",
+          "origin": "System Environment Property \"USERDOMAIN_ROAMINGPROFILE\""
+        },
+        ...
+      }
+    },
+    {
+      "name": "Config resource 'class path resource [application.properties]' via location 'optional:classpath:/'",
+      "properties": {
+        "management.endpoints.web.exposure.include": {
+          "value": "*",
+          "origin": "class path resource [application.properties] - 2:43"
+        },
+        ...
+      }
+    }
+  ]
+}
+```
 
 ### Loggers (loggers)
 
