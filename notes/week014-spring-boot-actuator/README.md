@@ -204,8 +204,6 @@ $ curl -s http://localhost:8080/actuator/beans | jq
 
 Spring Boot 自身会创建很多个 Bean，[这里是完整的结果](./beans.json)。
 
-### Caches (caches)
-
 ### Health (health)
 
 `/health` 端点用来检查应用程序的健康情况，默认情况下它只会显示应用程序的状态为 `UP` 或 `DOWN`：
@@ -1135,8 +1133,6 @@ public class DemoListConfiguration {
 }
 ```
 
-### Scheduled Tasks (scheduledtasks)
-
 ### Mappings (mappings)
 
 `/mappings` 端点用来返回应用中的所有 URI 路径，以及它们和控制器的映射关系：
@@ -1230,29 +1226,38 @@ $ curl -s -X POST http://localhost:8080/actuator/shutdown
 {"message":"Shutting down, bye..."}
 ```
 
-## 其他端点
+## 自定义端点
 
-除了 Actuator 的原生端点，还有一些特殊的端点，需要在特定的条件下才会有。
+有时候我们希望将应用程序的内部状态暴露出来，或对内部状态进行修改，这时我们就可以使用 Actuator 的自定义端点功能，通过 `@Endpoint` 注解即可以注册一个新端点：
 
-### Audit Events (auditevents)
+```
+@Endpoint(id = "test")
+@Configuration
+public class TestEndpoint {
+	
+	private final List<String> demoList;
+	public TestEndpoint(List<String> demoList) {
+		this.demoList = demoList;
+	}
 
-### Flyway (flyway)
+	@ReadOperation
+	public List<String> getDemoList() {
+		return this.demoList;
+	}
+}
+```
 
-### HTTP Trace (httptrace)
+可以看到我们在上面的方法上加了一个 `@ReadOperation` 注解，表示这个端点可以通过 `GET` 访问：
 
-### Spring Integration graph (integrationgraph)
+```
+$ curl -s http://localhost:8080/actuator/test | jq
+```
 
-### Liquibase (liquibase)
+除此之外，也可以使用 `@WriteOperation` 或 `@DeleteOperation` 注解，分别表示 `POST` 或 `DELETE` 请求。
 
-### Log File (logfile)
+## 使用 Spring Security 对端点进行安全保护
 
-### Prometheus (prometheus)
-
-### Quartz (quartz)
-
-### Sessions (sessions)
-
-### Application Startup (startup)
+## 通过 JMX 访问 Actuator 端点
 
 ## 参考
 
@@ -1263,7 +1268,23 @@ $ curl -s -X POST http://localhost:8080/actuator/shutdown
 1. [Spring Boot Actuator](https://www.baeldung.com/spring-boot-actuators)
 1. [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
 
-
 ## 更多
 
-### Beans 列表
+### 其他端点
+
+除了 Actuator 的原生端点，还有一些特殊的端点，需要在特定的条件下才会有。
+
+| 端点名称 | 端点地址 | 用途 | 满足条件 |
+| ------- | -------- | --- | ------- |
+| Audit Events | `/auditevents` | Exposes audit events information for the current application. | Requires an `AuditEventRepository` bean. |
+| Caches | `/caches` | Exposes available caches. | - |
+| Flyway | `/flyway` | Shows any Flyway database migrations that have been applied. | Requires one or more `Flyway` beans. |
+| HTTP Trace | `/httptrace` | Displays HTTP trace information (by default, the last 100 HTTP request-response exchanges). | Requires an `HttpTraceRepository` bean. |
+| Spring Integration graph | `/integrationgraph` | Shows the Spring Integration graph. | Requires a dependency on `spring-integration-core`. |
+| Liquibase | `/liquibase` | Shows any Liquibase database migrations that have been applied. | Requires one or more Liquibase beans. |
+| Log File | `/logfile` | Provides access to the contents of the application’s log file. | Requires `logging.file.name` or `logging.file.path` to be set. |
+| Prometheus | `/prometheus` | Provides Spring Boot application’s metrics in the format required for scraping by a Prometheus server. | Requires a dependency on `micrometer-registry-prometheus` |
+| Quartz | `/quartz` | Provides information about jobs and triggers that are managed by the Quartz Scheduler. | Requires `Quartz` beans. |
+| Scheduled Tasks | `/scheduledtasks` | Displays the scheduled tasks in your application. | - |
+| Sessions | `/sessions` | Allows retrieval and deletion of user sessions from a Spring Session-backed session store. | Requires a servlet-based web application that uses Spring Session. |
+| Application Startup | `/startup` | Shows [the startup steps data](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.spring-application.startup-tracking) collected by the `ApplicationStartup`. | Requires the SpringApplication to be configured with a `BufferingApplicationStartup`. |
