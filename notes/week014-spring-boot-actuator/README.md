@@ -1257,6 +1257,43 @@ $ curl -s http://localhost:8080/actuator/test | jq
 
 ## 使用 Spring Security 对端点进行安全保护
 
+由于 Actuator 端点暴露出来的信息较为敏感，存在一定的安全风险，所以我们必须防止未经授权的外部访问。首先添加 Spring Security 依赖：
+
+```
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+然后定义一个 `SecurityFilterChain` bean，对所有的 Actuator 端点开启认证，必须是 `ACTUATOR_ADMIN` 角色的用户才能访问，认证方式使用简单的 HTTP Basic 认证：
+
+```
+@Configuration
+public class DemoSecurityConfiguration {
+	
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.requestMatcher(EndpointRequest.toAnyEndpoint());
+		http.authorizeRequests((requests) -> requests.anyRequest().hasRole("ACTUATOR_ADMIN"));
+		http.httpBasic(withDefaults());
+		return http.build();
+	}
+}
+```
+
+在配置文件中添加一个 `ACTUATOR_ADMIN` 角色的用户：
+
+```
+spring.security.user.name=admin
+spring.security.user.password=admin
+spring.security.user.roles=ACTUATOR_ADMIN
+```
+
+这样我们在访问 Actuator 端点时，必须输入用户名和密码（admin/admin）。
+
+> 注意上面的代码中我们使用 `http.requestMatcher(EndpointRequest.toAnyEndpoint())` 只对 Actuator 端点开启认证，应用程序的其他接口不受影响。如果要对其他接口开启认证，可以再定义一个 `SecurityFilterChain` bean 对其他接口进行配置。
+
 ## 通过 JMX 访问 Actuator 端点
 
 ## 参考
