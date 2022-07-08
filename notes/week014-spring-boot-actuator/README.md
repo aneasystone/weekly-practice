@@ -1296,6 +1296,16 @@ spring.security.user.roles=ACTUATOR_ADMIN
 
 ## 通过 JMX 访问 Actuator 端点
 
+Spring Boot Actuator 端点不仅可以通过 HTTP 接口访问，而且还可以通过 JMX 访问，我们运行 jconsole 连接我们的应用程序：
+
+![](./images/jconsole.png)
+
+在选项卡中选择 MBean，左侧会以树形显示应用程序中的所有 MBean，我们找到 `org.springframework.boot` 就可以看到暴露的 `Endpoint` 列表了：
+
+![](./images/jconsole-mbean.png)
+
+随便选择一个 `Endpoint`，再打开操作界面，然后就可以像调用方法一样访问端点了。
+
 ## 参考
 
 1. [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
