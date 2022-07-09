@@ -1,6 +1,6 @@
 # WEEK011 - 在 Docker 环境中开发 Spring Boot 项目
 
-在 WEEK009 中，有一篇关于 Docker 的 [Getting Started Guide](../week009-spring-guides/guides/gs/spring-boot-docker/README.md)，在那篇教程中我们已经学习了如何编写 Dockerfile 将 Spring Boot 应用构建成 Docker 镜像。在这篇教程中，我们将继续使用之前的那个 Spring Boot 应用，并学习一些更深入的知识。
+在 [week009-spring-guides](../week009-spring-guides/README.md) 中，有一篇关于 Docker 的 [Getting Started Guide](../week009-spring-guides/guides/gs/spring-boot-docker/README.md)，在那篇教程中我们已经学习了如何编写 Dockerfile 将 Spring Boot 应用构建成 Docker 镜像。在这篇教程中，我们将继续使用之前的那个 Spring Boot 应用，并学习一些更深入的知识。
 
 ## 一个简单的 Dockerfile
 

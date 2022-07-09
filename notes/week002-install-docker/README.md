@@ -1,6 +1,6 @@
 # WEEK002 - 在 VirtualBox 上安装 Docker 服务
 
-在 WEEK001 中，我们在 VirtualBox 上安装了 CentOS 实验环境，这一节我们会继续在这个环境上安装 Docker 服务。
+在 [week001-centos-on-virtualbox](../week001-centos-on-virtualbox/README.md) 中，我们在 VirtualBox 上安装了 CentOS 实验环境，这一节我们会继续在这个环境上安装 Docker 服务。
 
 ## 1. 使用 XShell 连接虚拟机
 
@@ -35,7 +35,7 @@ Connecting to 10.0.2.6:22...
 Could not connect to '10.0.2.6' (port 22): Connection failed.
 ```
 
-通过复习 WEEK001 的内容，我们知道目前我们使用的 VirtualBox 的网络模式是 `NAT 网络`，在这种网络模式下，宿主机是无法直接访问虚拟机的，而要通过 `端口转发（Port Forwarding）`。
+通过复习 [week001-centos-on-virtualbox](../week001-centos-on-virtualbox/README.md) 的内容，我们知道目前我们使用的 VirtualBox 的网络模式是 `NAT 网络`，在这种网络模式下，宿主机是无法直接访问虚拟机的，而要通过 `端口转发（Port Forwarding）`。
 
 我们打开 VirtualBox “管理” -> “全局设定” 菜单，找到 “网络” 选项卡，在这里能看到我们使用的 NAT 网络：
 

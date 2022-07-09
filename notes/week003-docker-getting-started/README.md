@@ -1,6 +1,6 @@
 # WEEK003 - Docker 快速入门
 
-在 WEEK002 中，我们通过多种方法在 VirtualBox 上安装了 Docker 服务，这一节我们将根据官网文档，学习 Docker 的一些入门知识。这一节的内容主要包括：
+在 [week002-install-docker](../week002-install-docker/README.md) 中，我们通过多种方法在 VirtualBox 上安装了 Docker 服务，这一节我们将根据官网文档，学习 Docker 的一些入门知识。这一节的内容主要包括：
 
 * 构建和运行镜像
 * 通过 Docker Hub 分享镜像

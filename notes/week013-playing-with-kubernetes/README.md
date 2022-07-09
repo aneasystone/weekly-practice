@@ -4,7 +4,7 @@ Kubernetes 常常被简称为 K8S（发音：Kate's），是 Google 在 2014 年
 
 Kubernetes 属于平台级技术，覆盖的技术范围非常广，包括计算、网络、存储、高可用、监控、日志等多个方面，而且在 Kubernetes 中有很多新的概念和设计理念，所以有一定的入门门槛。
 
-在 WEEK010 中，我们学习了如何使用 Kind、Minikube 和 Kubeadmin 安装一个 Kubernetes 集群。这一节我们将照着 [官方教程](https://kubernetes.io/docs/tutorials/)，学习如何使用它，了解并掌握 Kubernetes 的基本概念。
+在 [week010-install-kubernetes](../week010-install-kubernetes/README.md) 中，我们学习了如何使用 Kind、Minikube 和 Kubeadmin 安装一个 Kubernetes 集群。这一节我们将照着 [官方教程](https://kubernetes.io/docs/tutorials/)，学习如何使用它，了解并掌握 Kubernetes 的基本概念。
 
 ## 使用 Minikube 创建集群
 
@@ -18,7 +18,7 @@ Kubernetes 属于平台级技术，覆盖的技术范围非常广，包括计算
 
 每个 Node 上都运行着 `Kubelet` 程序，它负责运行应用，并且是和 Master 通信的代理。每个 Node 上还要有运行容器的工具，如 Docker 或 rkt。
 
-我们可以使用 Minikube 创建一个单节点的简单集群。首先确保机器上已经安装 Minikube（安装步骤参考 WEEK010）：
+我们可以使用 Minikube 创建一个单节点的简单集群。首先确保机器上已经安装 Minikube（安装步骤参考 [week010-install-kubernetes](../week010-install-kubernetes/README.md)）：
 
 ```
 $ minikube version

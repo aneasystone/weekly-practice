@@ -294,7 +294,7 @@ Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.12.4:test (default-test) on project gs-maven: There are test failures.
 [ERROR]
-[ERROR] Please refer to D:\code\weekly-practice\WEEK009-Spring官方入门指南\guides\gs\maven\demo\target\surefire-reports for the individual test results.
+[ERROR] Please refer to D:\code\weekly-practice\notes\week-009-spring-guides\guides\gs\maven\demo\target\surefire-reports for the individual test results.
 [ERROR] -> [Help 1]
 [ERROR]
 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.

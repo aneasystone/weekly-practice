@@ -1,6 +1,6 @@
 # WEEK005 - 学习 JHipster
 
-在 WEEK004 中，我们学习了几种方法来快速生成 Spring 项目的脚手架代码，这一节将学习一个更强大的工具 [JHipster](https://www.jhipster.tech/)，它几乎是全能型选手，它能自动生成前后端一体的代码框架，并提供了大量的方便开发和测试以及用于生产环境的特性。
+在 [week004-creating-spring-project](../week004-creating-spring-project/README.md) 中，我们学习了几种方法来快速生成 Spring 项目的脚手架代码，这一节将学习一个更强大的工具 [JHipster](https://www.jhipster.tech/)，它几乎是全能型选手，它能自动生成前后端一体的代码框架，并提供了大量的方便开发和测试以及用于生产环境的特性。
 
 ## JHipster 快速入门
 
