@@ -617,6 +617,9 @@ Machine Learning
 	PaddlePaddle
 	https://www.paddlepaddle.org.cn/
 
+    Fluid, elastic data abstraction and acceleration for BigData/AI applications in cloud.
+    https://fluid-cloudnative.github.io/
+
 Coding
 
 	华山版《Java开发手册》
