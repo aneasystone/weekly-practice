@@ -16,11 +16,14 @@ public class DemoRunner implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) throws Exception {
-		LiteflowResponse response = flowExecutor.execute2Resp("chain1", "param");
-		System.out.println(String.format("RequestId = %s\r\nExecutorStepStr = %s\r\nMessage = %s\r\nisSuccess = %s", 
-			response.getRequestId(),
-			response.getExecuteStepStr(),
-			response.getMessage(),
-			response.isSuccess()));
+		for (int i = 0; i < 10; i++) {
+			LiteflowResponse response = flowExecutor.execute2Resp("chain1", "param");
+			System.out.println(String.format("RequestId = %s\r\nExecutorStepStr = %s\r\nMessage = %s\r\nisSuccess = %s", 
+				response.getRequestId(),
+				response.getExecuteStepStr(),
+				response.getMessage(),
+				response.isSuccess()));
+			Thread.sleep(10_000);
+		}
 	}
 }

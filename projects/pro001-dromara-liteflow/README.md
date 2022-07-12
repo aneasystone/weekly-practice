@@ -128,3 +128,55 @@ isSuccess = true
 
 可以看出三个组件按顺序 `a==>b==>c` 被依次执行。
 
+## 规则文件配置
+
+`LiteFlow` 支持三种格式的配置文件：`xml`、`json` 和 `yaml`，并且原生支持两种配置源：本地配置和 ZooKeeper 配置，而且还提供了扩展点可以用户自定义配置源。
+
+在上面的例子中我们使用的是本地 `xml` 配置，这一节我们来试试 ZooKeeper 配置。首先用 Docker 启动一个 ZooKeeper 进程：
+
+```
+> docker run -d -p 2181:2181 --name zookeeper zookeeper
+```
+
+然后进入容器连接 ZooKeeper：
+
+```
+> docker exec -it zookeeper bash
+root@1f387d442e27:/apache-zookeeper-3.8.0-bin# ls
+LICENSE.txt  NOTICE.txt  README.md  README_packaging.md  bin  conf  docs  lib
+root@1f387d442e27:/apache-zookeeper-3.8.0-bin# cd bin/
+root@1f387d442e27:/apache-zookeeper-3.8.0-bin/bin# ./zkCli.sh
+```
+
+在 ZooKeeper 上创建一个节点 `/liteflow`，并将 `json` 格式的配置保存到该节点：
+
+```
+[zk: localhost:2181(CONNECTED) 0] create /liteflow
+[zk: localhost:2181(CONNECTED) 1] set /liteflow {"flow":{"chain":[{"name":"chain1","value":"THEN(a,b,c)"}]}}
+[zk: localhost:2181(CONNECTED) 2] get /liteflow
+{"flow":{"chain":[{"name":"chain1","value":"THEN(a,b,c)"}]}}
+```
+
+至此配置已经准备就绪，修改 `application.properties` 配置文件：
+
+```
+liteflow.rule-source=el_json:127.0.0.1:2181
+liteflow.zk-node=/liteflow
+```
+
+并在 `pom.xml` 文件中加入依赖：
+
+```
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-framework</artifactId>
+    <version>5.1.0</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-recipes</artifactId>
+    <version>5.1.0</version>
+</dependency>
+```
+
+重新运行程序，得到和上一节相同的结果。ZooKeeper 的最大优势是配置的自动热加载，应用程序会自动监听 ZooKeeper 节点内容的变化，可以在不重启服务的情况下，进行规则的重载，而且不会因为重载的过程而出现服务中断的现象。

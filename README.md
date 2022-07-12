@@ -17,3 +17,7 @@
 * WEEK013 - [Kubernetes 使用小记](./notes/week013-playing-with-kubernetes/README.md)
 * WEEK014 - [Spring Boot 生产就绪特性 Actuator](./notes/week014-spring-boot-actuator/README.md)
 * WEEK014 - [实战 ELK 搭建日志系统](./notes/week015-elk-in-action/README.md)
+
+### 项目实践
+
+* PRO001 - [dromara/liteflow](./projects/pro001-dromara-liteflow/README.md) - 轻量，快速，稳定可编排的组件式规则引擎
