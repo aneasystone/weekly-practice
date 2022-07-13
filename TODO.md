@@ -63,6 +63,12 @@ Kubernetes Management Platform
 	HashiCorp Nomad
 	https://www.nomadproject.io/docs
 
+	Rainbond
+	https://www.rainbond.com/
+
+	KubeOperator
+	https://kubeoperator.io/
+
 Serverless
 
 	Knative
