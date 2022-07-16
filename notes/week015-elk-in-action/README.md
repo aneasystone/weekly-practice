@@ -1,4 +1,4 @@
-# WEEK014 - 实战 ELK 搭建日志系统
+# WEEK015 - 实战 ELK 搭建日志系统
 
 `ELK` 是 `Elasticsearch` + `Logstash` + `Kibana` 的简称。`Elasticsearch` 是一个基于 `Lucene` 的分布式全文搜索引擎，提供 RESTful API 进行数据读写；`Logstash` 是一个收集，处理和转发事件和日志消息的工具；而 `Kibana` 是 Elasticsearch 的开源数据可视化插件，为查看存储在 Elasticsearch 提供了友好的 Web 界面，并提供了条形图，线条和散点图，饼图和地图等分析工具。
 
