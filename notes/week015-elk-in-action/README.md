@@ -260,10 +260,77 @@ $ curl -s -k -u elastic:123456 https://localhost:9200/_search?q=hello | jq
 
 ## 安装 Kibana
 
+使用下面的 Docker 命令启动 Kibana 服务：
+
+```
+$ docker run --name kibana \
+  -p 5601:5601 \
+  docker.elastic.co/kibana/kibana:8.3.2
+```
+
+等待 Kibana 启动完成：
+
+```
+[2022-07-17T22:57:20.266+00:00][INFO ][plugins-service] Plugin "cloudSecurityPosture" is disabled.
+[2022-07-17T22:57:20.403+00:00][INFO ][http.server.Preboot] http server running at http://0.0.0.0:5601
+[2022-07-17T22:57:20.446+00:00][INFO ][plugins-system.preboot] Setting up [1] plugins: [interactiveSetup]
+[2022-07-17T22:57:20.448+00:00][INFO ][preboot] "interactiveSetup" plugin is holding setup: Validating Elasticsearch connection configuration…
+[2022-07-17T22:57:20.484+00:00][INFO ][root] Holding setup until preboot stage is completed.
+
+
+i Kibana has not been configured.
+
+Go to http://0.0.0.0:5601/?code=395267 to get started.
+```
+
+启动完成后，在浏览器输入 `http://localhost:5601/?code=395267` 访问 Kibana，第一次访问 Kibana 时需要配置 Elasticsearch 的 `Enrollment token`：
+
+![](./images/kibana-enrollment-token.png)
+
+这个 `Enrollment token` 的值可以从 Elasticsearch 的启动日志中找到，也可以使用下面的命令生成：
+
+```
+$ docker exec -it es /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+```
+
+注意访问 Kibana 的链接中带有一个 `code` 参数，这个参数为第一次访问 Kibana 时的验证码，如果不带参数访问，Kibana 会要求你填写：
+
+![](./images/kibana-verification.png)
+
+这个验证码可以从 Kibana 的启动日志中找到，也可以使用下面的命令得到：
+
+```
+$ docker exec -it kibana /usr/share/kibana/bin/kibana-verification-code
+Your verification code is:  395 267
+```
+
+填写验证码之后，Kibana 会自动完成 Elasticsearch 的配置，然后进入登录页面：
+
+![](./images/kibana-login.png)
+
+我们输入用户名和密码 `elastic/123456` 即可进入 Kibana 首页：
+
+![](./images/kibana-home.png)
+
+打开 Discover 页面 `http://localhost:5601/app/discover#/`：
+
+![](./images/kibana-discover.png)
+
+第一次访问需要创建一个数据视图（`data view`），数据视图的名称必须要和索引相匹配，我们这里填入 `logstash-*`：
+
+![](./images/kibana-create-data-view.png)
+
+然后就可以输入关键字对 Elasticsearch 进行检索了：
+
+![](./images/kibana-search.png)
+
+这里的检索语法被称为 `KQL（Kibana Query Language）`，具体内容可 [参考官方文档](https://www.elastic.co/guide/en/kibana/8.3/kuery-query.html)。
+
 ## 参考
 
 1. [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
 1. [Running Logstash on Docker](https://www.elastic.co/guide/en/logstash/current/docker.html)
+1. [Install Kibana with Docker](https://www.elastic.co/guide/en/kibana/current/docker.html)
 1. [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
 1. [Logstash Guide](https://www.elastic.co/guide/en/logstash/current/index.html)
 1. [Filebeat Guide](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
