@@ -172,7 +172,7 @@ output {
 ```
 $ docker run --name logstash \
   -e XPACK_MONITORING_ENABLED=false \
-  -v "/home/aneasystone/logstash/pipeline":/usr/share/logstash/pipeline \
+  -v "/home/aneasystone/logstash/pipeline/logstash.conf":/usr/share/logstash/pipeline/logstash.conf \
   -v "/home/aneasystone/logstash/http_ca.crt":/usr/share/logstash/http_ca.crt \
   -it --rm docker.elastic.co/logstash/logstash:8.3.2
 ```
@@ -326,6 +326,53 @@ Your verification code is:  395 267
 
 这里的检索语法被称为 `KQL（Kibana Query Language）`，具体内容可 [参考官方文档](https://www.elastic.co/guide/en/kibana/8.3/kuery-query.html)。
 
+## 配置 Logstash 读取日志文件
+
+在前面的例子中，我们配置了 Logstash 从标准输入获取数据，并转发到标准输出或 Elasticsearch 中。一个完整的 Logstash 配置文件包含三个部分：`input`、`filter` 和 `output`，并且每个部分都是插件：
+
+* [Input Plugins](https://www.elastic.co/guide/en/logstash/current/input-plugins.html)
+* [Output Plugins](https://www.elastic.co/guide/en/logstash/current/output-plugins.html)
+* [Filter Plugins](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html)
+
+这一节我们将改用 `file` 作为输入，从文件系统中读取日志文件内容，并转发到 Elasticsearch。首先修改 `logstash.conf` 中的 `input` 配置：
+
+```
+input {
+  file {
+    type => "log"
+    path => ["/app/logs/*.log"]
+  }
+}
+```
+
+然后重启启动 Logstash 容器，并将日志目录挂载到 `/app/logs`：
+
+```
+$ docker run --name logstash \
+  -e XPACK_MONITORING_ENABLED=false \
+  -v "/home/aneasystone/logstash/pipeline/logstash-file.conf":/usr/share/logstash/pipeline/logstash.conf \
+  -v "/home/aneasystone/logstash/http_ca.crt":/usr/share/logstash/http_ca.crt \
+  -v "/home/aneasystone/logs":/app/logs \
+  -it --rm docker.elastic.co/logstash/logstash:8.3.2
+```
+
+我们在 logs 目录下写入一点日志：
+
+```
+$ cd ~/logs
+$ echo 'hello' > hello.log
+$ echo 'hello world' >> hello.log
+```
+
+稍等片刻，就可以看到 Logstash 从日志文件中读取数据了：
+
+```
+{"event":{"original":"hello"},"@timestamp":"2022-07-18T23:48:27.709472Z","message":"hello","type":"log","@version":"1","host":{"name":"48bdb8490d22"},"log":{"file":{"path":"/app/logs/hello.log"}}}
+{"event":{"original":"hello world"},"@timestamp":"2022-07-18T23:52:07.345525Z","message":"hello world","type":"log","@version":"1","host":{"name":"48bdb8490d22"},"log":{"file":{"path":"/app/logs/hello.log"}}}
+```
+
+## 使用 FileBeat 读取日志文件
+
 ## 参考
 
 1. [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
@@ -376,7 +423,7 @@ $ docker ps
 ```
 $ docker run --name logstash \
   -e XPACK_MONITORING_ENABLED=false \
-  -v "/home/aneasystone/logstash/pipeline":/usr/share/logstash/pipeline \
+  -v "/home/aneasystone/logstash/pipeline/logstash.conf":/usr/share/logstash/pipeline/logstash.conf \
   -v "/home/aneasystone/logstash/http_ca.crt":/usr/share/logstash/http_ca.crt \
   -it --rm docker.elastic.co/logstash/logstash:8.3.2
 ```
@@ -386,7 +433,7 @@ $ docker run --name logstash \
 ```
 $ docker run --name logstash \
   -e XPACK_MONITORING_ENABLED=false \
-  -v "C:/Users/aneasystone/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04LTS_79rhkp1fndgsc/LocalState/rootfs/home/aneasystone/logstash/pipeline":/usr/share/logstash/pipeline \
+  -v "C:/Users/aneasystone/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04LTS_79rhkp1fndgsc/LocalState/rootfs/home/aneasystone/logstash/pipeline/logstash.conf":/usr/share/logstash/pipeline/logstash.conf \
   -v "C:/Users/aneasystone/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04LTS_79rhkp1fndgsc/LocalState/rootfs/home/aneasystone/logstash/http_ca.crt":/usr/share/logstash/http_ca.crt \
   -it --rm docker.elastic.co/logstash/logstash:8.3.2
 ```
