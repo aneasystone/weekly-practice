@@ -326,7 +326,7 @@ Your verification code is:  395 267
 
 这里的检索语法被称为 `KQL（Kibana Query Language）`，具体内容可 [参考官方文档](https://www.elastic.co/guide/en/kibana/8.3/kuery-query.html)。
 
-## 配置 Logstash 读取日志文件
+## 配置 Logstash 采集日志文件
 
 在前面的例子中，我们配置了 Logstash 从标准输入获取数据，并转发到标准输出或 Elasticsearch 中。一个完整的 Logstash 配置文件包含三个部分：`input`、`filter` 和 `output`，并且每个部分都是插件：
 
@@ -334,7 +334,7 @@ Your verification code is:  395 267
 * [Output Plugins](https://www.elastic.co/guide/en/logstash/current/output-plugins.html)
 * [Filter Plugins](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html)
 
-这一节我们将改用 `file` 作为输入，从文件系统中读取日志文件内容，并转发到 Elasticsearch。首先修改 `logstash.conf` 中的 `input` 配置：
+这一节我们将改用 `file` 作为输入，从文件系统中采集日志文件内容，并转发到 Elasticsearch。首先修改 `logstash.conf` 中的 `input` 配置：
 
 ```
 input {
@@ -345,7 +345,7 @@ input {
 }
 ```
 
-然后重启启动 Logstash 容器，并将日志目录挂载到 `/app/logs`：
+然后重新启动 Logstash 容器，并将日志目录挂载到 `/app/logs`：
 
 ```
 $ docker run --name logstash \
@@ -371,23 +371,94 @@ $ echo 'hello world' >> hello.log
 {"event":{"original":"hello world"},"@timestamp":"2022-07-18T23:52:07.345525Z","message":"hello world","type":"log","@version":"1","host":{"name":"48bdb8490d22"},"log":{"file":{"path":"/app/logs/hello.log"}}}
 ```
 
-## 使用 FileBeat 读取日志文件
+## 使用 FileBeat 采集日志文件
+
+尽管 Logstash 提供了 `file` 插件用于采集日志文件，但是一般在生产环境我们很少这样去用，因为 Logstash 相对来说还是太重了，它依赖于 JVM，当配置多个 `pipeline` 以及 `filter` 时，Logstash 会非常占内存。而采集日志的工作需要在每一台服务器上运行，我们希望采集日志消耗的资源越少越好。
+
+于是 [FileBeat](https://www.elastic.co/cn/beats/filebeat) 就出现了。它采用 Go 编写，非常轻量，只专注于采集日志，并将日志转发给 Logstash 甚至直接转发给 Elasticsearch。如下图所示：
+
+![](./images/efk.jpg)
+
+那么有人可能会问，既然可以直接从 FileBeat 将日志转发给 Elasticsearch，那么 Logstash 是不是就没用了？其实这取决于你的使用场景，如果你只是想将原始的日志收集到 Elasticsearch 而不做任何处理，确实可以不用 Logstash，但是如果你要对日志进行过滤和转换处理，Logstash 就很有用了。不过 FileBeat 也提供了 `processors` 模块，可以对日志做一些简单的转换处理。
+
+下面我们就来实践下这种场景。首先修改 Logstash 配置文件中的 `input`，让 Logstash 可以接收 FileBeat 的请求：
+
+```
+input {
+  beats {
+    port => 5044
+  }
+}
+```
+
+然后重新启动 Logstash 容器，注意将 5044 端口暴露出来：
+
+```
+$ docker run --name logstash \
+  -e XPACK_MONITORING_ENABLED=false \
+  -v "/home/aneasystone/logstash/pipeline/logstash-beat.conf":/usr/share/logstash/pipeline/logstash.conf \
+  -v "/home/aneasystone/logstash/http_ca.crt":/usr/share/logstash/http_ca.crt \
+  -p 5044:5044 \
+  -it --rm docker.elastic.co/logstash/logstash:8.3.2
+```
+
+然后新建一个 FileBeat 的配置文件 `filebeat.yml`，内容如下：
+
+```
+filebeat.inputs:
+- type: log
+  paths:
+    - /app/logs/*.log
+
+output.logstash:
+  hosts: ["192.168.1.35:5044"]
+```
+
+然后使用 Docker 启动 FileBeat 容器：
+
+```
+$ docker run --name filebeat \
+  -v "/home/aneasystone/filebeat/filebeat.yml":/usr/share/filebeat/filebeat.yml \
+  -v "/home/aneasystone/logs":/app/logs \
+  -it --rm docker.elastic.co/beats/filebeat:8.3.2
+```
+
+这时只要我们向 logs 目录写入一点日志：
+
+```
+$ echo "This is a filebeat log" >> filebeat.log
+```
+
+Logstash 就可以收到 FileBeat 采集过来的日志了：
+
+```
+{"message":"This is a filebeat log","host":{"name":"8a7849b5c331"},"log":{"offset":0,"file":{"path":"/app/logs/filebeat.log"}},"event":{"original":"This is a filebeat log"},"input":{"type":"log"},"ecs":{"version":"8.0.0"},"@version":"1","agent":{"id":"3bd9b289-599f-4899-945a-94692bdaa690","name":"8a7849b5c331","ephemeral_id":"268a3170-0feb-4a86-ad96-7cce6a9643ec","version":"8.3.2","type":"filebeat"},"tags":["beats_input_codec_plain_applied"],"@timestamp":"2022-07-19T23:41:22.255Z"}
+```
+
+## 日志格式转换
+
+### Logstash 的 `filter` 插件
+
+https://www.elastic.co/guide/en/logstash/current/filter-plugins.html
+
+### FileBeat 的 `processors` 模块
+
+https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html
+
+## 使用 Logback 对接 Logstash
+
+https://github.com/logfellow/logstash-logback-encoder
 
 ## 参考
 
 1. [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
 1. [Running Logstash on Docker](https://www.elastic.co/guide/en/logstash/current/docker.html)
 1. [Install Kibana with Docker](https://www.elastic.co/guide/en/kibana/current/docker.html)
-1. [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
-1. [Logstash Guide](https://www.elastic.co/guide/en/logstash/current/index.html)
-1. [Filebeat Guide](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
-1. [Kibana Guide](https://www.elastic.co/guide/en/kibana/current/index.html)
 1. [ELK6.0部署：Elasticsearch+Logstash+Kibana搭建分布式日志平台](https://ken.io/note/elk-deploy-guide)
+1. [Filebeat vs. Logstash: The Evolution of a Log Shipper](https://logz.io/blog/filebeat-vs-logstash/)
 1. https://github.com/xuwujing/java-study
-1. https://fuxiaopang.gitbooks.io/learnelasticsearch/
-1. https://doc.yonyoucloud.com/doc/logstash-best-practice-cn/index.html
-1. https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html
 1. https://blog.csdn.net/mawming/article/details/78344939
+1. https://www.feiyiblog.com/2020/03/06/ELK%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F/
 
 ## 更多
 
@@ -439,3 +510,11 @@ $ docker run --name logstash \
 ```
 
 其中，`C:/Users/aneasystone/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04LTS_79rhkp1fndgsc/LocalState/rootfs` 是 WSL Ubuntu 在 Windows 下的根路径。
+
+### 其他学习资料
+
+1. [Logstash 最佳实践](https://doc.yonyoucloud.com/doc/logstash-best-practice-cn/index.html)
+1. [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+1. [Logstash Guide](https://www.elastic.co/guide/en/logstash/current/index.html)
+1. [Filebeat Guide](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
+1. [Kibana Guide](https://www.elastic.co/guide/en/kibana/current/index.html)
