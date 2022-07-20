@@ -25,14 +25,6 @@ Kubernetes
 	https://kubernetes.io/docs/tutorials/
 	https://github.com/zhangjiongdev/k8s/blob/master/k8shacluster.md
 
-	Installation
-
-		Kind
-		https://kind.sigs.k8s.io/docs/user/quick-start/
-		
-		Minikube
-		https://minikube.sigs.k8s.io/docs/start/
-
 	容器服务 ACK
 	https://www.aliyun.com/product/kubernetes
 
