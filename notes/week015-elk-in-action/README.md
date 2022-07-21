@@ -437,9 +437,65 @@ Logstash 就可以收到 FileBeat 采集过来的日志了：
 
 ## 日志格式转换
 
+在实际的使用场景中，我们往往要对各个地方采集来的日志做一些格式转换，而不是直接将原始的日志写入 Elasticsearch 中，因为结构化的日志更方便检索和统计。比如在采集 Nginx 的 access log 时，原始的日志内容如下：
+
+```
+172.17.0.1 - - [20/Jul/2022:23:34:23 +0000] "GET / HTTP/1.1" 200 615 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" "-"
+172.17.0.1 - - [20/Jul/2022:23:34:23 +0000] "GET /favicon.ico HTTP/1.1" 404 555 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" "-"
+```
+
+我们查看 Nginx 配置文件中的 `log_format` 可以知道，其实 access log 中的每一行都是由 `remote_addr`、`remote_user`、`time_local`、`request` 等字段构成的：
+
+```
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+}
+```
+
+下面我们就通过 [Logstash 的 `filter` 插件](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) 或 [FileBeat 的 `processors` 模块](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 来将这个日志转换为结构化的字段。
+
 ### Logstash 的 `filter` 插件
 
-https://www.elastic.co/guide/en/logstash/current/filter-plugins.html
+Logstash 自带大量的 filter 插件用于对日志做各种各样的处理，如果要从任意文本中抽取出结构化的字段，其中最常用的 filter 插件就是 [Dissect](https://www.elastic.co/guide/en/logstash/current/plugins-filters-dissect.html) 和 [Grok](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html)，其中 Dissect 使用固定的分割符来提取字段，没有使用正则表达式，所以处理速度非常快，不过它只对固定格式的日志有效，对于不固定的文本格式就无能为力了。而 Grok 要强大的多，它使用正则表达式，几乎可以处理任意文本。
+
+这里我们将使用 Grok 来处理 Nginx 的 access log。
+
+Grok 通过一堆的模式来匹配你的日志，一个 Grok 模式的语法如下：
+
+```
+%{SYNTAX:SEMANTIC}
+```
+
+其中，`SYNTAX` 为模式名称，比如 `NUMBER` 表示数字，`IP` 表示 IP 地址，等等，Grok 内置了很多可以直接使用的模式，[这里有一份列表](https://github.com/elastic/logstash/blob/v1.4.0/patterns/grok-patterns)。`SEMANTIC` 为匹配模式的文本创建一个唯一标识。比如我们有下面这样一行日志：
+
+```
+55.3.244.1 GET /index.html 15824 0.043
+```
+
+可以使用下面的 Grok 模式来匹配：
+
+```
+%{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}
+```
+
+匹配得到的结构化日志如下：
+
+```
+{
+  "client": "55.3.244.1",
+  "method": "GET",
+  "request": "/index.html",
+  "bytes": "15824",
+  "duration": "0.043"
+}
+```
+
+https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
+https://grokdebug.herokuapp.com/
 
 ### FileBeat 的 `processors` 模块
 
