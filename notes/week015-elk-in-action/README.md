@@ -470,7 +470,7 @@ Grok 通过一堆的模式来匹配你的日志，一个 Grok 模式的语法如
 %{SYNTAX:SEMANTIC}
 ```
 
-其中，`SYNTAX` 为模式名称，比如 `NUMBER` 表示数字，`IP` 表示 IP 地址，等等，Grok 内置了很多可以直接使用的模式，[这里有一份列表](https://github.com/elastic/logstash/blob/v1.4.0/patterns/grok-patterns)。`SEMANTIC` 为匹配模式的文本创建一个唯一标识。比如我们有下面这样一行日志：
+其中，`SYNTAX` 为模式名称，比如 `NUMBER` 表示数字，`IP` 表示 IP 地址，等等，Grok 内置了很多可以直接使用的模式，[这里有一份完整列表](https://github.com/logstash-plugins/logstash-patterns-core/blob/main/patterns/legacy/grok-patterns)。`SEMANTIC` 为匹配模式的文本创建一个唯一标识。比如我们有下面这样一行日志：
 
 ```
 55.3.244.1 GET /index.html 15824 0.043
@@ -482,7 +482,17 @@ Grok 通过一堆的模式来匹配你的日志，一个 Grok 模式的语法如
 %{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}
 ```
 
-匹配得到的结构化日志如下：
+Logstash 配置类似如下：
+
+```
+filter {
+  grok {
+    match => { "message" => "%{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}" }
+  }
+}
+```
+
+其中 `match => { "message" => "..." }` 表示处理的是 `message` 字段。处理得到的结构化结果如下：
 
 ```
 {
@@ -494,8 +504,84 @@ Grok 通过一堆的模式来匹配你的日志，一个 Grok 模式的语法如
 }
 ```
 
-https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
-https://grokdebug.herokuapp.com/
+你可以使用 [Grok Debugger](https://grokdebug.herokuapp.com/) 或 [Grok Constructor](http://grokconstructor.appspot.com/) 对 Grok 模式在线进行调试。
+
+#### 自定义 Grok 模式
+
+另外，Logstash 内置的 Grok 模式可能不能满足你的需要，这时，你也可以自定义 Grok 模式。Grok 是基于正则表达式库 [Oniguruma](https://github.com/kkos/oniguruma) 实现的，所以我们可以使用 [Oniguruma 的语法](https://github.com/kkos/oniguruma/blob/master/doc/RE) 来创建自定义的 Grok 模式。
+
+自定义 Grok 模式的方式有以下三种：
+
+* 第一种是直接使用正则来定义 Grok 模式
+
+```
+filter {
+  grok {
+    match => { "message" => "(?<queue_id>[0-9A-F]{10,11})" }
+  }
+}
+```
+
+* 第二种是将 Grok 模式定义在模式文件中，比如创建一个名为 `patterns` 的目录，然后在目录下新建一个文件（文件名任意），文件内容如下：
+
+```
+# commnets
+POSTFIX_QUEUEID [0-9A-F]{10,11}
+```
+
+然后，在 Logstash 配置文件中，通过配置参数 `patterns_dir` 指定刚刚创建的那个模式目录，这样就可以和内置 Grok 模式一样的使用我们自定义的模式了：
+
+```
+filter {
+  grok {
+    patterns_dir => ["./patterns"]
+    match => { "message" => "%{POSTFIX_QUEUEID:queue_id}" }
+  }
+}
+```
+
+* 第三种是将 Grok 模式定义在 `pattern_definitions` 参数中，这种定义方式非常方便，不过这个模式只能在当前 grok 配置块内生效
+
+```
+filter {
+  grok {
+    pattern_definitions => {
+      "POSTFIX_QUEUEID" => "[0-9A-F]{10,11}"
+    }
+    match => { "message" => "%{POSTFIX_QUEUEID:queue_id}" }
+  }
+}
+```
+
+#### 处理 Nginx access log
+
+回到上面一开始的问题，我们希望将 Nginx access log 转换为结构化的格式。学习了 Grok 模式的知识之后，我们完全可以自己写出匹配 Nginx access log 的 Grok 模式，不过这样做有点繁琐。实际上，Logstash 已经内置了很多常用的系统日志格式，比如：Apache httpd、Redis、Mongo、Java、Maven 等，[参见这里](https://github.com/logstash-plugins/logstash-patterns-core/tree/main/patterns/legacy)。
+
+虽然没有专门的 Nginx 格式，但是 Nginx 默认的 access log 是符合 Apache httpd 日志规范的，只要你在 Nginx 配置文件中没有随便修改 `log_format` 配置，我们都可以直接使用 Apache httpd 的 Grok 模式来匹配 Nginx 的日志。
+
+[Apache httpd 的 Grok 模式](https://github.com/logstash-plugins/logstash-patterns-core/blob/main/patterns/legacy/httpd) 定义如下：
+
+```
+# Log formats
+HTTPD_COMMONLOG %{IPORHOST:clientip} %{HTTPDUSER:ident} %{HTTPDUSER:auth} \[%{HTTPDATE:timestamp}\] "(?:%{WORD:verb} %{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})" (?:-|%{NUMBER:response}) (?:-|%{NUMBER:bytes})
+HTTPD_COMBINEDLOG %{HTTPD_COMMONLOG} %{QS:referrer} %{QS:agent}
+
+# Deprecated
+COMMONAPACHELOG %{HTTPD_COMMONLOG}
+COMBINEDAPACHELOG %{HTTPD_COMBINEDLOG}
+```
+
+其中 `HTTPD_COMBINEDLOG` 就是 Apache httpd 的日志格式，在老的版本中通常使用 `COMBINEDAPACHELOG`，[Grok Debugger](https://grokdebug.herokuapp.com/) 就还是使用这个老的格式。
+
+对比发现，Nginx 的日志比 Apache httpd 的日志就多了一个 `$http_x_forwarded_for` 字段，所以我们可以通过下面的配置来处理 Nginx access log：
+
+```
+filter {
+  grok {
+    match => { "message" => "%{HTTPD_COMBINEDLOG} %{QS:x_forwarded_for}" }
+  }
+}
+```
 
 ### FileBeat 的 `processors` 模块
 
