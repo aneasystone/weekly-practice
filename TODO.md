@@ -19,48 +19,6 @@ Cloud Native
 	https://docs.docker.com/get-started/overview/
 	https://docs.docker.com/engine/reference/builder/
 
-Kubernetes
-
-	Basics
-	https://kubernetes.io/docs/tutorials/
-	https://github.com/zhangjiongdev/k8s/blob/master/k8shacluster.md
-
-	容器服务 ACK
-	https://www.aliyun.com/product/kubernetes
-
-	分布式云容器平台 ACK One
-	https://www.aliyun.com/product/aliware/adcp
-
-Kubernetes Management Platform
-
-    Rancher
-    https://rancher.com/
-
-	TKEStack - Tencent Kubernetes Engine Stack
-	https://github.com/tkestack/tke
-
-	KubeSphere
-	https://kubesphere.io/zh/
-
-	Kuboard
-	https://kuboard.cn/
-
-    KubeVela
-	https://kubevela.io/zh/
-    https://github.com/kubevela/kubevela
-
-		Open Application Model
-		https://oam.dev/
-
-	HashiCorp Nomad
-	https://www.nomadproject.io/docs
-
-	Rainbond
-	https://www.rainbond.com/
-
-	KubeOperator
-	https://kubeoperator.io/
-
 Serverless
 
 	Knative
@@ -662,3 +620,5 @@ Learn resources
 	https://learn.lianglianglee.com/
 
 	https://github.com/eryajf/learning-weekly
+
+	https://www.wdbyte.com/
