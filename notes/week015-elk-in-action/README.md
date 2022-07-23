@@ -371,17 +371,17 @@ $ echo 'hello world' >> hello.log
 {"event":{"original":"hello world"},"@timestamp":"2022-07-18T23:52:07.345525Z","message":"hello world","type":"log","@version":"1","host":{"name":"48bdb8490d22"},"log":{"file":{"path":"/app/logs/hello.log"}}}
 ```
 
-## 使用 FileBeat 采集日志文件
+## 使用 Filebeat 采集日志文件
 
 尽管 Logstash 提供了 `file` 插件用于采集日志文件，但是一般在生产环境我们很少这样去用，因为 Logstash 相对来说还是太重了，它依赖于 JVM，当配置多个 `pipeline` 以及 `filter` 时，Logstash 会非常占内存。而采集日志的工作需要在每一台服务器上运行，我们希望采集日志消耗的资源越少越好。
 
-于是 [FileBeat](https://www.elastic.co/cn/beats/filebeat) 就出现了。它采用 Go 编写，非常轻量，只专注于采集日志，并将日志转发给 Logstash 甚至直接转发给 Elasticsearch。如下图所示：
+于是 [Filebeat](https://www.elastic.co/cn/beats/filebeat) 就出现了。它采用 Go 编写，非常轻量，只专注于采集日志，并将日志转发给 Logstash 甚至直接转发给 Elasticsearch。如下图所示：
 
 ![](./images/efk.jpg)
 
-那么有人可能会问，既然可以直接从 FileBeat 将日志转发给 Elasticsearch，那么 Logstash 是不是就没用了？其实这取决于你的使用场景，如果你只是想将原始的日志收集到 Elasticsearch 而不做任何处理，确实可以不用 Logstash，但是如果你要对日志进行过滤和转换处理，Logstash 就很有用了。不过 FileBeat 也提供了 `processors` 功能，可以对日志做一些简单的转换处理。
+那么有人可能会问，既然可以直接从 Filebeat 将日志转发给 Elasticsearch，那么 Logstash 是不是就没用了？其实这取决于你的使用场景，如果你只是想将原始的日志收集到 Elasticsearch 而不做任何处理，确实可以不用 Logstash，但是如果你要对日志进行过滤和转换处理，Logstash 就很有用了。不过 Filebeat 也提供了 `processors` 功能，可以对日志做一些简单的转换处理。
 
-下面我们就来实践下这种场景。首先修改 Logstash 配置文件中的 `input`，让 Logstash 可以接收 FileBeat 的请求：
+下面我们就来实践下这种场景。首先修改 Logstash 配置文件中的 `input`，让 Logstash 可以接收 Filebeat 的请求：
 
 ```
 input {
@@ -402,7 +402,7 @@ $ docker run --name logstash \
   -it --rm docker.elastic.co/logstash/logstash:8.3.2
 ```
 
-然后新建一个 FileBeat 的配置文件 `filebeat.yml`，内容如下：
+然后新建一个 Filebeat 的配置文件 `filebeat.yml`，内容如下：
 
 ```
 filebeat.inputs:
@@ -414,7 +414,7 @@ output.logstash:
   hosts: ["192.168.1.35:5044"]
 ```
 
-然后使用 Docker 启动 FileBeat 容器：
+然后使用 Docker 启动 Filebeat 容器：
 
 ```
 $ docker run --name filebeat \
@@ -429,13 +429,13 @@ $ docker run --name filebeat \
 $ echo "This is a filebeat log" >> filebeat.log
 ```
 
-Logstash 就可以收到 FileBeat 采集过来的日志了：
+Logstash 就可以收到 Filebeat 采集过来的日志了：
 
 ```
 {"message":"This is a filebeat log","host":{"name":"8a7849b5c331"},"log":{"offset":0,"file":{"path":"/app/logs/filebeat.log"}},"event":{"original":"This is a filebeat log"},"input":{"type":"log"},"ecs":{"version":"8.0.0"},"@version":"1","agent":{"id":"3bd9b289-599f-4899-945a-94692bdaa690","name":"8a7849b5c331","ephemeral_id":"268a3170-0feb-4a86-ad96-7cce6a9643ec","version":"8.3.2","type":"filebeat"},"tags":["beats_input_codec_plain_applied"],"@timestamp":"2022-07-19T23:41:22.255Z"}
 ```
 
-FileBeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子：
+Filebeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子：
 
 ```
 output.elasticsearch:
@@ -468,7 +468,7 @@ http {
 }
 ```
 
-下面我们就通过 [Logstash 的 `filter` 插件](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) 或 [FileBeat 的 `processors` 功能](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 来将这个日志转换为结构化的字段。
+下面我们就通过 [Logstash 的 `filter` 插件](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) 或 [Filebeat 的 `processors` 功能](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 来将这个日志转换为结构化的字段。
 
 ### Logstash 的 `filter` 插件
 
@@ -595,9 +595,9 @@ filter {
 }
 ```
 
-### FileBeat 的 `processors` 功能
+### Filebeat 的 `processors` 功能
 
-FileBeat 提供了 [很多的 `processors`](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 可以对日志进行一些简单的处理，比如 `drop_event` 用于过滤日志，`convert` 用于转换数据类型，`rename` 用于重命名字段等。但是 FileBeat 的定位是轻量级日志采集工具，最大的理念在于 **轻量**，所以只能做些简单的处理，上面所说的 Logstash 的 Grok 就不支持。
+Filebeat 提供了 [很多的 `processors`](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 可以对日志进行一些简单的处理，比如 `drop_event` 用于过滤日志，`convert` 用于转换数据类型，`rename` 用于重命名字段等。但是 Filebeat 的定位是轻量级日志采集工具，最大的理念在于 **轻量**，所以只能做些简单的处理，上面所说的 Logstash 的 Grok 就不支持。
 
 如果你的日志是固定格式的，可以使用 [`dissect` 处理器](https://www.elastic.co/guide/en/beats/filebeat/current/dissect.html) 来进行处理，下面是一个 `dissect` 配置的例子：
 
@@ -665,9 +665,92 @@ processors:
 
 #### 使用 `script` 处理器
 
-#### 使用 FileBeat 的 `Modules` 功能
+虽然 Filebeat 不支持 Grok 处理器，但是它也提供了一种动态扩展的解决方案，那就是 [`script` 处理器](https://www.elastic.co/guide/en/beats/filebeat/current/processor-script.html)。在 `script` 处理器里，我们需要定义这样一个 `process` 方法：
+
+```
+function process(event) {
+    // Put your codes here
+}
+```
+
+Filebeat 在处理日志时，会将每一行日志都转换为一个 `event` 对象，然后调用这个 `process` 方法进行处理，`event` 对象提供了下面这些 API 用于处理日志：
+
+* Get(string)
+* Put(string, value)
+* Rename(string, string)
+* Delete(string)
+* Cancel()
+* Tag(string)
+* AppendTo(string, string)
+
+具体的使用方法可以参考官方文档。下面我们写一个简单的 `script` 处理器来处理上面例子中的日志格式：
+
+```
+processors:
+  - script:
+      lang: javascript
+      source: >
+        function process(event) {
+            var message = event.Get('message');
+            message = message.substring(1, message.length-1);
+            var s = message.split(' - ');
+            event.Put('service.pid', s[0]);
+            event.Put('service.name', s[1]);
+            event.Put('service.status', s[2]);
+        }
+```
+
+处理之后的日志格式和上面使用 `dissect` 处理器是一样的。
+
+我们知道 Grok 是基于正则表达式来处理日志的，当然也可以在 Javascript 脚本中使用正则表达式：
+
+```
+processors:
+  - script:
+      lang: javascript
+      source: >
+        function process(event) {
+            var message = event.Get('message');
+            var match = message.match(/"(.+) - (.+) - (.+)"/);
+            event.Put('service.pid', match[1]);
+            event.Put('service.name', match[2]);
+            event.Put('service.status', match[3]);
+        }
+```
+
+不过要注意的是，Filebeat 使用 [dop251/goja](https://github.com/dop251/goja) 这个库来解析 Javascript 脚本，目前只支持 ECMA 5.1 的语法规范（也就是 ECMAScript 2009），如果使用了最新的 Javascript 语法，可能会导致 Filebeat 异常退出。
+
+比如我们使用正则表达式的命名捕获分组（`named capturing groups`）来优化上面的代码：
+
+```
+processors:
+  - script:
+      lang: javascript
+      source: >
+        function process(event) {
+            var message = event.Get('message');
+            var match = message.match(/"(?<pid>.+) - (?<name>.+) - (?<status>.+)"/);
+            event.Put('service', match.groups);
+        }
+```
+
+Filebeat 直接启动就报错了：
+
+```
+Exiting: error initializing processors: SyntaxError: Invalid regular expression (re2): "(?<pid>[^\r\n]+) - (?<name>[^\r\n]+) - (?<status>[^\r\n]+)" (error parsing regexp: invalid or unsupported Perl syntax: `(?<`) at 3:31
+```
+
+这是因为命名捕获分组这个特性，是在 ECMA 9（也就是 [ECMAScript 2018](https://262.ecma-international.org/9.0/)）中才引入的，所以在 `script` 处理器中编写 Javascript 代码时需要特别注意语法的版本问题。
+
+#### 使用 Filebeat 的 `Modules` 功能
+
+https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-modules.html
 
 #### 使用 Elasticsearch 的 `Ingest pipelines` 功能
+
+https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ingest-node.html
+
+https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html
 
 ## 使用 Logback 对接 Logstash
 
@@ -682,6 +765,7 @@ https://github.com/logfellow/logstash-logback-encoder
 1. [Filebeat vs. Logstash: The Evolution of a Log Shipper](https://logz.io/blog/filebeat-vs-logstash/)
 1. https://blog.csdn.net/mawming/article/details/78344939
 1. https://www.feiyiblog.com/2020/03/06/ELK%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F/
+1. [如何在 Filebeat 端进行日志处理](https://mritd.com/2020/08/19/how-to-modify-filebeat-source-code-to-processing-logs/)
 
 ## 更多
 
@@ -733,6 +817,18 @@ $ docker run --name logstash \
 ```
 
 其中，`C:/Users/aneasystone/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04LTS_79rhkp1fndgsc/LocalState/rootfs` 是 WSL Ubuntu 在 Windows 下的根路径。
+
+### Elastic Beats
+
+除了 Filebeat，Elastic 还提供了其他一些轻量型的数据采集器：
+
+* [Filebeat](https://www.elastic.co/cn/beats/filebeat) - 日志文件
+* [Metricbeat](https://www.elastic.co/beats/metricbeat) - 指标
+* [Packetbeat](https://www.elastic.co/cn/beats/packetbeat) - 网络数据
+* [Winlogbeat](https://www.elastic.co/cn/beats/winlogbeat) - Windows 事件日志
+* [Auditbeat](https://www.elastic.co/cn/beats/auditbeat) - 审计日志
+* [Heartbeat](https://www.elastic.co/cn/beats/heartbeat) - 运行时间监控
+* [Functionbeat](https://www.elastic.co/cn/beats/functionbeat) - 无需服务器的采集器
 
 ### 其他学习资料
 
