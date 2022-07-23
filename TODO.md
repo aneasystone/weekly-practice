@@ -35,30 +35,6 @@ Autoscaling
 	HPA | Horizontal Pod Autoscaling
 	https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 
-CI/CD
-
-	Jenkins
-	https://www.jenkins.io/doc/tutorials/
-	
-	Drone
-	https://docs.drone.io/quickstart/
-	https://www.jianshu.com/p/15506f46f75a
-	
-	Earthly
-	https://github.com/earthly/earthly
-
-	Skaffold
-	https://skaffold.dev/
-
-	Tekton Pipelines
-	https://tekton.dev/
-
-	Concourse
-	https://concourse-ci.org/
-
-	Argo CD
-	https://argo-cd.readthedocs.io/en/stable/
-
 Databases and caches
 
 	MongoDB
@@ -145,17 +121,6 @@ Database libraries
 		http://blog.didispace.com/spring-boot-flyway-db-version/
 		http://qinghua.github.io/flyway/
 
-Message Queue
-
-	Kafka
-	https://kafka.apache.org/intro
-
-	RabbitMQ
-	https://www.rabbitmq.com/
-	
-	RocketMQ
-	https://rocketmq.apache.org/
-
 Graph Database
 
 	Nebula
@@ -235,22 +200,6 @@ Observability
 		鹰眼 from 阿里
 		Mtrace from 美团
 		Dapper from Google
-
-Troubleshooting
-
-	Arthas
-	https://arthas.aliyun.com/zh-cn/
-	https://github.com/alibaba/arthas
-	
-	vjtools
-	https://github.com/vipshop/vjtools
-
-	bistoury
-	https://github.com/qunarcorp/bistoury
-
-    XPocket
-    https://xpocket.perfma.com/
-    https://github.com/PerfMa/XPocket
 
 Testing
 
@@ -368,57 +317,6 @@ Java Utils
 		Thymeleaf
 		https://www.thymeleaf.org/
 	
-Package Manager
-
-	SDKMAN
-	https://sdkman.io/
-
-	Homebrew
-	https://brew.sh/
-
-	Helm | The package manager for Kubernetes
-	https://helm.sh/
-
-Build Tools
-
-	Maven
-	https://maven.apache.org/
-
-	Gradle
-	https://gradle.org/
-
-	Buildpacks
-	https://buildpacks.io/docs/tools/pack/
-	https://segmentfault.com/a/1190000041235825
-
-	Paketo Buildpacks
-	https://paketo.io/
-
-Shell
-
-	Bash
-	https://www.gnu.org/software/bash/
-
-	Fish
-	https://fishshell.com/
-
-	Zsh
-	https://www.zsh.org/
-
-	Oh My Zsh
-	https://ohmyz.sh/
-
-	PowerShell
-	https://docs.microsoft.com/en-us/powershell/
-
-Version Control
-
-	Git
-	https://git-scm.com/
-
-	Gogs
-	https://gogs.io/
-
 Microservice
 	
 	Spring Cloud
@@ -542,31 +440,6 @@ Stream
 
 	Flink
 	https://flink.apache.org/
-
-Front End
-
-	axios
-	https://github.com/axios/axios
-
-	Element UI
-	https://element.eleme.cn/
-
-	Ant Design
-	https://ant.design/index-cn
-
-	Vue.js
-	https://cn.vuejs.org/v2/guide/index.html
-
-	qiankun
-	https://qiankun.umijs.org/zh/guide/tutorial
-
-Hardware
-
-	Raspberry Pi
-	https://www.raspberrypi.org/
-
-	Arduino
-	https://www.arduino.cc/
 
 Machine Learning
 

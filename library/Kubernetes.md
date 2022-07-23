@@ -28,6 +28,10 @@ https://kubernetes.io/
 * [KubeOperator](https://kubeoperator.io/)
 * [OpenKruise](https://openkruise.io/)
 
+### 应用管理
+
+* [Helm](https://helm.sh/) | The package manager for Kubernetes
+
 ## 商业产品
 
 * [阿里云 - 容器服务 ACK](https://www.aliyun.com/product/kubernetes)
