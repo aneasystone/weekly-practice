@@ -28,10 +28,6 @@ https://kubernetes.io/
 * [KubeOperator](https://kubeoperator.io/)
 * [OpenKruise](https://openkruise.io/)
 
-### 应用管理
-
-* [Helm](https://helm.sh/) | The package manager for Kubernetes
-
 ## 商业产品
 
 * [阿里云 - 容器服务 ACK](https://www.aliyun.com/product/kubernetes)
@@ -42,7 +38,18 @@ https://kubernetes.io/
 * [Azure Kubernetes Service (AKS)](https://azure.microsoft.com/en-us/services/kubernetes-service/)
 * [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/)
 
-## CNCF
+## 周边
 
-* [CNCF - 云原生计算基金会简介 - 宋净超的博客|Cloud Native|云原生布道师](https://jimmysong.io/posts/cncf-introduction/)
-* [cncf/landscape: Static Cloud Native Landscapes and Interactive Landscape](https://github.com/cncf/landscape)
+### 应用管理
+
+* [Helm](https://helm.sh/) | The package manager for Kubernetes
+
+### Serverless
+
+* [Knative](https://knative.dev/docs/)
+* [阿里云 SAE](https://www.aliyun.com/product/sae)
+
+### Autoscaling
+
+* [KEDA](https://keda.sh/) | Kubernetes Event-driven Autoscaling
+* [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Horizontal Pod Autoscaling

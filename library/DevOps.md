@@ -14,3 +14,7 @@
 * [Tekton Pipelines](https://tekton.dev/)
 * [Concourse](https://concourse-ci.org/)
 * [Argo CD](https://argo-cd.readthedocs.io/en/stable/)
+
+## 制品仓库
+
+* [JFrog](https://www.jfrog.com/confluence/display/JFROG/JFrog+Documentation)
