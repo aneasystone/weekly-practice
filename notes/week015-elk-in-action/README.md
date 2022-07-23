@@ -379,7 +379,7 @@ $ echo 'hello world' >> hello.log
 
 ![](./images/efk.jpg)
 
-那么有人可能会问，既然可以直接从 FileBeat 将日志转发给 Elasticsearch，那么 Logstash 是不是就没用了？其实这取决于你的使用场景，如果你只是想将原始的日志收集到 Elasticsearch 而不做任何处理，确实可以不用 Logstash，但是如果你要对日志进行过滤和转换处理，Logstash 就很有用了。不过 FileBeat 也提供了 `processors` 模块，可以对日志做一些简单的转换处理。
+那么有人可能会问，既然可以直接从 FileBeat 将日志转发给 Elasticsearch，那么 Logstash 是不是就没用了？其实这取决于你的使用场景，如果你只是想将原始的日志收集到 Elasticsearch 而不做任何处理，确实可以不用 Logstash，但是如果你要对日志进行过滤和转换处理，Logstash 就很有用了。不过 FileBeat 也提供了 `processors` 功能，可以对日志做一些简单的转换处理。
 
 下面我们就来实践下这种场景。首先修改 Logstash 配置文件中的 `input`，让 Logstash 可以接收 FileBeat 的请求：
 
@@ -435,6 +435,18 @@ Logstash 就可以收到 FileBeat 采集过来的日志了：
 {"message":"This is a filebeat log","host":{"name":"8a7849b5c331"},"log":{"offset":0,"file":{"path":"/app/logs/filebeat.log"}},"event":{"original":"This is a filebeat log"},"input":{"type":"log"},"ecs":{"version":"8.0.0"},"@version":"1","agent":{"id":"3bd9b289-599f-4899-945a-94692bdaa690","name":"8a7849b5c331","ephemeral_id":"268a3170-0feb-4a86-ad96-7cce6a9643ec","version":"8.3.2","type":"filebeat"},"tags":["beats_input_codec_plain_applied"],"@timestamp":"2022-07-19T23:41:22.255Z"}
 ```
 
+FileBeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子：
+
+```
+output.elasticsearch:
+  hosts: ["https://localhost:9200"]
+  username: "username"
+  password: "password" 
+  ssl:
+    enabled: true
+    ca_trusted_fingerprint: "xxx"
+```
+
 ## 日志格式转换
 
 在实际的使用场景中，我们往往要对各个地方采集来的日志做一些格式转换，而不是直接将原始的日志写入 Elasticsearch 中，因为结构化的日志更方便检索和统计。比如在采集 Nginx 的 access log 时，原始的日志内容如下：
@@ -456,7 +468,7 @@ http {
 }
 ```
 
-下面我们就通过 [Logstash 的 `filter` 插件](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) 或 [FileBeat 的 `processors` 模块](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 来将这个日志转换为结构化的字段。
+下面我们就通过 [Logstash 的 `filter` 插件](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) 或 [FileBeat 的 `processors` 功能](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 来将这个日志转换为结构化的字段。
 
 ### Logstash 的 `filter` 插件
 
@@ -583,9 +595,79 @@ filter {
 }
 ```
 
-### FileBeat 的 `processors` 模块
+### FileBeat 的 `processors` 功能
 
-https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html
+FileBeat 提供了 [很多的 `processors`](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) 可以对日志进行一些简单的处理，比如 `drop_event` 用于过滤日志，`convert` 用于转换数据类型，`rename` 用于重命名字段等。但是 FileBeat 的定位是轻量级日志采集工具，最大的理念在于 **轻量**，所以只能做些简单的处理，上面所说的 Logstash 的 Grok 就不支持。
+
+如果你的日志是固定格式的，可以使用 [`dissect` 处理器](https://www.elastic.co/guide/en/beats/filebeat/current/dissect.html) 来进行处理，下面是一个 `dissect` 配置的例子：
+
+```
+processors:
+  - dissect:
+      tokenizer: '"%{pid|integer} - %{name} - %{status}"'
+      field: "message"
+      target_prefix: "service"
+```
+
+其中 `tokenizer` 用于定义日志的格式，上面的配置表示从日志中提取 `pid`、`name` 和 `status` 三个字段，`target_prefix` 表示将这三个字段放在 `service` 下面，默认情况是放在 `dissect` 下面。
+
+这个处理器可以处理下面这种格式的日志：
+
+```
+"321 - App01 - WebServer is starting"
+"321 - App01 - WebServer is up and running"
+"321 - App01 - WebServer is scaling 2 pods"
+"789 - App02 - Database is will be restarted in 5 minutes"
+"789 - App02 - Database is up and running"
+"789 - App02 - Database is refreshing tables"
+```
+
+处理之后的日志格式如下：
+
+```
+{
+  "@timestamp": "2022-07-23T01:01:54.310Z",
+  "@metadata": {
+    "beat": "filebeat",
+    "type": "_doc",
+    "version": "8.3.2"
+  },
+  "log": {
+    "offset": 0,
+    "file": {
+      "path": ""
+    }
+  },
+  "message": "\"789 - App02 - Database is will be restarted in 5 minutes\"",
+  "input": {
+    "type": "stdin"
+  },
+  "host": {
+    "name": "04bd0b21796b"
+  },
+  "agent": {
+    "name": "04bd0b21796b",
+    "type": "filebeat",
+    "version": "8.3.2",
+    "ephemeral_id": "64187690-291c-4647-b935-93c249e85d29",
+    "id": "43a89e87-0d74-4053-8301-0e6e73a00e77"
+  },
+  "ecs": {
+    "version": "8.0.0"
+  },
+  "service": {
+    "name": "App02",
+    "status": "Database is will be restarted in 5 minutes",
+    "pid": 789
+  }
+}
+```
+
+#### 使用 `script` 处理器
+
+#### 使用 FileBeat 的 `Modules` 功能
+
+#### 使用 Elasticsearch 的 `Ingest pipelines` 功能
 
 ## 使用 Logback 对接 Logstash
 
@@ -598,7 +680,6 @@ https://github.com/logfellow/logstash-logback-encoder
 1. [Install Kibana with Docker](https://www.elastic.co/guide/en/kibana/current/docker.html)
 1. [ELK6.0部署：Elasticsearch+Logstash+Kibana搭建分布式日志平台](https://ken.io/note/elk-deploy-guide)
 1. [Filebeat vs. Logstash: The Evolution of a Log Shipper](https://logz.io/blog/filebeat-vs-logstash/)
-1. https://github.com/xuwujing/java-study
 1. https://blog.csdn.net/mawming/article/details/78344939
 1. https://www.feiyiblog.com/2020/03/06/ELK%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F/
 

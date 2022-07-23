@@ -622,3 +622,5 @@ Learn resources
 	https://github.com/eryajf/learning-weekly
 
 	https://www.wdbyte.com/
+
+	https://github.com/xuwujing/java-study
