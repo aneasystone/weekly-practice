@@ -149,7 +149,7 @@
 * [Deploying a Spring Boot app to Azure](https://spring.io/guides/gs/spring-boot-for-azure/)
 * [Deploying to Cloud Foundry from STS](https://spring.io/guides/gs/sts-cloud-foundry-deployment/)
 * [【Topical Guides】Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/) - [*学习笔记*](../week011-spring-boot-on-docker/README.md)
-* [【Topical Guides】Spring on Kubernetes](https://spring.io/guides/topicals/spring-on-kubernetes/)
+* [【Topical Guides】Spring on Kubernetes](https://spring.io/guides/topicals/spring-on-kubernetes/) - [*学习笔记*](../week016-spring-boot-on-kubernetes/README.md)
 
 ## API 文档
 
@@ -173,7 +173,7 @@
 
 ## 更多
 
-### 1. Spring 官方文档
+### Spring 官方文档
 
 * [Spring Boot](https://spring.io/projects/spring-boot)
 * [Spring Framework](https://spring.io/projects/spring-framework)
@@ -256,58 +256,3 @@
 * [Spring Vault](https://spring.io/projects/spring-vault)
 * [Spring Web Flow](https://spring.io/projects/spring-webflow)
 * [Spring Web Services](https://spring.io/projects/spring-ws)
-
-### 2. Github 上关于 Java 和 Spring 的学习资源
-
-#### Java
-
-* 【2.3K】https://github.com/dunwu/javacore
-* 【3.1K】https://github.com/singgel/JAVA
-* 【122K】https://github.com/Snailclimb/JavaGuide
-* 【1.1K】https://github.com/superhj1987/pragmatic-java-engineer
-* 【63.5k】https://github.com/doocs/advanced-java
-* 【1.3K】https://github.com/Jackson0714/PassJava-Platform
-* 【0.8K】https://github.com/caison/java-knowledge-mind-map
-* 【4.3K】https://github.com/javagrowing/JGrowing
-* 【3.6K】https://github.com/RedSpider1/concurrent
-* 【1.3K】https://github.com/Jstarfish/JavaKeeper
-* 【3.7K】https://github.com/RongleXie/java-books-collections
-* 【1.4K】https://github.com/DreamCats/java-notes
-* 【1.1K】https://github.com/dunwu/java-tutorial
-* 【1.1K】https://github.com/DuHouAn/Java
-* 【1.8K】https://github.com/kanwangzjm/funiture
-* 【1.1K】https://github.com/Wasabi1234/Java-Concurrency-Progamming-Tutorial
-* 【2.4K】https://github.com/zq2599/blog_demos
-* 【1.0K】https://github.com/lenve/javaboy-code-samples
-* 【1.3K】https://github.com/bin392328206/six-finger
-* 【1.4K】https://github.com/qiurunze123/threadandjuc
-
-#### Spring
-
-* 【23.6K】https://github.com/wuyouzhuguli/SpringAll
-* 【27.5K】https://github.com/ityouknow/spring-boot-examples
-* 【25.7K】https://github.com/xkcoding/spring-boot-demo
-* 【5.6K】https://github.com/527515025/springBoot
-* 【1.7K】https://github.com/javahongxi/whatsmars
-* 【1.1K】https://github.com/chengxy-nds/Springboot-Notebook
-* 【14.9K】https://github.com/JeffLi1993/springboot-learning-example
-* 【4.5K】https://github.com/qibaoguang/Spring-Boot-Reference-Guide
-* 【7.4K】https://github.com/zhoutaoo/SpringCloud
-* 【30.6K】https://github.com/eugenp/tutorials
-* 【3.9K】https://github.com/ityouknow/awesome-spring-boot
-* 【4.3K】https://github.com/hansonwang99/Spring-Boot-In-Action
-* 【0.8K】https://github.com/cicadasmile/middle-ware-parent
-* 【1.5K】https://github.com/yzcheng90/X-SpringBoot
-* 【4.5K】https://github.com/spring-projects/spring-data-examples
-* 【2.0K】https://github.com/vector4wang/spring-boot-quick
-* 【2.2K】https://github.com/qq53182347/liugh-parent
-* 【3.1K】https://github.com/lenve/JavaEETest
-* 【2.1K】https://github.com/forezp/SpringBootLearning
-* 【4.3K】https://github.com/zuihou/lamp-cloud
-* 【2.4K】https://github.com/yizhiwazi/springboot-socks
-* 【3.6K】https://github.com/zlt2000/microservices-platform
-
-### 3. 其他学习站点
-
-* https://www.baeldung.com/full_archive
-* https://www.petrikainulainen.net/tutorials/

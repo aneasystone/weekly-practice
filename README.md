@@ -17,6 +17,7 @@
 * WEEK013 - [Kubernetes 使用小记](./notes/week013-playing-with-kubernetes/README.md)
 * WEEK014 - [Spring Boot 生产就绪特性 Actuator](./notes/week014-spring-boot-actuator/README.md)
 * WEEK015 - [实战 ELK 搭建日志系统](./notes/week015-elk-in-action/README.md)
+* WEEK016 - [在 Kubernetes 环境中开发 Spring Boot 项目](./notes/week016-spring-boot-on-kubernetes/README.md)
 
 ### 项目实践
 
