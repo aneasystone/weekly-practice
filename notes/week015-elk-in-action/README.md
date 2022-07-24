@@ -265,7 +265,7 @@ $ curl -s -k -u elastic:123456 https://localhost:9200/_search?q=hello | jq
 ```
 $ docker run --name kibana \
   -p 5601:5601 \
-  docker.elastic.co/kibana/kibana:8.3.2
+  -d docker.elastic.co/kibana/kibana:8.3.2
 ```
 
 等待 Kibana 启动完成：
@@ -435,7 +435,7 @@ Logstash 就可以收到 Filebeat 采集过来的日志了：
 {"message":"This is a filebeat log","host":{"name":"8a7849b5c331"},"log":{"offset":0,"file":{"path":"/app/logs/filebeat.log"}},"event":{"original":"This is a filebeat log"},"input":{"type":"log"},"ecs":{"version":"8.0.0"},"@version":"1","agent":{"id":"3bd9b289-599f-4899-945a-94692bdaa690","name":"8a7849b5c331","ephemeral_id":"268a3170-0feb-4a86-ad96-7cce6a9643ec","version":"8.3.2","type":"filebeat"},"tags":["beats_input_codec_plain_applied"],"@timestamp":"2022-07-19T23:41:22.255Z"}
 ```
 
-Filebeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子：
+Filebeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子，具体参数请参考 [Configure the Elasticsearch outputedit](https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html)：
 
 ```
 output.elasticsearch:
@@ -742,19 +742,89 @@ Exiting: error initializing processors: SyntaxError: Invalid regular expression 
 
 这是因为命名捕获分组这个特性，是在 ECMA 9（也就是 [ECMAScript 2018](https://262.ecma-international.org/9.0/)）中才引入的，所以在 `script` 处理器中编写 Javascript 代码时需要特别注意语法的版本问题。
 
-#### 使用 Filebeat 的 `Modules` 功能
-
-https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-modules.html
-
 #### 使用 Elasticsearch 的 `Ingest pipelines` 功能
 
-https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ingest-node.html
+如果你的 Filebeat 采集的日志是直接推送给 Elasticsearch 的，那么还可以使用 [Elasticsearch 的 `Ingest pipelines` 功能](https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html) 对日志进行处理。`Ingest pipelines` 可以让数据在进入 Elasticsearch 索引之前进行转换，它通过一系列的 `processors` 对接收到的数据进行预处理，这和 Logstash 的 `filter` 或 Filebeat 的 `processors` 功能几乎是一样的。
 
-https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html
+`Ingest pipelines` 是支持 Grok 处理器的，所以处理 Nginx 日志就非常简单了，可以参考上面 Logstash 的配置，直接使用 Grok 来处理。首先我们需要在 Elasticsearch 里创建一个 Ingest pipeline。你可以参考 [这里](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ingest-node.html) 通过 Elasticsearch 的接口来创建，也可以在 Kibana 通过可视化界面进行配置，这里我们选择 Kibana 来创建 Ingest pipeline。
 
-## 使用 Logback 对接 Logstash
+首先访问 Kibana 页面，进入 **Stack Management -> Ingest Pipelines**：
 
-https://github.com/logfellow/logstash-logback-encoder
+![](./images/kibana-ingest-pipelines.png)
+
+点击 **Create pipeline** 进入创建页面：
+
+![](./images/kibana-create-pipeline.png)
+
+填写 pipeline 的名称和描述，然后点击 **Add a processor** 添加一个处理器：
+
+![](./images/kibana-add-a-processor.png)
+
+我们在 Processor 下拉列表中选择 Grok，字段 Field 中填写 `message`，然后在 Patterns 里填写 Grok 表达式：
+
+```
+%{HTTPD_COMMONLOG} %{QS:referrer} %{QS:http_user_agent} %{QS:x_forwarded_for}
+```
+
+> 注意这里不能填上面配置 Logstash 那个 Grok 表达式，`%{HTTPD_COMBINEDLOG} %{QS:x_forwarded_for}`，因为 `HTTPD_COMBINEDLOG` 里包含了一个 `agent` 字段和 Filebeat 采集的日志里的 `agent` 字段冲突了，所以这里我们将其重新命名为 `http_user_agent`。
+
+最后点击 **Add** 完成添加。
+
+创建 Ingest pipeline 之后，可以通过 Kibana 提供的 **Test pipeline** 功能对文档进行测试：
+
+![](./images/kibana-test-pipeline.png)
+
+我们可以填入一个测试文档：
+
+```
+[
+  {
+    "_source": {
+      "message": "172.17.0.1 - - [20/Jul/2022:23:34:23 +0000] \"GET /favicon.ico HTTP/1.1\" 404 555 \"http://localhost/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36\" \"-\""
+    }
+  }
+]
+```
+
+然后点击 **Run the pipeline**，就可以得到处理后的结果。
+
+至此，对 Elasticsearch 的配置就完成了。接下来我们配置 Filebeat，将日志直接采集到 Elasticsearch：
+
+```
+output.elasticsearch:
+  hosts: ["https://172.17.0.3:9200"]
+  username: "elastic"
+  password: "123456"
+  pipeline: "nginx-accesslog-pipeline"
+  ssl:
+    enabled: true
+    ca_trusted_fingerprint: "6E597C77AB87235D381A82D961C46F2AEEC16A64C2042BF30925E097E0292069"
+```
+
+其中 `pipeline` 就是我们上面创建的 Ingest pipeline，日志推送到 Elasticsearch 之后会经过该 pipeline 处理后再存入索引，可以使用 `pipelines` 配置多个 pipeline，默认存入的索引为 `filebeat-%{[agent.version]}-%{+yyyy.MM.dd}`，可以通过 `index` 配置进行修改，不过注意的是，`index` 修改之后，要记得 [同时修改 `setup.template` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-template.html)。
+
+另外，`ca_trusted_fingerprint` 表示证书的指纹信息，我们可以从 `http_ca.crt` 文件中得到：
+
+```
+$ openssl x509 -fingerprint -sha256 -in http_ca.crt
+SHA256 Fingerprint=6E:59:7C:77:AB:87:23:5D:38:1A:82:D9:61:C4:6F:2A:EE:C1:6A:64:C2:04:2B:F3:09:25:E0:97:E0:29:20:69
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+```
+
+从 **Kibana -> Discover** 查询采集后的日志，确认我们配置的字段已经生效：
+
+![](./images/kibana-discover-filebeat.png)
+
+另外，为了简化 Ingest pipeline 的配置，Filebeat 还内置了 [大量的 `Modules`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-modules.html)。一个 Module 包括了下面这些配置：
+
+* Filebeat 的 input 配置，已经将常用组件的默认日志路径配置好了
+* Elasticsearch 的 Ingest pipeline 配置，用于对日志进行处理
+* 定义了各个字段的类型和描述
+* 自带一个默认的 Kibana 面板
+
+通过这种方式，常用组件的日志都可以直接通过内置的 Modules 来配置，比如采集 Nginx 的日志可以参考 [Nginx module](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-nginx.html) 页面。
 
 ## 参考
 
@@ -766,6 +836,7 @@ https://github.com/logfellow/logstash-logback-encoder
 1. https://blog.csdn.net/mawming/article/details/78344939
 1. https://www.feiyiblog.com/2020/03/06/ELK%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E7%B3%BB%E7%BB%9F/
 1. [如何在 Filebeat 端进行日志处理](https://mritd.com/2020/08/19/how-to-modify-filebeat-source-code-to-processing-logs/)
+1. [Elastic：开发者上手指南](https://elasticstack.blog.csdn.net/article/details/102728604)
 
 ## 更多
 
@@ -829,6 +900,10 @@ $ docker run --name logstash \
 * [Auditbeat](https://www.elastic.co/cn/beats/auditbeat) - 审计日志
 * [Heartbeat](https://www.elastic.co/cn/beats/heartbeat) - 运行时间监控
 * [Functionbeat](https://www.elastic.co/cn/beats/functionbeat) - 无需服务器的采集器
+
+### 使用 Logback 对接 Logstash
+
+https://github.com/logfellow/logstash-logback-encoder
 
 ### 其他学习资料
 
