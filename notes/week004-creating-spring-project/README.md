@@ -681,3 +681,12 @@ Spring Initializr 是一个完全开源的项目，我们可以通过它实现�
 ```
 export MAVEN_OPTS="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=10809 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=10809"
 ```
+
+或者在 `.mvn` 目录下新建一个 `jvm.config` 文件：
+
+```
+-Dhttp.proxyHost=127.0.0.1
+-Dhttp.proxyPort=10809
+-Dhttps.proxyHost=127.0.0.1
+-Dhttps.proxyPort=10809
+```

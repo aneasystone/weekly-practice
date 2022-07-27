@@ -6,6 +6,25 @@
 
 ## 准备应用
 
+通过 [start.spring.io](https://start.spring.io/) 生成项目代码，依赖选择 webflux 和 actuator。代码生成后，直接使用 Spring Boot Maven Plugin 构建镜像：
+
+```
+$ ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=aneasystone/spring-boot-k8s
+```
+
+然后使用 `docker run` 运行：
+
+```
+$ docker run --name spring-boot-k8s -p 8080:8080 -t aneasystone/spring-boot-k8s
+```
+
+通过 `/actuator/health` 端点检查程序是否启动成功：
+
+```
+$ curl http://localhost:8080/actuator/health
+{"status":"UP"}
+```
+
 ## 将应用部署到 Kubernetes
 
 ## 最佳实践
