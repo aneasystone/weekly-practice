@@ -177,7 +177,7 @@ Kubernetes 提供了一种名为探针（`Probe`）的机制用于对 Pod 中的
 
 探针的实现一般有三种方式：
 
-* `ExecAction`
+* `exec`
 
 在容器里执行一个命令，如果命令退出时返回 0，则认为检测成功，否则认为失败。比如下面的例子：
 
@@ -189,13 +189,15 @@ livenessProbe:
     - /tmp/healthy
 ```
 
-* `TCPSocketAction`
+* `tcpSocket`
 
 针对 `容器IP:端口` 的组合进行 TCP 连接检查，如果对应端口处于开放状态，则认为检测成功，否则认为失败。
 
-* `HTTPGetAction`
+* `httpGet`
 
-针对 `容器IP:端口:API路径` 的组合进行 HTTP GET 请求，如果 HTTP 响应的状态码在 200~400 之间，则认为检测成功，否则认为失败。比如这里我们就是通过 `/actuator/health/liveness` 和 `/actuator/health/readiness` 接口来检测的。
+针对 `容器IP:端口:API路径` 的组合进行 HTTP GET 请求，如果 HTTP 响应的状态码在 200~400 之间，则认为检测成功，否则认为失败。比如这里我们就是通过 `/actuator/health/liveness` 和 `/actuator/health/readiness` 端点来检测的。
+
+> 这两个端点默认只在 Kubernetes 环境下才开启。Spring Boot 会自动检测应用程序是否运行在 Kubernetes 环境中（通过环境变量 `*_SERVICE_HOST` 和 `*_SERVICE_PORT` 来判断），你也可以通过配置 `management.endpoint.health.probes.enabled` 手动开启。
 
 另外，Kubernetes 在运行容器的生命周期中提供了钩子（`Container Lifecycle Hooks`），可以在执行相应的生命周期钩子时运行在处理程序中实现的代码。这样的钩子有两个：
 
@@ -207,7 +209,97 @@ livenessProbe:
 
 在销毁容器之前即执行，它是阻塞的，所以它必须在删除容器的调用之前完成。没有参数传递给处理程序。很适合作为应用程序优雅退出的机制的，可以定义一系列的行为来释放容器占有的资源、进行通知和告警来实现优雅退出。在这里我们就是通过 `PreStop` 钩子，在容器退出前执行命令 `sleep 10` 等待 10 秒，确保所有的请求都已处理结束。
 
-## 使用 `ConfigMaps` 配置
+至此，我们已经实现了最佳实践的第一点和第二点，关于第三点，我们需要通过配置开启服务的优雅退出：
+
+```
+server.shutdown=graceful
+```
+
+在 Kubernetes 环境中，我们常常使用 `ConfigMap` 来保存配置。
+
+## 使用 `ConfigMap` 配置
+
+创建一个配置文件 `application.properties`，内容如下：
+
+```
+server.shutdown=graceful
+management.endpoints.web.exposure.include=*
+```
+
+其中，`management.endpoints.web.exposure.include=*` 的作用是开启 Actuator 的所有端点，这是为了方便我们检查配置是否生效。然后使用命令 `kubectl create configmap` 创建 `ConfigMap`：
+
+```
+$ kubectl create configmap spring-boot-k8s --from-file=./k8s/application.properties
+```
+
+使用 `kubectl get configmap` 检查是否创建成功：
+
+```
+$ kubectl get configmap spring-boot-k8s -o yaml
+apiVersion: v1
+data:
+  application.properties: "server.shutdown=graceful\r\nmanagement.endpoints.web.exposure.include=*\r\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-07-29T23:30:30Z"
+  name: spring-boot-k8s
+  namespace: default
+  resourceVersion: "1712129"
+  uid: 6ca3e9c8-bb53-482d-a650-b710f2ed9bcf
+```
+
+接下来我们就可以将这个 `ConfigMap` 作为卷挂载到容器中，首先在 `spec` 中定义一个卷：
+
+```
+spec:
+  volumes:
+    - name: config-volume
+      configMap:
+        name: spring-boot-k8s
+```
+
+然后将其挂载到容器中：
+
+```
+spec:
+  containers:
+    - image: aneasystone/spring-boot-k8s:snapshot
+      name: spring-boot-k8s
+      resources: {}
+      volumeMounts:
+        - name: config-volume
+          mountPath: /workspace/config
+```
+
+使用下面的命令使配置生效：
+
+```
+$ kubectl apply -f ./k8s
+```
+
+等待应用程序就绪之后，再使用 `kubectl port-forward` 开启代理：
+
+```
+$ kubectl port-forward svc/spring-boot-k8s 9090:80
+```
+
+访问 `http://localhost:9090/actuator/env` 可以看到配置已经生效：
+
+```
+{
+    "name": "Config resource 'class path resource [config/application.properties]' via location 'optional:classpath:/config/'",
+    "properties": {
+        "server.shutdown": {
+            "value": "graceful",
+            "origin": "class path resource [config/application.properties] - 1:17"
+        },
+        "management.endpoints.web.exposure.include": {
+            "value": "*",
+            "origin": "class path resource [config/application.properties] - 2:43"
+        }
+    }
+}
+```
 
 ## 服务发现和负载均衡
 
