@@ -142,6 +142,71 @@ $ curl -s http://localhost:9090/actuator/health
 
 ## 最佳实践
 
+为了让我们的应用能更好地在 Kubernetes 环境下运行，推荐以下几点最佳实践：
+
+1. [添加 readiness 和 liveness 探针](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-kubernetes-probes)
+2. [等待容器生命周期结束](https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment.cloud.kubernetes.container-lifecycle)
+3. [开启优雅退出](https://docs.spring.io/spring-boot/docs/current/reference/html/web.html#web.graceful-shutdown)
+
+我们在 `deployment.yaml` 文件中找到容器相关的配置，并添加 `livenessProbe`、`readinessProbe` 和 `lifecycle`：
+
+```
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+lifecycle:
+  preStop:
+    exec:
+      command: ["sh", "-c", "sleep 10"]
+```
+
+Kubernetes 提供了一种名为探针（`Probe`）的机制用于对 Pod 中的容器状况进行检查，探针由 Kubelet 执行，对容器定期检测，用于确定容器是否存活或者是否可以提供服务。探针根据作用可分为两类：
+
+* 存活探针（`livenessProbe`）
+
+该探针用于确定容器是否为正常运行状态，如果探测结果为 Failure，Kubelet 会杀掉对应的容器，并且根据其重启策略（`Restart Policy`）来决定是否重启；如果没有配置，默认为 Success。
+
+* 就绪探针（`readinessProbe`）
+
+该探针用于确定容器是否可提供服务，如果探测结果为 Failure，控制器 `Endpoints Controller` 会将对应的 Pod IP 从所有匹配上的 Service 的 Endpoint 列表中移除；如果没有配置，默认为 Success。
+
+探针的实现一般有三种方式：
+
+* `ExecAction`
+
+在容器里执行一个命令，如果命令退出时返回 0，则认为检测成功，否则认为失败。比如下面的例子：
+
+```
+livenessProbe:
+  exec:
+    command:
+    - cat
+    - /tmp/healthy
+```
+
+* `TCPSocketAction`
+
+针对 `容器IP:端口` 的组合进行 TCP 连接检查，如果对应端口处于开放状态，则认为检测成功，否则认为失败。
+
+* `HTTPGetAction`
+
+针对 `容器IP:端口:API路径` 的组合进行 HTTP GET 请求，如果 HTTP 响应的状态码在 200~400 之间，则认为检测成功，否则认为失败。比如这里我们就是通过 `/actuator/health/liveness` 和 `/actuator/health/readiness` 接口来检测的。
+
+另外，Kubernetes 在运行容器的生命周期中提供了钩子（`Container Lifecycle Hooks`），可以在执行相应的生命周期钩子时运行在处理程序中实现的代码。这样的钩子有两个：
+
+* `PostStart`
+
+在创建容器后立即执行，但是无法保证挂钩将在容器 ENTRYPOINT 之前执行。没有参数传递给处理程序。由于无法保证和容器内其它进程启动的顺序相关联，所以不是应用程序进行启动前配置的最佳解决方案。
+
+* `PreStop`
+
+在销毁容器之前即执行，它是阻塞的，所以它必须在删除容器的调用之前完成。没有参数传递给处理程序。很适合作为应用程序优雅退出的机制的，可以定义一系列的行为来释放容器占有的资源、进行通知和告警来实现优雅退出。在这里我们就是通过 `PreStop` 钩子，在容器退出前执行命令 `sleep 10` 等待 10 秒，确保所有的请求都已处理结束。
+
 ## 使用 `ConfigMaps` 配置
 
 ## 服务发现和负载均衡
