@@ -303,6 +303,154 @@ $ kubectl port-forward svc/spring-boot-k8s 9090:80
 
 ## 服务发现和负载均衡
 
+这一节我们将使用 [Kustomize](https://kustomize.io/) 来部署一个示例应用 [ryanjbaxter/k8s-spring-workshop](https://github.com/ryanjbaxter/k8s-spring-workshop)。Kustomize 是一款用于 Kubernetes 原生的配置管理的工具，它以无模板的方式来定制应用的配置，直接使用了 Kubernetes 的原生概念，而不需要额外的 DSL 语法，允许用户以一个应用描述文件为基础（Base YAML），然后通过 Overlay 的方式生成最终部署应用所需的描述文件。
+
+一般情况下，应用都会有多套部署环境：开发环境、测试环境、生产环境。多套环境则意味着多套 Kubernetes 应用资源 YAML，而这么多套 YAML 之间只存在一些微小的差异，比如镜像不同、标签不同、副本数不同、数据源配置不同等等。传统的维护方法通常是把一个环境下的 YAML 拷贝出来然后对差异的地方进行修改，这不仅麻烦，而且可能会因为人为疏忽导致配置错误，另外，多套类似的配置也不便于后续的维护和管理。
+
+Kustomize 通过 Base + Overlay 的方式来解决这个问题，在 Base 中定义基础配置，然后通过 Overlay 对 Base 中的配置进行新增或修改。下面是一个简单的例子：
+
+```
+demo
+├── base
+│   ├── deployment.yaml
+│   ├── kustomization.yaml
+│   └── service.yaml
+└── overlays
+    └── production
+        ├── ingress.yaml
+        └── kustomization.yaml
+```
+
+在开发或测试环境我们使用 Base 中的 deployment 和 service 部署应用即可，但是在生产环境还要再部署一个 ingress，那么就可以通过 Overlay 补充一个配置文件进来即可。
+
+又或者在生产环境中我们希望将应用的副本数改为 2，这时就可以通过 Patch 的方式修改 Base 里的配置文件。在我们这个示例程序中，就是使用这种方式来部署应用的：
+
+```
+kustomize
+├── base
+│   ├── deployment.yaml
+│   ├── kustomization.yaml
+│   └── service.yaml
+└── multi-replica
+    ├── kustomization.yaml
+    └── replicas.yaml
+```
+
+其中 `multi-replica/kustomization.yaml` 文件的内容如下：
+
+```
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./../base
+patchesStrategicMerge:
+  - replicas.yaml
+```
+
+可以看到，这个资源的类型为 `Kustomization`。我们通过 `resources` 指定 Base 配置的位置，并通过 `patchesStrategicMerge` 指定使用 `replicas.yaml` 来修改配置。在 `replicas.yaml` 文件中，我们只需要配上要修改的值即可，不用再编写完整的配置文件了：
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-workshop-name-service
+spec:
+  replicas: 2
+```
+
+有了 Kustomization 配置文件之后，就可以使用 `kustomize build` 生成完整的 Kubernetes 配置，生成的配置可以直接通过 `kubectl apply` 来部署：
+
+```
+$ kustomize build "github.com/ryanjbaxter/k8s-spring-workshop/name-service/kustomize/multi-replica/" | kubectl apply -f -
+```
+
+从 1.14 版本开始，kubectl 也开始支持使用 kustomization 文件来管理 Kubernetes 对象。 可以通过 `kubectl apply -k` 直接部署：
+
+```
+$ kubectl apply -k "github.com/ryanjbaxter/k8s-spring-workshop/name-service/kustomize/multi-replica/"
+```
+
+部署完成后，通过 `kubectl get pods` 应该能看到两个 `k8s-workshop-name-service` Pod：
+
+```
+$ kubectl get pods --selector app=k8s-workshop-name-service
+NAME                                         READY   STATUS    RESTARTS   AGE
+k8s-workshop-name-service-85fb6bcd85-ddtnd   1/1     Running   0          6m20s
+k8s-workshop-name-service-85fb6bcd85-k492l   1/1     Running   0          6m20s
+```
+
+使用 `kubectl port-forward` 将集群内 Service 端口代理到主机的 9090 端口：
+
+```
+$ kubectl port-forward svc/k8s-workshop-name-service 9090:80
+```
+
+使用 `curl` 确认接口是否能成功响应：
+
+```
+$ curl -i http://localhost:9090/; echo
+HTTP/1.1 200
+k8s-host: k8s-workshop-name-service-85fb6bcd85-ddtnd
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 5
+Date: Sun, 31 Jul 2022 04:24:54 GMT
+
+Ringo
+```
+
+注意请求头部的 `k8s-host`，它表示该请求是由哪个 Pod 处理的，我们多请求几次发现，每次返回的都是同一个 Pod，这是因为 `kubectl port-forward` 命令只代理了一个 Pod。
+
+在 Kubernetes 中部署应用时，Kubernetes 会自动根据服务名生成 DNS 记录，所以我们可以直接使用服务名来请求接口，而不用关心每个服务所在 Pod 的真实 IP 地址，此外 Kubernetes 也会使用负载均衡策略将请求路由到不同的 Pod 上。
+
+我们修改 `DemoApplication.java`，新增一个接口，通过 `WebClient` 调用 `k8s-workshop-name-service` 接口：
+
+```
+	@GetMapping
+	public Mono<String> index() {
+		return webClient.get().uri("http://k8s-workshop-name-service")
+				.retrieve()
+				.toEntity(String.class)
+				.map(entity -> {
+					String host = entity.getHeaders().get("k8s-host").get(0);
+					return "Hello " + entity.getBody() + " from " + host;
+				});
+	}
+```
+
+代码修改完成后，我们重新构建镜像并修改镜像标签：
+
+```
+$ ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=aneasystone/spring-boot-k8s
+$ docker tag aneasystone/spring-boot-k8s:latest aneasystone/spring-boot-k8s:snapshot
+```
+
+然后怎么将新构建的镜像重新部署到 Kubernetes 呢？最简单的一种做法是将之前的 Pod 删除：
+
+```
+$ kubectl delete pod --selector app=spring-boot-k8s   
+pod "spring-boot-k8s-655565dd6-6cblq" deleted
+```
+
+这样 Kubernetes 又会自动创建一个新 Pod，使用的自然就是新的镜像了。继续使用 `kubectl port-forward` 代理端口：
+
+```
+$ kubectl port-forward svc/spring-boot-k8s 9090:80
+```
+
+然后使用下面的 watch 命令每隔 1 秒发一次请求，观察 Pod 是否会变：
+
+```
+$ watch -n 1 curl http://localhost:9090
+```
+
+可以发现 Pod 并不是每次请求都会变，而是要等很长时间才能观察到变化。（*这可能和 Kubernetes 的负载均衡机制有关？*）如果想要立即观察到变化，可以使用 `kubectl delete pod` 删除该 Pod，请求会立即切到另一个 Pod 上：
+
+```
+$ kubectl delete pod k8s-workshop-name-service-56b986b664-wjcr9
+```
+
 ## 参考
 
 * [【Topical Guides】Spring on Kubernetes](https://spring.io/guides/topicals/spring-on-kubernetes/)
+* [kustomize 最简实践](https://zhuanlan.zhihu.com/p/92153378)
+* [使用 Kustomize 对 Kubernetes 对象进行声明式管理](https://kubernetes.io/zh-cn/docs/tasks/manage-kubernetes-objects/kustomization/)
