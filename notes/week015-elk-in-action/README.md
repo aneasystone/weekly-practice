@@ -435,7 +435,7 @@ Logstash 就可以收到 Filebeat 采集过来的日志了：
 {"message":"This is a filebeat log","host":{"name":"8a7849b5c331"},"log":{"offset":0,"file":{"path":"/app/logs/filebeat.log"}},"event":{"original":"This is a filebeat log"},"input":{"type":"log"},"ecs":{"version":"8.0.0"},"@version":"1","agent":{"id":"3bd9b289-599f-4899-945a-94692bdaa690","name":"8a7849b5c331","ephemeral_id":"268a3170-0feb-4a86-ad96-7cce6a9643ec","version":"8.3.2","type":"filebeat"},"tags":["beats_input_codec_plain_applied"],"@timestamp":"2022-07-19T23:41:22.255Z"}
 ```
 
-Filebeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子，具体参数请参考 [Configure the Elasticsearch outputedit](https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html)：
+Filebeat 除了可以将日志推送给 Logstash，还支持很多其他的 [`output` 配置](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html)，比如 Elasticsearch、Kafka、Redis 或者写入文件等等。下面是将日志推送给 Elasticsearch 的例子，具体参数请参考 [Configure the Elasticsearch output](https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html)：
 
 ```
 output.elasticsearch:

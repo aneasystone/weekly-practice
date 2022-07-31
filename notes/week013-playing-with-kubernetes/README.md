@@ -864,7 +864,6 @@ deployment "kubernetes-bootcamp" successfully rolled out
 
 1. [学习 Kubernetes 基础知识](https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/)
 1. [Kubernetes 术语表](https://kubernetes.io/docs/reference/glossary/)
-1. [Play with Kubernetes](https://labs.play-with-k8s.com/)
 1. [Kubernetes 指南](https://kubernetes.feisky.xyz/concepts/architecture)
 
 ## 更多
