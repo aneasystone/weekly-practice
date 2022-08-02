@@ -130,6 +130,4 @@ dmypy.json
 
 .vscode/
 
-sel/
-wave/
-stat/
+node_modules/
