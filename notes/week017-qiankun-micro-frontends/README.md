@@ -6,6 +6,62 @@
 
 ## 准备主应用
 
+我们直接使用 `vue-cli` 创建一个 Vue 脚手架项目，首先确保已安装 Node.js 环境：
+
+```
+$ node -v
+v16.14.2
+
+$ npm -v
+8.5.0
+```
+
+然后安装最新版本的 `vue-cli`：
+
+```
+$ npm install -g @vue/cli
+
+$ vue -V
+@vue/cli 5.0.8
+```
+
+使用 `vue-cli` 创建 demo 项目：
+
+```
+$ vue create demo
+
+?  Your connection to the default npm registry seems to be slow.  
+   Use https://registry.npmmirror.com for faster installation? Yes
+
+Vue CLI v5.0.8
+? Please pick a preset: Default ([Vue 3] babel, eslint)
+
+Vue CLI v5.0.8
+✨  Creating project in D:\code\weekly-practice\notes\week017-qiankun-micro-frontends\demo.
+⚙️  Installing CLI plugins. This might take a while...
+
+added 849 packages in 36s
+🚀  Invoking generators...
+📦  Installing additional dependencies...
+
+added 95 packages in 11s
+⚓  Running completion hooks...
+
+📄  Generating README.md...
+
+🎉  Successfully created project demo.      
+👉  Get started with the following commands:
+
+ $ cd demo
+ $ npm run serve
+```
+
+使用 `npm run serve` 即可启动项目，启动成功后在浏览器中访问 `http://localhost:8080/`：
+
+![](./images/vue-demo.png)
+
+## 准备微应用
+
 https://github.com/jiasx/mic-front-react
 
 https://github.com/jiasx/mic-front-vue2.0
