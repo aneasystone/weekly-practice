@@ -4,6 +4,45 @@
 
 [qiankun](https://qiankun.umijs.org/zh) 是阿里开源的一款微前端框架，它的灵感来自于 [single-spa](https://github.com/CanopyTax/single-spa) 项目，号称 **可能是你见过最完善的微前端解决方案**。single-spa 于 2018 年诞生，也是一个用于前端微服务化的解决方案，它实现了路由劫持和应用加载，不过它的缺点是不够灵活，不能动态加载 js 文件，而且没有处理样式隔离，不支持 js 沙箱机制。qiankun 于 2019 年开源，提供了更加开箱即用的 API (single-spa + sandbox + import-html-entry)，它基于 single-spa，具备 js 沙箱、样式隔离、HTML Loader、预加载 等微前端系统所需的能力。qiakun 升级 2.0 后，支持多个微应用的同时加载，有了这个特性，我们基本可以像接入 iframe 一样方便的接入微应用。
 
+## 官方示例
+
+`qiankun` 的源码里提供了大量完整的示例项目，我们先来体验体验这些示例，感受下微前端的魅力。首先，将 `qiankun` 的代码 clone 到本地：
+
+```
+$ git clone https://github.com/umijs/qiankun.git
+```
+
+`qiankun` 使用 [Yarn](https://yarnpkg.com/) 构建和打包项目，首先安装 Yarn：
+
+```
+$ npm install -g yarn
+```
+
+然后安装 `qiankun` 框架所依赖的包以及示例项目：
+
+```
+$ yarn install
+$ yarn examples:install
+```
+
+示例项目中包含了各种不同框架的实现，比如 `Vue`、`Vue 3`、`React 15`、`React 16`、`Angular 9` 以及使用 jQuery 实现的纯 HTML 项目，Yarn 会依次安装各个示例项目的依赖包，整个过程会比较长，安装完成之后，使用下面的命令运行示例项目：
+
+```
+$ yarn examples:start
+```
+
+然后打开浏览器，访问 `http://localhost:7099/`：
+
+![](./images/example.gif)
+
+或者使用下面的命令运行 `multiple demo`：
+
+```
+$ yarn examples:start-multiple
+```
+
+![](./images/qiankun-multiple-demo.png)
+
 ## 准备主应用
 
 我们直接使用 `vue-cli` 创建一个 Vue 脚手架项目，首先确保已安装 Node.js 环境：
@@ -73,3 +112,5 @@ https://github.com/jiasx/mic-front-vue2.0
 1. [万字长文-落地微前端 qiankun 理论与实践指北](https://juejin.cn/post/7069566144750813197)
 1. [Micro Frontends | extending the microservice idea to frontend development](https://micro-frontends.org/)
 1. [single-spa](https://zh-hans.single-spa.js.org/docs/getting-started-overview)
+1. [微前端框架 之 single-spa 从入门到精通](https://mp.weixin.qq.com/s?__biz=MzA3NTk4NjQ1OQ==&mid=2247484245&idx=1&sn=9ee91018578e6189f3b11a4d688228c5&chksm=9f696021a81ee937847c962e3135017fff9ba8fd0b61f782d7245df98582a1410aa000dc5fdc&scene=178&cur_album_id=2251416802327232513#rd)
+1. [微前端框架 之 qiankun 从入门到源码分析](https://mp.weixin.qq.com/s?__biz=MzA3NTk4NjQ1OQ==&mid=2247484411&idx=1&sn=7e67d2843b8576fce01b18269f33f7e9&chksm=9f69608fa81ee99954b6b5a1e3eb40e194c05c1edb504baac27577a0217f61c78ff9d0bb7e23&scene=178&cur_album_id=2251416802327232513#rd)
