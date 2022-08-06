@@ -43,7 +43,11 @@ $ yarn examples:start-multiple
 
 ![](./images/qiankun-multiple-demo.png)
 
-## 准备主应用
+## 开发实战
+
+这一节我们将从零开始，使用 `qiankun` 搭建一个简单的微前端项目，这个项目包括一个主应用和两个子应用。
+
+### 准备主应用
 
 我们直接使用 `vue-cli` 创建一个 Vue 脚手架项目，首先确保已安装 Node.js 环境：
 
@@ -99,7 +103,63 @@ added 95 packages in 11s
 
 ![](./images/vue-demo.png)
 
-## 准备微应用
+### 准备子应用
+
+然后照葫芦画瓢，使用 `vue-cli` 创建 app1 和 app2 项目：
+
+```
+vue create app1
+
+
+Vue CLI v5.0.8
+? Please pick a preset: Default ([Vue 3] babel, eslint)
+? Pick the package manager to use when installing dependencies: Yarn
+
+
+Vue CLI v5.0.8
+✨  Creating project in D:\code\weekly-practice\notes\week017-qiankun-micro-frontends\app1.
+⚙️  Installing CLI plugins. This might take a while...
+
+yarn install v1.22.19
+info No lockfile found.
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+
+success Saved lockfile.
+Done in 22.33s.
+🚀  Invoking generators...
+📦  Installing additional dependencies...
+
+yarn install v1.22.19
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 7.88s.
+⚓  Running completion hooks...
+
+📄  Generating README.md...
+
+🎉  Successfully created project app1.
+👉  Get started with the following commands:
+
+ $ cd app1
+ $ yarn serve
+```
+
+使用 `vue-cli` 创建的项目默认端口是 8080，为了不和主应用冲突，需要修改 `vue.config.js` 配置文件，将子应用的端口修改为 8081 和 8082：
+
+```
+const { defineConfig } = require('@vue/cli-service')
+module.exports = defineConfig({
+  transpileDependencies: true,
+  devServer: {
+    port: 8081
+  }
+})
+```
 
 https://github.com/jiasx/mic-front-react
 
