@@ -45,7 +45,7 @@ $ yarn examples:start-multiple
 
 ## 开发实战
 
-这一节我们将从零开始，使用 `qiankun` 搭建一个简单的微前端项目，这个项目包括一个主应用和两个子应用。
+这一节我们将从零开始，使用 `qiankun` 搭建一个简单的微前端项目，这个项目包括一个主应用和两个微应用。这里为了简单起见，两个微应用都是使用 Vue 开发，但是实际上，微前端对微应用的技术栈是不限的，微应用完全可以独立开发。
 
 ### 准备主应用
 
@@ -103,7 +103,7 @@ added 95 packages in 11s
 
 ![](./images/vue-demo.png)
 
-### 准备子应用
+### 准备微应用
 
 然后照葫芦画瓢，使用 `vue-cli` 创建 app1 和 app2 项目：
 
@@ -149,7 +149,7 @@ Done in 7.88s.
  $ yarn serve
 ```
 
-使用 `vue-cli` 创建的项目默认端口是 8080，为了不和主应用冲突，需要修改 `vue.config.js` 配置文件，将子应用的端口修改为 8081 和 8082：
+使用 `vue-cli` 创建的项目默认端口是 8080，为了不和主应用冲突，需要修改 `vue.config.js` 配置文件，将微应用的端口修改为 8081 和 8082：
 
 ```
 const { defineConfig } = require('@vue/cli-service')
@@ -161,9 +161,97 @@ module.exports = defineConfig({
 })
 ```
 
-https://github.com/jiasx/mic-front-react
+### 改造主应用
 
-https://github.com/jiasx/mic-front-vue2.0
+一切准备就绪后，接下来我们就开始将主应用改造成微前端架构。首先在主应用安装 `qiankun` 依赖：
+
+```
+$ npm i qiankun -S
+```
+
+然后在 `main.js` 文件中注册微应用：
+
+```
+import { registerMicroApps, start } from 'qiankun';
+
+registerMicroApps([{
+  name: 'app1',
+  entry: '//localhost:8081',
+  container: '#app1',
+  activeRule: '/app1'
+}, {
+  name: 'app2',
+  entry: '//localhost:8082',
+  container: '#app2',
+  activeRule: '/app2'
+}]);
+
+start();
+```
+
+只需这几行代码，微应用就注册好了。当 url 发生变化时，`qiankun` 会根据 `activeRule` 规则自动匹配相应的微应用，并将其插入到指定的 DOM 容器（`container`）中。我们在 `public/index.html` 里为每个微应用准备一个容器：
+
+```
+    <div id="app"></div>
+    <div id="app1"></div>
+    <div id="app2"></div>
+```
+
+### 改造微应用
+
+不过此时主应用还无法加载微应用，我们需要对微应用做两处改造。首先，微应用需要在自己的入口 js (通常就是你配置的 webpack 的 entry js) 导出 `bootstrap`、`mount` 和 `unmount` 三个生命周期钩子，以供主应用在适当的时机调用。打开文件 `main.js`，添加如下代码：
+
+```
+let instance = null
+function render() {
+  instance = createApp(App).mount('#app')
+}
+
+if (!window.__POWERED_BY_QIANKUN__) { // 默认独立运行
+  render();
+}
+
+export async function bootstrap(props) {
+  console.log('bootstrap app1', props)
+}
+export async function mount(props) {
+  console.log('mount app1', props)
+  render()
+}
+export async function unmount(props) {
+  console.log('unmount app1', props)
+  instance.$destroy()
+}
+```
+
+其中我们可以通过 `window.__POWERED_BY_QIANKUN__` 来区分微应用是自启动的还是由 `qiankun` 加载的，这样可以让微应用在两种模式下都兼容。
+
+其次，我们需要将微应用改为以 `umd` 的方式打包，并注意设置 `'Access-Control-Allow-Origin':'*'` 允许跨域访问：
+
+```
+const { defineConfig } = require('@vue/cli-service')
+module.exports = defineConfig({
+  transpileDependencies: true,
+  devServer: {
+    port: 8081,
+    headers:{
+      'Access-Control-Allow-Origin':'*'
+    }
+  },
+  configureWebpack:{
+    output:{
+      library: `app1`,
+      libraryTarget: 'umd'
+    }
+  }
+})
+```
+
+### 运行
+
+主应用和微应用都改造完成后，依次运行，然后在浏览器中依次访问，确保每个应用都可独立访问。另外，由于我们在主应用中加载了微应用，使用 `http://localhost:8080/app1` 和 `http://localhost:8080/app2` 应该也可以访问微应用：
+
+![](./images/demo-micro-app1.png)
 
 ## 参考
 
