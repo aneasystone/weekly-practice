@@ -108,13 +108,11 @@ added 95 packages in 11s
 然后照葫芦画瓢，使用 `vue-cli` 创建 app1 和 app2 项目：
 
 ```
-vue create app1
-
+$ vue create app1
 
 Vue CLI v5.0.8
 ? Please pick a preset: Default ([Vue 3] babel, eslint)
 ? Pick the package manager to use when installing dependencies: Yarn
-
 
 Vue CLI v5.0.8
 ✨  Creating project in D:\code\weekly-practice\notes\week017-qiankun-micro-frontends\app1.
@@ -307,6 +305,10 @@ createApp(App).use(router).use(ElementPlus).mount('#app')
 > 为什么切换微应用时，导航消失了？而不是加载在导航下面的容器中？
 >
 > 这是因为主应用的容器 id 和 微应用的容器 id 都叫 `app`，所以冲突了，将主应用的 id 修改为 `demo` 即可。
+
+运行之后，在浏览器里访问主应用，然后就可以通过导航菜单来访问微应用了：
+
+![](./images/vue-router.png)
 
 ## 参考
 
