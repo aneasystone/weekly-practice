@@ -1,18 +1,17 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <h1>Hello qiankun!</h1>
+    <el-menu :router="true" mode="horizontal">
+      <el-menu-item index="/hello">Hello</el-menu-item>
+      <el-menu-item index="/about">About</el-menu-item>
+      <el-menu-item index="/app1">App1</el-menu-item>
+      <el-menu-item index="/app2">App2</el-menu-item>
+    </el-menu>
+    <router-view></router-view>
+    <div id="app1"></div>
+    <div id="app2"></div>
+  </div>
 </template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
 
 <style>
 #app {

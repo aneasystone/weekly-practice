@@ -253,6 +253,57 @@ module.exports = defineConfig({
 
 ![](./images/demo-micro-app1.png)
 
+## 使用 Vue Router 切换微应用
+
+为了更方便地构建单页面应用（SPA），在现代的 Web 框架中，几乎都有 **路由** 的概念，一般用在左侧菜单或顶部导航上。Vue Router 就是 Vue.js 的官方路由。首先在主应用中安装 `vue-router` 和 `element-plus`：
+
+```
+$ npm i vue-router -S
+$ npm i element-plus -S
+```
+
+在 `main.js` 中注册路由：
+
+```
+import { createRouter, createWebHistory } from 'vue-router'
+import HelloWorld from './components/HelloWorld.vue'
+import About from './components/About.vue'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/hello', component: HelloWorld },
+    { path: '/about', component: About }
+  ]
+})
+
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
+createApp(App).use(router).use(ElementPlus).mount('#app')
+```
+
+主应用的代码修改如下：
+
+```
+<template>
+  <div>
+    <h1>Hello qiankun!</h1>
+    <el-menu :router="true" mode="horizontal">
+      <el-menu-item index="/hello">Hello</el-menu-item>
+      <el-menu-item index="/about">About</el-menu-item>
+      <el-menu-item index="/app1">App1</el-menu-item>
+      <el-menu-item index="/app2">App2</el-menu-item>
+    </el-menu>
+    <router-view></router-view>
+    <div id="app1"></div>
+    <div id="app2"></div>
+  </div>
+</template>
+```
+
+> TODO: 为什么切换子应用时，导航消失了？而不是加载在导航下面的容器中？
+
 ## 参考
 
 1. [qiankun 官方文档](https://qiankun.umijs.org/zh)

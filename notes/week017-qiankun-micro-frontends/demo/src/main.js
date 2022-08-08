@@ -17,4 +17,19 @@ registerMicroApps([{
 
 start();
 
-createApp(App).mount('#app')
+import { createRouter, createWebHistory } from 'vue-router'
+import HelloWorld from './components/HelloWorld.vue'
+import About from './components/About.vue'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/hello', component: HelloWorld },
+    { path: '/about', component: About }
+  ]
+})
+
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
+createApp(App).use(router).use(ElementPlus).mount('#app')
