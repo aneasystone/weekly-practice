@@ -220,11 +220,13 @@ export async function mount(props) {
 }
 export async function unmount(props) {
   console.log('unmount app1', props)
-  instance.$destroy()
+  console.log(instance)
 }
 ```
 
 其中我们可以通过 `window.__POWERED_BY_QIANKUN__` 来区分微应用是自启动的还是由 `qiankun` 加载的，这样可以让微应用在两种模式下都兼容。
+
+> 注意，网上有很多示例在 `unmount` 中会调用 `instance.$destroy()` 来销毁实例，但是在 Vue 3 中 `instance.$destroy()` 方法已经废弃了。
 
 其次，我们需要将微应用改为以 `umd` 的方式打包，并注意设置 `'Access-Control-Allow-Origin':'*'` 允许跨域访问：
 
@@ -302,7 +304,9 @@ createApp(App).use(router).use(ElementPlus).mount('#app')
 </template>
 ```
 
-> TODO: 为什么切换子应用时，导航消失了？而不是加载在导航下面的容器中？
+> 为什么切换微应用时，导航消失了？而不是加载在导航下面的容器中？
+>
+> 这是因为主应用的容器 id 和 微应用的容器 id 都叫 `app`，所以冲突了，将主应用的 id 修改为 `demo` 即可。
 
 ## 参考
 
@@ -313,3 +317,4 @@ createApp(App).use(router).use(ElementPlus).mount('#app')
 1. [single-spa](https://zh-hans.single-spa.js.org/docs/getting-started-overview)
 1. [微前端框架 之 single-spa 从入门到精通](https://mp.weixin.qq.com/s?__biz=MzA3NTk4NjQ1OQ==&mid=2247484245&idx=1&sn=9ee91018578e6189f3b11a4d688228c5&chksm=9f696021a81ee937847c962e3135017fff9ba8fd0b61f782d7245df98582a1410aa000dc5fdc&scene=178&cur_album_id=2251416802327232513#rd)
 1. [微前端框架 之 qiankun 从入门到源码分析](https://mp.weixin.qq.com/s?__biz=MzA3NTk4NjQ1OQ==&mid=2247484411&idx=1&sn=7e67d2843b8576fce01b18269f33f7e9&chksm=9f69608fa81ee99954b6b5a1e3eb40e194c05c1edb504baac27577a0217f61c78ff9d0bb7e23&scene=178&cur_album_id=2251416802327232513#rd)
+1. [微前端实战 - 基于 qiankun 的最佳实践](https://github.com/a1029563229/blogs/tree/master/BestPractices/qiankun)

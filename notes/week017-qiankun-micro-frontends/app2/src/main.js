@@ -19,5 +19,5 @@ export async function mount(props) {
 }
 export async function unmount(props) {
   console.log('unmount app2', props)
-  instance.$destroy()
+  console.log(instance)
 }
