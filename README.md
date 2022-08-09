@@ -19,6 +19,7 @@
 * WEEK015 - [实战 ELK 搭建日志系统](./notes/week015-elk-in-action/README.md)
 * WEEK016 - [在 Kubernetes 环境中开发 Spring Boot 项目](./notes/week016-spring-boot-on-kubernetes/README.md)
 * WEEK017 - [使用 qiankun 开发微前端应用](./notes/week017-qiankun-micro-frontends/README.md)
+* WEEK018 - [使用 Github Actions 跟踪 Github 趋势项目](./notes/week018-tracking-github-trending/README.md)
 
 ### 项目实践
 
