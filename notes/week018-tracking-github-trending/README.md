@@ -1,4 +1,4 @@
-# WEEK018 - 使用 Github Actions 跟踪 Github 趋势项目
+# WEEK018 - 使用 GitHub Actions 跟踪 GitHub 趋势项目
 
 [GitHub Actions](https://docs.github.com/cn/actions) 是 GitHub 于 2018 年 10 月推出的一款 CI/CD 服务。一个标准的 CI/CD 流程通常是一个工作流（`workflow`），工作流中包含了一个或多个任务（`job`），而每个任务都是由多个执行步骤（`step`）组成。
 
@@ -12,7 +12,7 @@ actions/setup-node@74bc508 # 指向一个 commit
 
 你可以在 [GitHub Marketplace](https://github.com/marketplace?type=actions) 中搜索你想使用的 action，另外，还有一份关于 GitHub Actions 的 awesome 清单 [sdras/awesome-actions](https://github.com/sdras/awesome-actions)，也可以找到不少的 action。
 
-## Github Actions 入门示例
+## GitHub Actions 入门示例
 
 这一节我们将通过一个最简单的入门示例了解 GitHub Actions 的基本概念。首先我们在 GitHub 上创建一个 demo 项目 [aneasystone/github-actions-demo](https://github.com/aneasystone/github-actions-demo)（也可以直接使用已有的项目），然后打开 Actions 选项卡：
 
@@ -90,7 +90,7 @@ jobs:
 
 https://docs.github.com/cn/actions/learn-github-actions/understanding-github-actions
 
-## 跟踪 Github 趋势项目
+## 跟踪 GitHub 趋势项目
 
 [bonfy/github-trending](https://github.com/bonfy/github-trending)
 
@@ -107,6 +107,6 @@ https://docs.github.com/cn/actions/learn-github-actions/understanding-github-act
 
 另外，阮一峰在他的 [入门教程](https://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html) 中介绍了一个示例，用于将 React 应用发布到 GitHub Pages。
 
-### 在本地运行 Github Actions
+### 在本地运行 GitHub Actions
 
 https://github.com/nektos/act
