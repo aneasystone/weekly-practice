@@ -176,7 +176,75 @@ runs-on: ubuntu-latest
 
 ## 跟踪 GitHub 趋势项目
 
-[bonfy/github-trending](https://github.com/bonfy/github-trending)
+学习了 GitHub Actions 的基本知识后，我们就可以开始使用它了。除了常见的 CI/CD 任务，如 [自动构建和测试](https://docs.github.com/cn/actions/automating-builds-and-tests)，[打包和发布](https://docs.github.com/cn/actions/publishing-packages)，[部署](https://docs.github.com/cn/actions/deployment) 等，还可以使用它来做很多有趣的事情。
+
+GitHub 有一个 [Trending](https://github.com/trending) 页面，可以在这里发现 GitHub 上每天、每周或每月最热门的项目，不过这个页面没有归档功能，无法追溯历史。如果我们能用爬虫每天自动爬取这个页面上的内容，并将结果保存下来，那么查阅起来就更方便了。要实现这个功能，必须满足三个条件：
+
+1. 能定时执行：可以使用 `on:schedule` 定时触发 GitHub Actions 工作流；
+2. 爬虫脚本：在工作流中可以执行任意的脚本，另外还可以通过 actions 安装各种语言的环境，比如使用 [actions/setup-python](https://github.com/actions/setup-python) 安装 Python 环境，使用 Python 来写爬虫最适合不过；
+* 能将结果保存下来：GitHub 仓库天生就是一个数据库，可以用来存储数据，我们可以将爬虫爬下来的数据提交并保存到 GitHub 仓库。
+
+可以看到，使用 GitHub Actions 完全可以实现这个功能，这个想法的灵感来自 [bonfy/github-trending](https://github.com/bonfy/github-trending) 项目，不过我在这个项目的基础上做了一些改进，比如将每天爬取的结果合并在同一个文件里，并且对重复的结果进行去重。
+
+首先我们创建一个仓库 [aneasystone/github-trending](https://github.com/aneasystone/github-trending)，然后和之前的示例项目一样，在 `.github/workflows` 目录下创建一个流水线文件，内容如下：
+
+```
+# This workflow will scrap GitHub trending projects daily.
+
+name: Daily Github Trending
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Scraper
+      run: |
+        python scraper.py
+    # Runs a set of commands using the runners shell
+    - name: Push to origin master
+      run: |
+        echo start push
+        git config --global user.name "aneasystone"
+        git config --global user.email "aneasystone@gmail.com"
+        
+        git add -A
+        git commit -m $(date '+%Y-%m-%d')
+        git push
+```
+
+在这里我们使用了 `on.schedule.cron: "0 2 * * *"` 来定时触发工作流，这个 cron 表达式需符合 [POSIX cron 语法](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html)，可以在 [crontab guru](https://crontab.guru/) 页面上对 cron 表达式进行调试。不过要注意的是，这里的时间为 UTC 时间，所以 `0 2 * * *` 对应的是北京时间 10 点整。
+
+> 注：在实际运行的时候，我发现工作流并不是每天早上 10 点执行，而是到 11 点才执行，起初我以为是定时任务出现了延迟，但是后来我才意识到，现在正好是夏天，大多数北美洲、欧洲以及部分中东地区都在实施 [夏令时](https://zh.wikipedia.org/wiki/%E5%A4%8F%E6%97%B6%E5%88%B6)，所以他们的时间要比我们早一个小时，他们的 10 点就是我们的 11 点。
+
+工作流的各个步骤是比较清晰的，首先通过 `actions/checkout@v2` 签出仓库代码，然后使用 `actions/setup-python@v2` 安装 Python 环境，然后执行 `pip install` 安装 Python 依赖。环境准备就绪后，执行 `python scraper.py`，这就是我们的爬虫脚本，它会将 GitHub Trending 页面的内容爬取下来并更新到 `README.md` 文件中，我们可以根据参数爬取不同编程语言的项目清单：
+
+```
+languages = ['', 'java', 'python', 'javascript', 'go', 'c', 'c++', 'c#', 'html', 'css', 'unknown']
+for lang in languages:
+    results = scrape_lang(lang)
+    write_markdown(lang, results)
+```
+
+数据爬取成功后，我们在工作流的最后通过 `git commit & git push` 将代码提交到 GitHub 仓库保存下来。你可以在这里 [aneasystone/github-trending](https://github.com/aneasystone/github-trending) 查看完整的代码。
 
 ## 参考
 
