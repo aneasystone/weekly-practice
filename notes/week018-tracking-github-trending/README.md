@@ -82,7 +82,7 @@ jobs:
 
 ![](./images/all-workflow-jobs.png)
 
-这里是工作流包含的所有作业（`job`）的执行情况，我们这个示例中只使用了一个名为 build 的作业。然后再点击作业，可以查看作业的执行日志：
+这里是工作流包含的所有作业（`job`）的执行情况，我们这个示例中只使用了一个名为 build 的作业。点击作业，可以查看作业的执行日志：
 
 ![](./images/all-workflow-job-logs.png)
 
@@ -182,7 +182,7 @@ GitHub 有一个 [Trending](https://github.com/trending) 页面，可以在这�
 
 1. 能定时执行：可以使用 `on:schedule` 定时触发 GitHub Actions 工作流；
 2. 爬虫脚本：在工作流中可以执行任意的脚本，另外还可以通过 actions 安装各种语言的环境，比如使用 [actions/setup-python](https://github.com/actions/setup-python) 安装 Python 环境，使用 Python 来写爬虫最适合不过；
-* 能将结果保存下来：GitHub 仓库天生就是一个数据库，可以用来存储数据，我们可以将爬虫爬下来的数据提交并保存到 GitHub 仓库。
+3. 能将结果保存下来：GitHub 仓库天生就是一个数据库，可以用来存储数据，我们可以将爬虫爬下来的数据提交并保存到 GitHub 仓库。
 
 可以看到，使用 GitHub Actions 完全可以实现这个功能，这个想法的灵感来自 [bonfy/github-trending](https://github.com/bonfy/github-trending) 项目，不过我在这个项目的基础上做了一些改进，比如将每天爬取的结果合并在同一个文件里，并且对重复的结果进行去重。
 
@@ -233,7 +233,7 @@ jobs:
 
 在这里我们使用了 `on.schedule.cron: "0 2 * * *"` 来定时触发工作流，这个 cron 表达式需符合 [POSIX cron 语法](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html)，可以在 [crontab guru](https://crontab.guru/) 页面上对 cron 表达式进行调试。不过要注意的是，这里的时间为 UTC 时间，所以 `0 2 * * *` 对应的是北京时间 10 点整。
 
-> 注：在实际运行的时候，我发现工作流并不是每天早上 10 点执行，而是到 11 点才执行，起初我以为是定时任务出现了延迟，但是后来我才意识到，现在正好是夏天，大多数北美洲、欧洲以及部分中东地区都在实施 [夏令时](https://zh.wikipedia.org/wiki/%E5%A4%8F%E6%97%B6%E5%88%B6)，所以他们的时间要比我们早一个小时，他们的 10 点就是我们的 11 点。
+> 注：在实际运行的时候，我发现工作流并不是每天早上 10 点执行，而是到 11 点才执行，起初我以为是定时任务出现了延迟，但是后来我才意识到，现在正好是夏天，大多数北美洲、欧洲以及部分中东地区都在实施 [夏令时](https://zh.wikipedia.org/wiki/%E5%A4%8F%E6%97%B6%E5%88%B6)，所以他们的时间要比我们早一个小时。
 
 工作流的各个步骤是比较清晰的，首先通过 `actions/checkout@v2` 签出仓库代码，然后使用 `actions/setup-python@v2` 安装 Python 环境，然后执行 `pip install` 安装 Python 依赖。环境准备就绪后，执行 `python scraper.py`，这就是我们的爬虫脚本，它会将 GitHub Trending 页面的内容爬取下来并更新到 `README.md` 文件中，我们可以根据参数爬取不同编程语言的项目清单：
 
