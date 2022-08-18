@@ -64,6 +64,7 @@ public class LockService implements Watcher {
     }
 	
     public static void main(String[] args) throws Exception {
+		// 注意，这里的 sessionTimeout 设置的越久，获取锁所需的时间也就越久
         ZooKeeper zookeeper = new ZooKeeper("localhost:2181", 3000, null);
         LockService lockService = new LockService(zookeeper, "/locks");
         System.out.println("Try to get the lock");
