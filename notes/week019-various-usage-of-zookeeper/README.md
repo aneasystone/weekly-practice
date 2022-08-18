@@ -177,23 +177,26 @@ Caused by: org.apache.zookeeper.KeeperException$ConnectionLossException: KeeperE
 这里正确的做法是使用 ZooKeeper 提供的 Watch 机制。上面在创建连接时 `new ZooKeeper("localhost:2181", 5000, null)`，这里的第三个参数可以指定一个实现 Watcher 接口的对象，Watcher 接口只有一个方法 `void process(WatchedEvent watchedEvent)`，这个方法会在连接创建成功的时候被调用。所以我们可以在 `new ZooKeeper()` 时设置一个 Watcher，然后通过 `CountDownLatch.await()` 阻塞程序执行，直到连接创建成功时，Watcher 的 `process()` 方法调用 `CountDownLatch.countDown()` 才开始执行下面的 `create()` 操作。下面是示例代码：
 
 ```java
-public class Simple implements Watcher {
+public class Sample implements Watcher {
     private CountDownLatch connectedSignal = new CountDownLatch(1);
+
     @Override
     public void process(WatchedEvent watchedEvent) {
         if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected) {
             connectedSignal.countDown();
         }
     }
+
     public void createNode() throws Exception {
         ZooKeeper zookeeper = new ZooKeeper("localhost:2181", 1000, this);
         connectedSignal.await();
         zookeeper.create("/data", "Hello world".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         zookeeper.close();
     }
+
     public static void main(String[] args) throws Exception {
-        Simple simple = new Simple();
-        simple.createNode();
+        Sample sample = new Sample();
+        sample.createNode();
     }
 }
 ```
@@ -218,12 +221,14 @@ public class Simple implements Watcher {
 
 ```java
 public class ConfigWriter {
+
     private ZooKeeper zookeeper;
     private String configPath;
     public ConfigWriter(ZooKeeper zookeeper, String configPath) {
         this.zookeeper = zookeeper;
         this.configPath = configPath;
     }
+    
     public void writeConfig(String configData) throws KeeperException, InterruptedException {
         Stat stat = zookeeper.exists(configPath, false);
         if (stat == null) {
@@ -232,6 +237,7 @@ public class ConfigWriter {
             zookeeper.setData(configPath, configData.getBytes(), -1);
         }
     }
+    
     public static void main(String[] args) throws Exception {
         ZooKeeper zookeeper = new ZooKeeper("localhost:2181", 30000, null);
         ConfigWriter writer = new ConfigWriter(zookeeper, "/configuration");
@@ -241,22 +247,25 @@ public class ConfigWriter {
 }
 ```
 
-先通过 `exists()` 方法判断 `/configuration` 节点是否存在，如果不存在，就使用 `create()` 方法创建一个并写入配置数据，如果已经存在，直接修改该节点的数据即可。每次配置变更时，我们就调用一次 `updateConfig(zk, "/configuration", configData)` 方法。然后我们再实现配置数据的订阅：
+先通过 `exists()` 方法判断 `/configuration` 节点是否存在，如果不存在，就使用 `create()` 方法创建一个并写入配置数据，如果已经存在，直接修改该节点的数据即可。然后我们再实现配置数据的订阅：
 
 ```java
 public class ConfigReader implements Watcher {
+
     private ZooKeeper zookeeper;
     private String configPath;
     public ConfigReader(ZooKeeper zookeeper, String configPath) {
         this.zookeeper = zookeeper;
         this.configPath = configPath;
     }
+    
     @Override
     public void process(WatchedEvent watchedEvent) {
         if (watchedEvent.getType() == Watcher.Event.EventType.NodeDataChanged) {
             readConfig();
         }
     }
+    
     public void readConfig() {
         try {
             byte[] data = zookeeper.getData(configPath, this, null/*stat*/);
@@ -265,6 +274,7 @@ public class ConfigReader implements Watcher {
             e.printStackTrace();
         }
     }
+    
     public static void main(String[] args) throws Exception {
         ZooKeeper zookeeper = new ZooKeeper("localhost:2181", 30000, null);
         ConfigReader reader = new ConfigReader(zookeeper, "/configuration");
@@ -284,18 +294,21 @@ public class ConfigReader implements Watcher {
 
 ```java
 public class GroupMember implements Watcher {
+
     private ZooKeeper zookeeper;
     private String groupPath;
     public GroupMember(ZooKeeper zookeeper, String groupPath) {
         this.zookeeper = zookeeper;
         this.groupPath = groupPath;
     }
+
     @Override
     public void process(WatchedEvent watchedEvent) {
         if (watchedEvent.getType() == Event.EventType.NodeChildrenChanged) {
             this.list();
         }
     }
+
     public void list() {
         try {
             List<String> members = zookeeper.getChildren(this.groupPath, this);
@@ -304,6 +317,7 @@ public class GroupMember implements Watcher {
             e.printStackTrace();
         }
     }
+
     public void join(String memberName) {
         try {
             String path = zookeeper.create(
@@ -313,6 +327,7 @@ public class GroupMember implements Watcher {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) throws Exception {
         ZooKeeper zookeeper = new ZooKeeper("localhost:2181", 30000, null);
         GroupMember member = new GroupMember(zookeeper, "/groups");
@@ -346,6 +361,7 @@ public class GroupMember implements Watcher {
             e.printStackTrace();
         }
     }
+    
     public void join(String memberName) {
         try {
             this.currentNode = zookeeper.create(
