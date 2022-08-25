@@ -20,10 +20,57 @@ Kubernetes Operator 遵循 [control loop](https://kubernetes.io/docs/concepts/ar
 
 ## Operator Framework
 
-[Operator Framework](https://operatorframework.io/) 是 CoreOS 开源的一个用于快速开发 Operator 的工具包，该框架包含两个主要的部分：
+[Operator Framework](https://operatorframework.io/) 是 CoreOS 开源的一个用于快速开发或管理 Operator 的工具包，主要分为三大部分：
 
-* [Operator SDK](https://sdk.operatorframework.io/)：无需了解复杂的 Kubernetes API 特性，即可让你根据你自己的专业知识构建一个 Operator 应用。
-* [Operator Lifecycle Manager](https://olm.operatorframework.io/)：OLM 是一款帮助你安装、更新和管理 Kubernetes Operator 的工具。
+* [Operator SDK](https://sdk.operatorframework.io/)：`Build, test, iterate.` 你无需了解复杂的 Kubernetes API 特性，就可以根据你自己的专业知识构建一个 Operator 应用。
+* [Operator Lifecycle Manager](https://olm.operatorframework.io/)：`install, manage, update.` OLM 是一款帮助你安装、更新和管理 Kubernetes Operator 的工具。
+* [OperatorHub.io](http://operatorhub.io/)：`Publish & share.` OperatorHub 是一个类似 DockerHub 的仓库，你可以在这里搜索你想要的 Operator，或者将你的 Operator 发布并分享给其他人。
+
+通过 Operator SDK 我们可以快速开发一个 Kubernetes Operator，它不仅提供了一套 High level API 来方便我们处理业务逻辑，还提供了一个命令行工具用于快速生成一个 Operator 的脚手架项目。
+
+## 环境准备
+
+在开发 Operator 之前，先确保你已经有一个能访问的 Kubernetes 集群环境，Kubernetes 的安装可以参考 [week010-install-kubernetes](../week010-install-kubernetes/README.md)。查看 Kubernetes 集群信息：
+
+```
+$ kubectl cluster-info
+Kubernetes control plane is running at https://kubernetes.docker.internal:6443
+CoreDNS is running at https://kubernetes.docker.internal:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+另外，Go 的开发环境也是必不可少的，可以参考 Go 的 [官方文档](https://go.dev/doc/install) 下载并安装。
+
+```
+$ curl -LO https://go.dev/dl/go1.19.linux-amd64.tar.gz
+$ sudo tar -C /usr/local -xzf go1.19.linux-amd64.tar.gz
+```
+
+将路径 `/usr/local/go/bin` 添加到 `PATH` 环境变量，或者将下面这行添加到 ` ~/.profile` 文件中：
+
+```
+$ export PATH=$PATH:/usr/local/go/bin
+```
+
+查看 Go 版本：
+
+```
+$ go version
+go version go1.19 linux/amd64
+```
+
+接下来，我们继续安装 Operator SDK。
+
+## 开发 Operator 工作流
+
+Operator SDK 提供以下工作流来开发一个新的 Operator：
+
+1. 使用 SDK 创建一个新的 Operator 项目
+2. 通过添加自定义资源（CRD）定义新的资源 API
+3. 指定使用 SDK API 来 watch 的资源
+4. 定义 Operator 的协调（reconcile）逻辑
+5. 使用 Operator SDK 构建并生成 Operator 部署清单文件
 
 ## 参考
 
@@ -33,5 +80,4 @@ Kubernetes Operator 遵循 [control loop](https://kubernetes.io/docs/concepts/ar
 1. [What is a Kubernetes operator?](https://www.redhat.com/en/topics/containers/what-is-a-kubernetes-operator)
 1. [Kubernetes Operators 101, Part 1: Overview and key features](https://developers.redhat.com/articles/2021/06/11/kubernetes-operators-101-part-1-overview-and-key-features)
 1. [Kubernetes Operators 101, Part 2: How operators work](https://developers.redhat.com/articles/2021/06/22/kubernetes-operators-101-part-2-how-operators-work)
-1. [Download and install - The Go Programming Language](https://go.dev/doc/install)
 1. [kubernetes-sigs/kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) - SDK for building Kubernetes APIs using CRDs
