@@ -201,7 +201,7 @@ type MemcachedSpec struct {
 
 	// Foo is an example field of Memcached. Edit memcached_types.go to remove/update
 	Foo string `json:"foo,omitempty"`
-	Size *int32 `json:"size"`
+	Size int32 `json:"size"`
 }
 ```
 
@@ -228,6 +228,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 ```
 $ make manifests
+test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 ```
 
 生成的自定义资源文件位于 `config/crd/bases/cache.example.com_memcacheds.yaml`，文件内容如下：
@@ -292,15 +294,84 @@ spec:
 
 在这个文件中，我们定义了一个名为 `Memcached` 的自定义资源（`Custom Resource Definition`，简称 CRD），并定义了 `foo` 和 `size` 两个属性，且 `size` 属性为必填项。
 
-### 开发 Operator 工作流
+### 本地调试 Operator
 
-Operator SDK 提供以下工作流来开发一个新的 Operator：
+至此，一个简单的 Operator 就开发好了，接下来我们运行 `make install` 命令，该命令使用 `kubectl apply` 将 CRD 安装到 Kubernetes 集群中：
 
-1. 使用 SDK 创建一个新的 Operator 项目
-2. 通过添加自定义资源（CRD）定义新的资源 API
-3. 指定使用 SDK API 来 watch 的资源
-4. 定义 Operator 的协调（reconcile）逻辑
-5. 使用 Operator SDK 构建并生成 Operator 部署清单文件
+```
+$ make install
+test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/kustomize build config/crd | kubectl apply -f -
+customresourcedefinition.apiextensions.k8s.io/memcacheds.cache.example.com created
+```
+
+通过 `kubectl get crds` 可以查看集群中的自定义资源是否创建成功：
+
+```
+$ kubectl get crds
+NAME                           CREATED AT
+memcacheds.cache.example.com   2022-08-26T09:24:19Z
+```
+
+可以看到集群中多了一个自定义资源 `memcacheds.cache.example.com`。然后运行 `make run` 命令在本地启动控制器：
+
+```
+$ make run
+test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+go fmt ./...
+api/v1alpha1/groupversion_info.go
+go vet ./...
+go run ./main.go
+1.6615063195978441e+09  INFO    controller-runtime.metrics      Metrics server is starting to listen    {"addr": ":8080"}
+1.6615063195986106e+09  INFO    setup   starting manager
+1.6615063195992978e+09  INFO    Starting server {"path": "/metrics", "kind": "metrics", "addr": "[::]:8080"}
+1.6615063195993063e+09  INFO    Starting server {"kind": "health probe", "addr": "[::]:8081"}
+1.661506319599374e+09   INFO    Starting EventSource    {"controller": "memcached", "controllerGroup": "cache.example.com", "controllerKind": "Memcached", "source": "kind source: *v1alpha1.Memcached"}
+1.6615063196000834e+09  INFO    Starting Controller     {"controller": "memcached", "controllerGroup": "cache.example.com", "controllerKind": "Memcached"}
+1.6615063197010505e+09  INFO    Starting workers        {"controller": "memcached", "controllerGroup": "cache.example.com", "controllerKind": "Memcached", "worker count": 1}
+```
+
+接下来我们就可以创建一个自定义资源实例测试一下。首先修改 `config/samples/cache_v1alpha1_memcached.yaml` 文件，填入 `foo` 和 `size` 两个属性：
+
+```
+apiVersion: cache.example.com/v1alpha1
+kind: Memcached
+metadata:
+  name: memcached-sample
+spec:
+  foo: Hello World
+  size: 10
+```
+
+然后执行 `kubectl apply` 命令创建自定义资源实例：
+
+```
+$ kubectl apply -f config/samples/cache_v1alpha1_memcached.yaml
+memcached.cache.example.com/memcached-sample created
+```
+
+此时查看控制器的输出如下：
+
+```
+Foo = Hello World, Size = 10
+```
+
+说明控制器监听到了自定义资源的创建，并输出了它的属性值。使用 `kubectl get` 查看刚刚创建的自定义资源：
+
+```
+$ kubectl get memcached.cache.example.com/memcached-sample
+NAME               AGE
+memcached-sample   13m
+```
+
+然后我们测试下自定义资源更新时的情况，修改 `cache_v1alpha1_memcached.yaml` 文件，比如将 `size` 改为 9，重新执行 `kubectl apply` 命令，控制器会立即监听到该修改，并输出新的属性值：
+
+```
+Foo = Hello World, Size = 9
+```
 
 ## 参考
 
