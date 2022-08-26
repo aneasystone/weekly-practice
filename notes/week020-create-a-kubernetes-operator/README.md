@@ -185,9 +185,112 @@ $ make manifests
 
 使用 `operator-sdk create` 命令可以生成 `api` 或 `webhook` 的脚手架代码，我们这里生成的是 `api`，包括两部分内容：自定义资源（`--resource`）和控制器相关的逻辑代码（`--controller`），其中 `--group`、`--version` 和 `--kind` 分别用来设置资源的分组、版本和类型。
 
+接下来可以从这些文件开始入手：
+
 * api/v1beta1/memcached_types.go
 * controllers/memcached_controller.go
 * controllers/suite_test.go
+
+`memcached_types.go` 文件用于定义资源的接口规范，我们在 `MemcachedSpec` 中添加一个新字段 `Size` 如下（默认已经生成了一个 `Foo` 字段）：
+
+```
+// MemcachedSpec defines the desired state of Memcached
+type MemcachedSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+
+	// Foo is an example field of Memcached. Edit memcached_types.go to remove/update
+	Foo string `json:"foo,omitempty"`
+	Size *int32 `json:"size"`
+}
+```
+
+接着打开 `memcached_controller.go` 文件，其中 `Reconcile` 方法就是上面所介绍的 `reconciliation loop` 的核心代码，可以在这里实现自己的业务逻辑，比如调用 Kubernetes API 创建、删除或更新各种 Kubernetes 资源。我们这里只是简单地将资源的属性值打印出来：
+
+```
+func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	_ = log.FromContext(ctx)
+
+	instance := &cachev1alpha1.Memcached{}
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		fmt.Println("Get instance err")
+		return ctrl.Result{}, err
+	}
+
+	fmt.Printf("Foo = %s, Size = %d\n", instance.Spec.Foo, instance.Spec.Size)
+
+	return ctrl.Result{}, nil
+}
+```
+
+然后执行下面的命令生成自定义资源文件：
+
+```
+$ make manifests
+```
+
+生成的自定义资源文件位于 `config/crd/bases/cache.example.com_memcacheds.yaml`，文件内容如下：
+
+```
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: memcacheds.cache.example.com
+spec:
+  group: cache.example.com
+  names:
+    kind: Memcached
+    listKind: MemcachedList
+    plural: memcacheds
+    singular: memcached
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Memcached is the Schema for the memcacheds API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MemcachedSpec defines the desired state of Memcached
+            properties:
+              foo:
+                description: Foo is an example field of Memcached. Edit memcached_types.go
+                  to remove/update
+                type: string
+              size:
+                format: int32
+                type: integer
+            required:
+            - size
+            type: object
+          status:
+            description: MemcachedStatus defines the observed state of Memcached
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+```
+
+在这个文件中，我们定义了一个名为 `Memcached` 的自定义资源（`Custom Resource Definition`，简称 CRD），并定义了 `foo` 和 `size` 两个属性，且 `size` 属性为必填项。
 
 ### 开发 Operator 工作流
 

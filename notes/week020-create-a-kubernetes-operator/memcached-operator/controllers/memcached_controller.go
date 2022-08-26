@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,7 +50,14 @@ type MemcachedReconciler struct {
 func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	instance := &cachev1alpha1.Memcached{}
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		fmt.Println("Get instance err")
+		return ctrl.Result{}, err
+	}
+
+	fmt.Printf("Foo = %s, Size = %d\n", instance.Spec.Foo, instance.Spec.Size)
 
 	return ctrl.Result{}, nil
 }

@@ -29,7 +29,8 @@ type MemcachedSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Memcached. Edit memcached_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Foo  string `json:"foo,omitempty"`
+	Size *int32 `json:"size"`
 }
 
 // MemcachedStatus defines the observed state of Memcached
