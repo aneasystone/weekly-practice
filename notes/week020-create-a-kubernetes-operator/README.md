@@ -28,7 +28,7 @@ Kubernetes Operator 遵循 [control loop](https://kubernetes.io/docs/concepts/ar
 
 通过 Operator SDK 我们可以快速开发一个 Kubernetes Operator，它不仅提供了一套 High level API 来方便我们处理业务逻辑，还提供了一个命令行工具用于快速生成一个 Operator 的脚手架项目。
 
-## 环境准备
+### 安装 `operator-sdk`
 
 在开发 Operator 之前，先确保你已经有一个能访问的 Kubernetes 集群环境，Kubernetes 的安装可以参考 [week010-install-kubernetes](../week010-install-kubernetes/README.md)。查看 Kubernetes 集群信息：
 
@@ -60,9 +60,109 @@ $ go version
 go version go1.19 linux/amd64
 ```
 
-接下来，我们继续安装 Operator SDK。
+接下来，我们继续安装 Operator SDK。我们在 Operator SDK 的 [Releases 页面](https://github.com/operator-framework/operator-sdk/releases) 找到合适的版本并下载：
 
-## 开发 Operator 工作流
+```
+$ curl -LO https://github.com/operator-framework/operator-sdk/releases/download/v1.23.0/operator-sdk_linux_amd64
+```
+
+将其移动到 `/usr/local/bin/` 目录即可完成安装：
+
+```
+$ chmod +x operator-sdk_linux_amd64 && sudo mv operator-sdk_linux_amd64 /usr/local/bin/operator-sdk
+```
+
+查看已安装的 `operator-sdk` 版本：
+
+```
+$ operator-sdk version
+operator-sdk version: "v1.23.0", commit: "1eaeb5adb56be05fe8cc6dd70517e441696846a4", kubernetes version: "1.24.2", go version: "go1.18.5", GOOS: "linux", GOARCH: "amd64"
+```
+
+### 使用 `operator-sdk` 初始化 Operator 项目
+
+Operator SDK 提供了三种方式开发 Operator：
+
+* [Ansible](https://sdk.operatorframework.io/docs/building-operators/ansible/quickstart/)
+* [Helm](https://sdk.operatorframework.io/docs/building-operators/helm/quickstart/)
+* [Go](https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/)
+
+我们这里将使用 Go 来开发 Operator，这种方式也是最灵活的，你可以使用 client-go 调用 Kubernetes API 来对 Kubernetes 对象进行操作。首先使用 `operator-sdk init` 初始化项目结构：
+
+```
+$ operator-sdk init --domain example.com --project-name memcached-operator --repo github.com/example/memcached-operator
+Writing kustomize manifests for you to edit...
+Writing scaffold for you to edit...
+Get controller runtime:
+$ go get sigs.k8s.io/controller-runtime@v0.12.2
+Update dependencies:
+$ go mod tidy
+Next: define a resource with:
+$ operator-sdk create api
+```
+
+其中 `--project-name` 参数可以省略，默认项目名称就是目录名。`--domain` 和 `--project-name` 两个参数用于组成 Operator 的镜像名称 `example.com/memcached-operator`，而 `--repo` 参数用于定义 Go 模块名：
+
+```
+module github.com/example/memcached-operator
+```
+
+初始化后的完整项目结构如下：
+
+```
+$ tree .
+.
+├── Dockerfile
+├── Makefile
+├── PROJECT
+├── README.md
+├── config
+│   ├── default
+│   │   ├── kustomization.yaml
+│   │   ├── manager_auth_proxy_patch.yaml
+│   │   └── manager_config_patch.yaml
+│   ├── manager
+│   │   ├── controller_manager_config.yaml
+│   │   ├── kustomization.yaml
+│   │   └── manager.yaml
+│   ├── manifests
+│   │   └── kustomization.yaml
+│   ├── prometheus
+│   │   ├── kustomization.yaml
+│   │   └── monitor.yaml
+│   ├── rbac
+│   │   ├── auth_proxy_client_clusterrole.yaml
+│   │   ├── auth_proxy_role.yaml
+│   │   ├── auth_proxy_role_binding.yaml
+│   │   ├── auth_proxy_service.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── leader_election_role.yaml
+│   │   ├── leader_election_role_binding.yaml
+│   │   ├── role_binding.yaml
+│   │   └── service_account.yaml
+│   └── scorecard
+│       ├── bases
+│       │   └── config.yaml
+│       ├── kustomization.yaml
+│       └── patches
+│           ├── basic.config.yaml
+│           └── olm.config.yaml
+├── go.mod
+├── go.sum
+├── hack
+│   └── boilerplate.go.txt
+└── main.go
+```
+
+主要包括以下几个文件：
+
+* `go.mod` - 用于定义 Go 项目的依赖信息
+* `PROJECT` - 用于保存项目的配置信息
+* `Makefile` - 包含一些有用的项目构建目标（*make targets*）
+* `config` - 该目录下包含一些用于项目部署的 YAML 文件
+* `main.go` - Operator 的主程序入口
+
+### 开发 Operator 工作流
 
 Operator SDK 提供以下工作流来开发一个新的 Operator：
 
