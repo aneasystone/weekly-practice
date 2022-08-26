@@ -79,6 +79,8 @@ $ operator-sdk version
 operator-sdk version: "v1.23.0", commit: "1eaeb5adb56be05fe8cc6dd70517e441696846a4", kubernetes version: "1.24.2", go version: "go1.18.5", GOOS: "linux", GOARCH: "amd64"
 ```
 
+另外，`operator-sdk` 依赖于 `make` 和 `gcc`，确保系统上已经安装了 `make` 和 `gcc` 工具。
+
 ### 使用 `operator-sdk` 初始化 Operator 项目
 
 Operator SDK 提供了三种方式开发 Operator：
@@ -162,6 +164,31 @@ $ tree .
 * `config` - 该目录下包含一些用于项目部署的 YAML 文件
 * `main.go` - Operator 的主程序入口
 
+### 创建 API
+
+初始化项目之后，接着就可以使用 `operator-sdk create api` 命令创建 API 了：
+
+```
+$ operator-sdk create api --group cache --version v1alpha1 --kind Memcached --resource --controller
+Writing kustomize manifests for you to edit...
+Writing scaffold for you to edit...
+api/v1alpha1/memcached_types.go
+controllers/memcached_controller.go
+Update dependencies:
+$ go mod tidy
+Running make:
+$ make generate
+/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+Next: implement your new API and generate the manifests (e.g. CRDs,CRs) with:
+$ make manifests
+```
+
+使用 `operator-sdk create` 命令可以生成 `api` 或 `webhook` 的脚手架代码，我们这里生成的是 `api`，包括两部分内容：自定义资源（`--resource`）和控制器相关的逻辑代码（`--controller`），其中 `--group`、`--version` 和 `--kind` 分别用来设置资源的分组、版本和类型。
+
+* api/v1beta1/memcached_types.go
+* controllers/memcached_controller.go
+* controllers/suite_test.go
+
 ### 开发 Operator 工作流
 
 Operator SDK 提供以下工作流来开发一个新的 Operator：
@@ -181,3 +208,31 @@ Operator SDK 提供以下工作流来开发一个新的 Operator：
 1. [Kubernetes Operators 101, Part 1: Overview and key features](https://developers.redhat.com/articles/2021/06/11/kubernetes-operators-101-part-1-overview-and-key-features)
 1. [Kubernetes Operators 101, Part 2: How operators work](https://developers.redhat.com/articles/2021/06/22/kubernetes-operators-101-part-2-how-operators-work)
 1. [kubernetes-sigs/kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) - SDK for building Kubernetes APIs using CRDs
+
+## 更多
+
+### 1. 安装 gcc 报 404 Not Found 错
+
+在 Ubuntu 上使用 `sudo apt install gcc` 安装 gcc 时，报如下错误：
+
+```
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/l/linux/linux-libc-dev_4.15.0-189.200_amd64.deb  404  Not Found [IP: 2001:67c:1562::15 80]
+E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+```
+
+解决方法很简单，执行 `sudo apt update` 更新软件源中的所有软件列表即可。
+
+### 2. 使用 `operator-sdk` 创建 API 报错
+
+执行 `operator-sdk create api` 命令创建 API 时，报如下错误：
+
+```
+/usr/local/go/src/net/cgo_linux.go:12:8: no such package located
+Error: not all generators ran successfully
+run `controller-gen object:headerFile=hack/boilerplate.go.txt paths=./... -w` to see all available markers, or `controller-gen object:headerFile=hack/boilerplate.go.txt paths=./... -h` for usage
+Makefile:94: recipe for target 'generate' failed
+make: *** [generate] Error 1
+Error: failed to create API: unable to run post-scaffold tasks of "base.go.kubebuilder.io/v3": exit status 2
+```
+
+没有安装 gcc 工具，使用 `sudo apt install gcc` 安装 gcc 即可。
