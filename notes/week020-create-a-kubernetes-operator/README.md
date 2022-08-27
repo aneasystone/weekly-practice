@@ -18,7 +18,7 @@ Kubernetes Operator 遵循 [control loop](https://kubernetes.io/docs/concepts/ar
 
 第一个 Kubernetes Controller 是 `kube-controller-manager`，它被认为是所有 Operator 的鼻祖。
 
-## Operator Framework
+## 使用 `Operator Framework` 开发 Operator
 
 [Operator Framework](https://operatorframework.io/) 是 CoreOS 开源的一个用于快速开发或管理 Operator 的工具包，主要分为三大部分：
 
@@ -178,7 +178,7 @@ Update dependencies:
 $ go mod tidy
 Running make:
 $ make generate
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+./memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 Next: implement your new API and generate the manifests (e.g. CRDs,CRs) with:
 $ make manifests
 ```
@@ -228,8 +228,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 ```
 $ make manifests
-test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 ```
 
 生成的自定义资源文件位于 `config/crd/bases/cache.example.com_memcacheds.yaml`，文件内容如下：
@@ -296,13 +296,13 @@ spec:
 
 ### 本地调试 Operator
 
-至此，一个简单的 Operator 就开发好了，接下来我们运行 `make install` 命令，该命令使用 `kubectl apply` 将 CRD 安装到 Kubernetes 集群中：
+至此，一个简单的 Operator 就开发好了，接下来我们运行 `make install` 命令，该命令使用 `kustomize build` 生成 CRD 配置文件并执行 `kubectl apply` 将 CRD 安装到 Kubernetes 集群中：
 
 ```
 $ make install
-test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/kustomize build config/crd | kubectl apply -f -
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+./memcached-operator/bin/kustomize build config/crd | kubectl apply -f -
 customresourcedefinition.apiextensions.k8s.io/memcacheds.cache.example.com created
 ```
 
@@ -318,9 +318,9 @@ memcacheds.cache.example.com   2022-08-26T09:24:19Z
 
 ```
 $ make run
-test -s /mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen || GOBIN=/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-/mnt/d/code/weekly-practice/notes/week020-create-a-kubernetes-operator/memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+./memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 go fmt ./...
 api/v1alpha1/groupversion_info.go
 go vet ./...
@@ -373,15 +373,336 @@ memcached-sample   13m
 Foo = Hello World, Size = 9
 ```
 
+### 部署 Operator
+
+Operator 开发完成后，我们需要将它部署到 Kubernetes 集群中。首先我们将其构建成 Docker 镜像，可以使用下面的命令构建，并将镜像推送到镜像仓库：
+
+```
+$ make docker-build docker-push IMG="aneasystone/memcached-operator:v0.0.1"
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+./memcached-operator/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+go fmt ./...
+go vet ./...
+KUBEBUILDER_ASSETS="/home/aneasystone/.local/share/kubebuilder-envtest/k8s/1.24.2-linux-amd64" go test ./... -coverprofile cover.out
+?       github.com/example/memcached-operator   [no test files]
+?       github.com/example/memcached-operator/api/v1alpha1      [no test files]
+ok      github.com/example/memcached-operator/controllers       8.935s  coverage: 0.0% of statements
+docker build -t aneasystone/memcached-operator:v0.0.1 .
+[+] Building 3.3s (18/18) FINISHED                                                                                                                                
+ => [internal] load build definition from Dockerfile
+ => => transferring dockerfile: 38B                                                         0.0s
+ => [internal] load .dockerignore                                                           0.0s
+ => => transferring context: 35B                                                            0.0s
+ => [internal] load metadata for gcr.io/distroless/static:nonroot                           0.7s
+ => [internal] load metadata for docker.io/library/golang:1.18                              3.0s
+ => [auth] library/golang:pull token for registry-1.docker.io0.0s
+ => [builder 1/9] FROM docker.io/library/golang:1.18@sha256:5540a6a6b3b612c382accc545b3f6702de21e77b15d89ad947116c94b5f42993        0.0s
+ => [internal] load build context                                                           0.1s
+ => => transferring context: 3.84kB                                                         0.0s
+ => [stage-1 1/3] FROM gcr.io/distroless/static:nonroot@sha256:1f580b0a1922c3e54ae15b0758b5747b260bd99d39d40c2edb3e7f6e2452298b     0.0s
+ => CACHED [builder 2/9] WORKDIR /workspace                                                 0.0s
+ => CACHED [builder 3/9] COPY go.mod go.mod                                                 0.0s
+ => CACHED [builder 4/9] COPY go.sum go.sum                                                 0.0s
+ => CACHED [builder 5/9] RUN go mod download                                                0.0s
+ => CACHED [builder 6/9] COPY main.go main.go                                               0.0s
+ => CACHED [builder 7/9] COPY api/ api/                                                     0.0s
+ => CACHED [builder 8/9] COPY controllers/ controllers/                                     0.0s
+ => CACHED [builder 9/9] RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go                                   0.0s
+ => CACHED [stage-1 2/3] COPY --from=builder /workspace/manager .                           0.0s
+ => exporting to image                                                                      0.0s
+ => => exporting layers                                                                     0.0s
+ => => writing image sha256:84df51146080fec45fb74d5be29705f41c27de062e1192cb7c43a3a80c22977e                                        0.0s
+ => => naming to docker.io/aneasystone/memcached-operator:v0.0.1                            0.0s
+docker push aneasystone/memcached-operator:v0.0.1
+The push refers to repository [docker.io/aneasystone/memcached-operator]
+b399109810db: Pushed 
+c456571abc85: Pushed 
+v0.0.1: digest: sha256:60822319ac3578e3f62a73530c5ca08472014bf7861b75de6dd88502ee11d088 size: 739
+```
+
+上面我将镜像推送到 Docker 官方镜像仓库 `docker.io`，你也可以配置成自己的镜像仓库地址。
+
+然后就可以将镜像部署到 Kubernetes 集群中了，官方提供了两种部署方式：直接部署 或 使用 OLM 部署。
+
+#### 直接部署
+
+运行下面的 `make deploy` 命令：
+
+```
+$ make deploy IMG="aneasystone/memcached-operator:v0.0.1"
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+test -s ./memcached-operator/bin/kustomize || { curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 3.8.7 ./memcached-operator/bin; }
+cd config/manager && ./memcached-operator/bin/kustomize edit set image controller=aneasystone/memcached-operator:v0.0.1
+./memcached-operator/bin/kustomize build config/default | kubectl apply -f -
+namespace/memcached-operator-system created
+customresourcedefinition.apiextensions.k8s.io/memcacheds.cache.example.com unchanged
+serviceaccount/memcached-operator-controller-manager created
+role.rbac.authorization.k8s.io/memcached-operator-leader-election-role created
+clusterrole.rbac.authorization.k8s.io/memcached-operator-manager-role created
+clusterrole.rbac.authorization.k8s.io/memcached-operator-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/memcached-operator-proxy-role created
+rolebinding.rbac.authorization.k8s.io/memcached-operator-leader-election-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/memcached-operator-manager-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/memcached-operator-proxy-rolebinding created
+configmap/memcached-operator-manager-config created
+service/memcached-operator-controller-manager-metrics-service created
+deployment.apps/memcached-operator-controller-manager created
+```
+
+从日志可以看到部署了一堆的东西，包括一个名字空间：
+
+* namespace/memcached-operator-system created
+
+一个自定义资源：
+
+* customresourcedefinition.apiextensions.k8s.io/memcacheds.cache.example.com unchanged
+
+一个 ConfigMap、Service 和 Deployment（这就是我们的 Operator）：
+
+* configmap/memcached-operator-manager-config created
+* service/memcached-operator-controller-manager-metrics-service created
+* deployment.apps/memcached-operator-controller-manager created
+
+还有一堆账户角色这些和安全相关的资源：
+
+* serviceaccount/memcached-operator-controller-manager created
+* role.rbac.authorization.k8s.io/memcached-operator-leader-election-role created
+* clusterrole.rbac.authorization.k8s.io/memcached-operator-manager-role created
+* clusterrole.rbac.authorization.k8s.io/memcached-operator-metrics-reader created
+* clusterrole.rbac.authorization.k8s.io/memcached-operator-proxy-role created
+* rolebinding.rbac.authorization.k8s.io/memcached-operator-leader-election-rolebinding created
+* clusterrolebinding.rbac.authorization.k8s.io/memcached-operator-manager-rolebinding created
+* clusterrolebinding.rbac.authorization.k8s.io/memcached-operator-proxy-rolebinding created
+
+这些和正常的 Kubernetes 资源是完全一样的，我们可以使用 `kubectl get` 查询各个资源的详情，注意指定名字空间（`-n memcached-operator-system`）：
+
+```
+$ kubectl get deployment -n memcached-operator-system
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+memcached-operator-controller-manager   1/1     1            1           9m6s
+```
+
+```
+$ kubectl get pods -n memcached-operator-system
+NAME                                                     READY   STATUS    RESTARTS   AGE
+memcached-operator-controller-manager-689d94c9bf-bqv2q   2/2     Running   0          8m54s
+```
+
+```
+$ kubectl get service -n memcached-operator-system
+NAME                                                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+memcached-operator-controller-manager-metrics-service   ClusterIP   10.96.197.28   <none>        8443/TCP   11m
+```
+
+同样的，也可以使用 `kubectl logs` 查看 Operator 的日志：
+
+```
+$ kubectl logs -f memcached-operator-controller-manager-689d94c9bf-bqv2q -n memcached-operator-system
+```
+
+如果要卸载 Operator，执行 `make undeploy` 命令即可：
+
+```
+$ make undeploy
+./memcached-operator/bin/kustomize build config/default | kubectl delete --ignore-not-found=false -f -
+namespace "memcached-operator-system" deleted
+customresourcedefinition.apiextensions.k8s.io "memcacheds.cache.example.com" deleted
+serviceaccount "memcached-operator-controller-manager" deleted
+role.rbac.authorization.k8s.io "memcached-operator-leader-election-role" deleted
+clusterrole.rbac.authorization.k8s.io "memcached-operator-manager-role" deleted
+clusterrole.rbac.authorization.k8s.io "memcached-operator-metrics-reader" deleted
+clusterrole.rbac.authorization.k8s.io "memcached-operator-proxy-role" deleted
+rolebinding.rbac.authorization.k8s.io "memcached-operator-leader-election-rolebinding" deleted
+clusterrolebinding.rbac.authorization.k8s.io "memcached-operator-manager-rolebinding" deleted
+clusterrolebinding.rbac.authorization.k8s.io "memcached-operator-proxy-rolebinding" deleted
+configmap "memcached-operator-manager-config" deleted
+service "memcached-operator-controller-manager-metrics-service" deleted
+deployment.apps "memcached-operator-controller-manager" deleted
+```
+
+#### 使用 OLM 部署
+
+OLM 的全称为 Operator Lifecycle Manager，是一款用于 Operator 的管理工具，可以使用 OLM 来帮你安装或更新 Kubernetes Operator。我们首先通过 `operator-sdk` 安装 OLM：
+
+```
+$ operator-sdk olm install
+INFO[0001] Fetching CRDs for version "latest"
+INFO[0001] Fetching resources for resolved version "latest"
+I0827 15:01:42.199954   12688 request.go:601] Waited for 1.0471208s due to client-side throttling, not priority and fairness, request: GET:https://kubernetes.docker.internal:6443/apis/autoscaling/v1?timeout=32s
+INFO[0012] Creating CRDs and resources
+INFO[0012]   Creating CustomResourceDefinition "catalogsources.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "clusterserviceversions.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "installplans.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "olmconfigs.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "operatorconditions.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "operatorgroups.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "operators.operators.coreos.com"
+INFO[0012]   Creating CustomResourceDefinition "subscriptions.operators.coreos.com"
+INFO[0012]   Creating Namespace "olm"
+INFO[0012]   Creating Namespace "operators"
+INFO[0012]   Creating ServiceAccount "olm/olm-operator-serviceaccount"
+INFO[0012]   Creating ClusterRole "system:controller:operator-lifecycle-manager"
+INFO[0012]   Creating ClusterRoleBinding "olm-operator-binding-olm"
+INFO[0012]   Creating OLMConfig "cluster"
+INFO[0015]   Creating Deployment "olm/olm-operator"
+INFO[0015]   Creating Deployment "olm/catalog-operator"
+INFO[0015]   Creating ClusterRole "aggregate-olm-edit"
+INFO[0015]   Creating ClusterRole "aggregate-olm-view"
+INFO[0015]   Creating OperatorGroup "operators/global-operators"
+INFO[0015]   Creating OperatorGroup "olm/olm-operators"
+INFO[0015]   Creating ClusterServiceVersion "olm/packageserver"
+INFO[0015]   Creating CatalogSource "olm/operatorhubio-catalog"
+INFO[0016] Waiting for deployment/olm-operator rollout to complete
+INFO[0016]   Waiting for Deployment "olm/olm-operator" to rollout: 0 of 1 updated replicas are available
+INFO[0019]   Deployment "olm/olm-operator" successfully rolled out
+INFO[0019] Waiting for deployment/catalog-operator rollout to complete
+INFO[0019]   Deployment "olm/catalog-operator" successfully rolled out
+INFO[0019] Waiting for deployment/packageserver rollout to complete
+INFO[0019]   Waiting for Deployment "olm/packageserver" to rollout: 0 of 2 updated replicas are available
+INFO[0033]   Deployment "olm/packageserver" successfully rolled out
+INFO[0033] Successfully installed OLM version "latest"
+
+NAME                                            NAMESPACE    KIND                        STATUS
+catalogsources.operators.coreos.com                          CustomResourceDefinition    Installed
+clusterserviceversions.operators.coreos.com                  CustomResourceDefinition    Installed
+installplans.operators.coreos.com                            CustomResourceDefinition    Installed
+olmconfigs.operators.coreos.com                              CustomResourceDefinition    Installed
+operatorconditions.operators.coreos.com                      CustomResourceDefinition    Installed
+operatorgroups.operators.coreos.com                          CustomResourceDefinition    Installed
+operators.operators.coreos.com                               CustomResourceDefinition    Installed
+subscriptions.operators.coreos.com                           CustomResourceDefinition    Installed
+olm                                                          Namespace                   Installed
+operators                                                    Namespace                   Installed
+olm-operator-serviceaccount                     olm          ServiceAccount              Installed
+system:controller:operator-lifecycle-manager                 ClusterRole                 Installed
+olm-operator-binding-olm                                     ClusterRoleBinding          Installed
+cluster                                                      OLMConfig                   Installed
+olm-operator                                    olm          Deployment                  Installed
+catalog-operator                                olm          Deployment                  Installed
+aggregate-olm-edit                                           ClusterRole                 Installed
+aggregate-olm-view                                           ClusterRole                 Installed
+global-operators                                operators    OperatorGroup               Installed
+olm-operators                                   olm          OperatorGroup               Installed
+packageserver                                   olm          ClusterServiceVersion       Installed
+operatorhubio-catalog                           olm          CatalogSource               Installed
+```
+
+如上所示，OLM 会在 Kubernetes 集群中安装一堆的资源，可以看到 OLM 本身也包含了两个 Operator：OLM Operator 和 Catalog Operator。关于他们的作用可以参考 [《如何管理越来越多的 operator？OLM 给你答案》](https://developer.aliyun.com/article/771857) 这篇文章。
+
+OLM 通过 Bundle 形式来组织和管理 Operator，使用 `make bundle` 生成 Bundle 相关的配置文件：
+
+```
+$ make bundle IMG="aneasystone/memcached-operator:v0.0.1"
+test -s ./memcached-operator/bin/controller-gen || GOBIN=./memcached-operator/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+./memcached-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+test -s ./memcached-operator/bin/kustomize || { curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 3.8.7 ./memcached-operator/bin; }
+operator-sdk generate kustomize manifests -q
+
+Display name for the operator (required):
+> memcached-operator
+
+Description for the operator (required):
+> memcached operator
+
+Provider's name for the operator (required):
+> aneasystone
+
+Any relevant URL for the provider name (optional):
+> https://www.aneasystone.com
+
+Comma-separated list of keywords for your operator (required):
+> memcached
+
+Comma-separated list of maintainers and their emails (e.g. 'name1:email1, name2:email2') (required):
+> aneasystone@gmail.com
+cd config/manager && ./memcached-operator/bin/kustomize edit set image controller=aneasystone/memcached-operator:v0.0.1
+./memcached-operator/bin/kustomize build config/manifests | operator-sdk generate bundle -q --overwrite --version 0.0.1
+INFO[0001] Creating bundle.Dockerfile
+INFO[0001] Creating bundle/metadata/annotations.yaml
+INFO[0001] Bundle metadata generated suceessfully
+operator-sdk bundle validate ./bundle
+INFO[0001] All validation tests have completed successfully
+```
+
+然后将 Bundle 构建成镜像并推送到镜像仓库：
+
+```
+$ make bundle-build bundle-push BUNDLE_IMG="aneasystone/memcached-operator-bundle:v0.0.1"
+docker build -f bundle.Dockerfile -t aneasystone/memcached-operator-bundle:v0.0.1 .
+[+] Building 0.6s (7/7) FINISHED
+ => [internal] load build definition from bundle.Dockerfile                                                            0.1s
+ => => transferring dockerfile: 971B                                                                                   0.0s
+ => [internal] load .dockerignore                                                                                      0.1s
+ => => transferring context: 35B                                                                                       0.0s
+ => [internal] load build context                                                                                      0.0s
+ => => transferring context: 12.72kB                                                                                   0.0s
+ => [1/3] COPY bundle/manifests /manifests/                                                                            0.0s
+ => [2/3] COPY bundle/metadata /metadata/                                                                              0.1s
+ => [3/3] COPY bundle/tests/scorecard /tests/scorecard/                                                                0.1s
+ => exporting to image                                                                                                 0.1s
+ => => exporting layers                                                                                                0.1s
+ => => writing image sha256:849fde8bbc55db7a1cd884ccdc7c61bfdca343650f72eb65e616c98c17193bca                           0.0s
+ => => naming to docker.io/aneasystone/memcached-operator-bundle:v0.0.1                                                0.0s
+make docker-push IMG=aneasystone/memcached-operator-bundle:v0.0.1
+make[1]: Entering directory './memcached-operator'
+docker push aneasystone/memcached-operator-bundle:v0.0.1
+The push refers to repository [docker.io/aneasystone/memcached-operator-bundle]
+ee3ff18c6586: Pushed
+1cca854eb4c8: Pushed
+2fa3c5f0ef35: Pushed
+v0.0.1: digest: sha256:c42ec3c4f9d461128c640f5568886b006e0332ea0d4a173008e97addefbfd3f9 size: 939
+make[1]: Leaving directory './memcached-operator'
+```
+
+运行 Bundle 将我们的 Operator 部署到 Kubernetes 集群中：
+
+```
+$ operator-sdk run bundle docker.io/aneasystone/memcached-operator-bundle:v0.0.1
+INFO[0023] Creating a File-Based Catalog of the bundle "docker.io/aneasystone/memcached-operator-bundle:v0.0.1"
+INFO[0028] Generated a valid File-Based Catalog
+INFO[0033] Created registry pod: docker-io-aneasystone-memcached-operator-bundle-v0-0-1
+INFO[0033] Created CatalogSource: memcached-operator-catalog
+INFO[0033] OperatorGroup "operator-sdk-og" created
+INFO[0033] Created Subscription: memcached-operator-v0-0-1-sub
+INFO[0037] Approved InstallPlan install-z264c for the Subscription: memcached-operator-v0-0-1-sub
+INFO[0037] Waiting for ClusterServiceVersion "default/memcached-operator.v0.0.1" to reach 'Succeeded' phase
+INFO[0037]   Waiting for ClusterServiceVersion "default/memcached-operator.v0.0.1" to appear
+INFO[0056]   Found ClusterServiceVersion "default/memcached-operator.v0.0.1" phase: Pending
+INFO[0058]   Found ClusterServiceVersion "default/memcached-operator.v0.0.1" phase: Installing
+INFO[0069]   Found ClusterServiceVersion "default/memcached-operator.v0.0.1" phase: Succeeded
+INFO[0069] OLM has successfully installed "memcached-operator.v0.0.1"
+```
+
+可以使用 `kubectl get` 检查 Operator 运行的状态，和上一节直接部署不一样的是，Operator 被安装在默认的 `default` 名字空间里了，其他的几乎没啥区别。可以更新 `config/samples/cache_v1alpha1_memcached.yaml` 文件来对 Operator 进行测试。
+
+如果要卸载 Operator，执行下面的命令：
+
+```
+$ operator-sdk cleanup memcached-operator
+```
+
+卸载 OLM：
+
+```
+$ operator-sdk olm uninstall
+```
+
+### 使用 [kubernetes-sigs/kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 开发 Operator
+
+`operator-sdk` 和 `kubebuilder` 都是为了方便用户创建和管理 Operator 而生的脚手架项目，其实 `operator-sdk` 在底层也使用了 `kubebuilder`，比如 `operator-sdk` 的命令行工具就是直接调用 `kubebuilder` 的命令行工具。无论由 `operator-sdk` 还是 `kubebuilder` 创建的 Operator 项目都是调用的 `controller-runtime` 接口，具有相同的项目目录结构。
+
 ## 参考
 
 1. [Kubernetes 文档 / 概念 / 扩展 Kubernetes / Operator 模式](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/operator/)
 1. [Kubernetes Operator 基础入门](https://www.infoq.cn/article/3jrwfyszlu6jatbdrtov)
 1. [Kubernetes Operator 快速入门教程](https://www.qikqiak.com/post/k8s-operator-101/)
+1. [Quickstart for Go-based Operators](https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/)
 1. [What is a Kubernetes operator?](https://www.redhat.com/en/topics/containers/what-is-a-kubernetes-operator)
 1. [Kubernetes Operators 101, Part 1: Overview and key features](https://developers.redhat.com/articles/2021/06/11/kubernetes-operators-101-part-1-overview-and-key-features)
 1. [Kubernetes Operators 101, Part 2: How operators work](https://developers.redhat.com/articles/2021/06/22/kubernetes-operators-101-part-2-how-operators-work)
-1. [kubernetes-sigs/kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) - SDK for building Kubernetes APIs using CRDs
+1. [如何管理越来越多的 operator？OLM 给你答案](https://developer.aliyun.com/article/771857)
 
 ## 更多
 
