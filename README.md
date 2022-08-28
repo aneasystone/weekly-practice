@@ -22,6 +22,7 @@
 * WEEK018 - [使用 GitHub Actions 跟踪 GitHub 趋势项目](./notes/week018-tracking-github-trending/README.md)
 * WEEK019 - [ZooKeeper 在不同场景下的使用](./notes/week019-various-usage-of-zookeeper/README.md)
 * WEEK020 - [写一个简单的 Kubernetes Operator](./notes/week020-create-a-kubernetes-operator/README.md)
+* WEEK021 - [使用 Visual Studio Code 进行 Go 开发](./notes/week021-go-in-visual-studio-code/README.md)
 
 ### 项目实践
 
