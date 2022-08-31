@@ -48,7 +48,13 @@ $ go mod init example.com/demo
 go: creating new go.mod: module example.com/demo
 ```
 
-运行成功后，可以发现创建了一个 `go.mod` 文件，这个文件类似于 Maven 项目中 `pom.xml` 文件，用于管理项目依赖的模块，我们打开这个文件，目前内容还比较简单，只是定义了当前的模块名以及使用的 Go 版本：
+运行成功后，可以发现创建了一个 `go.mod` 文件，这个文件类似于 Maven 项目中 `pom.xml` 文件，用于管理项目依赖的模块。早期的版本中，Go 语言是没有依赖管理功能的，所有依赖的第三方包都放在 `GOPATH` 目录下，这就导致了同一个包只能保存一个版本，如果不同的项目依赖同一个包的不同版本，该怎么办呢？
+
+于是 Go 语言从 v1.5 版本开始引入 `vendor` 模式，如果项目目录下有 `vendor` 目录，那么 Go 会优先使用 `vendor` 内的包，可以使用 [godep](https://github.com/tools/godep) 或 [dep](https://github.com/golang/dep) 来管理 `vender` 模式下的依赖包。
+
+不过从 v1.11 版本开始，官方又推出了 `Go module` 功能，并在 v1.13 版本中作为 Go 语言默认的依赖管理工具。使用 `Go module` 依赖管理会在项目根目录下生成 `go.mod` 和 `go.sum` 两个文件。
+
+我们打开 `go.mod` 这个文件，目前内容还比较简单，只是定义了当前的模块名以及使用的 Go 版本：
 
 ```
 module example.com/demo
@@ -58,7 +64,7 @@ go 1.19
 
 接下来我们在项目中创建一个 包（`package`），也就是一个目录，比如 `hello`，并在该目录下创建一个文件 `hello.go`，打开这个文件时会激活 Go 插件。等插件加载完毕，我们就可以编写 Go 代码了，在文件中输入如下内容：
 
-```
+```go
 package hello
 
 func SayHello() string {
@@ -70,7 +76,7 @@ func SayHello() string {
 
 接下来，在项目根目录下创建一个 `main.go` 文件，内容如下：
 
-```
+```go
 package main
 
 import (
@@ -108,6 +114,59 @@ Hello world
 
 ## 引用三方包
 
+上面的例子中我们只使用了系统包和自己代码中的包，如果要使用第三方包该怎么办呢？
+
+我们可以使用 `go get` 下载第三方包并将依赖更新到 `go.mod` 文件中，比如我们要添加 [rsc.io/quote](https://pkg.go.dev/rsc.io/quote) 这个依赖包，执行如下命令：
+
+```
+$ go get rsc.io/quote
+go: downloading rsc.io/quote v1.5.2
+go: added golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
+go: added rsc.io/quote v1.5.2
+```
+
+这个命令默认会从 Go 官方的模块代理（https://proxy.golang.org）下载依赖包，如果遇到网络问题，可以使用下面的命令改为国内的代理（https://goproxy.cn）：
+
+```
+$ go env -w GOPROXY=https://goproxy.cn,direct
+```
+
+`go get` 命令执行成功后，重新打开 `go.mod` 文件，可以看到自动添加了依赖：
+
+```
+require (
+	golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c // indirect
+	rsc.io/quote v1.5.2 // indirect
+	rsc.io/sampler v1.3.0 // indirect
+)
+```
+
+这时我们就可以在代码中使用 `rsc.io/quote` 这个包了：
+
+```
+package main
+
+import (
+	"fmt"
+
+	"example.com/demo/hello"
+	"rsc.io/quote"
+)
+
+func main() {
+	fmt.Println(hello.SayHello())
+	fmt.Println(quote.Go())
+}
+```
+
+重新运行程序：
+
+```
+$ go run main.go
+Hello world
+Don't communicate by sharing memory, share memory by communicating.
+```
+
 ## 编写单元测试
 
 ## 调试 Go 程序
@@ -120,3 +179,4 @@ https://github.com/golang/vscode-go/wiki/debugging
 1. [VSCode Go Wiki](https://github.com/golang/vscode-go/wiki)
 1. [Go Documentation](https://go.dev/doc/)
 1. [Getting started with VS Code Go](https://www.youtube.com/watch?v=1MXIGYrMk80)
+1. [Go语言之依赖管理](https://www.liwenzhou.com/posts/Go/go_dependency/)
