@@ -169,6 +169,41 @@ Don't communicate by sharing memory, share memory by communicating.
 
 ## 编写单元测试
 
+这一节我们使用 Go 语言的标准库 `testing` 对我们的代码进行单元测试。Go 语言推荐将测试文件和源代码文件放在一起，测试文件以 `_test.go` 结尾，比如我们要对上面的 `hello.go` 编写单元测试，可以在同目录创建一个 `hello_test.go` 文件，文件内容如下：
+
+```go
+package hello_test
+
+import (
+	"testing"
+
+	"example.com/demo/hello"
+)
+
+func TestSayHello(t *testing.T) {
+	if hello.SayHello() != "Hello world" {
+		t.Fatal("Not good")
+	}
+}
+```
+
+测试用例名称一般命名为 Test 加上待测试的方法名，比如这里的 `TestSayHello` 是对 `SayHello` 的测试，测试用的参数有且只有一个，在这里是 `t *testing.T`，表示这是一个单元测试，如果是基准测试，这个参数类型为 `*testing.B`。
+
+VS Code 会自动识别单元测试的包和方法，并在包和方法上显示一个链接：
+
+![](./images/unit-test.png)
+
+我们可以点击方法上的 `run test` 或 `debug test` 来执行测试，或者使用 `go test` 命令来执行，由于这个测试是写在 `hello` 这个目录下，我们需要进入该目录执行测试：
+
+```
+$ cd hello
+$ go test
+PASS
+ok      example.com/demo/hello  0.277s
+```
+
+这里有一点需要特别注意，我们在这个文件的最顶部声明包时用的是 `package hello_test`，而不是 `package hello`，其实两种方法都可以，这取决于你编写的是黑盒测试还是白盒测试。如果你使用 `package hello`，那么在单元测试代码中就可以对私有方法进行测试，相当于白盒测试，而这里我们使用的是黑盒测试，也就是只对包里公共方法进行测试。
+
 ## 调试 Go 程序
 
 https://github.com/golang/vscode-go/wiki/debugging
@@ -180,3 +215,5 @@ https://github.com/golang/vscode-go/wiki/debugging
 1. [Go Documentation](https://go.dev/doc/)
 1. [Getting started with VS Code Go](https://www.youtube.com/watch?v=1MXIGYrMk80)
 1. [Go语言之依赖管理](https://www.liwenzhou.com/posts/Go/go_dependency/)
+1. [Go Test 单元测试简明教程](https://geektutu.com/post/quick-go-test.html)
+1. [Proper package naming for testing with the Go language](https://stackoverflow.com/questions/19998250/proper-package-naming-for-testing-with-the-go-language/31443271)
