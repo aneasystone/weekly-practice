@@ -206,7 +206,51 @@ ok      example.com/demo/hello  0.277s
 
 ## 调试 Go 程序
 
-https://github.com/golang/vscode-go/wiki/debugging
+在上面的单元测试方法上面有一个 `debug test` 链接，点击该链接就可以调试 Go 程序了。如果要以调试模式启动 `main()` 函数，可以打开 `main.go` 文件，使用 F5 快捷键启动调试器。
+
+![](./images/go-debugging.png)
+
+或者打开 VS Code 的 “运行和调试” 侧边栏，然后点击 “运行和调试” 按钮也可以启动调试器。如果调试器启动成功，我们可以在下方的调试控制台看到类似这样的输出：
+
+```
+Starting: C:\Users\aneasystone\go\bin\dlv.exe dap --check-go-version=false --listen=127.0.0.1:60508 from d:\code\weekly-practice\notes\week021-go-in-visual-studio-code\demo
+DAP server listening at: 127.0.0.1:60508
+```
+
+Go 语言的官方调试器是 [dlv](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv.md)，它的全称为 `Delve`，VSCode 通过运行 [dlv dap](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_dap.md) 命令来启动 Go 语言的调试器，这个命令会在本地启动一个 TCP 服务器，并通过 [DAP 协议（Debug Adaptor Protocol）]((https://microsoft.github.io/debug-adapter-protocol/)) 和 VS Code 进行通信实现调试的功能。
+
+使用 F5 快捷键或 “运行和调试” 按钮时，VS Code 会使用默认配置对当前打开的文件进行调试。如果想修改配置参数，我们可以创建一个 `launch.json` 配置文件：
+
+![](./images/create-launch-json.png)
+
+点击 “创建 launch.json 文件” 按钮会弹出一个下拉框，我们可以：
+
+* 调试一个包（Launch Package）
+* 附加到本地进程（Attach to local process）
+* 连接到远程服务（Connect to server）
+
+我们选择第一个，创建的 `launch.json` 配置文件如下：
+
+```json
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch Package",
+			"type": "go",
+			"request": "launch",
+			"mode": "auto",
+			"program": "${fileDirname}"
+		}
+	]
+}
+```
+
+我们将 `${fileDirname}` 变量修改为 `.`，表示项目的根目录。这样我们就可以在打开任意文件的时候快速调试 `main()` 方法了，而不用每次都打开 `main.go` 文件来调试。如果我们需要对调试器进行配置，比如配置命令行参数启动（`args`），修改当前工作目录（`cwd`），配置 dlv 调试器（`dlvFlags`）等等，我们在 `launch.json` 中输入引号后 VS Code 会自动提示所有支持的配置项：
+
+![](./images/create-launch-json-args.png)
+
+这些配置项的含义可以参考 [Launch.json Attributes](https://github.com/golang/vscode-go/wiki/debugging#launchjson-attributes)。
 
 ## 参考
 
@@ -217,3 +261,4 @@ https://github.com/golang/vscode-go/wiki/debugging
 1. [Go语言之依赖管理](https://www.liwenzhou.com/posts/Go/go_dependency/)
 1. [Go Test 单元测试简明教程](https://geektutu.com/post/quick-go-test.html)
 1. [Proper package naming for testing with the Go language](https://stackoverflow.com/questions/19998250/proper-package-naming-for-testing-with-the-go-language/31443271)
+1. [Debug Go programs in VS Code](https://github.com/golang/vscode-go/wiki/debugging)
