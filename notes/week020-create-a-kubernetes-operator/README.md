@@ -731,3 +731,95 @@ Error: failed to create API: unable to run post-scaffold tasks of "base.go.kubeb
 ```
 
 没有安装 gcc 工具，使用 `sudo apt install gcc` 安装 gcc 即可。
+
+### 3. `make build` 或 `make test` 时报错
+
+在公司电脑开发 Operator 时遇到了这个问题，执行 `make build` 或 `make test` 时报下面这样的错：
+
+```
+STEP: bootstrapping test environment
+1.6621765789962418e+09  DEBUG   controller-runtime.test-env     starting control plane
+
+1.6621765802518039e+09  ERROR   controller-runtime.test-env     unable to start the controlplane        {"tries": 0, "error": "timeout waiting for process etcd to start successfully (it may have failed to start, or stopped unexpectedly before becoming ready)"}
+```
+
+看报错信息猜测可能是和 `etcd` 有关，使用 `ps aux | grep etcd` 确实可以看到在执行测试时启动了一个 `etcd` 的进程：
+
+```
+$ ps aux | grep etcd
+aneasystone  2609 23.0  0.1 737148 22560 pts/0    Sl   13:34   0:00 /home/aneasystone/.local/share/kubebuilder-envtest/k8s/1.24.1-linux-amd64/etcd --advertise-client-urls=http://127.0.0.1:52467 --data-dir=/tmp/k8s_test_framework_3831360890 --listen-client-urls=http://127.0.0.1:52467 --listen-peer-urls=http://127.0.0.1:52468 --unsafe-no-fsync=true
+```
+
+于是我试着手工运行这个命令，发现 `etcd` 服务启动时报错了：
+
+```
+2022-09-03 11:42:28.499748 E | etcdserver: publish error: etcdserver: request timed out
+2022-09-03 11:42:35.501458 E | etcdserver: publish error: etcdserver: request timed out
+```
+
+使用 `etcdctl` 也连不上该 `etcd` 服务。一开始我以为是 `kubebuilder` 自带的 `etcd` 文件有问题，于是就自己安装了一个 `etcd`，直接运行时也是报错，只不过报错信息有点不一样：
+
+```
+panic: invalid page type: 0: 4
+
+goroutine 1 [running]:
+
+github.com/etcd-io/bbolt.(*Cursor).search(0xc00005be18, {0xc00005be70, 0x8, 0x8}, 0xc00005bdb8?)
+```
+
+看报错是位于 `etcd-io/bbolt` 这个包，BoltDB 是 `etcd` 使用的内存 KV 数据库。使用 *bolt* 和 *panic: invalid page type* 为关键字，很快就在 [microsoft/WSL](https://github.com/microsoft/WSL) 里找到了一个相关的 Issue：[BoltDB panics on cursor search since April update](https://github.com/microsoft/WSL/issues/3162)，根据 Issue 里的描述，写了一个 BoltDB 的简单示例：
+
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/boltdb/bolt"
+)
+
+func main() {
+	os.Remove("test.db")
+	db, err := bolt.Open("test.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucket([]byte("MyBucket"))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		return err
+	})
+
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("MyBucket"))
+		c := b.Cursor()
+		c.Seek([]byte("test"))
+		return nil
+	})
+	os.Remove("test.db")
+}
+```
+
+运行代码后也是和上面几乎一模一样的报错：
+
+```
+$ go run main.go
+panic: invalid page type: 0: 4
+
+goroutine 1 [running]:
+github.com/boltdb/bolt.(*Cursor).search(0xc00005be18, {0xc00005be70, 0x8, 0x8}, 0xc00005bdb8?)
+```
+
+至此大概可以推断这应该是 WSL 的问题，WSL 目前最新版本是 WSL 2，不过要注意的是，根据 [Microsoft 官方的升级指南](https://docs.microsoft.com/en-us/windows/wsl/install-manual#step-2---check-requirements-for-running-wsl-2)，WSL 2 只支持 Windows 10 Build 18362 之后的版本：
+
+```
+Builds lower than 18362 do not support WSL 2. Use the Windows Update Assistant to update your version of Windows.
+```
+
+打开 Windows 更新，更新完成后重启，问题解决。
