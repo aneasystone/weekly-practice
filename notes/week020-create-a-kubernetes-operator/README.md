@@ -2,7 +2,7 @@
 
 [Kubernetes Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) 这一概念是由 CoreOS 的工程师于 2016 年提出的，它是一种通过 [自定义资源](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)（`custom resource`、`CR`）来包装、运行和管理 Kubernetes 应用的方式。Kubernetes 1.7 版本以来就引入了自定义资源的概念，该功能可以让开发人员扩展新功能或更新现有功能，并且可以自动执行一些管理任务，这些自定义资源就像 Kubernetes 的原生组件一样。
 
-通过自定义资源，我们可以将应用抽象为一个整体，而不用去关心该应用是由哪些 Kubernetes 原生组件构成的，什么 Pods、Deployments、Services 或 ConfigMaps 统统交给 Operator 来管理。创建 Operator 的关键是自定义资源的设计，通过直接调用 Kubernetes API，编写自定义规则自动管理和维护 Kubernetes 集群中的应用，包括自动化安装、配置、更新、故障转移、备份恢复等等。这样的应用也被称为 Kubernetes 原生应用（`Kubernetes-native application`）。Operator 可以帮我们实现下面这些功能：
+通过自定义资源，我们可以将应用抽象为一个整体，而不用去关心该应用是由哪些 Kubernetes 原生组件构成的，什么 Pods、Deployments、Services 或 ConfigMaps 统统交给 Operator 来管理。创建 Operator 的关键是自定义资源的设计，通过直接调用 Kubernetes API，编写自定义规则自动管理和维护 Kubernetes 集群中的应用，包括自动化安装、配置、更新、故障转移、备份恢复等等。这样的应用也被称为 Kubernetes 原生应用（`Kubernetes-native application`）。可以把 Operator 当做是一个运维人员，它以软件的形式帮助我们管理 Kubernetes 中运行的应用。Operator 可以帮我们实现下面这些运维工作：
 
 ![](./images/operator-capabilitiy-model.png)
 
@@ -205,7 +205,7 @@ type MemcachedSpec struct {
 }
 ```
 
-接着打开 `memcached_controller.go` 文件，其中 `Reconcile` 方法就是上面所介绍的 `reconciliation loop` 的核心代码，可以在这里实现自己的业务逻辑，比如调用 Kubernetes API 创建、删除或更新各种 Kubernetes 资源。我们这里只是简单地将资源的属性值打印出来：
+接着打开 `memcached_controller.go` 文件，其中 `Reconcile` 方法就是上面所介绍的 `reconciliation loop` 的核心代码，可以在这里实现自己的业务逻辑，比如调用 Kubernetes API 创建、删除或更新各种 Kubernetes 资源。我们这里只是简单地将资源的属性值打印出来（官方对 `memcached-operator` 有完整的示例代码，可以 [参考这里](https://github.com/operator-framework/operator-sdk/tree/master/testdata/go)）：
 
 ```
 func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -698,8 +698,12 @@ $ operator-sdk olm uninstall
 1. [Kubernetes 文档 / 概念 / 扩展 Kubernetes / Operator 模式](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/operator/)
 1. [Kubernetes Operator 基础入门](https://www.infoq.cn/article/3jrwfyszlu6jatbdrtov)
 1. [Kubernetes Operator 快速入门教程](https://www.qikqiak.com/post/k8s-operator-101/)
+1. [Kubernetes Operators 入门笔记](https://feichashao.com/kubernetes-operators/)
+1. [亲历者说：Kubernetes API 与 Operator，不为人知的开发者战争](https://developer.aliyun.com/article/685522)
+1. [《Kubernetes Operators eBook》By Jason Dobies & Joshua Wood](https://developers.redhat.com/books/kubernetes-operators)
 1. [Quickstart for Go-based Operators](https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/)
 1. [What is a Kubernetes operator?](https://www.redhat.com/en/topics/containers/what-is-a-kubernetes-operator)
+1. [Introducing Operators: Putting Operational Knowledge into Software](https://cloud.redhat.com/blog/introducing-operators-putting-operational-knowledge-into-software)
 1. [Kubernetes Operators 101, Part 1: Overview and key features](https://developers.redhat.com/articles/2021/06/11/kubernetes-operators-101-part-1-overview-and-key-features)
 1. [Kubernetes Operators 101, Part 2: How operators work](https://developers.redhat.com/articles/2021/06/22/kubernetes-operators-101-part-2-how-operators-work)
 1. [如何管理越来越多的 operator？OLM 给你答案](https://developer.aliyun.com/article/771857)
@@ -823,3 +827,10 @@ Builds lower than 18362 do not support WSL 2. Use the Windows Update Assistant t
 ```
 
 打开 Windows 更新，更新完成后重启，问题解决。
+
+### 4. Operator 示例
+
+* [Etcd Operator](https://github.com/coreos/etcd-operator)
+* [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
+* [Operator SDK 官方示例](https://github.com/operator-framework/operator-sdk/tree/master/testdata)
+* [《Kubernetes Operators eBook》示例](https://github.com/kubernetes-operators-book/chapters)

@@ -125,7 +125,7 @@ go: added golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
 go: added rsc.io/quote v1.5.2
 ```
 
-这个命令默认会从 Go 官方的模块代理（https://proxy.golang.org）下载依赖包，如果遇到网络问题，可以使用下面的命令改为国内的代理（https://goproxy.cn）：
+这个命令默认会从 Go 官方的模块代理（[https://proxy.golang.org](https://proxy.golang.org)）下载依赖包，如果遇到网络问题，可以使用下面的命令改为国内的代理（[https://goproxy.cn](https://goproxy.cn)）：
 
 ```
 $ go env -w GOPROXY=https://goproxy.cn,direct
