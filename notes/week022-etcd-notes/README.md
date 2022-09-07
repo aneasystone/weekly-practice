@@ -115,10 +115,47 @@ hello
 world
 ```
 
+## 搭建 etcd 集群
+
+https://doczhcn.gitbook.io/etcd/index/index/local_cluster
+
+## 安全性
+
+### 开启用户角色认证
+
+https://etcd.io/docs/v3.5/op-guide/authentication/rbac/
+
+### 开启 TLS 证书认证
+
+https://etcd.io/docs/v3.5/op-guide/security/
+
+## etcd 和 其他键值存储的区别
+
+### etcd vs. Redis
+
+Redis 和 etcd 一样，支持键值存储，而且也支持分布式特性，他们之间的差异如下：
+
+* Redis 支持的数据类型比 etcd 更丰富
+* Redis 在分布式环境下不是强一致的，可能会丢数据或读取不到最新数据
+* Redis 的数据监听机制没有 etcd 完善
+* etcd 为了保证强一致性，性能要低于 Redis
+
+综上考虑，Redis 适用于缓存，需要频繁读写，但对系统没有强一致性的要求，etcd 适用于系统读写较少，但是对系统有强一致性要求的场景，比如存储分布式系统的元数据。
+
+### etcd vs. ZooKeeper
+
+ZooKeeper 和 etcd 的定位都是分布式协调系统，ZooKeeper 起源于 Hadoop 生态系统，etcd 则是跟着 Kubernetes 的流行而流行。他们都是顺序一致性的（满足CAP 的 CP），意味着无论你访问任意节点，都将获得最终一致的数据。他们之间的差异如下：
+
+* ZooKeeper 从逻辑上来看是一种目录结构，而 etcd 从逻辑上来看就是一个 KV 结构，不过 etcd 的 Key 可以是任意字符串，所以也可以模拟出目录结构
+* etcd 使用 Raft 算法实现一致性，比 ZooKeeper 的 ZAB 算法更简单
+* ZooKeeper 采用 Java 编写，etcd 采用 Go 编写，相比而言 ZooKeeper 的部署复杂度和维护成本要高一点
+* ZooKeeper 属于 Apache 基金会顶级项目，发展较缓慢，而 etcd 得益于云原生，近几年发展势头迅速
+
 ## 参考
 
 1. [Etcd Quickstart](https://etcd.io/docs/v3.5/quickstart/) - Get etcd up and running in less than 5 minutes!
+1. [Etcd 中文文档](http://www.zhaowenyu.com/etcd-doc/)
 1. [Etcd 官方文档中文版](https://doczhcn.gitbook.io/etcd/)
-1. [Etcd 教程](http://www.codebaoku.com/etcd/etcd-index.html)
-1. [etcd 教程](https://www.tizi365.com/archives/557.html)
+1. [Etcd 教程 | 编程宝库](http://www.codebaoku.com/etcd/etcd-index.html)
+1. [etcd 教程 | 梯子教程](https://www.tizi365.com/archives/557.html)
 1. [七张图了解Kubernetes内部的架构](https://segmentfault.com/a/1190000022973856)
