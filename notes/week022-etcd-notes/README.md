@@ -115,9 +115,23 @@ hello
 world
 ```
 
+也可以使用 `--prefix` 参数进行前缀查询，比如下面的命令可以查出 etcd 中的所有键值对：
+
+```
+$ etcdctl get "" --prefix
+```
+
 ## 搭建 etcd 集群
 
 https://doczhcn.gitbook.io/etcd/index/index/local_cluster
+
+## 操作 etcd
+
+### 使用 etcdctl 命令行操作 etcd
+
+### 使用 etcd API 操作 etcd
+
+### 使用 Go 语言操作 etcd
 
 ## 安全性
 
@@ -144,12 +158,16 @@ Redis 和 etcd 一样，支持键值存储，而且也支持分布式特性，�
 
 ### etcd vs. ZooKeeper
 
-ZooKeeper 和 etcd 的定位都是分布式协调系统，ZooKeeper 起源于 Hadoop 生态系统，etcd 则是跟着 Kubernetes 的流行而流行。他们都是顺序一致性的（满足CAP 的 CP），意味着无论你访问任意节点，都将获得最终一致的数据。他们之间的差异如下：
+ZooKeeper 和 etcd 的定位都是分布式协调系统，ZooKeeper 起源于 Hadoop 生态系统，etcd 则是跟着 Kubernetes 的流行而流行。他们都是顺序一致性的（满足 CAP 的 CP），意味着无论你访问任意节点，都将获得最终一致的数据。他们之间的差异如下：
 
 * ZooKeeper 从逻辑上来看是一种目录结构，而 etcd 从逻辑上来看就是一个 KV 结构，不过 etcd 的 Key 可以是任意字符串，所以也可以模拟出目录结构
 * etcd 使用 Raft 算法实现一致性，比 ZooKeeper 的 ZAB 算法更简单
-* ZooKeeper 采用 Java 编写，etcd 采用 Go 编写，相比而言 ZooKeeper 的部署复杂度和维护成本要高一点
-* ZooKeeper 属于 Apache 基金会顶级项目，发展较缓慢，而 etcd 得益于云原生，近几年发展势头迅速
+* ZooKeeper 采用 Java 编写，etcd 采用 Go 编写，相比而言 ZooKeeper 的部署复杂度和维护成本要高一点，而且 ZooKeeper 的官方只提供了 Java 和 C 的客户端，对其他编程语言不是很友好
+* ZooKeeper 属于 Apache 基金会顶级项目，发展较缓慢，而 etcd 得益于云原生，近几年发展势头迅猛
+* etcd 提供了 gRPC 或 HTTP 接口使用起来更简单
+* ZooKeeper 使用 SASL 进行安全认证，而 etcd 支持 TLS 客户端安全认证，更容易使用
+
+总体来说，ZooKeeper 和 etcd 还是很相似的，在 [week019-various-usage-of-zookeeper](../week019-various-usage-of-zookeeper/README.md) 这篇文章中介绍了一些 ZooKeeper 的使用场景，我们使用 etcd 同样也都可以实现。在具体选型上，我们应该更关注是否契合自己所使用的技术栈。
 
 ## 参考
 
