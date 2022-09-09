@@ -53,7 +53,7 @@ Go OS/Arch: linux/amd64
 
 ### 启动
 
-直接不带参数运行 `etcd` 命令，即可启动一个单节点的 etcd 服务（a single-member cluster of etcd）：
+直接不带参数运行 `etcd` 命令，即可（a single-member cluster of etcd）：
 
 ```
 $ etcd
@@ -123,7 +123,103 @@ $ etcdctl get "" --prefix
 
 ## 搭建 etcd 集群
 
-https://doczhcn.gitbook.io/etcd/index/index/local_cluster
+上面的例子中，我们在本地启动了一个单节点的 etcd 服务，一般用于开发和测试。在生产环境中，我们需要搭建高可用的 etcd 集群。
+
+启动一个 etcd 集群要求集群中的每个成员都要知道集群中的其他成员，最简单的做法是在启动 etcd 服务时加上 `--initial-cluster` 参数告诉 etcd 初始集群中有哪些成员，这种方法也被称为 **静态配置**。
+
+我们在本地打开三个终端，并在三个终端中分别运行下面三个命令：
+
+```
+$ etcd --name infra1 \
+	--listen-client-urls http://127.0.0.1:12379 \
+	--advertise-client-urls http://127.0.0.1:12379 \
+	--listen-peer-urls http://127.0.0.1:12380 \
+	--initial-advertise-peer-urls http://127.0.0.1:12380 \
+	--initial-cluster-token etcd-cluster-demo \
+	--initial-cluster 'infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380' \
+	--initial-cluster-state new
+```
+
+```
+$ etcd --name infra2 \
+	--listen-client-urls http://127.0.0.1:22379 \
+	--advertise-client-urls http://127.0.0.1:22379 \
+	--listen-peer-urls http://127.0.0.1:22380 \
+	--initial-advertise-peer-urls http://127.0.0.1:22380 \
+	--initial-cluster-token etcd-cluster-demo \
+	--initial-cluster 'infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380' \
+	--initial-cluster-state new
+```
+
+```
+$ etcd --name infra3 \
+	--listen-client-urls http://127.0.0.1:32379 \
+	--advertise-client-urls http://127.0.0.1:32379 \
+	--listen-peer-urls http://127.0.0.1:32380 \
+	--initial-advertise-peer-urls http://127.0.0.1:32380 \
+	--initial-cluster-token etcd-cluster-demo \
+	--initial-cluster 'infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380' \
+	--initial-cluster-state new
+```
+
+我们随便选择一个节点，通过 `member list` 都可以查询集群中的所有成员：
+
+```
+$ etcdctl --write-out=table --endpoints=localhost:12379 member list
++------------------+---------+--------+------------------------+------------------------+------------+
+|        ID        | STATUS  |  NAME  |       PEER ADDRS       |      CLIENT ADDRS      | IS LEARNER |
++------------------+---------+--------+------------------------+------------------------+------------+
+| b217c7a319e4e4f8 | started | infra2 | http://127.0.0.1:22380 | http://127.0.0.1:22379 |      false |
+| d35bfbeb1c7fbfcf | started | infra1 | http://127.0.0.1:12380 | http://127.0.0.1:12379 |      false |
+| d425e5b1e0d8a751 | started | infra3 | http://127.0.0.1:32380 | http://127.0.0.1:32379 |      false |
++------------------+---------+--------+------------------------+------------------------+------------+
+```
+
+测试往集群中写入数据：
+
+```
+$ etcdctl --endpoints=localhost:12379 put hello world
+OK
+```
+
+换一个节点也可以查出数据：
+
+```
+$ etcdctl --endpoints=localhost:22379 get hello
+hello
+world
+```
+
+但是一般为了保证高可用，我们会在 `--endpoints` 里指定集群中的所有成员：
+
+```
+$ etcdctl --endpoints=localhost:12379,localhost:22379,localhost:32379 get hello
+hello
+world
+```
+
+然后我们停掉一个 etcd 服务，可以发现集群还可以正常查询，说明高可用生效了，然后我们再停掉一个 etcd 服务，此时集群就不可用了，这是因为 Raft 协议必须要保证集群中一半以上的节点存活才能正常工作，可以看到集群中的唯一节点也异常退出了：
+
+```
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x18 pc=0x75745b]
+
+goroutine 188 [running]:
+go.uber.org/zap.(*Logger).check(0x0, 0x1, 0x10a3ea5, 0x36, 0xc002068900)
+        /root/go/pkg/mod/go.uber.org/zap@v1.10.0/logger.go:264 +0x9b
+go.uber.org/zap.(*Logger).Warn(0x0, 0x10a3ea5, 0x36, 0xc002068900, 0x2, 0x2)
+        /root/go/pkg/mod/go.uber.org/zap@v1.10.0/logger.go:194 +0x45
+go.etcd.io/etcd/etcdserver.(*EtcdServer).requestCurrentIndex(0xc0002b4000, 0xc001fef200, 0xbfcf831fa9e8b606, 0x0, 0x0, 0x0)
+        /tmp/etcd-release-3.4.20/etcd/release/etcd/etcdserver/v3_server.go:805 +0x873
+go.etcd.io/etcd/etcdserver.(*EtcdServer).linearizableReadLoop(0xc0002b4000)
+        /tmp/etcd-release-3.4.20/etcd/release/etcd/etcdserver/v3_server.go:721 +0x2d6
+go.etcd.io/etcd/etcdserver.(*EtcdServer).goAttach.func1(0xc0002b4000, 0xc00011c4a0)
+        /tmp/etcd-release-3.4.20/etcd/release/etcd/etcdserver/server.go:2698 +0x57
+created by go.etcd.io/etcd/etcdserver.(*EtcdServer).goAttach
+        /tmp/etcd-release-3.4.20/etcd/release/etcd/etcdserver/server.go:2696 +0x1b1
+```
+
+使用静态的方法运行 etcd 集群虽然简单，但是这种方法必须提前规划好集群中所有成员的 IP 和端口，在有些场景下成员的地址是无法提前知道的，这时我们可以使用 **动态配置** 的方法来初始化集群，etcd 提供了两种动态配置的机制：**etcd Discovery** 和 **DNS Discovery**，具体的内容可以参考 [Clustering Guide](https://etcd.io/docs/v3.5/op-guide/clustering/)。
 
 ## 操作 etcd
 
