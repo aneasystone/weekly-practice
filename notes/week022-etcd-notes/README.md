@@ -544,7 +544,101 @@ lease 694d8324b4080150 revoked
 
 租约撤销后，和该租约关联的键也会一并被删除掉。
 
+#### 其他命令
+
+使用 `etcdctl --help` 查看支持的其他命令。
+
 ### 使用 etcd API 操作 etcd
+
+etcd 支持的大多数基础 API 都定义在 [api/etcdserverpb/rpc.proto](https://github.com/etcd-io/etcd/blob/main/api/etcdserverpb/rpc.proto) 文件中，官方的 [API reference](https://etcd.io/docs/v3.5/dev-guide/api_reference_v3/) 就是根据这个文件生成的。
+
+etcd 将这些 API 分为 6 大类：
+
+* service `KV`
+    * Range
+    * Put
+    * DeleteRange
+    * Txn
+    * Compact
+* service `Watch`
+    * Watch
+* service `Lease`
+    * LeaseGrant
+    * LeaseRevoke
+    * LeaseKeepAlive
+    * LeaseTimeToLive
+    * LeaseLeases
+* service `Cluster`
+    * MemberAdd
+    * MemberRemove
+    * MemberUpdate
+    * MemberList
+    * MemberPromote
+* service `Maintenance`
+    * Alarm
+    * Status
+    * Defragment
+    * Hash
+    * HashKV
+    * Snapshot
+    * MoveLeader
+    * Downgrade
+* service `Auth`
+    * AuthEnable
+    * AuthDisable
+    * AuthStatus
+    * Authenticate
+    * UserAdd
+    * UserGet
+    * UserList
+    * UserDelete
+    * UserChangePassword
+    * UserGrantRole
+    * UserRevokeRole
+    * RoleAdd
+    * RoleGet
+    * RoleList
+    * RoleDelete
+    * RoleGrantPermission
+    * RoleRevokePermission
+
+实际上，每个接口都对应一个 HTTP 请求，比如上面执行的 `etcdctl put` 命令就是调用 `KV.Put` 接口，而 `etcdctl get` 命令就是调用 `KV.Range` 接口。
+
+调用 `KV.Put` 写入数据（注意接口中键值对使用 BASE64 编码，这里的键为 key，值为 value）：
+
+```
+$ curl -L http://localhost:2379/v3/kv/put \
+  -X POST -d '{"key": "a2V5", "value": "dmFsdWU="}'
+{"header":{"cluster_id":"14841639068965178418","member_id":"10276657743932975437","revision":"24","raft_term":"3"}}
+```
+
+调用 `KV.Range` 查询数据：
+
+```
+curl -L http://localhost:2379/v3/kv/range \
+  -X POST -d '{"key": "a2V5"}'
+{"header":{"cluster_id":"14841639068965178418","member_id":"10276657743932975437","revision":"24","raft_term":"3"},"kvs":[{"key":"a2V5","create_revision":"24","mod_revision":"24","version":"1","value":"dmFsdWU="}],"count":"1"}
+```
+
+这和使用 `etcdctl` 命令行查询效果是一样的：
+
+```
+$ etcdctl get key
+key
+value
+```
+
+除了这 6 类基础 API，etcd 还提供了两个并发类 API，包括分布式锁和集群选主：
+
+* [service `Lock`](https://github.com/etcd-io/etcd/blob/main/server/etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+    * Lock
+    * Unlock
+* [service `Election`](https://github.com/etcd-io/etcd/blob/main/server/etcdserver/api/v3election/v3electionpb/v3election.proto)
+    * Campaign
+    * Proclaim
+    * Leader
+    * Observe
+    * Resign
 
 ### 使用 Go 语言操作 etcd
 
