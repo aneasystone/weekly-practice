@@ -702,16 +702,6 @@ C:\Users\aneasystone\go\pkg\mod\github.com\coreos\etcd@v3.3.27+incompatible\clie
 $ go get google.golang.org/grpc@v1.26.0
 ```
 
-## 安全性
-
-### 开启用户角色认证
-
-https://etcd.io/docs/v3.5/op-guide/authentication/rbac/
-
-### 开启 TLS 证书认证
-
-https://etcd.io/docs/v3.5/op-guide/security/
-
 ## etcd 和 其他键值存储的区别
 
 ### etcd vs. Redis
@@ -738,6 +728,8 @@ ZooKeeper 和 etcd 的定位都是分布式协调系统，ZooKeeper 起源于 Ha
 
 总体来说，ZooKeeper 和 etcd 还是很相似的，在 [week019-various-usage-of-zookeeper](../week019-various-usage-of-zookeeper/README.md) 这篇文章中介绍了一些 ZooKeeper 的使用场景，我们使用 etcd 同样也都可以实现。在具体选型上，我们应该更关注是否契合自己所使用的技术栈。
 
+官方有一个比较完整的表格 [Comparison chart](https://etcd.io/docs/v3.5/learning/why/#comparison-chart)，从不同的维度对比了 etcd 和 ZooKeeper、Consul 以及一些 NewSQL（Cloud Spanner、CockroachDB、TiDB）的区别。
+
 ## 参考
 
 1. [Etcd Quickstart](https://etcd.io/docs/v3.5/quickstart/) - Get etcd up and running in less than 5 minutes!
@@ -746,3 +738,64 @@ ZooKeeper 和 etcd 的定位都是分布式协调系统，ZooKeeper 起源于 Ha
 1. [Etcd 教程 | 编程宝库](http://www.codebaoku.com/etcd/etcd-index.html)
 1. [etcd 教程 | 梯子教程](https://www.tizi365.com/archives/557.html)
 1. [七张图了解Kubernetes内部的架构](https://segmentfault.com/a/1190000022973856)
+
+## 更多
+
+### etcd 的安全性
+
+#### 开启用户角色认证
+
+etcd 支持开启 [RBAC 认证](https://etcd.io/docs/v3.5/op-guide/authentication/rbac/)，但是开启认证之前，我们需要提前创建 `root` 用户和 `root` 角色。
+
+创建 `root` 用户：
+
+```
+$ etcdctl user add root
+Password of root:
+Type password of root again for confirmation:
+User root created
+```
+
+创建 `root` 角色：
+
+```
+$ etcdctl role add root
+Role root created
+```
+
+给 `root` 用户赋权 `root` 角色：
+
+```
+$ etcdctl user grant-role root root
+Role root is granted to user root
+```
+
+开启认证：
+
+```
+$ etcdctl auth enable
+Authentication Enabled
+```
+
+此时访问 etcd 就必须带上用户名和密码认证了，否则会报错：
+
+```
+$ etcdctl put hello world
+{"level":"warn","ts":"2022-09-11T09:59:07.093+0800","caller":"clientv3/retry_interceptor.go:62","msg":"retrying of unary invoker failed","target":"endpoint://client-9b824d27-c8d4-4195-a17e-31eb0cf70a1c/127.0.0.1:2379","attempt":0,"error":"rpc error: code = InvalidArgument desc = etcdserver: user name is empty"}
+Error: etcdserver: user name is empty
+```
+
+使用 `--user` 带上用户名和密码访问：
+
+```
+$ etcdctl --user root:123456 put hello world
+OK
+```
+
+#### 开启 TLS 证书认证
+
+https://etcd.io/docs/v3.5/op-guide/security/
+
+### 使用 etcd 实现服务注册和发现
+
+* [Go Micro 使用 etcd 服务注册和发现](http://www.codebaoku.com/etcd/etcd-service-register.html)
