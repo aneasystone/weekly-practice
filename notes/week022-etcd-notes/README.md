@@ -642,6 +642,66 @@ value
 
 ### 使用 Go 语言操作 etcd
 
+etcd 提供了各个语言的 SDK 用于操作 etcd，比如 Go 的 [etcd/client/v3](https://github.com/etcd-io/etcd/tree/master/client/v3)、Java 的 [coreos/jetcd](https://github.com/etcd-io/jetcd)、Python 的 [kragniz/python-etcd3](https://github.com/kragniz/python-etcd3) 等，官方文档 [Libraries and tools](https://etcd.io/docs/v3.5/integrations/#libraries) 列出了更多其他语言的 SDK。这一节通过一个简单的 Go 语言示例来学习 SDK 的用法。
+
+首先安装依赖：
+
+```
+$ go get go.etcd.io/etcd/client/v3
+```
+
+然后通过 `clientv3.New` 创建一个 etcd 连接：
+
+```go
+cli, err := clientv3.New(clientv3.Config{
+    Endpoints:   []string{"localhost:2379"},
+    DialTimeout: 5 * time.Second,
+})
+if err != nil {
+    panic("Connect etcd server error")
+}
+defer cli.Close()
+```
+
+然后就可以通过 `cli` 来对 etcd 操作了，比如调用 `cli.Put` 写入数据：
+
+```go
+_, err = cli.Put(ctx, "hello", "world")
+if err != nil {
+    panic("Put kv error")
+}
+```
+
+调用 `cli.Get` 查询数据：
+
+```go
+resp, err := cli.Get(ctx, "hello")
+if err != nil {
+    panic("Get kv error")
+}
+for _, kv := range resp.Kvs {
+    fmt.Printf("%s: %s\n", kv.Key, kv.Value)
+}
+```
+
+不过在运行的时候，报了下面这样一个奇怪的错：
+
+```
+go run .\main.go
+# github.com/coreos/etcd/clientv3/balancer/resolver/endpoint
+C:\Users\aneasystone\go\pkg\mod\github.com\coreos\etcd@v3.3.27+incompatible\clientv3\balancer\resolver\endpoint\endpoint.go:114:87: undefined: resolver.BuildOption
+C:\Users\aneasystone\go\pkg\mod\github.com\coreos\etcd@v3.3.27+incompatible\clientv3\balancer\resolver\endpoint\endpoint.go:182:40: undefined: resolver.ResolveNowOption
+# github.com/coreos/etcd/clientv3/balancer/picker
+C:\Users\aneasystone\go\pkg\mod\github.com\coreos\etcd@v3.3.27+incompatible\clientv3\balancer\picker\err.go:37:53: undefined: balancer.PickOptions
+C:\Users\aneasystone\go\pkg\mod\github.com\coreos\etcd@v3.3.27+incompatible\clientv3\balancer\picker\roundrobin_balanced.go:55:63: undefined: balancer.PickOptions
+```
+
+[这里](https://blog.csdn.net/wohu1104/article/details/107923944) 有个解决方案，说是 grpc 版本较高导致的，需要降低 grpc 的版本：
+
+```
+$ go get google.golang.org/grpc@v1.26.0
+```
+
 ## 安全性
 
 ### 开启用户角色认证
