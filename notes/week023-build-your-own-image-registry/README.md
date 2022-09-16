@@ -101,7 +101,13 @@ $ curl -s http://localhost:5000/v2/hello-world/manifests/latest | jq
 
 除了这三个比较常用的查询类接口，Docker Registry API 还有一些用于上传和下载的接口，具体的内容可以查看这里的 [接口列表](https://docs.docker.com/registry/spec/api/#detail)。
 
-## 使用 `crane` 工具操作仓库
+### 开启 TLS 和安全认证
+
+上面我们用一行命令就搭建了一个私有仓库，不过这个私有仓库几乎没什么安全性，只能在本地测试用。如果要搭建一套生产环境用的镜像仓库，还需要了解安全相关的知识。
+
+
+
+### 使用 `crane` 工具操作仓库
 
 ## 使用 Docker Registry UI 图形界面
 
@@ -118,3 +124,17 @@ $ curl -s http://localhost:5000/v2/hello-world/manifests/latest | jq
 1. [distribution/distribution](https://github.com/distribution/distribution) - The toolkit to pack, ship, store, and deliver container content
 1. [SUSE/Portus](https://github.com/SUSE/Portus) - Authorization service and frontend for Docker registry (v2)
 1. [google/go-containerregistry](https://github.com/google/go-containerregistry) - Go library and CLIs for working with container registries
+
+## 更多
+
+### 1. 设置镜像仓库的存储驱动
+
+镜像仓库本质上是一个文件存储和内容分发系统，可以通过 [Storage API](https://docs.docker.com/registry/storage-drivers/) 接口实现不同的存储驱动，官方支持下面这些存储驱动：
+
+* [In-memory storage driver (testing only)](https://docs.docker.com/registry/storage-drivers/inmemory/)
+* [Filesystem storage driver](https://docs.docker.com/registry/storage-drivers/filesystem/)
+* [S3 storage driver](https://docs.docker.com/registry/storage-drivers/s3/)
+* [Microsoft Azure storage driver](https://docs.docker.com/registry/storage-drivers/azure/)
+* [OpenStack Swift storage driver](https://docs.docker.com/registry/storage-drivers/swift/)
+* [Aliyun OSS storage driver](https://docs.docker.com/registry/storage-drivers/oss/)
+* [Google Cloud Storage driver](https://docs.docker.com/registry/storage-drivers/gcs/)
