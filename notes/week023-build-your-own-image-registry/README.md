@@ -101,13 +101,127 @@ $ curl -s http://localhost:5000/v2/hello-world/manifests/latest | jq
 
 除了这三个比较常用的查询类接口，Docker Registry API 还有一些用于上传和下载的接口，具体的内容可以查看这里的 [接口列表](https://docs.docker.com/registry/spec/api/#detail)。
 
-### 开启 TLS 和安全认证
-
-上面我们用一行命令就搭建了一个私有仓库，不过这个私有仓库几乎没什么安全性，只能在本地测试用。如果要搭建一套生产环境用的镜像仓库，还需要了解安全相关的知识。
-
-
-
 ### 使用 `crane` 工具操作仓库
+
+## 开启 TLS 和安全认证
+
+上面我们用一行命令就搭建了一个私有仓库，不过这个私有仓库几乎没什么安全性，只能在本地测试用。Docker 默认是以 HTTPS 方式连接除 localhost 之外的仓库的，当从其他机器访问这个不安全的仓库地址时会报下面这样的错：
+
+```
+$ docker pull 192.168.1.39:5000/hello-world
+Using default tag: latest
+Error response from daemon: Get "https://192.168.1.39:5000/v2/": http: server gave HTTP response to HTTPS client
+```
+
+如果真要用也可以，需要修改 Docker 的配置文件 `/etc/docker/daemon.json`，将这个地址添加到 `insecure-registries` 配置项中：
+
+```
+{
+  "insecure-registries" : ["192.168.1.39:5000"]
+}
+```
+
+然后重启 Docker 后即可。
+
+不过这种方式非常不安全，不仅容易遭受中间人攻击（MITM），而且有一些限制，比如不能开启用户认证，也就是说你这个镜像仓库是赤裸裸的暴露在任何人面前。如果要搭建一套生产环境使用的镜像仓库，我们必须做得更安全一点。
+
+### 开启 TLS 安全
+
+我们首先需要 [获得一份 TLS 证书](https://docs.docker.com/registry/deploying/#get-a-certificate)，官方文档中要求你拥有一个 HTTPS 域名，并从权威的 CA 机构获得一份证书，不过大很多人估计没这个条件，所以我们 [使用自签名证书](https://docs.docker.com/registry/insecure/#use-self-signed-certificates)（self-signed certificate）。
+
+创建一个 `certs` 目录：
+
+```
+$ mkdir -p certs
+```
+
+使用 `openssl req` 生成证书：
+
+```
+$ openssl req \
+  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key \
+  -addext "subjectAltName = IP:192.168.1.39" \
+  -x509 -days 365 -out certs/domain.crt
+```
+
+注意这里要使用 `-addext` 参数添加 `subjectAltName` 扩展项，也就是 **Subject Alternative Name**，一般缩写为 **SAN**，表示我们的证书使用者是 IP 192.168.1.39，如果你有自己的域名，可以在 SAN 中指定 DNS：`-addext "subjectAltName = DNS:example.hub"`。
+
+如果没有在证书的 SAN 中指定 IP，会报如下错误：
+
+```
+$ docker push 192.168.1.39:5000/registry:latest
+The push refers to repository [192.168.1.39:5000/registry]
+Get "https://192.168.1.39:5000/v2/": x509: cannot validate certificate for 192.168.1.39 because it doesn't contain any IP SANs
+```
+
+或者证书中 IP 和实际 IP 不匹配，也会报错：
+
+```
+$ docker push 192.168.1.39:5000/registry:latest
+The push refers to repository [192.168.1.39:5000/registry]
+Get "https://192.168.1.39:5000/v2/": x509: certificate is valid for 192.168.1.40, not 192.168.1.39
+```
+
+生成证书的过程中，还会提示你填写一些信息，这些信息被称为 **Distinguished Name**（简称 **DN**），可以酌情填写重要的，不想填的输入 `.` 留空即可：
+
+```
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:CN
+State or Province Name (full name) [Some-State]:AH
+Locality Name (eg, city) []:HF
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:.
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:example.hub
+Email Address []:
+```
+
+命令执行成功后会在 `certs` 目录生成 `domain.crt` 和 `domain.key` 两个文件，然后通过下面的命令重新启动镜像仓库（先删除之前启动的），开启 TLS 安全功能：
+
+```
+$ docker run -d \
+  -v "$(pwd)"/certs:/certs \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
+  -p 5000:5000 \
+  --name registry \
+  registry:latest
+```
+
+不过由于这个证书是我们自己颁发的，并不是系统可信证书，在使用时会报错：
+
+```
+$ docker push 192.168.1.39:5000/registry:latest
+The push refers to repository [192.168.1.39:5000/registry]
+Get "https://192.168.1.39:5000/v2/": x509: certificate signed by unknown authority
+```
+
+有两种方法可以解决这个问题，第一种方法和上面的 HTTP 形式一样，在配置文件中添加 `insecure-registries` 配置：
+
+```
+{
+  "insecure-registries" : ["192.168.1.39:5000"]
+}
+```
+
+第二种方法是让 Docker 服务信任这个证书。如果是 Linux 机器，可以将 `domain.crt` 文件放到 Docker 的证书目录 `/etc/docker/certs.d/192.168.1.39:5000/ca.crt` 下，立即生效，不用重启 Docker 服务；如果是 Windows 机器，直接双击证书文件，将证书安装到当前用户或本地计算机：
+
+![](./images/windows-cert-install.png)
+
+然后选择 *根据证书类型，自动选择证书存储*，默认会将证书安装到 *中间证书颁发机构* 下，也可以手工选择安装到 *受信任的根证书颁发机构* 下。
+
+安装完成后可以打开证书管理器（如果安装时存储位置选择的是当前用户，运行 `certmgr.msc`；如果是本地计算机，运行 `certlm.msc`）查看我们的证书：
+
+![](./images/windows-cert.png)
+
+需要重启 Docker 服务后生效。
+
+### 开启用户认证
 
 ## 使用 Docker Registry UI 图形界面
 
