@@ -223,6 +223,76 @@ Get "https://192.168.1.39:5000/v2/": x509: certificate signed by unknown authori
 
 ### 开启用户认证
 
+开启 TLS 之后，为了保证镜像仓库的安全性，还可以通过客户端认证机制只允许特定的客户端连接，配置参数为 `http.tls.clientcas`，可以配置多个客户端证书：
+
+```
+http:
+  tls:
+    certificate: /path/to/x509/public
+    key: /path/to/x509/private
+    clientcas:
+      - /path/to/ca.pem
+      - /path/to/another/ca.pem
+```
+
+不过这种方式不是很常用，更多的是使用 [Basic 认证机制](https://docs.docker.com/registry/deploying/#native-basic-auth)。Docker Registry 支持通过 [Apache htpasswd 文件](https://httpd.apache.org/docs/2.4/programs/htpasswd.html) 来实现用户认证功能，首先使用 `htpasswd` 命令来生成密码文件：
+
+```
+$ mkdir -p auth
+$ docker run --entrypoint htpasswd httpd:2 -Bbn admin passw0rd > auth/htpasswd
+```
+
+`htpasswd` 命令内置在 Apache HTTPD 服务器里，我们这里直接使用了 `httpd:2` 镜像，生成的密码文件保存在 `auth` 目录下，密码是通过 [Bcrypt 算法](https://en.wikipedia.org/wiki/Bcrypt) 加密的，文件内容是这种格式：
+
+```
+admin:$2y$05$mzoaYiDmF7Bm2p/JWf4kje7naTzkyYpqgg5v8mZPq0HdDuSXZ1d0i
+```
+
+然后运行下面的命令，同时开启 TLS 功能和用户认证功能：
+
+```
+$ docker run -d \
+  -v "$(pwd)"/certs:/certs \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
+  -v "$(pwd)"/auth:/auth \
+  -e "REGISTRY_AUTH=htpasswd" \
+  -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
+  -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+  -p 5000:5000 \
+  --name registry \
+  registry:latest
+```
+
+这时访问镜像仓库报错：
+
+```
+$ docker push 192.168.1.39:5000/hello-world
+no basic auth credentials
+```
+
+需要先 `docker login` 登录：
+
+```
+$ docker login 192.168.1.39:5000
+```
+
+登录成功后，就可以正常操作镜像仓库了。需要特别注意的是，登录后的用户名和密码会以 BASE64 的形式保存在 `~/.docker/config.json` 文件中：
+
+```json
+{
+  "auths": {
+    "192.168.1.39:5000": {
+      "auth": "YWRtaW46cGFzc3cwcmQ="
+    }
+  }
+}
+```
+
+这是很不安全的，你可以考虑使用其他的 [Credentials store](https://docs.docker.com/engine/reference/commandline/login/#credentials-store) 来保存你的用户名和密码。
+
+另外，除了使用 Basic 用户认证，Docker Registry 还支持 [使用认证服务器实现更复杂的 OAuth 2.0 认证](https://docs.docker.com/registry/spec/auth/token/)。
+
 ## 使用 Docker Registry UI 图形界面
 
 ## 使用 Harbar 搭建私有镜像仓库
