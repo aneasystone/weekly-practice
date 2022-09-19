@@ -103,6 +103,40 @@ $ curl -s http://localhost:5000/v2/hello-world/manifests/latest | jq
 
 ### 使用 `crane` 工具操作仓库
 
+使用 Docker Registry API 操作镜像仓库不是那么方便，使用 docker 命令访问镜像仓库必须依赖 Docker Daemon 服务，有没有一款命令行工具可以直接用来操作镜像仓库呢？
+
+[google/go-containerregistry](https://github.com/google/go-containerregistry) 是 Google 开源的一个专门操作镜像仓库的 Go 类库，并且 Google 还基于此类库实现了一个小工具 [crane](https://github.com/google/go-containerregistry/blob/main/cmd/crane/README.md)，大大地方便了我们查看或管理远程仓库中的镜像。
+
+如果我们的镜像仓库开启了用户认证（参见下一节），需要在使用之前先通过 `crane auth login` 登录：
+
+```
+$ crane auth login localhost:5000 -u admin -p passw0rd
+```
+
+使用 `crane catalog` 列出所有镜像：
+
+```
+$ crane catalog localhost:5000 --insecure
+```
+
+使用 `crane ls` 列出某个镜像的所有标签：
+
+```
+$ crane ls localhost:5000/hello-world --insecure
+```
+
+使用 `crane pull` 下载镜像，并保存到一个 tar 文件中：
+
+```
+$ crane pull localhost:5000/hello-world hello-world.tar --insecure
+```
+
+使用 `crane push` 将一个 tar 文件上传到镜像仓库：
+
+```
+$ crane push hello-world.tar localhost:5000/hello-world --insecure
+```
+
 ## 开启 TLS 和安全认证
 
 上面我们用一行命令就搭建了一个私有仓库，不过这个私有仓库几乎没什么安全性，只能在本地测试用。Docker 默认是以 HTTPS 方式连接除 localhost 之外的仓库的，当从其他机器访问这个不安全的仓库地址时会报下面这样的错：
@@ -213,9 +247,7 @@ Get "https://192.168.1.39:5000/v2/": x509: certificate signed by unknown authori
 
 ![](./images/windows-cert-install.png)
 
-然后选择 *根据证书类型，自动选择证书存储*，默认会将证书安装到 *中间证书颁发机构* 下，也可以手工选择安装到 *受信任的根证书颁发机构* 下。
-
-安装完成后可以打开证书管理器（如果安装时存储位置选择的是当前用户，运行 `certmgr.msc`；如果是本地计算机，运行 `certlm.msc`）查看我们的证书：
+然后选择 *根据证书类型，自动选择证书存储*，默认会将证书安装到 *中间证书颁发机构* 下，也可以手工选择安装到 *受信任的根证书颁发机构* 下。安装完成后可以打开证书管理器（如果安装时存储位置选择的是当前用户，运行 `certmgr.msc`；如果是本地计算机，运行 `certlm.msc`）查看我们的证书：
 
 ![](./images/windows-cert.png)
 
@@ -308,6 +340,7 @@ $ docker login 192.168.1.39:5000
 1. [distribution/distribution](https://github.com/distribution/distribution) - The toolkit to pack, ship, store, and deliver container content
 1. [SUSE/Portus](https://github.com/SUSE/Portus) - Authorization service and frontend for Docker registry (v2)
 1. [google/go-containerregistry](https://github.com/google/go-containerregistry) - Go library and CLIs for working with container registries
+1. [Housekeep your local image registry](https://zhimin-wen.medium.com/housekeep-your-local-image-registry-770db6c66306)
 
 ## 更多
 
