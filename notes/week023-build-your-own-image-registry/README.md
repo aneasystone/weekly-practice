@@ -137,6 +137,92 @@ $ crane pull localhost:5000/hello-world hello-world.tar --insecure
 $ crane push hello-world.tar localhost:5000/hello-world --insecure
 ```
 
+### 删除镜像
+
+使用 `crane` 删除镜像要稍微复杂一点，首先使用 `crane digest` 获取某个镜像的摘要值（digest value）：
+
+```
+$ crane digest localhost:5000/hello-world:latest --insecure
+sha256:3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9
+```
+
+然后通过这个摘要值来删除镜像：
+
+```
+$ crane delete localhost:5000/hello-world@sha256:3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9 --insecure
+```
+
+不过默认情况下会报错，因为我们没有开启删除镜像的功能：
+
+```
+Error: DELETE https://localhost:5000/v2/hello-world/manifests/sha256:3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9: UNSUPPORTED: The operation is unsupported.
+```
+
+可以在启动镜像仓库时加上 `REGISTRY_STORAGE_DELETE_ENABLED=true` 环境变量，或在配置文件中加上该配置：
+
+```
+registry:
+  storage:
+    delete:
+      enabled: true
+```
+
+删除之后，通过 `crane ls` 确认 `hello-world:latest` 已删除：
+
+```
+$ crane ls localhost:5000/hello-world --insecure
+```
+
+不过此时使用 `crane catalog` 还是能看到这个镜像的，说明只是标签被删了：
+
+```
+$ crane catalog localhost:5000 --insecure
+hello-world
+```
+
+根据 distribution 项目上的一个 [Issuse](https://github.com/distribution/distribution/issues/2434) 大概了解到，Docker Registry API 只能删除 manifests 和 layers，不能删除 repository。如果真要删除，可以手工把 `/var/lib/registry/docker/registry/v2/repositories/hello-world` 这个目录删掉。
+
+另外有一点需要注意的是，通过 API 删除镜像并不能删除磁盘上未引用的 Blobs 文件，所以如果你想要释放磁盘空间，还需要手工对 Docker Registry 执行 [垃圾回收（Garbage collection）](https://docs.docker.com/registry/garbage-collection/)。
+
+进入 registry 容器：
+
+```
+$ docker exec -it registry /bin/sh
+```
+
+通过 `registry garbage-collect` 命令垃圾回收，真正执行前可以先加上一个 `--dry-run` 参数，可以看到执行后命令会删除哪些内容：
+
+```
+/ # registry garbage-collect --delete-untagged --dry-run /etc/docker/registry/config.yml
+hello-world
+
+0 blobs marked, 3 blobs and 0 manifests eligible for deletion
+blob eligible for deletion: sha256:3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9
+blob eligible for deletion: sha256:7f760066df116957589ba45a8ca84fe03373d15fdf1752c9b60f24ecbff5a870
+blob eligible for deletion: sha256:feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412
+```
+
+确认无误后，开始执行垃圾回收：
+
+```
+/ # registry garbage-collect --delete-untagged /etc/docker/registry/config.yml
+hello-world
+
+0 blobs marked, 3 blobs and 0 manifests eligible for deletion
+blob eligible for deletion: sha256:3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9
+INFO[0000] Deleting blob: /docker/registry/v2/blobs/sha256/3d/3d1aa3d49e778503d60d3ba718eaf04bc8fa2262bff980edf3fb8c01779cd8a9  go.version=go1.16.15 instance.id=74e3fb6e-ac44-4c96-923a-5cc6d5e5342a service=registry
+blob eligible for deletion: sha256:7f760066df116957589ba45a8ca84fe03373d15fdf1752c9b60f24ecbff5a870
+INFO[0000] Deleting blob: /docker/registry/v2/blobs/sha256/7f/7f760066df116957589ba45a8ca84fe03373d15fdf1752c9b60f24ecbff5a870  go.version=go1.16.15 instance.id=74e3fb6e-ac44-4c96-923a-5cc6d5e5342a service=registry
+blob eligible for deletion: sha256:feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412
+INFO[0000] Deleting blob: /docker/registry/v2/blobs/sha256/fe/feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412  go.version=go1.16.15 instance.id=74e3fb6e-ac44-4c96-923a-5cc6d5e5342a service=registry
+```
+
+执行结束后查看磁盘空间是否释放：
+
+```
+/ # df -h | grep /var/lib/registry
+```
+
 ## 开启 TLS 和安全认证
 
 上面我们用一行命令就搭建了一个私有仓库，不过这个私有仓库几乎没什么安全性，只能在本地测试用。Docker 默认是以 HTTPS 方式连接除 localhost 之外的仓库的，当从其他机器访问这个不安全的仓库地址时会报下面这样的错：
@@ -325,20 +411,14 @@ $ docker login 192.168.1.39:5000
 
 另外，除了使用 Basic 用户认证，Docker Registry 还支持 [使用认证服务器实现更复杂的 OAuth 2.0 认证](https://docs.docker.com/registry/spec/auth/token/)。
 
-## 使用 Docker Registry UI 图形界面
-
-## 使用 Harbar 搭建私有镜像仓库
-
 ## 参考
 
 1. [仓库 - Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/basic_concept/repository)
 1. [私有仓库 - Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/repository/registry)
 1. [Docker Registry](https://docs.docker.com/registry/)
-1. [Docker Registry UI](https://github.com/Joxit/docker-registry-ui)
 1. [How to delete images from a private docker registry?](https://stackoverflow.com/questions/25436742/how-to-delete-images-from-a-private-docker-registry)
 1. [你必须知道的Docker镜像仓库的搭建](https://www.cnblogs.com/edisonchou/p/docker_registry_repository_setup_introduction.html)
 1. [distribution/distribution](https://github.com/distribution/distribution) - The toolkit to pack, ship, store, and deliver container content
-1. [SUSE/Portus](https://github.com/SUSE/Portus) - Authorization service and frontend for Docker registry (v2)
 1. [google/go-containerregistry](https://github.com/google/go-containerregistry) - Go library and CLIs for working with container registries
 1. [Housekeep your local image registry](https://zhimin-wen.medium.com/housekeep-your-local-image-registry-770db6c66306)
 
@@ -355,3 +435,13 @@ $ docker login 192.168.1.39:5000
 * [OpenStack Swift storage driver](https://docs.docker.com/registry/storage-drivers/swift/)
 * [Aliyun OSS storage driver](https://docs.docker.com/registry/storage-drivers/oss/)
 * [Google Cloud Storage driver](https://docs.docker.com/registry/storage-drivers/gcs/)
+
+### 2. 使用图形界面管理镜像仓库
+
+这篇文章主要介绍了通过 Docker Registry API 和命令行两种方式对镜像仓库进行管理，这也是管理镜像仓库最基础的方式。篇幅有限，还有很多其他图形化的方式没有介绍，这些项目的底层依赖或实现原理大抵是一样的，下面是一个简单的列表：
+
+* [Docker Registry UI](https://github.com/Joxit/docker-registry-ui) - The simplest and most complete UI for your private registry
+* [SUSE/Portus](https://github.com/SUSE/Portus) - Authorization service and frontend for Docker registry (v2)
+* [Harbor](https://github.com/goharbor/harbor) - An open source trusted cloud native registry project that stores, signs, and scans content.
+* [Sonatype Nexus](https://www.sonatype.com/products/nexus-repository) - Manage binaries and build artifacts across your
+software supply chain.
