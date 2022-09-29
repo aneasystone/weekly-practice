@@ -25,7 +25,7 @@
 * WEEK021 - [使用 Visual Studio Code 进行 Go 开发](./notes/week021-go-in-visual-studio-code/README.md)
 * WEEK022 - [etcd 学习笔记](./notes/week022-etcd-notes/README.md)
 * WEEK023 - [搭建自己的镜像仓库](./notes/week023-build-your-own-image-registry/README.md)
-* WEEK024 - [Java 8 之 Stream 用法总结](./notes/week024-java-streams/README.md)
+* WEEK024 - [Java 8 之 Stream API 用法总结](./notes/week024-java-streams/README.md)
 
 ### 项目实践
 
