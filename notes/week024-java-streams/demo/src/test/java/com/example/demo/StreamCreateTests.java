@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -32,6 +36,12 @@ class StreamCreateTests {
 		String[] array = new String[]{"a", "b", "c"};
 		Stream<String> streamOfArray = Arrays.stream(array);
 		assertEquals(streamOfArray.count(), 3);
+
+		Stream<String> streamOfArray2 = Stream.of(array);
+		assertEquals(streamOfArray2.count(), 3);
+
+		Stream<String> streamOfArray3 = Stream.of("a", "b", "c");
+		assertEquals(streamOfArray3.count(), 3);
 	}
 
 	@Test
@@ -59,5 +69,33 @@ class StreamCreateTests {
 		AtomicInteger num = new AtomicInteger(0);
 		Stream<Integer> streamOfGenerate2 = Stream.generate(() -> num.incrementAndGet()).limit(3);
 		streamOfGenerate2.forEach(System.out::println);
+	}
+
+	@Test
+	void createStreamFromIterate() {
+		Stream<Integer> streamOfIterate = Stream.iterate(1, n -> n + 1).limit(3);
+		// assertEquals(streamOfIterate.count(), 3);
+		streamOfIterate.forEach(System.out::println);
+	}
+
+	@Test
+	void createStreamFromPrimitives() {
+		IntStream intStream = IntStream.range(1, 4);
+		assertEquals(intStream.count(), 3);		
+
+		IntStream intStream2 = IntStream.rangeClosed(1, 3);
+		assertEquals(intStream2.count(), 3);
+	}
+
+	@Test
+	void createStreamFromRandom() {
+		IntStream intStream = new Random().ints(3);
+		intStream.forEach(System.out::println);
+
+		LongStream longStream = new Random().longs(3);
+		longStream.forEach(System.out::println);
+
+		DoubleStream doubleStream = new Random().doubles(3);
+		doubleStream.forEach(System.out::println);
 	}
 }

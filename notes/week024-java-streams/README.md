@@ -98,6 +98,18 @@ String[] array = new String[]{"a", "b", "c"};
 Stream<String> streamOfArray = Arrays.stream(array);
 ```
 
+也可以使用 `Stream.of()` 方法来创建：
+
+```java
+Stream<String> streamOfArray2 = Stream.of(array);
+```
+
+由于 `Stream.of()` 函数的入参定义是一个可变参数，本质上是个数组，所以既可以像上面那样传入一个数组，也可以直接传入数组元素创建：
+
+```java
+Stream<String> streamOfArray3 = Stream.of("a", "b", "c");
+```
+
 #### 使用 `Stream.builder()` 手工创建流
 
 有时候流中的数据不是来自某个数据源，而是需要手工添加，我们可以使用 `Stream.builder()` 方法手工创建流：
@@ -117,7 +129,7 @@ Stream.Builder<String> builder = Stream.<String>builder();
 builder.add("a");
 builder.add("b");
 builder.add("c");
-Stream<String> streamOfBuilder = builder.build();
+Stream<String> streamOfBuilder2 = builder.build();
 ```
 
 #### 使用 `Stream.generate()` 生成流
@@ -133,6 +145,47 @@ Stream<String> streamOfGenerate = Stream.generate(() -> "hello").limit(3);
 ```java
 AtomicInteger num = new AtomicInteger(0);
 Stream<Integer> streamOfGenerate2 = Stream.generate(() -> num.incrementAndGet()).limit(3);
+```
+
+#### 使用 `Stream.iterate()` 生成流
+
+在上面的例子中，我们通过将变量传到 Lambda 表达式来生成一个整数数列，像这种根据迭代来生成数据的场景，还有一种更简单的实现：
+
+```java
+Stream<Integer> streamOfIterate = Stream.iterate(1, n -> n + 1).limit(3);
+```
+
+`iterate()` 函数第一个参数为流的第一个元素，后续的元素通过第二个参数中的 `UnaryOperator<T>` 来迭代生成。
+
+#### 生成基础类型的流
+
+由于 `Stream<T>` 接口使用了泛型，它的类型参数只能是对象类型，所以我们无法生成基础类型的流，我们只能使用相应的封装类型来生成流，这样就会导致自动装箱和拆箱（**auto-boxing**），影响性能。
+
+于是 JDK 提供了几个特殊的接口来方便我们创建基础类型的流。JDK 一共有 8 个基础类型，包括 4 个整数类型（`byte`、`short`、`int`、`long`），2 个浮点类型（`float`、`double`），1 个字符型（`char`）和 1 个布尔型（`boolean`），不过只提供了 3 个基础类型的流：`IntStream`、`LongStream` 和 `DoubleStream`。
+
+基础类型流和普通流接口基本一致，我们可以通过上面介绍的各种方法来创建基础类型流。JDK 还针对不同的基础类型提供了相应的更便捷的生成流的方法，比如 `IntStream.range()` 函数用于方便的生成某个范围内的整数序列：
+
+```java
+IntStream intStream = IntStream.range(1, 4);
+```
+
+要注意的是这个数列是左闭右开的，不包含第二个参数，`IntStream.rangeClosed()` 函数生成的数列是左右都是闭区间：
+
+```java
+IntStream intStream2 = IntStream.rangeClosed(1, 3);
+```
+
+此外，`Random` 类也提供了一些生成基础类型流的方法，比如下面的代码生成 3 个随机的 `int` 型整数：
+
+```java
+IntStream intStream = new Random().ints(3);
+```
+
+生成随机的 `long` 和 `double` 类型：
+
+```java
+LongStream longStream = new Random().longs(3);
+DoubleStream doubleStream = new Random().doubles(3);
 ```
 
 ### 中间操作
