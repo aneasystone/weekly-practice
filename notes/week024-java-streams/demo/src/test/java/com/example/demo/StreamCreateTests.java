@@ -3,10 +3,15 @@ package com.example.demo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -98,4 +103,31 @@ class StreamCreateTests {
 		DoubleStream doubleStream = new Random().doubles(3);
 		doubleStream.forEach(System.out::println);
 	}
+
+	@Test
+	void createStreamFromString() {
+		IntStream charStream = "abc".chars();
+		charStream.forEach(System.out::println);
+	}
+
+	@Test
+	void createStreamFromPattern() {
+		Stream<String> stringStream = Pattern.compile(", ").splitAsStream("a, b, c");
+		assertEquals(stringStream.count(), 3);
+	}
+
+	@Test
+	void createStreamFromFiles() throws IOException {
+		String filePath = "D:/code/weekly-practice/notes/week024-java-streams/demo/src/main/resources/";
+		
+		try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"));) {
+			stringStream.forEach(System.out::println);
+		}
+
+		try (Stream<Path> pathStream = Files.list(Paths.get(filePath));) {
+			pathStream.forEach(System.out::println);
+		}
+	}
+
+	
 }

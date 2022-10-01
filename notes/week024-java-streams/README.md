@@ -188,6 +188,34 @@ LongStream longStream = new Random().longs(3);
 DoubleStream doubleStream = new Random().doubles(3);
 ```
 
+#### 使用 `String.chars()` 生成字符流
+
+`String` 类提供了一个 `chars()` 方法，用于从字符串生成字符流，正如上面所说，JDK 只提供了 `IntStream`、`LongStream` 和 `DoubleStream` 三种基础类型流，并没有 `CharStream` 一说，所以返回值使用了 `IntStream`：
+
+```java
+IntStream charStream = "abc".chars();
+```
+
+#### 使用 `Pattern.splitAsStream()` 生成字符串流
+
+我们知道，`String` 类里有一个 `split()` 方法可以将一个字符串分割成子串，但是返回值是一个数组，如果要生成一个子串流，可以使用正则表达式包中 `Pattern` 类的 `splitAsStream()` 方法：
+
+```java
+Stream<String> stringStream = Pattern.compile(", ").splitAsStream("a, b, c");
+```
+
+#### 从文件生成字符串流
+
+另外，Java NIO 包中的 `Files` 类提供了一个 `lines()` 方法，它依次读取文件的每一行并生成字符串流：
+
+```java
+try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"));) {
+    stringStream.forEach(System.out::println);
+}
+```
+
+注意使用 `try-with-resources` 关闭文件。
+
 ### 中间操作
 
 ### 结束操作
