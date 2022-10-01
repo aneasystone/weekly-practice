@@ -218,7 +218,47 @@ try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"))
 
 ### 中间操作
 
+上一节主要介绍了一些常用的创建流的方法，流一旦创建好了，就可以对流执行各种操作。我们将对流的操作分成两种类型：**中间操作（Intermediate operation）** 和 **结束操作（Terminal operation）**，所有的中间操作返回的结果都是流本身，所以可以写出链式的代码，而结束操作会关闭流，让流无法再访问。
+
+中间操作又可以分成 **无状态操作（Stateless operation）** 和 **有状态操作（Stateful operation）** 两种，无状态是指元素的处理不受前面元素的影响，而有状态是指必须等到所有元素处理之后才知道最终结果。
+
+#### 无状态操作
+
+##### `filter`
+##### `map` / `mapToInt` / `mapToLong` / `mapToDouble`
+##### `flatMap` / `flatMapToInt` / `flatMapToLong` / `flatMapToDouble`
+##### `peek`
+##### `unordered`
+
+#### 有状态操作
+
+##### `distinct`
+##### `sorted`
+##### `limit` / `skip`
+##### `takeWhile` / `dropWhile`
+
 ### 结束操作
+
+流的中间操作其实只是一个标记，它是延迟执行的，要等到结束操作时才会触发实际的计算，而且每个流只能有一个结束操作。结束操作会关闭流，对已经关闭的流再执行操作会抛出 `IllegalStateException` 异常。
+
+结束操作也可以分成两种类型：**短路操作（Short-Circuit operation）** 和 **非短路操作（Non-Short-Circuit operation）**，短路操作是指不用处理全部元素就可以返回结果，它必须一个元素处理一次，而非短路操作可以批量处理数据，但是需要等全部元素都处理完才会返回结果。
+
+#### 短路操作
+
+##### `anyMatch`
+##### `allMatch`
+##### `nonMatch`
+##### `findFirst`
+##### `findAny`
+
+#### 非短路操作
+
+##### `forEach`
+##### `forEachOrdered`
+##### `toArray`
+##### `reduce`
+##### `collect`
+##### `min` / `max` / `count`
 
 ## 参考
 
