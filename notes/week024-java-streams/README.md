@@ -222,11 +222,59 @@ try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"))
 
 中间操作又可以分成 **无状态操作（Stateless operation）** 和 **有状态操作（Stateful operation）** 两种，无状态是指元素的处理不受前面元素的影响，而有状态是指必须等到所有元素处理之后才知道最终结果。
 
+下面通过一些实例来演示不同操作的具体用法，首先创建一个流，包含一些学生数据：
+
+```java
+Stream<Student> students = Stream.of(
+    Student.builder().name("张三").age(27).number(1L).interests("画画、篮球").build(),
+    Student.builder().name("李四").age(29).number(2L).interests("篮球、足球").build(),
+    Student.builder().name("王二").age(27).number(3L).interests("唱歌、跳舞、画画").build(),
+    Student.builder().name("麻子").age(31).number(4L).interests("篮球、羽毛球").build()
+);
+```
+
 #### 无状态操作
 
 ##### `filter`
+
+`filter` 用于对数据流进行过滤：
+
+```java
+students = students.filter(s -> s.getAge() > 30);
+```
+
 ##### `map` / `mapToInt` / `mapToLong` / `mapToDouble`
+
+`map` 接受一个 `Function<? super T, ? extends R> mapper` 类型的参数，对数据流的类型进行转换，从 T 类型转换为 R 类型，比如下面的代码将数据流 `Stream<Student>` 转换为 `Stream<StudentDTO>`：
+
+```java
+Stream<StudentDTO> studentDTOs = students.map(s -> {
+    return StudentDTO.builder().name(s.getName()).age(s.getAge()).build();
+});
+```
+
+如果要转换成基本类型流，可以使用 `mapToInt`、`mapToLong` 或 `mapToDouble` 方法：
+
+```java
+LongStream studentAges = students.mapToLong(s -> s.getAge());
+```
+
+上面的 Lambda 也可以写成方法引用：
+
+```java
+LongStream studentAges2 = students.mapToLong(Student::getAge);
+```
+
 ##### `flatMap` / `flatMapToInt` / `flatMapToLong` / `flatMapToDouble`
+
+`flatMap` 接受一个 `Function<? super T, ? extends Stream<? extends R>> mapper` 类型的参数，和 `map` 不同的是，他将 T 类型转换为 R 类型的流，而不是转换为 R 类型，然后再将流中所有数据平铺得到最后的结果：
+
+```java
+Stream<String> studentInterests = students.flatMap(s -> Arrays.stream(s.getInterests().split("、")));
+```
+
+每个学生可能有一个或多个兴趣，使用 `、` 分割，上面的代码首先将每个学生的兴趣拆开得到一个字符串流，然后将流中的元素平铺，最后得到汇总后的字符串流，该流中包含了所有学生的所有兴趣（元素可能重复）。可以看出 `flatMap` 实际上是对多个流的数据进行合并。
+
 ##### `peek`
 ##### `unordered`
 
