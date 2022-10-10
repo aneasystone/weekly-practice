@@ -237,7 +237,7 @@ Stream<Student> students = Stream.of(
 
 ##### `filter`
 
-`filter` 用于对数据流进行过滤：
+`filter` 用于对数据流进行过滤，它接受一个 `Predicate<? super T> predicate` 参数，返回符合该 Predicate 条件的元素：
 
 ```java
 students = students.filter(s -> s.getAge() > 30);
@@ -276,7 +276,32 @@ Stream<String> studentInterests = students.flatMap(s -> Arrays.stream(s.getInter
 每个学生可能有一个或多个兴趣，使用 `、` 分割，上面的代码首先将每个学生的兴趣拆开得到一个字符串流，然后将流中的元素平铺，最后得到汇总后的字符串流，该流中包含了所有学生的所有兴趣（元素可能重复）。可以看出 `flatMap` 实际上是对多个流的数据进行合并。
 
 ##### `peek`
+
+`peek` 一般用来调试，它接受一个 `Consumer<? super T> action` 参数，可以在流的计算过程中对元素进行处理，无返回结果，比如打印出元素的状态：
+
+```java
+Stream<String> studentNames = students.filter(s -> s.getAge() > 20)
+    .peek(System.out::println)
+    .map(Student::getName)
+    .peek(System.out::println);
+```
+
 ##### `unordered`
+
+*相遇顺序（encounter order）* 是流中的元素被处理时的顺序，创建流的数据源决定了流是否有序，比如 `List` 或数组是有序的，而 `HashSet` 是无序的。一些中间操作也可以修改流的相遇顺序，比如 `sorted()` 用于将无序流转换为有序，而 `unordered()` 也可以将一个有序流变成无序。
+
+对于 *顺序流（sequential streams）*，相遇顺序并不会影响性能，只会影响确定性。如果一个流是有序的，每次执行都会得到相同的结果，如果一个流是无序的，则可能会得到不同的结果。
+
+> 不过根据官方文档的说法，我使用 `unordered()` 将一个流改成无序流，重复执行得到的结果还是一样的 `[2, 4, 6]`，并没有得到不同的结果：
+>
+> ```
+> List<Integer> ints = Stream.of(1, 2, 3).unordered()
+>	.map(x -> x*2)
+>	.collect(Collectors.toList());
+> ```
+> [网上有说法](https://segmentfault.com/q/1010000017969473) 认为，这是因为 `unordered()` 并不会打乱流原本的顺序，只会 **消除流必须保持有序的约束**，从而允许后续操作使用不必考虑排序的优化。
+
+对于 *并行流（parallel streams）*，去掉有序约束后可能会提高流的执行效率，有些聚合操作，比如 `distinct()` 或 `Collectors.groupingBy()` 在不考虑元素有序时具备更好的性能。
 
 #### 有状态操作
 
@@ -312,6 +337,7 @@ Stream<String> studentInterests = students.flatMap(s -> Arrays.stream(s.getInter
 
 1. [Java8 Stream的总结](https://juejin.cn/post/6844903565350141966)
 1. [Java 8 新特性](https://www.runoob.com/java/java8-new-features.html)
+1. [Package java.util.stream Description](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
 1. https://www.runoob.com/java/java8-streams.html
 1. https://www.baeldung.com/java-streams
 1. https://www.baeldung.com/tag/java-streams/

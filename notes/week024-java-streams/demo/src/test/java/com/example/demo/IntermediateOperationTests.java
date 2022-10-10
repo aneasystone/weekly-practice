@@ -1,6 +1,8 @@
 package com.example.demo;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -47,5 +49,23 @@ public class IntermediateOperationTests {
 	void flatMapTest() {
 		Stream<String> studentInterests = students.flatMap(s -> Arrays.stream(s.getInterests().split("、")));
 		studentInterests.forEach(System.out::println);
+	}
+
+	@Test
+	void peekTest() {
+		Stream<String> studentNames = students.filter(s -> s.getAge() > 20)
+			.peek(System.out::println)
+			.map(Student::getName)
+			.peek(System.out::println);
+		// studentNames.forEach(System.out::println);
+		System.out.println(studentNames.findFirst().get());
+	}
+
+	@Test
+	void unorderedTest() {
+		List<Integer> ints = Stream.of(1, 2, 3).unordered()
+			.map(x -> x*2)
+			.collect(Collectors.toList());
+		System.out.println(ints);
 	}
 }
