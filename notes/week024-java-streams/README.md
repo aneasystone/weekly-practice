@@ -306,9 +306,75 @@ Stream<String> studentNames = students.filter(s -> s.getAge() > 20)
 #### 有状态操作
 
 ##### `distinct`
+
+`distinct()` 方法用于去除流中的重复元素：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 2, 3, 2, 4, 3, 1, 2);
+intStream = intStream.distinct();
+```
+
+`distinct()` 是根据流中每个元素的 `equals()` 方法来去重的，所以如果流中是对象类型，可能需要重写其 `equals()` 方法。
+
 ##### `sorted`
-##### `limit` / `skip`
-##### `takeWhile` / `dropWhile`
+
+`sorted()` 方法根据 *自然序（natural order）* 对流中的元素进行排序，流中的元素必须实现 `Comparable` 接口：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+intStream = intStream.sorted();
+```
+
+如果流中的元素没有实现 `Comparable` 接口，我们可以提供一个比较器 `Comparator<? super T> comparator` 对流进行排序：
+
+```java
+students = students.sorted(new Comparator<Student>() {
+
+    @Override
+    public int compare(Student o1, Student o2) {
+        return o1.getAge().compareTo(o2.getAge());
+    }
+    
+});
+```
+
+上面是通过匿名内部类的方式创建了一个比较器，我们可以使用 Lambda 来简化它的写法：
+
+```java
+students = students.sorted((o1, o2) -> o1.getAge().compareTo(o2.getAge()));
+```
+
+另外，`Comparator` 还内置了一些静态方法可以进一步简化代码：
+
+```java
+students = students.sorted(Comparator.comparing(Student::getAge));
+```
+
+甚至可以组合多个比较条件写出更复杂的排序逻辑：
+
+```java
+students = students.sorted(
+    Comparator.comparing(Student::getAge).thenComparing(Student::getNumber)
+);
+```
+
+##### `skip` / `limit`
+
+`skip` 和 `limit` 这两个方法有点类似于 SQL 中的 `LIMIT offset, rows` 语句，用于返回指定的记录条数，最常见的一个用处是用来做分页查询。
+
+```java
+Stream<Integer> intStream = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+intStream = intStream.skip(3).limit(3);
+```
+
+##### `dropWhile` / `takeWhile`
+
+`dropWhile` 和 `takeWhile` 这两个方法的作用也是返回指定的记录条数，只不过条数不是固定的，而是根据某个条件来决定返回哪些元素：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+intStream = intStream.dropWhile(x -> x <= 3).takeWhile(x -> x <= 6);
+```
 
 ### 结束操作
 
