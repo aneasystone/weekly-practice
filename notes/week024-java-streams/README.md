@@ -226,9 +226,9 @@ try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"))
 
 ```java
 Stream<Student> students = Stream.of(
-    Student.builder().name("张三").age(27).number(1L).interests("画画、篮球").build(),
+    Student.builder().name("张三").age(27).number(3L).interests("画画、篮球").build(),
     Student.builder().name("李四").age(29).number(2L).interests("篮球、足球").build(),
-    Student.builder().name("王二").age(27).number(3L).interests("唱歌、跳舞、画画").build(),
+    Student.builder().name("王二").age(27).number(1L).interests("唱歌、跳舞、画画").build(),
     Student.builder().name("麻子").age(31).number(4L).interests("篮球、羽毛球").build()
 );
 ```
@@ -384,11 +384,49 @@ intStream = intStream.dropWhile(x -> x <= 3).takeWhile(x -> x <= 6);
 
 #### 短路操作
 
-##### `anyMatch`
-##### `allMatch`
-##### `nonMatch`
-##### `findFirst`
-##### `findAny`
+##### `anyMatch` / `allMatch` / `nonMatch`
+
+这几个 match 方法非常类似，它们都接受一个 `Predicate<? super T> predicate` 条件，用于判断流中元素是否满足某个条件。
+
+`anyMatch` 表示只要有一个元素满足条件即返回 `true`：
+
+```java
+boolean hasAgeGreaterThan30 = students.anyMatch(s -> s.getAge() > 30);
+```
+
+`allMatch` 表示所有元素都满足条件才返回 `true`：
+
+```java
+boolean allAgeGreaterThan20 = students.allMatch(s -> s.getAge() > 20);
+```
+
+`noneMatch` 表示所有元素都不满足条件才返回 `true`：
+
+```java
+boolean noAgeGreaterThan40 = students.noneMatch(s -> s.getAge() > 40);
+```
+
+##### `findFirst` / `findAny`
+
+这两个 find 方法也是非常类似，都是从流中返回一个元素，如果没有，则返回一个空的 `Optional`，它们经常和 `filter` 方法联合使用。
+
+`findFirst` 用于返回流中第一个元素：
+
+```java
+Optional<Student> student = students.filter(s -> s.getAge() > 28).findFirst();
+```
+
+而 `findAny()` 返回的元素是不确定的，如果是顺序流，返回的是第一个元素，如果是并行流，则返回值是随机的：
+
+```java
+// 返回的是 李四
+Optional<Student> student = students.filter(s -> s.getAge() > 28).findAny();
+```
+
+```java
+// 返回不确定
+Optional<Student> student = students.parallel().filter(s -> s.getAge() > 28).findAny();
+```
 
 #### 非短路操作
 
