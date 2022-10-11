@@ -63,4 +63,35 @@ public class TerminalOperationTests {
 		assertTrue(student.isPresent());
 		// assertEquals(student.get().getName(), "李四");
 	}
+
+	@Test
+	void forEachTest() {
+		Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+		// intStream.forEach(System.out::println);
+		intStream.parallel().forEach(System.out::println);
+	}
+
+	@Test
+	void forEachOrderedTest() {
+		Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+		// intStream.forEachOrdered(System.out::println);
+		intStream.parallel().forEachOrdered(System.out::println);
+	}
+
+	@Test
+	void toArrayTest() {
+		Object[] array = students.toArray();
+		for (Object o : array) {
+			System.out.println(((Student)o).getName());
+		}
+	}
+
+	@Test
+	void toArrayTest2() {
+		// Student[] array = students.toArray(x -> new Student[4]);
+		Student[] array = students.toArray(Student[]::new);
+		for (Student o : array) {
+			System.out.println(o.getName());
+		}
+	}
 }

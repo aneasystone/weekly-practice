@@ -416,12 +416,14 @@ boolean noAgeGreaterThan40 = students.noneMatch(s -> s.getAge() > 40);
 Optional<Student> student = students.filter(s -> s.getAge() > 28).findFirst();
 ```
 
-而 `findAny()` 返回的元素是不确定的，如果是顺序流，返回的是第一个元素，如果是并行流，则返回值是随机的：
+而 `findAny()` 返回的元素是不确定的，如果是顺序流，返回的是第一个元素：
 
 ```java
 // 返回的是 李四
 Optional<Student> student = students.filter(s -> s.getAge() > 28).findAny();
 ```
+
+如果是并行流，则返回值是随机的：
 
 ```java
 // 返回不确定
@@ -430,9 +432,40 @@ Optional<Student> student = students.parallel().filter(s -> s.getAge() > 28).fin
 
 #### 非短路操作
 
-##### `forEach`
-##### `forEachOrdered`
+##### `forEach` / `forEachOrdered`
+
+这两个 `forEach` 方法有点类似于 `peek` 方法，都是接受一个 `Consumer<? super T> action` 参数，对流中每一个元素进行处理，只不过 `forEach` 是结束操作，而 `peek` 是中间操作。
+
+```java
+intStream.forEach(System.out::println);
+```
+
+这两个方法的区别在于 `forEach` 的处理顺序是不确定的，而 `forEachOrdered` 会按照流中元素的 *相遇顺序（encounter order）* 来处理。比如下面的代码：
+
+```java
+intStream.parallel().forEach(System.out::println);
+```
+
+由于这里使用了并行流，`forEach` 输出结果是随机的。如果换成 `forEachOrdered`，则会保证输出结果是有序的：
+
+```java
+intStream.parallel().forEachOrdered(System.out::println);
+```
+
 ##### `toArray`
+
+`toArray` 方法用于将流转换为一个数组，默认情况下数组类型是 `Object[]`：
+
+```java
+Object[] array = students.toArray();
+```
+
+如果要转换为确切的对象类型，`toArray` 还接受一个 `IntFunction<A[]> generator` 参数，也是数组的构造函数：
+
+```java
+Student[] array = students.toArray(Student[]::new);
+```
+
 ##### `reduce`
 ##### `collect`
 ##### `min` / `max` / `count`
