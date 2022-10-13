@@ -467,6 +467,76 @@ Student[] array = students.toArray(Student[]::new);
 ```
 
 ##### `reduce`
+
+在英语中 `reduce` 这个单词的意思是 “减少、缩小”，顾名思义，`reduce` 方法的作用也是如此，它会根据某种规则依次处理流中的元素，经过计算与合并后返回一个唯一的值。早在 2004 年，Google 就研究并提出了一种面向大规模数据处理的并行计算模型和方法，被称为 [MapReduce](https://research.google/pubs/pub62/)，这里的 Map 表示 **映射**，Reduce 表示 **规约**，它们和 Java Stream API 中的 `map` 和 `reduce` 方法有着异曲同工之妙，都是从函数式编程语言中借鉴的思想。
+
+`reduce` 方法有三种不同的函数形式，第一种也是最简单的：
+
+```java
+Optional<T> reduce(BinaryOperator<T> accumulator);
+```
+
+它接受一个 `BinaryOperator<T> accumulator` 参数，`BinaryOperator` 也是一个函数式接口，它是 `BiFunction` 接口的特殊形式：
+
+```java
+@FunctionalInterface
+public interface BinaryOperator<T> extends BiFunction<T,T,T> {
+}
+```
+
+所以我们知道 `accumulator` 是一个函数，它有两个参数，并且两个参数的类型和输出是一样的。它的第一个参数是上次函数执行的返回值（也称为中间结果），第二个参数是流中的元素，函数将两个值按照方法进行处理，得到值赋给下次执行这个函数的参数。第一次执行的时候第一参数的值是流中第一元素，第二个元素是流中第二元素，因为流可能为空，所以这个方法的返回值为 `Optional`。
+
+最容易想到的一个例子是通过 `reduce` 来求和：
+
+```java
+Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x + y);
+```
+
+不仅如此，稍微改一下 `accumulator` 函数，我们还可以实现其他的功能，比如求最大值：
+
+```java
+Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x > y ? x : y);
+```
+
+求最小值：
+
+```java
+Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x < y ? x : y);
+```
+
+`reduce` 的第二种形式是：
+
+```java
+T reduce(T identity, BinaryOperator<T> accumulator);
+```
+
+它和第一种形式的区别在于多了一个和流中元素同类型的 `T identity` 参数，这个参数的作用是设置初始值，当流中元素为空时，返回初始值。这个形式的好处是不会返回 `Optional` 类型，代码看起来更简单，所以一般更推荐使用这种形式：
+
+```java
+Integer result = students.map(Student::getAge).reduce(0, (x, y) -> x + y);
+```
+
+在 `reduce` 的 JDK 源码注释里，有一段伪代码很好地解释了 `reduce` 内部的处理逻辑：
+
+```
+U result = identity;
+for (T element : this stream)
+    result = accumulator.apply(result, element)
+return result;
+```
+
+`reduce` 的第三种形式如下：
+
+```java
+<U> U reduce(U identity, 
+    BiFunction<U, ? super T, U> accumulator, 
+    BinaryOperator<U> combiner);
+```
+
+可以看到第三种形式要稍微复杂一点，它接受三个参数，而且返回值类型也变了，不再局限于和流中元素同类型。
+
+`reduce` 方法的强大之处在于它非常灵活，聚合操作
+
 ##### `collect`
 ##### `min` / `max` / `count`
 
