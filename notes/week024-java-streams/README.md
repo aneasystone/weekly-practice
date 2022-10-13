@@ -290,7 +290,7 @@ Stream<String> studentNames = students.filter(s -> s.getAge() > 20)
 
 *相遇顺序（encounter order）* 是流中的元素被处理时的顺序，创建流的数据源决定了流是否有序，比如 `List` 或数组是有序的，而 `HashSet` 是无序的。一些中间操作也可以修改流的相遇顺序，比如 `sorted()` 用于将无序流转换为有序，而 `unordered()` 也可以将一个有序流变成无序。
 
-对于 *顺序流（sequential streams）*，相遇顺序并不会影响性能，只会影响确定性。如果一个流是有序的，每次执行都会得到相同的结果，如果一个流是无序的，则可能会得到不同的结果。
+对于 *串行流（sequential streams）*，相遇顺序并不会影响性能，只会影响确定性。如果一个流是有序的，每次执行都会得到相同的结果，如果一个流是无序的，则可能会得到不同的结果。
 
 > 不过根据官方文档的说法，我使用 `unordered()` 将一个流改成无序流，重复执行得到的结果还是一样的 `[2, 4, 6]`，并没有得到不同的结果：
 >
@@ -413,10 +413,11 @@ boolean noAgeGreaterThan40 = students.noneMatch(s -> s.getAge() > 40);
 `findFirst` 用于返回流中第一个元素：
 
 ```java
+// 返回的是 李四
 Optional<Student> student = students.filter(s -> s.getAge() > 28).findFirst();
 ```
 
-而 `findAny()` 返回的元素是不确定的，如果是顺序流，返回的是第一个元素：
+而 `findAny()` 返回的元素是不确定的，如果是串行流，返回的是第一个元素：
 
 ```java
 // 返回的是 李四
@@ -476,20 +477,36 @@ Student[] array = students.toArray(Student[]::new);
 Optional<T> reduce(BinaryOperator<T> accumulator);
 ```
 
-它接受一个 `BinaryOperator<T> accumulator` 参数，`BinaryOperator` 也是一个函数式接口，它是 `BiFunction` 接口的特殊形式：
+它接受一个 `BinaryOperator<T> accumulator` 参数，`BinaryOperator` 是一个函数式接口，它是 `BiFunction` 接口的特殊形式，`BiFunction` 表示的是两个入参和一个出参的函数：
+
+```java
+@FunctionalInterface
+public interface BiFunction<T, U, R> {
+    // ...
+}
+```
+
+`BinaryOperator` 同样也是两个入参和一个出参的函数，但是它的两个入参的类型和出参的类型是一样的：
 
 ```java
 @FunctionalInterface
 public interface BinaryOperator<T> extends BiFunction<T,T,T> {
+    // ...
 }
 ```
 
-所以我们知道 `accumulator` 是一个函数，它有两个参数，并且两个参数的类型和输出是一样的。它的第一个参数是上次函数执行的返回值（也称为中间结果），第二个参数是流中的元素，函数将两个值按照方法进行处理，得到值赋给下次执行这个函数的参数。第一次执行的时候第一参数的值是流中第一元素，第二个元素是流中第二元素，因为流可能为空，所以这个方法的返回值为 `Optional`。
+`accumulator` 的意思是累加器，它是一个函数，它有两个参数。它的第一个参数是上次函数执行的返回值（也称为中间结果），第二个参数是流中的元素，函数将两个值按照方法进行处理，得到值赋给下次执行这个函数的参数。第一次执行的时候第一参数的值是流中第一元素，第二个元素是流中第二元素，因为流可能为空，所以这个方法的返回值为 `Optional`。
 
 最容易想到的一个例子是通过 `reduce` 来求和：
 
 ```java
 Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x + y);
+```
+
+其中的 Lambda 表达式 `(x, y) -> x + y` 也可以简写成方法引用 `Integer::sum`：
+
+```java
+Optional<Integer> result = students.map(Student::getAge).reduce(Integer::sum);
 ```
 
 不仅如此，稍微改一下 `accumulator` 函数，我们还可以实现其他的功能，比如求最大值：
@@ -504,6 +521,8 @@ Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x > y 
 Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x < y ? x : y);
 ```
 
+这些参数同样也都可以使用方法引用 `Integer::max` 和 `Integer::min` 进行简化。
+
 `reduce` 的第二种形式是：
 
 ```java
@@ -513,7 +532,7 @@ T reduce(T identity, BinaryOperator<T> accumulator);
 它和第一种形式的区别在于多了一个和流中元素同类型的 `T identity` 参数，这个参数的作用是设置初始值，当流中元素为空时，返回初始值。这个形式的好处是不会返回 `Optional` 类型，代码看起来更简单，所以一般更推荐使用这种形式：
 
 ```java
-Integer result = students.map(Student::getAge).reduce(0, (x, y) -> x + y);
+Integer result = students.map(Student::getAge).reduce(0, Integer::sum);
 ```
 
 在 `reduce` 的 JDK 源码注释里，有一段伪代码很好地解释了 `reduce` 内部的处理逻辑：
@@ -533,9 +552,70 @@ return result;
     BinaryOperator<U> combiner);
 ```
 
-可以看到第三种形式要稍微复杂一点，它接受三个参数，而且返回值类型也变了，不再局限于和流中元素同类型。
+可以看到第三种形式要稍微复杂一点，它接受三个参数，第一个参数 `identity` 表示初始值，第二个参数 `accumulator` 表示累加器，这和形式二是一样的，不过注意看会发现这两个参数的类型发生了变化，而且返回值的类型也变了，不再局限于和流中元素同类型。第三个参数 `BinaryOperator<U> combiner` 被称为组合器，这个参数有什么作用呢？在上面的例子中，我们使用的都是串行流，当我们处理并行流时，流会被拆分成多个子流进行 `reduce` 操作，很显然我们还需要将多个子流的处理结果进行汇聚，这个汇聚操作就是 `combiner`。
 
-`reduce` 方法的强大之处在于它非常灵活，聚合操作
+不过如果你的汇聚操作和累加器逻辑是一样的，`combiner` 参数也可以省略：
+
+```java
+Integer result = intStream.parallel().reduce(0, Integer::sum);
+```
+
+这个写法和下面的写法没有任何区别：
+
+```java
+Integer result = intStream.parallel().reduce(0, Integer::sum, Integer::sum);
+```
+
+到目前为止我们还没有看到 `reduce` 方法的特别之处，可能你会觉得它不过就是普通的方法，用于 **对流中的所有元素累积处理，最终得到一个处理结果**。其实这是一个非常强大的工具，也是一个抽象程度非常高的概念，它的用法可以非常灵活，从下面几个例子可以一窥 `reduce` 的冰山一角。
+
+统计元素个数：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 2, 4, 2);
+Map<Integer, Integer> countMap = intStream.reduce(new HashMap<>(), (x, y) -> {
+    if (x.containsKey(y)) {
+        x.put(y, x.get(y) + 1);
+    } else {
+        x.put(y, 1);
+    }
+    return x;
+}, (x, y) -> new HashMap<>());
+```
+
+数组去重：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 2, 4, 2);
+List<Integer> distinctMap = intStream.reduce(new ArrayList<>(), (x, y) -> {
+    if (!x.contains(y)) {
+        x.add(y);
+    }
+    return x;
+}, (x, y) -> new ArrayList<>());
+```
+
+List 转 Map：
+
+```java
+Map<Long, Student> studentMap = students.reduce(new HashMap<Long, Student>(), (x, y) -> {
+	x.put(y.getNumber(), y);
+	return x;
+}, (x, y) -> new HashMap<Long, Student>());
+```
+
+可以看到，一旦这个返回类型不做限制时，我们能做的事情就太多了。只要是类似的汇聚操作，都可以用 `reduce` 实现，这也是 `MapReduce` 可以用于大规模数据处理的原因。不过上面处理的都是串行流，所以 `combiner` 参数并没有什么用，随便写都不影响处理结果，但是当我们处理并行流时，`combiner` 参数就不能乱写了，也不能省略，这是因为它和累加器的参数是不一样的，而且它们的处理逻辑也略有区别。比如上面的 List 转 Map 的例子，如果使用并行流，则必须写 `combiner` 参数：
+
+```java
+Map<Long, Student> studentMap = students.parallel().reduce(new HashMap<Long, Student>(), (x, y) -> {
+    x.put(y.getNumber(), y);
+    return x;
+}, (x, y) -> {
+    for (Map.Entry<Long, Student> entry : y.entrySet()) {
+        x.put(entry.getKey(), entry.getValue());
+    }
+    return x;
+});
+```
 
 ##### `collect`
 ##### `min` / `max` / `count`
@@ -543,9 +623,9 @@ return result;
 ## 参考
 
 1. [Java8 Stream的总结](https://juejin.cn/post/6844903565350141966)
-1. [Java 8 新特性](https://www.runoob.com/java/java8-new-features.html)
+1. [Java 8 新特性 | 菜鸟教程](https://www.runoob.com/java/java8-new-features.html)
+1. [Java 8 Stream | 菜鸟教程](https://www.runoob.com/java/java8-streams.html)
 1. [Package java.util.stream Description](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
-1. https://www.runoob.com/java/java8-streams.html
 1. https://www.baeldung.com/java-streams
 1. https://www.baeldung.com/tag/java-streams/
 1. https://www.cnblogs.com/wangzhuxing/p/10204894.html

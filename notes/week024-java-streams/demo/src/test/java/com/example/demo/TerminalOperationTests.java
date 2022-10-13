@@ -104,7 +104,8 @@ public class TerminalOperationTests {
 	void reduceTest() {
 		
 		// sum
-		Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x + y);
+		// Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x + y);
+        Optional<Integer> result = students.map(Student::getAge).reduce(Integer::sum);
 		System.out.println(result.get());
 	}
 
@@ -112,7 +113,8 @@ public class TerminalOperationTests {
 	void reduceTest2() {
 
 		// min
-		Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x < y ? x : y);
+		// Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x < y ? x : y);
+        Optional<Integer> result = students.map(Student::getAge).reduce(Integer::min);
 		System.out.println(result.get());
 	}
 
@@ -120,8 +122,8 @@ public class TerminalOperationTests {
 	void reduceTest3() {
 
 		// max
-		Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x > y ? x : y);
-
+		// Optional<Integer> result = students.map(Student::getAge).reduce((x, y) -> x > y ? x : y);
+        Optional<Integer> result = students.map(Student::getAge).reduce(Integer::max);
 		System.out.println(result.get());
 	}
 
@@ -165,9 +167,7 @@ public class TerminalOperationTests {
 	void reduceTest5() {
 		
 		// 属性求和
-		Integer totalAge = students.reduce(0, (x, y) -> {
-			return x + y.getAge();
-		}, (x, y) -> 0);
+		Integer totalAge = students.reduce(0, (x, y) -> x + y.getAge(), (x, y) -> 0);
 		System.out.println(totalAge);
 	}
 
@@ -175,12 +175,44 @@ public class TerminalOperationTests {
 	void reduceTest6() {
 
 		// list to map
-		Map<Long, Student> studentMap = students.reduce(new HashMap<Long, Student>(), (x, y) -> {
+		// Map<Long, Student> studentMap = students.reduce(new HashMap<Long, Student>(), (x, y) -> {
+		// 	x.put(y.getNumber(), y);
+		// 	return x;
+		// }, (x, y) -> new HashMap<Long, Student>());
+		// System.out.println(studentMap);
+
+        Map<Long, Student> studentMap = students.parallel().reduce(new HashMap<Long, Student>(), (x, y) -> {
 			x.put(y.getNumber(), y);
 			return x;
-		}, (x, y) -> new HashMap<Long, Student>());
+		}, (x, y) -> {
+            for (Map.Entry<Long, Student> entry : y.entrySet()) {
+                x.put(entry.getKey(), entry.getValue());
+            }
+            return x;
+        });
 		System.out.println(studentMap);
 	}
+
+    @Test
+	void reduceTest7() {
+
+        // 并行流求和
+        Stream<Integer> intStream = Stream.iterate(1, n -> n + 1).limit(100);
+        Optional<Integer> result = intStream.reduce(Integer::sum);
+        System.out.println(result.get());
+
+        Stream<Integer> intStream2 = Stream.iterate(1, n -> n + 1).limit(100);
+        Optional<Integer> result2 = intStream2.parallel().reduce(Integer::sum);
+        System.out.println(result2.get());
+
+        Stream<Integer> intStream3 = Stream.iterate(1, n -> n + 1).limit(100);
+        Integer result3 = intStream3.parallel().reduce(0, Integer::sum);
+        System.out.println(result3);
+
+        Stream<Integer> intStream4 = Stream.iterate(1, n -> n + 1).limit(100);
+        Integer result4 = intStream4.parallel().reduce(0, Integer::sum, Integer::sum);
+        System.out.println(result4);
+    }
 
 	@Test
 	void minTest() {
