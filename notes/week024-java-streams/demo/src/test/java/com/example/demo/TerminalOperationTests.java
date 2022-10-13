@@ -4,11 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -214,6 +218,12 @@ public class TerminalOperationTests {
         System.out.println(result4);
     }
 
+    @Test
+	void collectTest() {
+		List<Student> studentList = students.collect(Collectors.toList());
+		System.out.println(studentList);
+	}
+
 	@Test
 	void minTest() {
 		OptionalInt minAge = students.mapToInt(Student::getAge).min();
@@ -222,13 +232,38 @@ public class TerminalOperationTests {
 
 	@Test
 	void maxTest() {
-		OptionalInt maxAge = students.mapToInt(Student::getAge).max();
-		System.out.println(maxAge.getAsInt());
+		// OptionalInt maxAge = students.mapToInt(Student::getAge).max();
+		// System.out.println(maxAge.getAsInt());
+
+        Optional<Student> maxAgeStudent = students.max(Comparator.comparingInt(Student::getAge));
+        System.out.println(maxAgeStudent.get().getAge());
 	}
 
 	@Test
 	void sumTest() {
 		int sumAge = students.mapToInt(Student::getAge).sum();
 		System.out.println(sumAge);
+	}
+
+    @Test
+	void averageTest() {
+		OptionalDouble averageAge = students.mapToInt(Student::getAge).average();
+		System.out.println(averageAge);
+	}
+
+    @Test
+	void summaryStatisticsTest() {
+		IntSummaryStatistics summaryStatistics = students.mapToInt(Student::getAge).summaryStatistics();
+        System.out.println("Max = " + summaryStatistics.getMax());
+        System.out.println("Min = " + summaryStatistics.getMin());
+        System.out.println("Sum = " + summaryStatistics.getSum());
+        System.out.println("Count = " + summaryStatistics.getCount());
+		System.out.println("Average = " + summaryStatistics.getAverage());
+	}
+
+    @Test
+	void countTest() {
+		long count = students.count();
+		System.out.println(count);
 	}
 }

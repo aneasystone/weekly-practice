@@ -40,7 +40,7 @@ List<String> words = List.of("A", "B", "C");
 words.stream().forEach(word -> System.out.println(word.toLowerCase()));
 ```
 
-使用内部迭代可以让用户更聚焦待解决的问题，编写代码不易出错，而且通常编写的代码更少也更易读。这是 Stream API 的一大特征。
+使用内部迭代可以让用户更聚焦待解决的问题，编写代码不易出错，而且通常编写的代码更少也更易读。这是 Stream API 的一大特征。其实，上面的两种代码实际上对应着两种截然不同的编程风格，那种用户需要关注怎么做，需要 step-by-step 地告诉计算机执行细节的编程风格，被称为 **[命令式编程（Imperative programming）](https://en.wikipedia.org/wiki/Imperative_programming)**，而用户只关注做什么，只需要告诉计算机想要什么结果，计算过程由计算机自己决定的编程风格，被称为 **[声明式编程（Declarative programming）](https://en.wikipedia.org/wiki/Declarative_programming)**。
 
 另外，正如 Stream API 的名字一样，Stream API 中有很多方法都会返回流对象本身，于是我们就可以将多个操作串联起来形成一个管道（*pipeline*），写出下面这样流式风格（*fluent style*）的代码：
 
@@ -618,7 +618,53 @@ Map<Long, Student> studentMap = students.parallel().reduce(new HashMap<Long, Stu
 ```
 
 ##### `collect`
-##### `min` / `max` / `count`
+
+#### `count`
+
+`count` 比较简单，用于统计流中元素个数：
+
+```java
+long count = students.count();
+```
+
+##### `max` / `min`
+
+`max` 和 `min` 函数用于计算流中的最大元素和最小元素，元素的大小通过比较器 `Comparator<? super T> comparator` 来决定。比如获取年龄最大的学生：
+
+```java
+Optional<Student> maxAgeStudent = students.max(Comparator.comparingInt(Student::getAge));
+```
+
+不过对于基础类型流，`max` 和 `min` 函数进行了简化，不需要比较器参数：
+
+```java
+OptionalInt maxAge = students.mapToInt(Student::getAge).max();
+```
+
+##### `sum` / `average` / `summaryStatistics`
+
+另外，对于基础类型流，还特意增加了一些统计类的函数，比如 `sum` 用于对流中数据进行求和：
+
+```java
+int sumAge = students.mapToInt(Student::getAge).sum();
+```
+
+`average` 用于求平均值：
+
+```java
+OptionalDouble averageAge = students.mapToInt(Student::getAge).average();
+```
+
+`summaryStatistics` 用于一次性获取流中数据的统计信息（包括最大值、最小值、总和、数量、平均值）：
+
+```java
+IntSummaryStatistics summaryStatistics = students.mapToInt(Student::getAge).summaryStatistics();
+System.out.println("Max = " + summaryStatistics.getMax());
+System.out.println("Min = " + summaryStatistics.getMin());
+System.out.println("Sum = " + summaryStatistics.getSum());
+System.out.println("Count = " + summaryStatistics.getCount());
+System.out.println("Average = " + summaryStatistics.getAverage());
+```
 
 ## 参考
 
