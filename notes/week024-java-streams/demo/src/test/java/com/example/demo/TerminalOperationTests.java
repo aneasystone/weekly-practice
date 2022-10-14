@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,10 +30,10 @@ public class TerminalOperationTests {
 	@BeforeEach
 	void setUp() {
 		students = Stream.of(
-			Student.builder().name("张三").age(27).number(3L).interests("画画、篮球").build(),
-			Student.builder().name("李四").age(29).number(2L).interests("篮球、足球").build(),
-			Student.builder().name("王二").age(27).number(1L).interests("唱歌、跳舞、画画").build(),
-			Student.builder().name("麻子").age(31).number(4L).interests("篮球、羽毛球").build()
+			Student.builder().name("张三").gender("男").age(27).number(3L).interests("画画、篮球").build(),
+			Student.builder().name("李四").gender("男").age(29).number(2L).interests("篮球、足球").build(),
+			Student.builder().name("王二").gender("女").age(27).number(1L).interests("唱歌、跳舞、画画").build(),
+			Student.builder().name("麻子").gender("女").age(31).number(4L).interests("篮球、羽毛球").build()
 		);
 	}
 
@@ -220,8 +223,112 @@ public class TerminalOperationTests {
 
     @Test
 	void collectTest() {
-		List<Student> studentList = students.collect(Collectors.toList());
-		System.out.println(studentList);
+		Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+		AtomicInteger result = intStream.collect(
+            () -> new AtomicInteger(),
+            (a, b) -> a.addAndGet(b), 
+            (a, b) -> {}
+        );
+        System.out.println(result);
+
+        // Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+		// AtomicInteger result = intStream.collect(
+        //     AtomicInteger::new,
+        //     AtomicInteger::addAndGet, 
+        //     (a, b) -> {}
+        // );
+        // System.out.println(result);
+	}
+
+    @Test
+	void collectTest2() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+		List<Integer> result = intStream.collect(Collectors.toList());
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest3() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+		Set<Integer> result = intStream.collect(Collectors.toSet());
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest4() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+		List<Integer> result = intStream.collect(Collectors.toCollection(ArrayList::new));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest5() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+		Integer result = intStream.collect(Collectors.summingInt(Integer::valueOf));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest6() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+		Optional<Integer> result = intStream.collect(Collectors.maxBy(Integer::compareTo));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest7() {
+		Map<Long, Student> result = students.collect(Collectors.toMap(Student::getNumber, Function.identity()));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest8() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+        Map<Integer, Integer> result = intStream.collect(Collectors.toMap(i -> i, i -> i, (i, j) -> i));
+		System.out.println(result.values());
+	}
+
+    @Test
+	void collectTest9() {
+        Stream<Integer> intStream = Stream.of(1, 3, 2, 4, 3, 2, 1);
+        Map<Integer, Long> result = intStream.collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest10() {
+        String result = students.map(Student::getName).collect(Collectors.joining("、"));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest11() {
+        Map<Integer, List<Student>> result = students.collect(Collectors.groupingBy(Student::getAge));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest12() {
+        Map<Boolean, List<Student>> result = students.collect(Collectors.partitioningBy(x -> x.getAge() > 30));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest13() {
+        Map<String, List<String>> result = students.collect(Collectors.groupingBy(
+            Student::getGender, Collectors.mapping(
+                Student::getName, Collectors.toList())));
+		System.out.println(result);
+	}
+
+    @Test
+	void collectTest14() {
+        Map<String, Integer> result = students.collect(Collectors.groupingBy(
+            Student::getGender, Collectors.reducing(
+                0, Student::getAge, Integer::sum)));
+        // Map<String, Integer> result = students.collect(Collectors.groupingBy(
+        //     Student::getGender, Collectors.summingInt(Student::getAge)));
+		System.out.println(result);
 	}
 
 	@Test

@@ -226,10 +226,10 @@ try (Stream<String> stringStream = Files.lines(Paths.get(filePath + "test.txt"))
 
 ```java
 Stream<Student> students = Stream.of(
-    Student.builder().name("张三").age(27).number(3L).interests("画画、篮球").build(),
-    Student.builder().name("李四").age(29).number(2L).interests("篮球、足球").build(),
-    Student.builder().name("王二").age(27).number(1L).interests("唱歌、跳舞、画画").build(),
-    Student.builder().name("麻子").age(31).number(4L).interests("篮球、羽毛球").build()
+    Student.builder().name("张三").gender("男").age(27).number(3L).interests("画画、篮球").build(),
+    Student.builder().name("李四").gender("男").age(29).number(2L).interests("篮球、足球").build(),
+    Student.builder().name("王二").gender("女").age(27).number(1L).interests("唱歌、跳舞、画画").build(),
+    Student.builder().name("麻子").gender("女").age(31).number(4L).interests("篮球、羽毛球").build()
 );
 ```
 
@@ -619,6 +619,124 @@ Map<Long, Student> studentMap = students.parallel().reduce(new HashMap<Long, Stu
 
 ##### `collect`
 
+`collect` 函数正如它的名字一样，可以将流中的元素经过处理并收集起来，得到收集后的结果，这听起来感觉和 `reduce` 函数有点像，而且它的函数定义也和 `reduce` 函数很类似：
+
+```java
+<R> R collect(Supplier<R> supplier,
+    BiConsumer<R, ? super T> accumulator,
+    BiConsumer<R, R> combiner);
+```
+
+不过区别还是有的，`collect` 函数的第一个参数也是用于设置初始值，不过它是通过一个 `Supplier<R> supplier` 来设置，这是一个没有参数的函数，函数的返回值就是初始值。第二个和第三个参数也是累加器 `accumulator` 和组合器 `combiner`，它们的作用和在 `reduce` 中是一样的，不过它们的类型是 `BiConsumer` 而不是 `BinaryOperator`（也不是 `BiFunction`），这也就意味着累加器和组合器是没有返回值的，所以需要在累加器中使用引用类型来储存中间结果，下面是使用 `collect` 对流中元素求和的例子：
+
+```java
+Stream<Integer> intStream = Stream.of(1, 3, 2, 4);
+AtomicInteger result = intStream.collect(
+    () -> new AtomicInteger(),
+    (a, b) -> a.addAndGet(b), 
+    (a, b) -> {}
+);
+```
+
+将上面的代码和 `reduce` 求和的代码对比一下，可以看出两者几乎是一样的，一般来说 `reduce` 能实现的功能，`collect` 基本上也都能实现，区别在于它的初始值是一个引用变量，并且中间的计算结果也一直储存在这个引用变量中，最后的返回值也是这个引用变量。很显然，这个引用变量是一个 **可变的容器（mutable container）**，所以 `collect` 在官方文档中也被称为 **Mutable reduction** 操作。
+
+而且 `collect` 相比于 `reduce` 来说显得更强大，因为它还提供了一个更简单的形式，它将 `supplier`、`accumulator` 和 `combiner` 抽象为收集器 `Collector` 接口：
+
+```java
+<R, A> R collect(Collector<? super T, A, R> collector);
+```
+
+这个函数的定义虽然看上去非常简单，但是不得不说，`collect` 可能是 Stream API 中最为复杂的函数，其复杂之处就在于收集器的创建，为了方便我们创建收集器，Stream API 提供了一个工具类 `Collectors`，它内置了大量的静态方法可以创建一些常用的收集器，比如我们最常用的 `Collectors.toList()` 可以将流中元素收集为一个列表：
+
+```java
+List<Integer> result = intStream.collect(Collectors.toList());
+```
+
+从源码中可以看出这个收集器是由 `ArrayList::new` 和 `List::add` 组成的：
+
+```java
+public static <T>
+Collector<T, ?, List<T>> toList() {
+    return new CollectorImpl<>(
+        (Supplier<List<T>>) ArrayList::new, 
+        List::add,
+        (left, right) -> { left.addAll(right); return left; },
+        CH_ID);
+}
+```
+
+上面 `reduce` 中的几个例子，我们一样可以使用 `collect` 来实现，比如求和：
+
+```java
+Integer result = intStream.collect(Collectors.summingInt(Integer::valueOf));
+```
+
+求最大值：
+
+```java
+Optional<Integer> result = intStream.collect(Collectors.maxBy(Integer::compareTo));
+```
+
+统计元素个数：
+
+```java
+Map<Integer, Long> result = intStream.collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+```
+
+数组去重：
+
+```java
+Map<Integer, Integer> result = intStream.collect(Collectors.toMap(i -> i, i -> i, (i, j) -> i));
+```
+
+List 转 Map：
+
+```java
+Map<Long, Student> result = students.collect(Collectors.toMap(Student::getNumber, Function.identity()));
+```
+
+除此之外，`Collectors` 还内置了很多其他的静态方法，比如字符串拼接：
+
+```java
+String result = students.map(Student::getName).collect(Collectors.joining("、"));
+```
+
+按条件将数据分为两组：
+
+```java
+Map<Boolean, List<Student>> result = students.collect(Collectors.partitioningBy(x -> x.getAge() > 30));
+```
+
+按字段值将数据分为多组：
+
+```java
+Map<Integer, List<Student>> result = students.collect(Collectors.groupingBy(Student::getAge));
+```
+
+`partitioningBy` 和 `groupingBy` 函数非常类似，只不过一个将数据分成两组，一个将数据分为多组，它们的第一个参数都是 `Function<? super T, ? extends K> classifier`，又被称为 **分类函数（classification function）**，分组返回的 `Map` 的键就是由它产生的，而对应的 `Map` 的值是该分类的数据列表。很容易想到，既然得到了每个分类的数据列表，我们当然可以继续使用 Stream API 对每个分类的数据进一步处理。所以 `groupingBy` 函数还提供了另一种形式：
+
+```java
+Collector<T, ?, Map<K, D>> groupingBy(
+    Function<? super T, ? extends K> classifier, 
+    Collector<? super T, A, D> downstream)
+```
+
+第二个参数仍然是一个收集器 `Collector`，这被称为 **下游收集器（downstream collector）**，比如上面那个统计元素个数的例子：
+
+```java
+Map<Integer, Long> result = intStream.collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+```
+
+这里就使用了下游收集器 `Collectors.counting()` 对每个分组的数据进行计数。我们甚至可以对下游收集器返回的结果继续使用下游收集器处理，比如我希望得修改分组后的数据类型：
+
+```java
+Map<String, List<String>> result = students.collect(Collectors.groupingBy(
+    Student::getGender, Collectors.mapping(
+        Student::getName, Collectors.toList())));
+```
+
+这里我希望按学生性别分组，并得到每个性别的学生姓名列表，而不是学生列表。首先使用收集器 `Collectors.mapping()` 将 Student 对象转换为姓名，然后再使用 `Collectors.toList()` 将学生姓名收集到一个列表。这种包含一个或多个下游收集器的操作被称为 **Multi-level reduction**。
+
 #### `count`
 
 `count` 比较简单，用于统计流中元素个数：
@@ -676,3 +794,53 @@ System.out.println("Average = " + summaryStatistics.getAverage());
 1. https://www.baeldung.com/tag/java-streams/
 1. https://www.cnblogs.com/wangzhuxing/p/10204894.html
 1. https://www.cnblogs.com/yulinfeng/p/12561664.html
+
+## 更多
+
+### `Collectors` 静态方法一览
+
+* 转换为集合
+  * `Collector<T, ?, C> toCollection(Supplier<C> collectionFactory)`
+  * `Collector<T, ?, List<T>> toList()`
+  * `Collector<T, ?, Set<T>> toSet()`
+* 统计计算
+  * `Collector<T, ?, IntSummaryStatistics> summarizingInt(ToIntFunction<? super T> mapper)`
+  * `Collector<T, ?, LongSummaryStatistics> summarizingLong(ToLongFunction<? super T> mapper)`
+  * `Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(ToDoubleFunction<? super T> mapper)`
+  * `Collector<T, ?, Optional<T>> minBy(Comparator<? super T> comparator)`
+  * `Collector<T, ?, Optional<T>> maxBy(Comparator<? super T> comparator)`
+  * `Collector<T, ?, Integer> summingInt(ToIntFunction<? super T> mapper)`
+  * `Collector<T, ?, Long> summingLong(ToLongFunction<? super T> mapper)`
+  * `Collector<T, ?, Double> summingDouble(ToDoubleFunction<? super T> mapper)`
+  * `Collector<T, ?, Double> averagingInt(ToIntFunction<? super T> mapper)`
+  * `Collector<T, ?, Double> averagingLong(ToLongFunction<? super T> mapper)`
+  * `Collector<T, ?, Double> averagingDouble(ToDoubleFunction<? super T> mapper)`
+  * `Collector<T, ?, Long> counting()`
+* 字符串拼接
+  * `Collector<CharSequence, ?, String> joining()`
+  * `Collector<CharSequence, ?, String> joining(CharSequence delimiter)`
+  * `Collector<CharSequence, ?, String> joining(CharSequence delimiter, CharSequence prefix, CharSequence suffix)`
+* Map & Reduce
+  * `Collector<T, ?, R> mapping(Function<? super T, ? extends U> mapper, Collector<? super U, A, R> downstream)`
+  * `Collector<T, ?, T> reducing(T identity, BinaryOperator<T> op)`
+  * `Collector<T, ?, Optional<T>> reducing(BinaryOperator<T> op)`
+  * `Collector<T, ?, U> reducing(U identity, Function<? super T, ? extends U> mapper, BinaryOperator<U> op)`
+* 分组
+  * `Collector<T, ?, Map<K, List<T>>> groupingBy(Function<? super T, ? extends K> classifier)`
+  * `Collector<T, ?, Map<K, D>> groupingBy(Function<? super T, ? extends K> classifier, Collector<? super T, A, D> downstream)`
+  * `Collector<T, ?, M> groupingBy(Function<? super T, ? extends K> classifier, Supplier<M> mapFactory, Collector<? super T, A, D> downstream)`
+  * `Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(Function<? super T, ? extends K> classifier)`
+  * `Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(Function<? super T, ? extends K> classifier, Collector<? super T, A, D> downstream)`
+  * `Collector<T, ?, M> groupingByConcurrent(Function<? super T, ? extends K> classifier, Supplier<M> mapFactory, Collector<? super T, A, D> downstream)`
+  * `Collector<T, ?, Map<Boolean, List<T>>> partitioningBy(Predicate<? super T> predicate)`
+  * `Collector<T, ?, Map<Boolean, D>> partitioningBy(Predicate<? super T> predicate, Collector<? super T, A, D> downstream)`
+* List 转 Map
+  * `Collector<T, ?, Map<K,U>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper)`
+  * `Collector<T, ?, Map<K,U>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper, BinaryOperator<U> mergeFunction)`
+  * `Collector<T, ?, M> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper, BinaryOperator<U> mergeFunction, Supplier<M> mapSupplier)`
+  * `Collector<T, ?, ConcurrentMap<K,U>> toConcurrentMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper)`
+  * `Collector<T, ?, ConcurrentMap<K,U>> toConcurrentMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper, BinaryOperator<U> mergeFunction)`
+  * `Collector<T, ?, M> toConcurrentMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper, BinaryOperator<U> mergeFunction, Supplier<M> mapSupplier)`
+* 其他
+  * `Collector<T,A,RR> collectingAndThen(Collector<T,A,R> downstream, Function<R,RR> finisher)`
+  
