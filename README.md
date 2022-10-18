@@ -26,6 +26,7 @@
 * WEEK022 - [etcd 学习笔记](./notes/week022-etcd-notes/README.md)
 * WEEK023 - [搭建自己的镜像仓库](./notes/week023-build-your-own-image-registry/README.md)
 * WEEK024 - [Java 8 之 Stream API 用法总结](./notes/week024-java-streams/README.md)
+* WEEK025 - [WebAssembly 学习笔记](./notes/week025-webassembly-notes/README.md)
 
 ### 项目实践
 
