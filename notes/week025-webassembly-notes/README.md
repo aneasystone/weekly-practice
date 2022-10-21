@@ -1,22 +1,28 @@
 # WEEK025 - WebAssembly 学习笔记
 
-[WebAssembly](https://webassembly.org/)（简称 WASM）是一种以安全有效的方式运行可移植程序的新兴 Web 技术，它的开发团队来自 Mozilla、Google、Microsoft 和 Apple，分别代表着四大网络浏览器 Firefox、Chrome、Microsoft Edge 和 Safari，从 2017 年 11 月开始，这四大浏览器就开始实验性的支持 WebAssembly。当时 WebAssembly 还没有形成标准，这么多的浏览器开发商对某个尚未标准化的技术达成如此一致的意见，这在历史上是很罕见的，可以看出这绝对是一项值得关注的技术，被号称为 `the future of web development`。
+[WebAssembly](https://webassembly.org/)（简称 WASM）是一种以安全有效的方式运行可移植程序的新兴 Web 技术，下面是引用 [MDN 上对它的定义](https://developer.mozilla.org/zh-CN/docs/WebAssembly)：
 
-WebAssembly 在 2019 年 12 月 5 日被万维网联盟（W3C）推荐，与 HTML，CSS 和 JavaScript 一起，成为 Web 的第四种语言。
+> WebAssembly 是一种新的编码方式，可以在现代的网络浏览器中运行 － 它是一种低级的类汇编语言，具有紧凑的二进制格式，可以接近原生的性能运行，并为诸如 C/C++ 等语言提供一个编译目标，以便它们可以在 Web 上运行。它也被设计为可以与 JavaScript 共存，允许两者一起工作。
+
+也就是说，无论你使用的是哪一种语言，我们都可以将其转换为 WebAssembly 格式，并在浏览器中以原生的性能运行。WebAssembly 的开发团队来自 Mozilla、Google、Microsoft 和 Apple，分别代表着四大网络浏览器 Firefox、Chrome、Microsoft Edge 和 Safari，从 2017 年 11 月开始，这四大浏览器就开始实验性的支持 WebAssembly。当时 WebAssembly 还没有形成标准，这么多的浏览器开发商对某个尚未标准化的技术达成如此一致的意见，这在历史上是很罕见的，可以看出这绝对是一项值得关注的技术，被号称为 `the future of web development`。
+
+WebAssembly 在 2019 年 12 月 5 日被万维网联盟（W3C）推荐为标准，与 HTML，CSS 和 JavaScript 一起，成为 Web 的第四种语言。
 
 ## WebAssembly 之前的历史
 
 JavaScript 诞生于 1995 年 5 月，一个让人津津乐道的故事是，当时刚加入网景的 [Brendan Eich](https://zh.wikipedia.org/wiki/%E5%B8%83%E8%98%AD%E7%99%BB%C2%B7%E8%89%BE%E5%85%8B) 仅仅花了十天时间就开发出了 JavaScript 语言。开发 JavaScript 的初衷是为 HTML 提供一种脚本语言使得网页变得更动态，当时根本就没有考虑什么浏览器兼容性、安全性、移植性这些东西，对性能也没有特别的要求。但随着 Web 技术的发展，网页要解决的问题已经远不止简单的文本信息，而是包括了更多的高性能图像处理和 3D 渲染等方面，这时，JavaScript 的性能问题就凸显出来了。于是，如何让 JavaScript 执行的更快，变成了各大浏览器生产商争相竞逐的目标。
 
-### 浏览器的性能之战
+### 浏览器性能之战
 
 这场关于浏览器的性能之战在 2008 年由 Google 带头打响，这一年的 9 月 2 日，Google 发布了一款跨时代的浏览器 Chrome，具备简洁的用户界面和极致的用户体验，内置的 [V8](https://v8.dev/) 引擎采用了全新的 JIT 编译（Just-in-time compilation，即时编译）技术，使得浏览器的响应速度得到了几倍的提升。次年，Apple 发布了他们的浏览器新版本 Safari 4，其中引入新的 Nitro 引擎（也被称为 SquirrelFish 或 [JavaScriptCore](https://trac.webkit.org/wiki/JavaScriptCore)），同样使用的是 JIT 技术。紧接着，Mozilla 在 Firefox 3.5 中引入 [TraceMonkey](https://en.wikipedia.org/wiki/SpiderMonkey) 技术，Microsoft 在 2011 年也推出 [Chakra](https://en.wikipedia.org/wiki/Chakra_(JScript_engine)) 引擎。
 
-JIT 技术的推出大大提高了 JavaScript 的性能：
+使用 JIT 技术，极大的提高了 JavaScript 的性能。那么 JIT 是如何工作的呢？我们知道，JavaScript 是解释型语言，因此传统的 JavaScript 引擎需要逐行读取 JavaScript 代码，并将其翻译成可执行的机器码。很显然这是极其低效的，如果有一段代码需要执行上千次，那么 JavaScript 引擎也会傻傻的翻译上千次。JIT 技术的基本思路就是缓存，它将执行频次比较高的代码实时编译成机器码，并缓存起来，当下次执行到同样代码时直接使用相应的机器码替换掉，从而获得极大的性能提升。另外，对于执行频次非常高的代码，JIT 引擎还会使用优化编译器（Optimising Compiler）编译出更高效的机器码。关于 JIT 技术的原理可以参考 [A crash course in just-in-time (JIT) compilers](https://hacks.mozilla.org/2017/02/a-crash-course-in-just-in-time-jit-compilers/) 这篇文章。
+
+JIT 技术推出之后，JavaScript 的性能得到了飞速提升：
 
 ![](./images/jit-performance.png)
 
-随着性能的提升，JavaScript 的应用范围也得到了极大的扩展，Web 内容变得更加丰富，图片、视频、游戏，等等等等，甚至有人将 JavaScript 用于后端开发（Node.js）。不过由于 JavaScript 动态类型和解释执行的特性，它天生在性能上存在着缺陷，通过 JIT 的优化很快就遇到了瓶颈。但是日益丰富的 Web 内容对 JavaScript 的性能提出了更高的要求，尤其是 3D 游戏，这些游戏在 PC 上跑都很吃力，更别说在浏览器里运行了。
+随着性能的提升，JavaScript 的应用范围也得到了极大的扩展，Web 内容变得更加丰富，图片、视频、游戏，等等等等，甚至有人将 JavaScript 用于后端开发（Node.js）。不过由于 JavaScript **动态类型** 和 **解释执行** 的特性，它天生在性能上存在着缺陷，通过 JIT 的优化很快就遇到了瓶颈。但是日益丰富的 Web 内容对 JavaScript 的性能提出了更高的要求，尤其是 3D 游戏，这些游戏在 PC 上跑都很吃力，更别说在浏览器里运行了。
 
 如何让 JavaScript 执行地更快，是摆在各大浏览器生产商面前的一大难题，很快，Google 和 Mozilla 交出了各自的答卷。
 
@@ -32,9 +38,17 @@ Google 在 2008 年开源了 [NaCl 技术](https://developer.chrome.com/docs/nat
 
 ### Mozilla 的 asm.js 解决方案
 
-https://www.sohu.com/a/145566886_505793
+2010 年，刚刚加入 Mozilla 的 [Alon Zakai](https://github.com/kripken) 在工作之余突发奇想，能不能将自己编写的 C/C++ 游戏引擎运行在浏览器上？当时 NaCl 技术还没怎么普及，Alon Zakai 一时之间并没有找到什么好的技术方案。好在 C/C++ 是强类型语言，JavaScript 是弱类型语言，所以将 C/C++ 代码转换为 JavaScript 在技术上是完全可行的。Alon Zakai 于是便开始着手编写这样的一个编译器，[Emscripten](https://emscripten.org/) 由此诞生了！
+
+Emscripten 和传统的编译器很类似，都是将某种语言转换为另一种语言形式，不过他们之间有着本质的区别。传统的编译器是将一种语言编译成某种 low-level 的语言，比如将 C/++ 代码编译成二进制文件（机器码），这种编译器被称为 [Compiler](https://en.wikipedia.org/wiki/Compiler)；而 Emscripten 是将 C/C++ 代码编译成和它 same-level 的 JavaScript 代码，这种编译器被称为 Transpiler 或者 [Source to source compiler](https://en.wikipedia.org/wiki/Source-to-source_compiler)。
+
+Emscripten 相比于 NaCl 来说兼容性更好，于是很快就得到了 Mozilla 的认可，
 
 https://tate-young.github.io/2020/03/02/webassembly.html
+
+https://developer.mozilla.org/zh-CN/docs/WebAssembly
+
+https://www.sohu.com/a/145566886_505793
 
 http://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html
 
