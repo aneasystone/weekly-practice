@@ -41,7 +41,7 @@ function arraySum(arr) {
 arr = [1, "hello"];
 ```
 
-JavaScript 这种动态类型的特点对 JIT 引擎是非常不友好的，反复的优化和去优化不仅无法提高性能，甚至会有副作用。由于这个问题，通过 JIT 的优化很快就遇到了瓶颈。
+JavaScript 这种动态类型的特点对 JIT 引擎是非常不友好的，反复的优化和去优化不仅无法提高性能，甚至会有副作用。所以在实际的生产环境中，JIT 的效果往往没有那么显著，通过 JIT 的优化很快就遇到了瓶颈。
 
 但是日益丰富的 Web 内容对 JavaScript 的性能提出了更高的要求，尤其是 3D 游戏，这些游戏在 PC 上跑都很吃力，更别说在浏览器里运行了。如何让 JavaScript 执行地更快，是摆在各大浏览器生产商面前的一大难题，很快，Google 和 Mozilla 交出了各自的答卷。
 
@@ -57,25 +57,53 @@ Google 在 2008 年开源了 [NaCl 技术](https://developer.chrome.com/docs/nat
 
 ### Mozilla 的 asm.js 解决方案
 
-2010 年，刚刚加入 Mozilla 的 [Alon Zakai](https://github.com/kripken) 在工作之余突发奇想，能不能将自己编写的 C/C++ 游戏引擎运行在浏览器上？当时 NaCl 技术还没怎么普及，Alon Zakai 一时之间并没有找到什么好的技术方案。好在 C/C++ 是强类型语言，JavaScript 是弱类型语言，所以将 C/C++ 代码转换为 JavaScript 在技术上是完全可行的。Alon Zakai 于是便开始着手编写这样的一个编译器，[Emscripten](https://emscripten.org/) 由此诞生了！
+2010 年，刚刚加入 Mozilla 的 [Alon Zakai](https://github.com/kripken) 在工作之余突发奇想，能不能将自己编写的 C/C++ 游戏引擎运行在浏览器上？当时 NaCl 技术还没怎么普及，Alon Zakai 一时之间并没有找到什么好的技术方案。好在 C/C++ 是强类型语言，JavaScript 是弱类型语言，所以将 C/C++ 代码转换为 JavaScript 在技术上是完全可行的。Alon Zakai 于是便开始着手编写这样的一个编译器，[Emscripten](https://emscripten.org/) 便由此诞生了！
 
-Emscripten 和传统的编译器很类似，都是将某种语言转换为另一种语言形式，不过他们之间有着本质的区别。传统的编译器是将一种语言编译成某种 low-level 的语言，比如将 C/++ 代码编译成二进制文件（机器码），这种编译器被称为 [Compiler](https://en.wikipedia.org/wiki/Compiler)；而 Emscripten 是将 C/C++ 代码编译成和它 same-level 的 JavaScript 代码，这种编译器被称为 Transpiler 或者 [Source to source compiler](https://en.wikipedia.org/wiki/Source-to-source_compiler)。
+Emscripten 和传统的编译器很类似，都是将某种语言转换为另一种语言形式，不过他们之间有着本质的区别。传统的编译器是将一种语言编译成某种 low-level 的语言，比如将 C/C++ 代码编译成二进制文件（机器码），这种编译器被称为 [Compiler](https://en.wikipedia.org/wiki/Compiler)；而 Emscripten 是将 C/C++ 代码编译成和它 same-level 的 JavaScript 代码，这种编译器被称为 Transpiler 或者 [Source to source compiler](https://en.wikipedia.org/wiki/Source-to-source_compiler)。
 
-Emscripten 相比于 NaCl 来说兼容性更好，于是很快就得到了 Mozilla 的认可，
+Emscripten 相比于 NaCl 来说兼容性更好，于是很快就得到了 Mozilla 的认可。之后 Alon Zakai 被邀请加入 Mozilla 的研究团队并全职负责 Emscripten 的开发，以及通过 Emscripten 编译生成的 JavaScript 代码的性能优化上。在 2013 年，Alon Zakai 联合 Luke Wagner，David Herman 一起发布了 [asm.js](http://asmjs.org/) 规范，同年，Mozilla 也发布了 Firefox 22，并内置了新一代的 OdinMonkey 引擎，它是第一个支持 asm.js 规范的 JavaScript 引擎。
+
+asm.js 的思想很简单，就是尽可能的在 JavaScript 中使用类型明确的参数，并通过 `TypedArray` 取消了垃圾回收机制，这样可以让 JIT 充分利用和优化，进而提高 JavaScript 的执行性能。比如下面这样一段 C 代码：
+
+```c
+int f(int i) {
+  return i + 1;
+}
+```
+
+使用 Emscripten 编译生成的 JavaScript 代码如下：
+
+```js
+function f(i) {
+  i = i|0;
+  return (i + 1)|0;
+}
+```
+
+通过在变量和返回值后面加上 `|0` 这样的操作，我们明确了参数和返回值的数据类型，当 JIT 引擎检测到这样的代码时，便可以跳过语法分析和类型推断这些步骤，将代码直接转成机器语言。据称，使用 asm.js 能达到原生代码 50% 左右的速度，虽然没有 NaCl 亮眼，但是这相比于普通的 JavaScript 代码而言已经是极大的性能提升了。而且我们可以看出 asm.js 采取了和 NaCl 截然不同的思路，asm.js 其实和 JavaScript 没有区别，它只是 JavaScript 的一个子集而已，这样做不仅可以充分发挥出 JIT 的最大功效，而且能兼容所有的浏览器。
+
+但是 asm.js 也存在着不少的问题。首先由于它还是和 JavaScript一样是文本格式，因此加载和解析都会花费比较长的时间，这被称为慢启动问题；其次，大量的 `|0` 这样的标注代码，使得代码的可读性和可扩展性都变的很差；因此这并不是一个非常理想的技术方案。
+
+### WebAssembly = NaCl + asm.js
+
+随着技术的发展，Mozilla 和 Google 的工程师出现了很多次的交流和合作，通过汲取 NaCl 和 asm.js 两者的优点，双方推出了一种全新的技术方案：
+
+* 和 NaCl/PNaCl 一样，基于二进制格式，从而能够被快速解析，达到原生代码的运行速度；
+* 和 PNaCl 一样，依赖于通用的 LLVM IR，这样既具备可移植性，又便于其他语言快速接入；
+* 和 asm.js 一样，使用 Emscripten 等工具链进行编译；
+* 和 asm.js 一样，必须以非常自然的方式直接操作 Web API，而不用像 PNaCl 一样需要处理与 JavaScript 之间的通信；
+
+这个技术方案在 2015 年正式命名为 WebAssembly，2017 年各大浏览器生产商纷纷宣布支持 WebAssembly，2019 年 WebAssembly 正式成为 W3C 标准，一场关于浏览器的性能革命已经悄然展开。
+
+![](./images/wasm-performance.png)
+
+## WebAssembly 入门示例
 
 https://tate-young.github.io/2020/03/02/webassembly.html
-
-https://developer.mozilla.org/zh-CN/docs/WebAssembly
-
-https://www.sohu.com/a/145566886_505793
 
 http://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html
 
 https://web.archive.org/web/20170327132956/https://arstechnica.com/information-technology/2013/05/native-level-performance-on-the-web-a-brief-examination-of-asm-js/
-
-https://en.wikipedia.org/wiki/Asm.js
-
-https://webassembly.org/docs/faq/
 
 https://web.archive.org/web/20221013220648/https://techcrunch.com/2015/06/17/google-microsoft-mozilla-and-others-team-up-to-launch-webassembly-a-new-binary-format-for-the-web/
 
@@ -100,7 +128,7 @@ https://juejin.cn/post/7052901106631999495
 ## 参考
 
 1. [WebAssembly 官网](https://webassembly.org/)
-1. [WebAssembly | MDN](https://developer.mozilla.org/en-US/docs/WebAssembly)
+1. [WebAssembly | MDN](https://developer.mozilla.org/zh-CN/docs/WebAssembly)
 1. [WebAssembly 中文网](http://webassembly.org.cn/)
 1. [WebAssembly System Interface](https://github.com/WebAssembly/WASI)
 1. [WebAssembly Design Documents](https://github.com/WebAssembly/design)
@@ -108,6 +136,6 @@ https://juejin.cn/post/7052901106631999495
 1. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
 1. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
 1. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
-1. [A crash course in just-in-time (JIT) compilers](https://hacks.mozilla.org/2017/02/a-crash-course-in-just-in-time-jit-compilers/)
-1. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
-1. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
+2. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
+3. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
+4. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
