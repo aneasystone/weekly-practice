@@ -82,7 +82,15 @@ function f(i) {
 
 通过在变量和返回值后面加上 `|0` 这样的操作，我们明确了参数和返回值的数据类型，当 JIT 引擎检测到这样的代码时，便可以跳过语法分析和类型推断这些步骤，将代码直接转成机器语言。据称，使用 asm.js 能达到原生代码 50% 左右的速度，虽然没有 NaCl 亮眼，但是这相比于普通的 JavaScript 代码而言已经是极大的性能提升了。而且我们可以看出 asm.js 采取了和 NaCl 截然不同的思路，asm.js 其实和 JavaScript 没有区别，它只是 JavaScript 的一个子集而已，这样做不仅可以充分发挥出 JIT 的最大功效，而且能兼容所有的浏览器。
 
-但是 asm.js 也存在着不少的问题。首先由于它还是和 JavaScript一样是文本格式，因此加载和解析都会花费比较长的时间，这被称为慢启动问题；其次，大量的 `|0` 这样的标注代码，使得代码的可读性和可扩展性都变的很差；因此这并不是一个非常理想的技术方案。
+但是 asm.js 也存在着不少的问题。首先由于它还是和 JavaScript一样是文本格式，因此加载和解析都会花费比较长的时间，这被称为慢启动问题；其次，asm.js 除了在变量后面加 `|0` 之外，还有很多类似这样的标注代码：
+
+![](./images/asmjs.png)
+
+很显然，这让代码的可读性和可扩展性都变的很差；最后，仍然是性能问题，通过 asm.js 无论怎么优化最终生成的都还是 JavaScript 代码，性能自然远远比不上原生代码；因此这并不是一个非常理想的技术方案。
+
+### 其他解决方案
+
+除了 NaCl 和 asm.js，实际上还有一些其他的解决方案，但最终的结果要么夭折，要么被迫转型。其中值得一提的是 Google 发明的 [Dart](https://dart.dev/) 语言，Dart 语言的野心很大，它最初的目的是要取代 JavaScript 成为 Web 的首选语言，为此 Google 还开发了一款新的浏览器 Dartium，内置 Dart 引擎可以执行 Dart 程序，而且对于不支持 Dart 程序的浏览器，它还提供了相应的工具将 Dart 转换为 JavaScript。这一套组合拳可谓是行云流水，可是结果如何可想而知，不仅很难得到用户的承认，而且也没得到其他浏览器的认可，最终 Google 在 2015 年取消了该计划。目前 Dart 语言转战移动开发领域，比如跨平台开发框架 Flutter 就是采用 Dart 开发的。
 
 ### WebAssembly = NaCl + asm.js
 
@@ -90,7 +98,7 @@ function f(i) {
 
 * 和 NaCl/PNaCl 一样，基于二进制格式，从而能够被快速解析，达到原生代码的运行速度；
 * 和 PNaCl 一样，依赖于通用的 LLVM IR，这样既具备可移植性，又便于其他语言快速接入；
-* 和 asm.js 一样，使用 Emscripten 等工具链进行编译；
+* 和 asm.js 一样，使用 Emscripten 等工具链进行编译；另外，Emscripten 同时支持生成 asm.js 和二进制格式，当浏览器不兼容新的二进制格式时，asm.js 可以作为降级方案；
 * 和 asm.js 一样，必须以非常自然的方式直接操作 Web API，而不用像 PNaCl 一样需要处理与 JavaScript 之间的通信；
 
 这个技术方案在 2015 年正式命名为 WebAssembly，2017 年各大浏览器生产商纷纷宣布支持 WebAssembly，2019 年 WebAssembly 正式成为 W3C 标准，一场关于浏览器的性能革命已经悄然展开。
@@ -99,17 +107,9 @@ function f(i) {
 
 ## WebAssembly 入门示例
 
+https://juejin.cn/post/7013286944553566215
+
 https://tate-young.github.io/2020/03/02/webassembly.html
-
-http://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html
-
-https://web.archive.org/web/20170327132956/https://arstechnica.com/information-technology/2013/05/native-level-performance-on-the-web-a-brief-examination-of-asm-js/
-
-https://web.archive.org/web/20221013220648/https://techcrunch.com/2015/06/17/google-microsoft-mozilla-and-others-team-up-to-launch-webassembly-a-new-binary-format-for-the-web/
-
-https://web.archive.org/web/20220801052932/https://brendaneich.com/2015/06/from-asm-js-to-webassembly/
-
-https://web.archive.org/web/20170320002809/https://arstechnica.com/information-technology/2015/06/the-web-is-getting-its-bytecode-webassembly/
 
 https://blog.csdn.net/weixin_43895948/article/details/119276306
 
@@ -136,6 +136,6 @@ https://juejin.cn/post/7052901106631999495
 1. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
 1. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
 1. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
-2. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
-3. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
-4. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
+1. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
+1. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
+1. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
