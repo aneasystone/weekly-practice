@@ -4,7 +4,9 @@
 
 > WebAssembly 是一种新的编码方式，可以在现代的网络浏览器中运行 － 它是一种低级的类汇编语言，具有紧凑的二进制格式，可以接近原生的性能运行，并为诸如 C/C++ 等语言提供一个编译目标，以便它们可以在 Web 上运行。它也被设计为可以与 JavaScript 共存，允许两者一起工作。
 
-也就是说，无论你使用的是哪一种语言，我们都可以将其转换为 WebAssembly 格式，并在浏览器中以原生的性能运行。WebAssembly 的开发团队来自 Mozilla、Google、Microsoft 和 Apple，分别代表着四大网络浏览器 Firefox、Chrome、Microsoft Edge 和 Safari，从 2017 年 11 月开始，这四大浏览器就开始实验性的支持 WebAssembly。当时 WebAssembly 还没有形成标准，这么多的浏览器开发商对某个尚未标准化的技术达成如此一致的意见，这在历史上是很罕见的，可以看出这绝对是一项值得关注的技术，被号称为 `the future of web development`。
+也就是说，无论你使用的是哪一种语言，我们都可以将其转换为 WebAssembly 格式，并在浏览器中以原生的性能运行。WebAssembly 的开发团队来自 Mozilla、Google、Microsoft 和 Apple，分别代表着四大网络浏览器 Firefox、Chrome、Microsoft Edge 和 Safari，从 2017 年 11 月开始，这四大浏览器就开始实验性的支持 WebAssembly。当时 WebAssembly 还没有形成标准，这么多的浏览器开发商对某个尚未标准化的技术 [达成如此一致的意见](https://lists.w3.org/Archives/Public/public-webassembly/2017Feb/0002.html)，这在历史上是很罕见的，可以看出这绝对是一项值得关注的技术，被号称为 `the future of web development`。
+
+![](./images/four-browsers.png)
 
 WebAssembly 在 2019 年 12 月 5 日被万维网联盟（W3C）推荐为标准，与 HTML，CSS 和 JavaScript 一起，成为 Web 的第四种语言。
 
@@ -22,9 +24,26 @@ JIT 技术推出之后，JavaScript 的性能得到了飞速提升：
 
 ![](./images/jit-performance.png)
 
-随着性能的提升，JavaScript 的应用范围也得到了极大的扩展，Web 内容变得更加丰富，图片、视频、游戏，等等等等，甚至有人将 JavaScript 用于后端开发（Node.js）。不过由于 JavaScript **动态类型** 和 **解释执行** 的特性，它天生在性能上存在着缺陷，通过 JIT 的优化很快就遇到了瓶颈。但是日益丰富的 Web 内容对 JavaScript 的性能提出了更高的要求，尤其是 3D 游戏，这些游戏在 PC 上跑都很吃力，更别说在浏览器里运行了。
+随着性能的提升，JavaScript 的应用范围也得到了极大的扩展，Web 内容变得更加丰富，图片、视频、游戏，等等等等，甚至有人将 JavaScript 用于后端开发（Node.js）。不过 JIT 也不完全是 “性能银弹”，因为通过 JIT 优化也是有一定代价的，比如存储优化后的机器码需要更多的内存，另外 JIT 优化对变量类型非常敏感，但是由于 JavaScript **动态类型** 的特性，用户代码中对某个变量的类型并不会严格固定，这时 JIT 优化的效果将被大打折扣。比如下面这段简单的代码：
 
-如何让 JavaScript 执行地更快，是摆在各大浏览器生产商面前的一大难题，很快，Google 和 Mozilla 交出了各自的答卷。
+```js
+function arraySum(arr) {
+  var sum = 0;
+  for (var i = 0; i < arr.length; i++) {
+    sum += arr[i];
+  }
+}
+```
+
+假设 JIT 检测到 `sum += arr[i];` 这行代码被执行了很多次，开始对其进行编译优化，它首先需要确认 `sum`、`arr`、`i` 和 `arr[i]` 这些变量的类型，如果 `arr[i]` 是 `int` 类型，这就是整数相加的操作，但如果 `arr[i]` 是 `string` 类型，这又变成了字符串拼接的操作，这两种情况编译成的机器码是完全不同的。所以 JIT 引擎会先根据代码执行情况假设变量为某种类型，然后再进行优化，当执行时会对类型进行检测，一旦检测到类型不同时，这个 JIT 优化将被作废，这个过程叫做 **去优化**（deoptimization，或者 bailing out）。假如用户写出这样的代码：
+
+```js
+arr = [1, "hello"];
+```
+
+JavaScript 这种动态类型的特点对 JIT 引擎是非常不友好的，反复的优化和去优化不仅无法提高性能，甚至会有副作用。由于这个问题，通过 JIT 的优化很快就遇到了瓶颈。
+
+但是日益丰富的 Web 内容对 JavaScript 的性能提出了更高的要求，尤其是 3D 游戏，这些游戏在 PC 上跑都很吃力，更别说在浏览器里运行了。如何让 JavaScript 执行地更快，是摆在各大浏览器生产商面前的一大难题，很快，Google 和 Mozilla 交出了各自的答卷。
 
 ### Google 的 NaCl 解决方案
 
@@ -57,8 +76,6 @@ https://web.archive.org/web/20170327132956/https://arstechnica.com/information-t
 https://en.wikipedia.org/wiki/Asm.js
 
 https://webassembly.org/docs/faq/
-
-https://stackoverflow.com/questions/44931479/compiling-vs-transpiling
 
 https://web.archive.org/web/20221013220648/https://techcrunch.com/2015/06/17/google-microsoft-mozilla-and-others-team-up-to-launch-webassembly-a-new-binary-format-for-the-web/
 
