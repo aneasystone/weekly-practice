@@ -1,0 +1,12 @@
+{
+  "name": "rust-demo",
+  "version": "0.1.0",
+  "files": [
+    "rust_demo_bg.wasm",
+    "rust_demo.js",
+    "rust_demo.d.ts"
+  ],
+  "module": "rust_demo.js",
+  "types": "rust_demo.d.ts",
+  "sideEffects": false
+}

@@ -107,12 +107,11 @@ function f(i) {
 
 ## WebAssembly 入门示例
 
-从上面的学习中我们知道，WebAssembly 是一种通用的编码格式，并且已经有很多编程语言支持将源码编译成这种格式了，官方的 [Getting Started](https://webassembly.org/getting-started/developers-guide/) 有一个详细的列表。这一节我们就跟着官方的教程实践一下下面这四种语言：
+从上面的学习中我们知道，WebAssembly 是一种通用的编码格式，并且已经有很多编程语言支持将源码编译成这种格式了，官方的 [Getting Started](https://webassembly.org/getting-started/developers-guide/) 有一个详细的列表。这一节我们就跟着官方的教程实践一下下面这三种语言：
 
 * [C/C++](https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm)
 * [Rust](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm)
 * [Go](https://github.com/golang/go/wiki/WebAssembly)
-* [AssemblyScript](https://www.assemblyscript.org/introduction.html)
 
 ### 将 C/C++ 程序编译成 WebAssembly
 
@@ -169,9 +168,80 @@ $ python3 -m http.server
 
 ### 将 Rust 程序编译成 WebAssembly
 
-### 将 Go 程序编译成 WebAssembly
+首先按照官方文档 [安装 Rust](https://www.rust-lang.org/zh-CN/tools/install)，安装包含了一系列常用的命令行工具，包括 `rustup`、`rustc`、`cargo` 等，其中 `cargo` 是 Rust 的包管理器，可以使用它安装 `wasm-pack`：
 
-### 将 AssemblyScript 程序编译成 WebAssembly
+```
+$ cargo install wasm-pack
+```
+
+`wasm-pack` 用于将 Rust 代码编译成 WebAssembly 格式，不过要注意它不支持 bin 项目，只支持 lib 项目，所以我们通过 `--lib` 来创建项目：
+
+```
+$ cargo new --lib rust-demo
+     Created library `rust-demo` package
+```
+
+打开 `./src/lib.rs`，输入以下代码：
+
+```rust
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern {
+    pub fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    alert(&format!("Hello, {}!", name));
+}
+```
+
+在上面的代码中我们使用了 [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) 这个工具，它实现了 JavaScript 和 Rust 之间的相互通信，关于它的详细说明可以参考 [《The `wasm-bindgen` Guide》](https://rustwasm.github.io/docs/wasm-bindgen/) 这本电子书。我们首先通过 `extern` 声明了一个 JavaScript 中的 alert 方法，然后我们就可以像调用正常的 Rust 方法一样调用这个外部方法。下面再通过 `pub fn` 将 `greet` 方法暴露出来，这样我们也可以从 JavaScript 中调用这个 Rust 方法。
+
+接着修改 `./Cargo.toml` 文件，添加如下内容：
+
+```
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+```
+
+其中 `crate-type = ["cdylib"]` 表示生成一个 [动态系统库](https://doc.rust-lang.org/reference/linkage.html)。使用 `wasm-pack` 进行构建：
+
+```
+$ wasm-pack build --target web
+```
+
+这个命令会生成一个 `pkg` 目录，里面包含了 wasm 文件和对应的 JavaScript 胶水代码，这和上面的 emcc 结果类似，不过并没有生成相应的测试 HTML 文件。我们手工创建一个 `index.html` 文件，内容如下：
+
+```html
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>hello-wasm example</title>
+  </head>
+  <body>
+    <script type="module">
+      import init, { greet } from "./pkg/rust_demo.js";
+      init().then(() => {
+        greet("WebAssembly");
+      });
+    </script>
+  </body>
+</html>
+```
+
+然后启动一个 Web Server，并在浏览器中打开测试页面：
+
+![](./images/rust-demo-html.png)
+
+我们成功在浏览器中调用了使用 Rust 编写的 `greet` 方法！
+
+### 将 Go 程序编译成 WebAssembly
 
 ## 参考
 
