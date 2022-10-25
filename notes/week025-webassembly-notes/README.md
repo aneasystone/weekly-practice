@@ -116,6 +116,57 @@ function f(i) {
 
 ### 将 C/C++ 程序编译成 WebAssembly
 
+首先我们参考 [Emscripten 的官方文档](https://emscripten.org/docs/getting_started/downloads.html) 上的步骤下载并安装 [Emscripten SDK](https://emscripten.org/)，安装完成后通过下面的命令检查环境是否正常：
+
+```
+$ emcc --check
+emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.24 (68a9f990429e0bcfb63b1cde68bad792554350a5)
+shared:INFO: (Emscripten: Running sanity checks)
+```
+
+环境准备就绪后，我们就可以将 C/C++ 的代码编译为 WebAssembly 了。写一个简单的 Hello World 程序 `hello.c`：
+
+```c
+#include <stdio.h>
+
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+```
+
+然后使用 emcc 进行编译：
+
+```
+$ emcc hello.c -o hello.html
+```
+
+上面这个命令会生成三个文件：
+
+* hello.wasm - 这就是生成的 WebAssembly 二进制字节码文件
+* hello.js - 包含一段胶水代码（glue code）通过 JavaScript 来调用 WebAssembly 文件
+* hello.html - 方便开发调试，在页面上显示 WebAssembly 的调用结果
+
+我们不能直接用浏览器打开 hello.html 文件，因为浏览器不支持 `file://` 形式的 XHR 请求，所以在 HTML 中无法加载 .wasm 等相关的文件，为了看到效果，我们需要一个 Web Server，比如 Nginx、Tomcat 等，不过这些安装和配置都比较麻烦，我们还有很多其他的方法快速启动一个 Web Server。
+
+比如通过 `npm` 启动一个本地 Web Server：
+
+```
+$ npx serve .
+```
+
+或者使用 Python3 的 `http.server` 模块：
+
+```
+$ python3 -m http.server
+```
+
+访问 hello.html 页面如下：
+
+![](./images/hello-html.png)
+
+可以看到我们在 C 语言中打印的 Hello World 成功输出到浏览器了。
+
 ### 将 Rust 程序编译成 WebAssembly
 
 ### 将 Go 程序编译成 WebAssembly
