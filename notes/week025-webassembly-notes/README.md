@@ -107,35 +107,41 @@ function f(i) {
 
 ## WebAssembly 入门示例
 
-https://juejin.cn/post/7013286944553566215
+从上面的学习中我们知道，WebAssembly 是一种通用的编码格式，并且已经有很多编程语言支持将源码编译成这种格式了，官方的 [Getting Started](https://webassembly.org/getting-started/developers-guide/) 有一个详细的列表。这一节我们就跟着官方的教程实践一下下面这四种语言：
 
-https://tate-young.github.io/2020/03/02/webassembly.html
+* [C/C++](https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm)
+* [Rust](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm)
+* [Go](https://github.com/golang/go/wiki/WebAssembly)
+* [AssemblyScript](https://www.assemblyscript.org/introduction.html)
 
-https://blog.csdn.net/weixin_43895948/article/details/119276306
+### 将 C/C++ 程序编译成 WebAssembly
 
-https://blog.51cto.com/u_15087086/2598661
+### 将 Rust 程序编译成 WebAssembly
 
-https://www.zhihu.com/question/362649730
+### 将 Go 程序编译成 WebAssembly
 
-https://www.zhihu.com/question/31415286
-
-https://www.jianshu.com/p/ad2769f4c32e
-
-https://codechina.gitcode.host/programmer/2017/programmer-2017-55.html
-
-https://juejin.cn/post/7052901106631999495
+### 将 AssemblyScript 程序编译成 WebAssembly
 
 ## 参考
 
 1. [WebAssembly 官网](https://webassembly.org/)
-1. [WebAssembly | MDN](https://developer.mozilla.org/zh-CN/docs/WebAssembly)
-1. [WebAssembly 中文网](http://webassembly.org.cn/)
-1. [WebAssembly System Interface](https://github.com/WebAssembly/WASI)
-1. [WebAssembly Design Documents](https://github.com/WebAssembly/design)
-1. [WebAssembly Specification](https://webassembly.github.io/spec/core/index.html)
-1. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
-1. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
-1. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
-1. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
-1. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
-1. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
+2. [WebAssembly | MDN](https://developer.mozilla.org/zh-CN/docs/WebAssembly)
+3. [WebAssembly 中文网](http://webassembly.org.cn/)
+4. [WebAssembly System Interface](https://github.com/WebAssembly/WASI)
+5. [WebAssembly Design Documents](https://github.com/WebAssembly/design)
+6. [WebAssembly Specification](https://webassembly.github.io/spec/core/index.html)
+7. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
+8. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
+9. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
+10. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
+11. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
+12. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
+13. [一个白学家眼里的 WebAssembly](https://zhuanlan.zhihu.com/p/102692865)
+14. [使用 Docker 和 Golang 快速上手 WebAssembly](https://soulteary.com/2021/11/21/use-docker-and-golang-to-quickly-get-started-with-webassembly.html)
+15. [如何评论浏览器最新的 WebAssembly 字节码技术？](https://www.zhihu.com/question/31415286)
+16. [如何看待 WebAssembly 这门技术？](https://www.zhihu.com/question/362649730)
+17. [系统学习WebAssembly（1） —— 理论篇](https://zhuanlan.zhihu.com/p/338261741)
+18. [快 11K Star 的 WebAssembly，你应该这样学](https://juejin.cn/post/7013286944553566215)
+19. [WebAssembly 与 JIT](https://tate-young.github.io/2020/03/02/webassembly.html)
+20. [WebAssembly 初步探索](https://codechina.gitcode.host/programmer/2017/programmer-2017-55.html)
+
