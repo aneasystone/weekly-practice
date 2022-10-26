@@ -296,6 +296,84 @@ $ wasm-pack build --target web
 
 ### 将 Go 程序编译成 WebAssembly
 
+首先确保你已经 [安装了 Go](https://go.dev/doc/install)：
+
+```
+$ go version
+go version go1.19 linux/amd64
+```
+
+使用 `go mod init` 初始化模块：
+
+```
+$ mkdir go-demo && cd go-demo
+$ go mod init com.example
+```
+
+新建一个 `main.go` 文件：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, WebAssembly!")
+}
+```
+
+使用 `go build` 可以将它编译成可执行文件，通过在命令之前指定 `GOOS=js GOARCH=wasm` 可以将它编译成 WebAssembly 文件：
+
+```
+$ GOOS=js GOARCH=wasm go build -o main.wasm
+```
+
+和上面的 C 语言或 Rust 语言的例子一样，为了测试这个 main.wasm 文件，我们还需要 JavaScript 胶水代码和一个测试 HTML 文件。Go 的安装目录下自带了一个 `wasm_exec.js` 文件，我们将其拷贝到当前目录：
+
+```
+$ cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
+```
+
+然后创建一个 `index.html` 文件（也可以直接使用 Go 自带的 `wasm_exec.html` 文件）：
+
+```html
+<html>
+  <head>
+    <meta charset="utf-8"/>
+      <script src="wasm_exec.js"></script>
+      <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+          go.run(result.instance);
+        });
+      </script>
+  </head>
+  <body></body>
+</html>
+```
+
+启动 Web Server 后在浏览器中打开该页面：
+
+![](./images/go-demo-html.png)
+
+在控制台中我们就可以看到程序运行的结果了。
+
+除了在浏览器中测试 WebAssembly 文件，也可以使用 Go 安装目录自带的 `go_js_wasm_exec` 工具来运行它：
+
+```
+$ $(go env GOROOT)/misc/wasm/go_js_wasm_exec ./main.wasm
+Hello, WebAssembly!
+```
+
+或者 `go run` 时带上 `-exec` 参数来运行：
+
+```
+$ GOOS=js GOARCH=wasm go run -exec="$(go env GOROOT)/misc/wasm/go_js_wasm_exec" .
+Hello, WebAssembly!
+```
+
+运行这个命令需要安装 Node.js v12 以上的版本，打开 `go_js_wasm_exec` 文件可以看到它实际上就是执行 `node wasm_exec_node.js` 这个命令。
+
 ## 参考
 
 1. [WebAssembly 官网](https://webassembly.org/)
