@@ -166,6 +166,59 @@ $ python3 -m http.server
 
 可以看到我们在 C 语言中打印的 Hello World 成功输出到浏览器了。
 
+另外，我们也可以将 C 语言中的函数暴露出来给 JavaScript 调用。默认情况下，Emscripten 生成的代码只会调用 `main()` 函数，其他函数忽略。我们可以使用 `emscripten.h` 中的 `EMSCRIPTEN_KEEPALIVE` 来暴露函数，新建一个 `greet.c` 文件如下：
+
+```c
+#include <stdio.h>
+#include <emscripten/emscripten.h>
+
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN
+#endif
+
+EXTERN EMSCRIPTEN_KEEPALIVE void greet(char* name) {
+    printf("Hello, %s!\n", name);
+}
+```
+
+上面的代码定义了一个 `void greet(char* name)` 函数，为了让这个函数可以在 JavaScript 中调用，编译时还需要指定 `NO_EXIT_RUNTIME` 和 `EXPORTED_RUNTIME_METHODS` 参数，将 `ccall` 导出来：
+
+```
+$ emcc -o greet.html greet.c -s NO_EXIT_RUNTIME=1 -s EXPORTED_RUNTIME_METHODS=ccall
+```
+
+greet.html 文件和上面的 hello.html 几乎是一样的，我们在该文件中加几行代码来测试我们的 `greet()` 函数，首先加一个按钮：
+
+```
+<button id="mybutton">Click me!</button>
+```
+
+然后为它添加点击事件，可以看到 JavaScript 就是通过上面导出的 `ccall` 来调用 `greet()` 函数的：
+
+```
+document.getElementById("mybutton").addEventListener("click", () => {
+  const result = Module.ccall(
+    "greet",         // name of C function
+    null,            // return type
+    ["string"],      // argument types
+    ["WebAssembly"]  // arguments
+  );
+});
+```
+
+> 除了 `ccall`，我们还可以使用 `-s EXPORTED_RUNTIME_METHODS=ccall,cwrap` 同时导出 `ccall` 和 `cwrap` 函数。`ccall` 的作用是直接调用某个 C 函数，而 `cwrap` 是将 C 函数编译为一个 JavaScript 函数，并可以反复调用，这在正式项目中更实用。
+
+点击这个按钮，可以在页面和控制台上都看到 `greet()` 函数打印的内容：
+
+![](./images/greet-html.png)
+
 ### 将 Rust 程序编译成 WebAssembly
 
 首先按照官方文档 [安装 Rust](https://www.rust-lang.org/zh-CN/tools/install)，安装包含了一系列常用的命令行工具，包括 `rustup`、`rustc`、`cargo` 等，其中 `cargo` 是 Rust 的包管理器，可以使用它安装 `wasm-pack`：
@@ -197,7 +250,7 @@ pub fn greet(name: &str) {
 }
 ```
 
-在上面的代码中我们使用了 [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) 这个工具，它实现了 JavaScript 和 Rust 之间的相互通信，关于它的详细说明可以参考 [《The `wasm-bindgen` Guide》](https://rustwasm.github.io/docs/wasm-bindgen/) 这本电子书。我们首先通过 `extern` 声明了一个 JavaScript 中的 alert 方法，然后我们就可以像调用正常的 Rust 方法一样调用这个外部方法。下面再通过 `pub fn` 将 `greet` 方法暴露出来，这样我们也可以从 JavaScript 中调用这个 Rust 方法。
+在上面的代码中我们使用了 [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) 这个工具，它实现了 JavaScript 和 Rust 之间的相互通信，关于它的详细说明可以参考 [《The `wasm-bindgen` Guide》](https://rustwasm.github.io/docs/wasm-bindgen/) 这本电子书。我们首先通过 `extern` 声明了一个 JavaScript 中的 `alert()` 函数，然后我们就可以像调用正常的 Rust 函数一样调用这个外部函数。下面再通过 `pub fn` 将 `greet()` 函数暴露出来，这样我们也可以从 JavaScript 中调用这个 Rust 函数。
 
 接着修改 `./Cargo.toml` 文件，添加如下内容：
 
@@ -239,7 +292,7 @@ $ wasm-pack build --target web
 
 ![](./images/rust-demo-html.png)
 
-我们成功在浏览器中调用了使用 Rust 编写的 `greet` 方法！
+我们成功在浏览器中调用了使用 Rust 编写的 `greet()` 函数！
 
 ### 将 Go 程序编译成 WebAssembly
 
