@@ -374,6 +374,57 @@ Hello, WebAssembly!
 
 运行这个命令需要安装 Node.js v12 以上的版本，打开 `go_js_wasm_exec` 文件可以看到它实际上就是执行 `node wasm_exec_node.js` 这个命令。
 
+上面的例子是直接在 JavaScript 中执行 Go 程序，如果我们需要将 Go 中的函数导出给 JavaScript 调用，可以通过 [syscall/js](https://pkg.go.dev/syscall/js) 来实现：
+
+```go
+package main
+
+import (
+    "syscall/js"
+)
+
+func addFunction(this js.Value, p []js.Value) interface{} {
+    sum := p[0].Int() + p[1].Int()
+    return js.ValueOf(sum)
+}
+
+func main() {
+    js.Global().Set("add", js.FuncOf(addFunction))
+    select {} // block the main thread forever
+}
+```
+
+注意在 `main()` 函数中我们使用 `select {}` 将程序阻塞住，防止程序退出，否则 JavaScript 在调用 Go 函数时会报下面这样的错误：
+
+```
+wasm_exec.js:536 Uncaught Error: Go program has already exited
+    at globalThis.Go._resume (wasm_exec.js:536:11)
+    at wasm_exec.js:549:8
+    at <anonymous>:1:1
+```
+
+由于 `add` 函数是直接添加到 `js.Global()` 中的，我们可以直接通过 `window.add` 来访问它：
+
+![](./images/go-add-html.png)
+
+`js.Global()` 为我们提供了一个 Go 和 JavaScript 之间的桥梁，我们不仅可以将 Go 函数暴露给 JavaScript 调用，甚至可以通过 `js.Global()` 来操作 DOM：
+
+```go
+func hello(this js.Value, args []js.Value) interface{} {
+    doc := js.Global().Get("document")
+    h1 := doc.Call("createElement", "h1")
+    h1.Set("innerText", "Hello World")
+    doc.Get("body").Call("append", h1)
+    return nil
+}
+```
+
+除了官方的 `go build` 可以将 Go 程序编译成 WebAssembly 文件，你也可以尝试使用 [TinyGo](https://tinygo.org/docs/guides/webassembly/)，这是 Go 语言的一个子集实现，它对 Go 规范做了适当的裁剪，只保留了一些比较重要的库，这让它成为了一种更加强大和高效的语言，你可以在意想不到的地方运行它（比如很多物联网设备）。另外，使用 TinyGo 编译 WebAssembly 还有一个很大的优势，它编译出来的文件比 Go 官方编译出来的文件小的多（上面的例子中 C/C++ 或 Rust 编译出来的 wasm 文件只有 100~200K，而 Go 编译出来的 wasm 文件竟然有 2M 多）。
+
+## WebAssembly 文本格式
+
+## 使用 WASI 在非浏览器下使用 WebAssembly
+
 ## 参考
 
 1. [WebAssembly 官网](https://webassembly.org/)
@@ -396,4 +447,4 @@ Hello, WebAssembly!
 18. [快 11K Star 的 WebAssembly，你应该这样学](https://juejin.cn/post/7013286944553566215)
 19. [WebAssembly 与 JIT](https://tate-young.github.io/2020/03/02/webassembly.html)
 20. [WebAssembly 初步探索](https://codechina.gitcode.host/programmer/2017/programmer-2017-55.html)
-
+21. [WebAssembly 實戰 – 讓 Go 與 JS 在瀏覽器上共舞](https://medium.com/starbugs/run-golang-on-browser-using-wasm-c0db53d89775)
