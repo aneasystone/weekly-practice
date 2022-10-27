@@ -419,32 +419,99 @@ func hello(this js.Value, args []js.Value) interface{} {
 }
 ```
 
-除了官方的 `go build` 可以将 Go 程序编译成 WebAssembly 文件，你也可以尝试使用 [TinyGo](https://tinygo.org/docs/guides/webassembly/)，这是 Go 语言的一个子集实现，它对 Go 规范做了适当的裁剪，只保留了一些比较重要的库，这让它成为了一种更加强大和高效的语言，你可以在意想不到的地方运行它（比如很多物联网设备）。另外，使用 TinyGo 编译 WebAssembly 还有一个很大的优势，它编译出来的文件比 Go 官方编译出来的文件小的多（上面的例子中 C/C++ 或 Rust 编译出来的 wasm 文件只有 100~200K，而 Go 编译出来的 wasm 文件竟然有 2M 多）。
+除了官方的 `go build` 可以将 Go 程序编译成 WebAssembly 文件，你也可以尝试使用 [TinyGo](https://tinygo.org/docs/guides/webassembly/)，这是 Go 语言的一个子集实现，它对 Go 规范做了适当的裁剪，只保留了一些比较重要的库，这让它成为了一种更加强大和高效的语言，你可以在意想不到的地方运行它（比如很多物联网设备）。另外，使用 TinyGo 编译 WebAssembly 还有一个很大的优势，它编译出来的文件比 Go 官方编译出来的文件小得多（上面的例子中 C/C++ 或 Rust 编译出来的 wasm 文件只有 100~200K，而 Go 编译出来的 wasm 文件竟然有 2M 多）。
 
 ## WebAssembly 文本格式
 
-## 使用 WASI 在非浏览器下使用 WebAssembly
+上面我们使用了三种不同的编程语言来体验 WebAssembly，学习了如何编译，以及如何在浏览器中使用 JavaScript 调用它。不过这里有一个问题，由于 wasm 文件是二进制格式，对我们来说是完全黑盒的，不像 JavaScript 是纯文本的，我们可以方便地通过浏览器自带的开发者工具对齐进行调试，而 wasm 如果调用出问题，我们将很难排查。实际上，WebAssembly 在设计之初就已经考虑了这样的问题，所以它不仅具有 [二进制格式](https://webassembly.github.io/spec/core/binary/index.html)，而且还有一种类似于汇编语言的 [文本格式](https://webassembly.github.io/spec/core/text/index.html)，方便用户查看、编辑和调试。
+
+下面是 WebAssembly 文本格式的一个简单例子：
+
+```
+(module
+  (func $add (param $lhs i32) (param $rhs i32) (result i32)
+    local.get $lhs
+    local.get $rhs
+    i32.add)
+  (export "add" (func $add))
+)
+```
+
+WebAssembly 代码中的基本单元是一个模块，每个模块通过一个大的 [S-表达式](https://zh.wikipedia.org/wiki/S-%E8%A1%A8%E8%BE%BE%E5%BC%8F) 来表示，S-表达式是一种嵌套结构，实际上它是树的一种表示形式。上面的代码首先通过 `(module)` 定义了一个模块，然后模块中使用 `(func $add (param $lhs i32) (param $rhs i32) (result i32))` 定义了一个 `add()` 函数，这个 S-表达式转换为比较好理解的形式就是 `i32 add(i32 lhs, i32 rhs)`，最后通过 `(export "add" (func $add))` 将该函数暴露出来，关于这段代码的详细解释可以参考 Mozilla 官方文档中的 [Understanding WebAssembly text format](https://developer.mozilla.org/zh-CN/docs/WebAssembly/Understanding_the_text_format)。
+
+我们将上面的代码保存到 `add.wat` 文件中，并通过 [WABT](https://github.com/WebAssembly/wabt) 工具包（The WebAssembly Binary Toolkit）中的 [wat2wasm](https://webassembly.github.io/wabt/doc/wat2wasm.1.html) 将其转换为 wasm 格式：
+
+```
+$ wat2wasm add.wat -o add.wasm
+```
+
+使用下面的 JavaScript 脚本加载 wasm 并调用 `add()` 函数：
+
+```js
+fetchAndInstantiate('add.wasm').then(function(instance) {
+    console.log(instance.exports.add(1, 2));  // "3"
+});
+
+// fetchAndInstantiate() found in wasm-utils.js
+function fetchAndInstantiate(url, importObject) {
+    return fetch(url).then(response =>
+    response.arrayBuffer()
+    ).then(bytes =>
+    WebAssembly.instantiate(bytes, importObject)
+    ).then(results =>
+    results.instance
+    );
+}
+```
+
+将这段 JavaScript 脚本放在一个 HTML 文件中，然后启动 Web Server 访问，可以看到控制台输出了 3，也就是 `add(1, 2)` 的结果，并且我们还可以通过 Chrome 提供的 [开发者工具对 wasm 文件进行调试](https://developer.chrome.com/blog/wasm-debugging-2020/)：
+
+![](./images/wasm-debug.png)
 
 ## 参考
 
 1. [WebAssembly 官网](https://webassembly.org/)
-2. [WebAssembly | MDN](https://developer.mozilla.org/zh-CN/docs/WebAssembly)
-3. [WebAssembly 中文网](http://webassembly.org.cn/)
-4. [WebAssembly System Interface](https://github.com/WebAssembly/WASI)
-5. [WebAssembly Design Documents](https://github.com/WebAssembly/design)
-6. [WebAssembly Specification](https://webassembly.github.io/spec/core/index.html)
-7. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
-8. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
-9. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
-10. [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
-11. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
-12. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
-13. [一个白学家眼里的 WebAssembly](https://zhuanlan.zhihu.com/p/102692865)
-14. [使用 Docker 和 Golang 快速上手 WebAssembly](https://soulteary.com/2021/11/21/use-docker-and-golang-to-quickly-get-started-with-webassembly.html)
-15. [如何评论浏览器最新的 WebAssembly 字节码技术？](https://www.zhihu.com/question/31415286)
-16. [如何看待 WebAssembly 这门技术？](https://www.zhihu.com/question/362649730)
-17. [系统学习WebAssembly（1） —— 理论篇](https://zhuanlan.zhihu.com/p/338261741)
-18. [快 11K Star 的 WebAssembly，你应该这样学](https://juejin.cn/post/7013286944553566215)
-19. [WebAssembly 与 JIT](https://tate-young.github.io/2020/03/02/webassembly.html)
-20. [WebAssembly 初步探索](https://codechina.gitcode.host/programmer/2017/programmer-2017-55.html)
-21. [WebAssembly 實戰 – 讓 Go 與 JS 在瀏覽器上共舞](https://medium.com/starbugs/run-golang-on-browser-using-wasm-c0db53d89775)
+1. [WebAssembly | MDN](https://developer.mozilla.org/zh-CN/docs/WebAssembly)
+1. [WebAssembly 中文网](http://webassembly.org.cn/)
+1. [WebAssembly Design Documents](https://github.com/WebAssembly/design)
+1. [WebAssembly Specification](https://webassembly.github.io/spec/core/index.html)
+1. [WebAssembly - 维基百科](https://zh.wikipedia.org/wiki/WebAssembly)
+1. [asm.js 和 Emscripten 入门教程](https://www.ruanyifeng.com/blog/2017/09/asmjs_emscripten.html)
+1. [浏览器是如何工作的：Chrome V8 让你更懂JavaScript](https://king-hcj.github.io/2020/10/05/google-v8/)
+1.  [WebAssembly完全入门——了解wasm的前世今身](https://www.cnblogs.com/detectiveHLH/p/9928915.html)
+1. [浅谈WebAssembly历史](https://github.com/ErosZy/md/blob/master/WebAssembly%E4%B8%93%E6%A0%8F/1.%E6%B5%85%E8%BF%B0WebAssembly%E5%8E%86%E5%8F%B2.md)
+1. [A cartoon intro to WebAssembly Articles](https://hacks.mozilla.org/category/code-cartoons/a-cartoon-intro-to-webassembly/)
+1. [一个白学家眼里的 WebAssembly](https://zhuanlan.zhihu.com/p/102692865)
+1. [使用 Docker 和 Golang 快速上手 WebAssembly](https://soulteary.com/2021/11/21/use-docker-and-golang-to-quickly-get-started-with-webassembly.html)
+1. [如何评论浏览器最新的 WebAssembly 字节码技术？](https://www.zhihu.com/question/31415286)
+1. [如何看待 WebAssembly 这门技术？](https://www.zhihu.com/question/362649730)
+1. [系统学习WebAssembly（1） —— 理论篇](https://zhuanlan.zhihu.com/p/338261741)
+1. [快 11K Star 的 WebAssembly，你应该这样学](https://juejin.cn/post/7013286944553566215)
+1. [WebAssembly 与 JIT](https://tate-young.github.io/2020/03/02/webassembly.html)
+1. [WebAssembly 初步探索](https://codechina.gitcode.host/programmer/2017/programmer-2017-55.html)
+1. [WebAssembly 實戰 – 讓 Go 與 JS 在瀏覽器上共舞](https://medium.com/starbugs/run-golang-on-browser-using-wasm-c0db53d89775)
+
+## 更多
+
+### 在非浏览器下运行 WebAssembly
+
+WebAssembly 最早只应用于 Web 浏览器中，但鉴于它所拥有 **可移植、安全及高效** 等特性，WebAssembly 也被逐渐应用在 Web 领域之外的一些其他场景中，并为此提出了一项新的接口标准 —— [WASI（WebAssembly System Interface）](https://wasi.dev/)。
+
+要让 WebAssembly 跑在非 Web 环境下，我们必须有一款支持 WASI 接口的运行时（WASI runtime），目前比较流行的有两个：[wasttime](https://wasmtime.dev/) 和 [wasmer](https://wasmer.io/)，这些运行时提供了不同编程语言的 SDK，可以使得我们在各种不同的语言中调用 WebAssembly 模块。
+
+### 使用 WABT 工具包
+
+WABT 工具包中除了上文所使用的 `wat2wasm` 之外，还提供了很多其他有用的工具：
+
+* [wat2wasm](https://webassembly.github.io/wabt/doc/wat2wasm.1.html) - 将 WebAssembly 文本格式（.wat）转换为二进制格式（.wasm）
+* [wasm2wat](https://webassembly.github.io/wabt/doc/wasm2wat.1.html) - 将 WebAssembly 二进制格式（.wasm）转换为文本格式（.wat）
+* [wasm-objdump](https://webassembly.github.io/wabt/doc/wasm-objdump.1.html) - 打印 wasm 文件的信息，类似于 objdump
+* [wasm-interp](https://webassembly.github.io/wabt/doc/wasm-interp.1.html) - 解码并运行一个 wasm 文件
+* [wasm-decompile](https://webassembly.github.io/wabt/doc/wasm-decompile.1.html) - 将 wasm 文件反编译成一种和 C 语言类似的语法，便于阅读
+* [wat-desugar](https://webassembly.github.io/wabt/doc/wat-desugar.1.html)
+* [wasm2c](https://webassembly.github.io/wabt/doc/wasm2c.1.html) - 将 wasm 文件转换为 C 文件
+* [wasm-strip](https://webassembly.github.io/wabt/doc/wasm-strip.1.html)
+* [wasm-validate](https://webassembly.github.io/wabt/doc/wasm-validate.1.html)
+* [wast2json](https://webassembly.github.io/wabt/doc/wast2json.1.html)
+* [wasm-opcodecnt](https://webassembly.github.io/wabt/doc/wasm-opcodecnt.1.html)
+* [spectest-interp](https://webassembly.github.io/wabt/doc/spectest-interp.1.html)
