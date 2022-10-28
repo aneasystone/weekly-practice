@@ -497,7 +497,7 @@ function fetchAndInstantiate(url, importObject) {
 
 WebAssembly 最早只应用于 Web 浏览器中，但鉴于它所拥有 **可移植、安全及高效** 等特性，WebAssembly 也被逐渐应用在 Web 领域之外的一些其他场景中，并为此提出了一项新的接口标准 —— [WASI（WebAssembly System Interface）](https://wasi.dev/)。
 
-要让 WebAssembly 跑在非 Web 环境下，我们必须有一款支持 WASI 接口的运行时（WASI runtime），目前比较流行的有两个：[wasttime](https://wasmtime.dev/) 和 [wasmer](https://wasmer.io/)，这些运行时提供了不同编程语言的 SDK，可以使得我们在各种不同的语言中调用 WebAssembly 模块。
+要让 WebAssembly 跑在非 Web 环境下，我们必须有一款支持 WASI 接口的运行时（WASI runtime），目前比较流行的有：[wasttime](https://wasmtime.dev/)、[wasmer](https://wasmer.io/) 和 [WasmEdge](https://wasmedge.org/) 等，这些运行时提供了不同编程语言的 SDK，可以使得我们在各种不同的语言中调用 WebAssembly 模块。
 
 ### 使用 WABT 工具包
 
