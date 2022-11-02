@@ -423,7 +423,7 @@ func hello(this js.Value, args []js.Value) interface{} {
 
 ## WebAssembly 文本格式
 
-上面我们使用了三种不同的编程语言来体验 WebAssembly，学习了如何编译，以及如何在浏览器中使用 JavaScript 调用它。不过这里有一个问题，由于 wasm 文件是二进制格式，对我们来说是完全黑盒的，不像 JavaScript 是纯文本的，我们可以方便地通过浏览器自带的开发者工具对齐进行调试，而 wasm 如果调用出问题，我们将很难排查。实际上，WebAssembly 在设计之初就已经考虑了这样的问题，所以它不仅具有 [二进制格式](https://webassembly.github.io/spec/core/binary/index.html)，而且还有一种类似于汇编语言的 [文本格式](https://webassembly.github.io/spec/core/text/index.html)，方便用户查看、编辑和调试。
+上面我们使用了三种不同的编程语言来体验 WebAssembly，学习了如何编译，以及如何在浏览器中使用 JavaScript 调用它。不过这里有一个问题，由于 wasm 文件是二进制格式，对我们来说是完全黑盒的，不像 JavaScript 是纯文本的，我们可以方便地通过浏览器自带的开发者工具对其进行调试，而 wasm 如果调用出问题，我们将很难排查。实际上，WebAssembly 在设计之初就已经考虑了这样的问题，所以它不仅具有 [二进制格式](https://webassembly.github.io/spec/core/binary/index.html)，而且还有一种类似于汇编语言的 [文本格式](https://webassembly.github.io/spec/core/text/index.html)，方便用户查看、编辑和调试。
 
 下面是 WebAssembly 文本格式的一个简单例子：
 
