@@ -4,7 +4,16 @@
 
 > Observability is a measure of how well internal states of a system can be inferred from knowledge of its external outputs.
 
+这个概念也被引入软件开发行业，2018 年，Apple 的工程师 Cindy Sridharan 在他新出版的书籍 [《
+Distributed Systems Observability》](https://www.oreilly.com/library/view/distributed-systems-observability/9781492033431/) 中首次提出了分布式系统可观测性的概念，介绍了可观测性和传统监控的区别，以及如何通过可观测性的三大支柱（日志、指标监控和链路跟踪）构建完整的观测模型，从而实现分布式系统的故障诊断、根因分析和快速恢复。
 
+在可观测性提出之前，大家对系统的观测一般都是从日志、指标监控和链路跟踪三个方面独立进行，并且在每个领域都积累了丰富的经验。渐渐地，大家也意识到这三个方面并不是完全独立的，而是存在互相重合的现象，比如运维人员在查看系统 CPU 或内存等指标的图表时，如果发现异常，我们希望能快速定位到这个时间段的日志，看看有没有什么错误日志（从指标到日志）；或者在日志系统中查看某条错误日志时，我们希望追踪到链路的入口位置，看看最源头的请求参数是什么（从日志到链路）。
+
+![](./images/metrics-to-logs.png)
+
+2017 年，Peter Bourgon 撰写了一篇总结文章《Metrics, Tracing, and Logging》系统地阐述了这三者的定义、特征，以及它们之间的关系与差异，受到了业界的广泛认可。
+
+![](./images/metrics-logging-tracing.png)
 
 ## 快速开始
 
