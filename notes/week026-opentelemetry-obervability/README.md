@@ -53,7 +53,101 @@ OpenTelemetry 最核心的功能总结为一句话就是，**以统一的数据�
 
 ## 快速开始
 
-为了让用户能快速地体验和上手 OpenTelemetry，官方提供了一个名为 [Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo) 的 Demo 服务，接下来我们就按照 [Quick Start](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/docker_deployment.md) 的步骤，部署这个 Demo 服务并体验 OpenTelemetry。
+为了让用户能快速地体验和上手 OpenTelemetry，官方提供了一个名为 [Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo) 的演示服务，接下来我们就按照 [Quick Start](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/docker_deployment.md) 的步骤，使用 Docker 来部署这个演示服务，一睹 OpenTelemetry 的真容。
+
+> 除了使用 Docker 部署，官方也提供了 [Kubernetes 部署方式](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/kubernetes_deployment.md)。
+
+首先下载仓库代码：
+
+```
+$ git clone https://github.com/open-telemetry/opentelemetry-demo.git
+```
+
+进入代码目录后直接执行 `docker compose up` 命令：
+
+```
+$ cd opentelemetry-demo/
+$ docker compose up --no-build
+```
+
+参数 `--no-build` 用于直接从镜像仓库拉取镜像，如果去掉这个参数则会使用本地的代码来构建镜像。这个命令会启动 20 个容器：
+
+```
+[+] Running 20/0
+ ⠿ Container prometheus               Created                                                                          0.0s
+ ⠿ Container postgres                 Created                                                                          0.0s
+ ⠿ Container grafana                  Created                                                                          0.0s
+ ⠿ Container feature-flag-service     Created                                                                          0.0s
+ ⠿ Container jaeger                   Created                                                                          0.0s
+ ⠿ Container redis-cart               Created                                                                          0.0s
+ ⠿ Container otel-col                 Created                                                                          0.0s
+ ⠿ Container payment-service          Created                                                                          0.0s
+ ⠿ Container ad-service               Created                                                                          0.0s
+ ⠿ Container shipping-service         Created                                                                          0.0s
+ ⠿ Container email-service            Created                                                                          0.0s
+ ⠿ Container product-catalog-service  Created                                                                          0.0s
+ ⠿ Container recommendation-service   Created                                                                          0.0s
+ ⠿ Container quoteservice             Created                                                                          0.0s
+ ⠿ Container currency-service         Created                                                                          0.0s
+ ⠿ Container cart-service             Created                                                                          0.0s
+ ⠿ Container checkout-service         Created                                                                          0.0s
+ ⠿ Container frontend                 Created                                                                          0.0s
+ ⠿ Container load-generator           Created                                                                          0.0s
+ ⠿ Container frontend-proxy           Created                                                                          0.0s
+Attaching to ad-service, cart-service, checkout-service, currency-service, email-service, feature-flag-service, frontend, frontend-proxy, grafana, jaeger, load-generator, otel-col, payment-service, postgres, product-catalog-service, prometheus, quoteservice, recommendation-service, redis-cart, shipping-service
+```
+
+耐心等待所有的镜像下载完毕，且所有的服务启动成功后，即可通过浏览器访问下面这些页面：
+
+* Webstore: http://localhost:8080/
+* Grafana: http://localhost:8080/grafana/
+* Feature Flags UI: http://localhost:8080/feature/
+* Load Generator UI: http://localhost:8080/loadgen/
+* Jaeger UI: http://localhost:8080/jaeger/ui/
+
+### 演示服务架构
+
+这个演示服务中包含了很多微服务，并且为了起到演示作用，使用了各种不同的编程语言进行开发，用户可以根据自己的兴趣了解不同服务的具体实现：
+
+* [Ad Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/adservice.md) （Java）
+* [Cart Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/cartservice.md) （.Net）
+* [Checkout Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/checkoutservice.md) （Go）
+* [Currency Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/currencyservice.md) （C++）
+* [Email Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/emailservice.md) （Ruby）
+* [Feature Flag Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/featureflagservice.md) （Erlang / [Elixir](https://elixir-lang.org/)）
+* [Frontend](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/frontend.md) （JavaScript）
+* [Load Generator](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/loadgenerator.md) （Python / [Locust](https://locust.io/)）
+* [Payment Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/paymentservice.md) （JavaScript）
+* [Product Catalog Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/productcatalogservice.md) （Go）
+* [Quote Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/quoteservice.md) （PHP）
+* [Recommendation Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/recommendationservice.md) （Python）
+* [Shipping Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/shippingservice.md) （Rust）
+
+这些微服务组成的架构图如下所示：
+
+![](./images/demo-architecture.png)
+
+除了这些微服务组件，还部署了下面这些中间件：
+
+* Prometheus
+* Postgres
+* Grafana
+* Jaeger
+* Redis
+* OpenTelemetry Collector
+* Envoy（Frontend Proxy）
+
+### 体验演示服务
+
+https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/demo_screenshots.md
+
+### 使用 OpenTelemetry 快速排错
+
+https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/scenarios/recommendation_cache.md
+
+## 开发指南
+
+https://opentelemetry.io/docs/getting-started/dev/
 
 ## 参考
 
@@ -65,8 +159,34 @@ OpenTelemetry 最核心的功能总结为一句话就是，**以统一的数据�
 1. [OpenTelemetry初體驗：實踐Chaos Engineering來Drive the Observability's best practice](https://engineering.linecorp.com/zh-hant/blog/opentelemetry-chaos-engineering-drive-the-observability-best-practice/) - Johnny Pan
 1. [淺談DevOps與Observability 系列](https://ithelp.ithome.com.tw/users/20104930/ironman/4960)
 1. [可观测性](http://icyfenix.cn/distribution/observability/) - 凤凰架构
+1. [Kratos 学习笔记 - 基于 OpenTelemetry 的链路追踪](https://go-kratos.dev/blog/go-kratos-opentelemetry-practice/)
+1. [使用 OpenTelemetry Collector 来收集追踪信息，发送至 AppInsights](https://docs.dapr.io/zh-hans/operations/monitoring/tracing/open-telemetry-collector-appinsights/) - Dapr 文档库
 
 ## 更多
 
-1. [Kratos 学习笔记 - 基于 OpenTelemetry 的链路追踪](https://go-kratos.dev/blog/go-kratos-opentelemetry-practice/)
-1. [使用 OpenTelemetry Collector 来收集追踪信息，发送至 AppInsights](https://docs.dapr.io/zh-hans/operations/monitoring/tracing/open-telemetry-collector-appinsights/) - Dapr 文档库
+### 1. 执行 `docker compose up` 报错 `'compose' is not a docker command.`
+
+[Docker Compose V2](https://github.com/docker/compose) 是 `docker-compose` 的重大版本升级，使用 Go 完全重写了对之前 V1 的 Python 代码，并且和 V1 不同的是，V2 不再是独立的可执行程序，而是作为 Docker 的命令行插件来运行。所以需要先将其安装到 Docker 的插件目录：
+
+```
+$ mkdir -p ~/.docker/cli-plugins
+$ curl -fsSL "https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
+$ chmod +x ~/.docker/cli-plugins/docker-compose
+```
+
+安装完成后检查是否生效：
+
+```
+$ docker compose version
+Docker Compose version v2.12.2
+```
+
+如果你需要兼容 Docker Compose V1 时的 `docker-compose` 命令，官方提供了一个名为 [Compose Switch](https://github.com/docker/compose-switch) 的工具，它可以将 `docker-compose` 命令自动转换为 `docker compose` 命令。如果你的机器上没有安装过 Docker Compose V1，可以直接下载 `compose-switch` 并改名为 `docker-compose`：
+
+```
+$ sudo curl -fsSL https://github.com/docker
+/compose-switch/releases/download/v1.0.5/docker-compose-linux-amd64 -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
+```
+
+如果已经安装过 Docker Compose V1，你可以将其先卸载掉再安装 `compose-switch`，或者根据官方文档使用 `update-alternatives` 之类的工具进行版本切换。
