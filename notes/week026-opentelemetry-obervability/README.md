@@ -139,6 +139,24 @@ Attaching to ad-service, cart-service, checkout-service, currency-service, email
 
 ### 体验演示服务
 
+这个演示服务是一个天文爱好者的网上商城，具备浏览商品、商品推荐、添加购物车、下单等功能：
+
+![](./images/demo-shop.png)
+
+![](./images/demo-shop-cart.png)
+
+商城运行起来之后，[Load Generator](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/loadgenerator.md) 服务就会自动对商城进行负载测试，它是一个使用开源工具 [Locust](https://locust.io/) 编写的负载测试服务，可以模拟用户访问网站。
+
+访问 `http://localhost:8080/loadgen` 进入 Load Generator 页面：
+
+![](./images/locust-load-gen.png)
+
+可以在这里查看测试用例，开启或停止测试，修改模拟的用户数和用户访问的频率等。还提供了图表页面展示测试的 RPS（Request per Second）、响应时间、活跃用户数等指标：
+
+![](./images/locust-rps.png)
+
+![](./images/locust-response-times.png)
+
 https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/demo_screenshots.md
 
 ### 使用 OpenTelemetry 快速排错
