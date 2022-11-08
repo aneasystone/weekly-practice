@@ -139,15 +139,17 @@ Attaching to ad-service, cart-service, checkout-service, currency-service, email
 
 ### 体验演示服务
 
-这个演示服务是一个天文爱好者的网上商城，具备浏览商品、商品推荐、添加购物车、下单等功能：
+这个演示服务是一个天文爱好者的网上商城，访问 `http://localhost:8080/` 进入商城首页：
 
 ![](./images/demo-shop.png)
+
+商城具有浏览商品、商品推荐、添加购物车、下单等功能：
 
 ![](./images/demo-shop-cart.png)
 
 商城运行起来之后，[Load Generator](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/loadgenerator.md) 服务就会自动对商城进行负载测试，它是一个使用开源工具 [Locust](https://locust.io/) 编写的负载测试服务，可以模拟用户访问网站。
 
-访问 `http://localhost:8080/loadgen` 进入 Load Generator 页面：
+访问 `http://localhost:8080/loadgen/` 进入 Load Generator 页面：
 
 ![](./images/locust-load-gen.png)
 
@@ -157,7 +159,71 @@ Attaching to ad-service, cart-service, checkout-service, currency-service, email
 
 ![](./images/locust-response-times.png)
 
-https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/demo_screenshots.md
+### 体验 OpenTelemetry
+
+接下来我们看看这个演示服务是如何部署和配置 OpenTelemetry 的，打开 `docker-compose.yaml` 文件，找到 [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) 的配置：
+
+```yaml
+otelcol:
+  image: otel/opentelemetry-collector-contrib:0.61.0
+  container_name: otel-col
+  deploy:
+    resources:
+      limits:
+        memory: 100M
+  restart: always
+  command: [ "--config=/etc/otelcol-config.yml", "--config=/etcotelcol-config-extras.yml" ]
+  volumes:
+    - ./src/otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+    - ./src/otelcollector/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml
+  ports:
+    - "4317"          # OTLP over gRPC receiver
+    - "4318:4318"     # OTLP over HTTP receiver
+    - "9464"          # Prometheus exporter
+    - "8888"          # metrics endpoint
+  depends_on:
+    - jaeger
+  logging: *logging
+```
+
+`otelcol-config.yml` 文件内容如下：
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+
+exporters:
+  otlp:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+  logging:
+  prometheus:
+    endpoint: "otelcol:9464"
+
+processors:
+  batch:
+  spanmetrics:
+    metrics_exporter: prometheus
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [spanmetrics, batch]
+      exporters: [logging, otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, logging]
+```
 
 ### 使用 OpenTelemetry 快速排错
 
