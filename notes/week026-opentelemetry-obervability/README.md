@@ -161,7 +161,9 @@ Attaching to ad-service, cart-service, checkout-service, currency-service, email
 
 ### 体验 OpenTelemetry
 
-接下来我们看看这个演示服务是如何部署和配置 OpenTelemetry 的，打开 `docker-compose.yaml` 文件，找到 [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) 的配置：
+我们知道，OpenTelemetry 的作用是以统一的方式采集和导出可观测性数据，上面所列出来的这些微服务分别使用了不同语言的 [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/) 采集数据，对于采集的数据，我们有两种处理方式：一种是直接将其导出到某个后端服务，比如直接导出到 Prometheus、Jaeger 等，这种方式简单明了，适用于开发环境或小规模环境；另一种方式是导出到 [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) 服务，这也是官方推荐的做法，这样你的服务可以更聚焦于快速地导出数据，而对于请求重试、批量导出、数据加密、数据压缩或敏感数据过滤这些数据处理操作统统交给 OpenTelemetry Collector 来处理。
+
+在这个演示服务中，我们就是通过 OpenTelemetry Collector 来收集数据的，打开 `docker-compose.yaml` 文件，我们来看看 OpenTelemetry Collector 的配置：
 
 ```yaml
 otelcol:
@@ -186,7 +188,19 @@ otelcol:
   logging: *logging
 ```
 
-`otelcol-config.yml` 文件内容如下：
+这里可以看到 OpenTelemetry Collector 暴露了四个端口：`4317` 和 `4318` 这两个端口是用于收集数据的，一个是 gRPC 协议，一个是 HTTP 协议，数据必须符合 [OTLP 规范](https://opentelemetry.io/docs/reference/specification/protocol/)（OpenTelemetry Protocol）；`9464` 和 `8888` 这两个端口是 OpenTelemetry Collector 的指标端口，`8888` 暴露的是 OpenTelemetry Collector 本身的指标：
+
+![](./images/otelcol-metrics.png)
+
+而 `9464` 暴露是的 OpenTelemetry Collector 收集到的指标：
+
+![](./images/otelcol-service-metrics.png)
+
+这两个端口都配置在 Prometheus 的 Targets 中：
+
+![](./images/prometheus-targets.png)
+
+接下来我们看下 OpenTelemetry Collector 的配置文件 `otelcol-config.yml`，文件的内容如下：
 
 ```yaml
 receivers:
@@ -224,6 +238,8 @@ service:
       processors: [batch]
       exporters: [prometheus, logging]
 ```
+
+![](./images/Otel_Collector.svg)
 
 ### 使用 OpenTelemetry 快速排错
 
