@@ -196,7 +196,24 @@ otelcol:
 
 ![](./images/otelcol-service-metrics.png)
 
-这两个端口都配置在 Prometheus 的 Targets 中：
+这两个端口都配置在 Prometheus 的配置文件 `prometheus-config.yaml` 中：
+
+```yaml
+global:
+  evaluation_interval: 30s
+  scrape_interval: 5s
+scrape_configs:
+- job_name: otel
+  static_configs:
+  - targets:
+    - 'otelcol:9464'
+- job_name: otel-collector
+  static_configs:
+  - targets:
+    - 'otelcol:8888'
+```
+
+我们打开 Prometheus 的 Targets 页面：
 
 ![](./images/prometheus-targets.png)
 
@@ -226,7 +243,23 @@ processors:
   batch:
   spanmetrics:
     metrics_exporter: prometheus
+```
 
+OpenTelemetry Collector 主要由以下三部分组成：
+
+* **[接收器（receivers）](https://opentelemetry.io/docs/collector/configuration/#receivers)**：配置 OpenTelemetry Collector 接收数据的方式，在上面的配置中，我们使用了 [OTLP Receiver](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md)，并开启了 gRPC 和 HTTP 两个端点用于接收数据；
+* **[处理器（processors）](https://opentelemetry.io/docs/collector/configuration/#processors)**：在接收数据之后导出数据之前对数据进行处理，比如 [Batch Processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md) 用于批处理数据，[Span Metrics Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/spanmetricsprocessor/README.md) 用于从 Span 数据中计算出请求数、错误数和请求耗时（Request, Error and Duration，简称 **R.E.D**）；
+* **[导出器（exporters）](https://opentelemetry.io/docs/collector/configuration/#exporters)**：将处理后的数据导出到后端服务，比如在上面的配置中，通过 [OTLP gRPC Exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) 将数据导出到 Jaeger，[Logging Exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/loggingexporter/README.md) 用于在控制台打印日志，[Prometheus Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/prometheusexporter/README.md) 用于暴露 Prometheus 指标端口，提供给 Prometheus 抓取；
+
+除了上面配置的这些，我们还可以在 [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) 和 [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) 找到更多的官方或第三方的 receivers、processors 和 exporters。
+
+OpenTelemetry Collector 的总体示意图如下所示：
+
+![](./images/otel-collector.png)
+
+配置好 receivers、processors 和 exporters 之后，我们还需要通过流水线（pipeline）将其串起来：
+
+```yaml
 service:
   pipelines:
     traces:
@@ -238,8 +271,6 @@ service:
       processors: [batch]
       exporters: [prometheus, logging]
 ```
-
-![](./images/Otel_Collector.svg)
 
 ### 使用 OpenTelemetry 快速排错
 
