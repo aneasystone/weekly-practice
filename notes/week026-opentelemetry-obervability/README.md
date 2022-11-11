@@ -247,9 +247,31 @@ processors:
 
 OpenTelemetry Collector 主要由以下三部分组成：
 
-* **[接收器（receivers）](https://opentelemetry.io/docs/collector/configuration/#receivers)**：配置 OpenTelemetry Collector 接收数据的方式，在上面的配置中，我们使用了 [OTLP Receiver](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md)，并开启了 gRPC 和 HTTP 两个端点用于接收数据；
+* **[接收器（receivers）](https://opentelemetry.io/docs/collector/configuration/#receivers)**：配置 OpenTelemetry Collector 接收数据的方式，在上面的配置中，我们使用了 [OTLP Receiver](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md)，并开启了 gRPC 和 HTTP 两个端点用于接收数据（gRPC 端口默认为 4317，HTTP 端口默认为 4318）；
 * **[处理器（processors）](https://opentelemetry.io/docs/collector/configuration/#processors)**：在接收数据之后导出数据之前对数据进行处理，比如 [Batch Processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md) 用于批处理数据，[Span Metrics Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/spanmetricsprocessor/README.md) 用于从 Span 数据中计算出请求数、错误数和请求耗时（Request, Error and Duration，简称 **R.E.D**）；
 * **[导出器（exporters）](https://opentelemetry.io/docs/collector/configuration/#exporters)**：将处理后的数据导出到后端服务，比如在上面的配置中，通过 [OTLP gRPC Exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) 将数据导出到 Jaeger，[Logging Exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/loggingexporter/README.md) 用于在控制台打印日志，[Prometheus Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/prometheusexporter/README.md) 用于暴露 Prometheus 指标端口，提供给 Prometheus 抓取；
+
+暴露给 Prometheus 的指标端口 9464 我们在上面的 Prometheus 配置中已经看到了，导出到 Jaeger 的端口 4317 也可以在 Jaeger 的配置文件中看到：
+
+```yaml
+jaeger:
+  image: jaegertracing/all-in-one
+  container_name: jaeger
+  command: ["--memory.max-traces", "10000", "--query.base-path", "/jaeger/ui"]
+  deploy:
+    resources:
+      limits:
+        memory: 275M
+  restart: always
+  ports:
+    - "16686"                    # Jaeger UI
+    - "4317"                     # OTLP gRPC default port
+  environment:
+    - COLLECTOR_OTLP_ENABLED=true
+  logging: *logging
+```
+
+Jaeger 从 v1.35 版本开始支持 OTLP 协议的链路跟踪数据，通过在环境变量中添加 `COLLECTOR_OTLP_ENABLED=true` 即可开启该功能。
 
 除了上面配置的这些，我们还可以在 [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) 和 [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) 找到更多的官方或第三方的 receivers、processors 和 exporters。
 
@@ -257,7 +279,7 @@ OpenTelemetry Collector 的总体示意图如下所示：
 
 ![](./images/otel-collector.png)
 
-配置好 receivers、processors 和 exporters 之后，我们还需要通过流水线（pipeline）将其串起来：
+配置好 receivers、processors 和 exporters 之后，我们还需要通过在 [服务（service）](https://opentelemetry.io/docs/collector/configuration/#service) 中添加流水线（pipeline）将其串起来：
 
 ```yaml
 service:
@@ -271,6 +293,35 @@ service:
       processors: [batch]
       exporters: [prometheus, logging]
 ```
+
+上面的配置中我们开启了两个流水线：
+
+* `traces` 流水线用于处理链路跟踪数据：通过 otlp 接收数据，再通过 spanmetrics 和 batch 处理器进行处理，最后导出到 logging 和 otlp；
+* `metrics` 流水线用于处理指标数据：通过 otlp 接收数据，再通过 batch 处理器进行处理，最后导出到 prometheus 和 logging；
+
+除此之外，还可以添加 `logs` 流水线用于处理日志数据。
+
+在这个演示服务中 Prometheus 的端口并没有对外暴露，而是通过 Grafana 来做可视化展示，我们打开 `http://localhost:8080/grafana/` 页面，可以在 Grafana 中找到两个面板，一个是 OpenTelemetry 本身的指标面板：
+
+![](./images/grafana-otel-metrics.png)
+
+这个面板中展示了 receivers、processors 和 exporters 的指标信息。另一个是 OpenTelemetry 收集的服务的指标面板：
+
+![](./images/grafana-service-metrics.png)
+
+这个面板中展示了每个服务的 CPU 利用率，内存，调用次数，错误率等指标信息。
+
+在 Grafana 中配置了两个数据源，一个 Prometheus，一个 Jaeger，不过 Jaeger 数据源貌似没有用。我们可以打开 `http://localhost:8080/jaeger/ui/` 页面，在 Search 页面搜索不同服务的 trace 数据：
+
+![](./images/jaeger-search.png)
+
+随便点击一条 trace 数据，可以进入该 trace 的详细页面，这个页面展示了该 trace 在不同服务之间的详细链路：
+
+![](./images/jaeger-trace-detail.png)
+
+更厉害的是，Jaeger 还能根据 trace 数据生成整个系统的架构图：
+
+![](./images/jaeger-system-architecture.png)
 
 ### 使用 OpenTelemetry 快速排错
 
