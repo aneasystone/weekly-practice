@@ -319,13 +319,40 @@ service:
 
 ![](./images/jaeger-trace-detail.png)
 
-更厉害的是，Jaeger 还能根据 trace 数据生成整个系统的架构图：
+更厉害的是，Jaeger 还能根据 trace 数据生成整个系统的架构图（连线处还标出了服务之间的调用量）：
 
 ![](./images/jaeger-system-architecture.png)
 
 ### 使用 OpenTelemetry 快速排错
 
-https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/scenarios/recommendation_cache.md
+示例服务提供了几个 [特性开关（Feature Flags）](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/feature_flags.md) 用于模拟服务异常的场景。我们在浏览器中输入 `http://localhost:8080/feature/` 进入 Feature Flag UI 页面：
+
+![](./images/feature-flags-ui.png)
+
+这里有两个特性开关：
+
+* `productCatalogFailure` - 打开这个开关后，访问商品 `OLJCESPC7Z` 时会报错；
+* `recommendationCache` - 打开这个开关后，`recommendationservice` 会偶发性的报内存溢出错误；
+
+在 [Using Metrics and Traces to diagnose a memory leak](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/scenarios/recommendation_cache.md) 这篇官方文档中，给出了排查内存溢出错误的步骤。我们这里不妨就排查下商品接口报错这个问题，首先，我们将 `productCatalogFailure` 这个特性开关打开，然后在浏览器中访问 `http://localhost:8080/product/OLJCESPC7Z` 页面：
+
+![](./images/product-error.png)
+
+果然，页面报错了。在下面的开发者工具中可以看到是 `http://localhost:8080/api/products/OLJCESPC7Z` 这个接口报了 `500 Internal Server Error` 错误。
+
+为了排查这个错误，我们打开 Jaeger UI 进入 Search 页面，在 Service 列表中选择 `productcatalogservice`，Tags 中输入 `error=true`，可以在搜索结果中看到很多红色的点，这些都是出错的请求：
+
+![](./images/jaeger-errors.png)
+
+我们点开其中一个查看详情：
+
+![](./images/jaeger-error-detail.png)
+
+在左侧的树形结构中，我们看到出错的服务上都有一个红色的感叹号，展开 `productcatalogservice`，在 Logs 中就能看到错误的日志了：
+
+```
+Error: ProductCatalogService Fail Feature Flag Enabled
+```
 
 ## 开发指南
 
