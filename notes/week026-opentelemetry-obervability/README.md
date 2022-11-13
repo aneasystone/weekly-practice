@@ -356,7 +356,86 @@ Error: ProductCatalogService Fail Feature Flag Enabled
 
 ## 开发指南
 
-https://opentelemetry.io/docs/getting-started/dev/
+这一节我们将学习如何在自己的项目中集成 [OpenTelemetry SDK](https://opentelemetry.io/docs/getting-started/dev/)，OpenTelemetry 支持大多数开发语言，其中 [对 Java 的支持](https://opentelemetry.io/docs/instrumentation/java/) 最为完善。不仅提供了 [Java API 和 SDK](https://github.com/open-telemetry/opentelemetry-java)，我们可以使用 SDK [手动采集数据](https://opentelemetry.io/docs/instrumentation/java/manual/)，而且还提供了 [Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation) 让我们不用写一行代码就能 [自动采集数据](https://opentelemetry.io/docs/instrumentation/java/automatic/)，并且支持 [大多数的 Java 库和框架](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md)。
+
+### Automatic Instrumentation
+
+首先准备两个简单的 Spring Boot 项目：`demo-server` 作为服务端，提供了一个 `/greeting` 接口；`demo-client` 作为客户端，使用 `RestTemplate` 调用 `/greeting` 接口。
+
+然后下载最新版本的 [opentelemetry-javaagent.jar](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases)，将其作为 `-javaagent` 参数启动 `demo-server`：
+
+```
+$ java -javaagent:../opentelemetry-javaagent.jar \
+  -Dotel.service.name=demo-server \
+  -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
+  -jar ./target/demo-server-0.0.1-SNAPSHOT.jar
+```
+
+然后再启动 `demo-client`：
+
+```
+$ java -javaagent:../opentelemetry-javaagent.jar \
+  -Dotel.service.name=demo-client \
+  -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
+  -jar ./target/demo-client-0.0.1-SNAPSHOT.jar
+```
+
+上面通过参数 `otel.service.name` 指定服务名称，通过参数 `otel.exporter.otlp.endpoint` 指定 OpenTelemetry Collector 地址。
+
+运行之后，打开 Jaeger UI 页面，就可以看到 `demo-client` 的这次请求：
+
+![](./images/jaeger-demo.png)
+
+点开可以看到完整的链路详情：
+
+![](./images/jaeger-demo-detail.png)
+
+### Manual Instrumentation
+
+通过 Java Agent 自动收集指标虽然简单，但是有时候我们还需要手动收集一些其他信息，比如处理过程中的一些步骤日志或耗时指标等。
+
+官方在 [这里提供了大量的示例](https://github.com/open-telemetry/opentelemetry-java-docs#java-opentelemetry-examples) 供初学者学习参考，上面 [Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo) 演示服务中的 [Ad Service](https://github.com/open-telemetry/opentelemetry-demo/blob/main/docs/services/adservice.md) 也是使用 Java 实现的，我们也可以 [参考它的代码](https://github.com/open-telemetry/opentelemetry-demo/tree/main/src/adservice)。
+
+首先我们在 `demo-server` 的 `pom.xml` 文件中添加依赖：
+
+```xml
+<project>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>1.20.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api</artifactId>
+    </dependency>
+  </dependencies>
+</project>
+```
+
+然后在处理 `/greeting` 请求时，对当前的 Span 添加一个新的属性：
+
+```java
+@GetMapping("/greeting")
+public String greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+
+  Span span = Span.current();
+  span.setAttribute("user.name", name);
+
+  return String.format("Hello, %s", name);
+}
+```
+
+重新编译和启动，再次运行 `demo-client`，可以在 Jaeger UI 中看到我们添加的属性：
+
+![](./images/jaeger-demo-span-attr.png)
 
 ## 参考
 
@@ -369,7 +448,6 @@ https://opentelemetry.io/docs/getting-started/dev/
 1. [淺談DevOps與Observability 系列](https://ithelp.ithome.com.tw/users/20104930/ironman/4960)
 1. [可观测性](http://icyfenix.cn/distribution/observability/) - 凤凰架构
 1. [Kratos 学习笔记 - 基于 OpenTelemetry 的链路追踪](https://go-kratos.dev/blog/go-kratos-opentelemetry-practice/)
-1. [使用 OpenTelemetry Collector 来收集追踪信息，发送至 AppInsights](https://docs.dapr.io/zh-hans/operations/monitoring/tracing/open-telemetry-collector-appinsights/) - Dapr 文档库
 
 ## 更多
 
@@ -399,3 +477,10 @@ $ sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 如果已经安装过 Docker Compose V1，你可以将其先卸载掉再安装 `compose-switch`，或者根据官方文档使用 `update-alternatives` 之类的工具进行版本切换。
+
+### 2. Dapr 的可观测性实战
+
+* [Observe your application with Dapr](https://docs.dapr.io/operations/)
+  * [Tracing](https://docs.dapr.io/operations/monitoring/tracing/)
+  * [Metrics](https://docs.dapr.io/operations/monitoring/metrics/)
+  * [Logging](https://docs.dapr.io/operations/monitoring/logging/)
