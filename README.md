@@ -27,7 +27,8 @@
 * WEEK023 - [搭建自己的镜像仓库](./notes/week023-build-your-own-image-registry/README.md)
 * WEEK024 - [Java 8 之 Stream API 用法总结](./notes/week024-java-streams/README.md)
 * WEEK025 - [WebAssembly 学习笔记](./notes/week025-webassembly-notes/README.md)
-* WEEK026 - [基于 OpenTelemetry 的可观测性实战](./notes/week026-opentelemetry-obervability/README.md)
+* WEEK026 - [基于 OpenTelemetry 的可观测性实战](./notes/week026-opentelemetry-observability/README.md)
+* WEEK027 - [实战 Kubernetes 的动态扩缩容](./notes/week027-kubernetes-auto-scaling/README.md)
 
 ### 项目实践
 
