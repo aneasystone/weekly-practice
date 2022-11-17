@@ -86,7 +86,7 @@ minikube   Ready    control-plane,master   4m51s   v1.20.2
 使用命令行工具 `kubectl` 可以创建和管理 Deployment，它通过 Kubernetes API 与集群进行交互。使用 `kubectl create deployment` 部署我们的第一个应用程序：
 
 ```
-$ kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
+$ kubectl create deployment kubernetes-bootcamp --image=jocatalin/kubernetes-bootcamp:v1
 deployment.apps/kubernetes-bootcamp created
 ```
 
@@ -202,7 +202,7 @@ $ curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-
     "containers": [
       {
         "name": "kubernetes-bootcamp",
-        "image": "gcr.io/google-samples/kubernetes-bootcamp:v1",
+        "image": "jocatalin/kubernetes-bootcamp:v1",
         "resources": {
           
         },
@@ -315,7 +315,7 @@ $ curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-
 * Kubelet，负责主节点和工作节点之间的通信，它还负责管理工作节点上的 Pod 和容器；
 * 容器运行时
 
-接下来我们使用 `kubelctl` 命令对 Pod 展开更深入的了解，大多数命令和 Docker 命令很类似，如果有一定的 Docker 基础，可以很快上手。使用 `kubectl get pods` 可以查看 Pod 列表，列表中显示着 Pod 名称和状态一些简单的信息，如果需要更详细的信息，可以使用 `kubectl describe` 命令：
+接下来我们使用 `kubectl` 命令对 Pod 展开更深入的了解，大多数命令和 Docker 命令很类似，如果有一定的 Docker 基础，可以很快上手。使用 `kubectl get pods` 可以查看 Pod 列表，列表中显示着 Pod 名称和状态一些简单的信息，如果需要更详细的信息，可以使用 `kubectl describe` 命令：
 
 ```
 $ kubectl describe pods
@@ -335,7 +335,7 @@ Controlled By:  ReplicaSet/kubernetes-bootcamp-fb5c67579
 Containers:
   kubernetes-bootcamp:
     Container ID:   docker://ac8e5d785a8c7d8a550febdec1720f6d2a1ebe66f90ce970a963340b9f33c032
-    Image:          gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image:          jocatalin/kubernetes-bootcamp:v1
     Image ID:       docker-pullable://jocatalin/kubernetes-bootcamp@sha256:0d6b8ee63bb57c5f5b6156f446b3bc3b3c143d233037f3a2f00e279c8fcc64af
     Port:           8080/TCP
     Host Port:      0/TCP
@@ -365,7 +365,7 @@ Events:
   Type    Reason     Age   From               Message
   ----    ------     ----  ----               -------
   Normal  Scheduled  77s   default-scheduler  Successfully assigned default/kubernetes-bootcamp-fb5c67579-8sm7d to minikube
-  Normal  Pulled     75s   kubelet            Container image "gcr.io/google-samples/kubernetes-bootcamp:v1" already present on machine
+  Normal  Pulled     75s   kubelet            Container image "jocatalin/kubernetes-bootcamp:v1" already present on machine
   Normal  Created    75s   kubelet            Created container kubernetes-bootcamp
   Normal  Started    74s   kubelet            Started container kubernetes-bootcamp
 ```
@@ -552,7 +552,7 @@ Pod Template:
   Labels:  app=kubernetes-bootcamp
   Containers:
    kubernetes-bootcamp:
-    Image:        gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image:        jocatalin/kubernetes-bootcamp:v1
     Port:         8080/TCP
     Host Port:    0/TCP
     Environment:  <none>
@@ -706,7 +706,7 @@ Pod Template:
   Labels:  app=kubernetes-bootcamp
   Containers:
    kubernetes-bootcamp:
-    Image:        gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image:        jocatalin/kubernetes-bootcamp:v1
     Port:         8080/TCP
     Host Port:    0/TCP
     Environment:  <none>
@@ -818,7 +818,7 @@ deployment "kubernetes-bootcamp" successfully rolled out
 如果我们更新的时候出错了，比如更新到一个不存在的镜像：
 
 ```
-$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=gcr.io/google-samples/kubernetes-bootcamp:v10
+$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=jocatalin/kubernetes-bootcamp:v10
 deployment.apps/kubernetes-bootcamp image updated
 ```
 
@@ -847,7 +847,8 @@ kubernetes-bootcamp-7d44784b7c-vfn79   1/1     Running            0          13m
 下面是 `kubectl rollout status` 命令的输出：
 
 ```
-$ kubectl rollout status deployments/kubernetes-bootcampWaiting for deployment "kubernetes-bootcamp" rollout to finish: 2 out of 4 new replicas have been updated...
+$ kubectl rollout status deployments/kubernetes-bootcamp
+Waiting for deployment "kubernetes-bootcamp" rollout to finish: 2 out of 4 new replicas have been updated...
 ```
 
 这时可以使用 `kubectl rollout undo` 执行回滚操作，应用程序将会全部恢复到之前的 v2 版本：
