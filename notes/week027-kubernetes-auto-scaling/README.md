@@ -6,6 +6,178 @@
 
 ## Metrics Server
 
+为了实现动态扩缩容，首先我们需要对 Kubernetes 集群的负载情况进行监控，Kubernetes 从 v1.8 开始提出了 [Metrics API](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#metrics-api) 的概念来解决这个问题，官方认为核心指标的监控应该是稳定的，版本可控的，并且和其他的 Kubernetes API 一样，可以直接被用户访问（如：`kubectl top` 命令），或被集群中其他控制器使用（如：`HPA`），为此专门开发了 [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) 组件。
+
+我们知道 Kubernetes 会在每个节点上运行一个 Kubelet 进程，这个进程对容器进行生命周期的管理，实际上，它还有另外一个作用，那就是监控所在节点的资源使用情况，并且可以通过 [Summary API](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#summary-api-source) 来查询。Metrics Server 就是通过聚合各个节点的 Kubelet 的 Summary API，然后对外提供 Metrics API，并通过 API Server 的 [API 聚合层（API Aggregation Layer）](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/) 将接口以 Kubernetes API 的形式暴露给用户或其他程序使用：
+
+![](./images/resource-metrics-pipeline.png)
+
+安装官方文档，我们使用下面的命令安装 Metrics Server：
+
+```
+$ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+安装之后，使用 `kubectl get pods` 可以看到 Metrics Server 虽然是 Running 状态，但是一直没有 Ready：
+
+```
+$ kubectl get pods -n kube-system
+NAME                                     READY   STATUS    RESTARTS         AGE
+metrics-server-847d45fd4f-rhsh4          0/1     Running   0                30s
+```
+
+使用 `kubectl logs` 查看日志报如下错误：
+
+```
+$ kubectl logs -f metrics-server-847d45fd4f-rhsh4 -n kube-system
+E1119 04:47:02.299430       1 scraper.go:140] "Failed to scrape node" err="Get \"https://192.168.65.4:10250/metrics/resource\": x509: cannot validate certificate for 192.168.65.4 because it doesn't contain any IP SANs" node="docker-desktop"
+```
+
+这里的 `/metrics/resource` 接口就是 Kubelet 的 Summary API，这个报错的意思是证书校验没通过，因为证书中没有包含所请求的 IP 地址，我们不妨随便进一个 Pod 内部，用 openssl 看下这个证书的信息：
+
+```
+# openssl s_client -showcerts -connect 192.168.65.4:10250
+CONNECTED(00000003)
+depth=1 CN = docker-desktop-ca@1663714811
+verify error:num=19:self signed certificate in certificate chain
+verify return:0
+---
+Certificate chain
+ 0 s:/CN=docker-desktop@1663714811
+   i:/CN=docker-desktop-ca@1663714811
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+ 1 s:/CN=docker-desktop-ca@1663714811
+   i:/CN=docker-desktop-ca@1663714811
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+---
+Server certificate
+subject=/CN=docker-desktop@1663714811
+issuer=/CN=docker-desktop-ca@1663714811
+```
+
+可以看到这是一个自签名的证书，证书只签给了 `docker-desktop@1663714811`，没有签给 `192.168.65.4` 这个 IP，所以 Metrics Server 认为证书是无效的，为了解决这个问题，第一种方法是将这个证书加入 Metrics Server 的受信证书中，不过这种方法比较繁琐，另一种方法简单暴力，我们可以直接让 Metrics Server 跳过证书检查。我们将上面安装 Metrics Server 的那个 YAML 文件下载下来，在 Metrics Server 的启动参数中添加 `--kubelet-insecure-tls`：
+
+```yaml
+- args:
+  - --cert-dir=/tmp
+  - --secure-port=4443
+  - --kubelet-insecure-tls
+  - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+  - --kubelet-use-node-status-port
+  - --metric-resolution=15s
+```
+
+然后使用 `kubectl apply` 重新安装：
+
+```
+$ kubectl apply -f components.yaml
+```
+
+再通过 `kubectl get pods` 确认 Metrics Server 已经成功运行起来了。这时，我们就可以通过 `kubectl top` 命令来获取 Kubernetes 集群状态了，比如查看所有节点的 CPU 和内存占用：
+
+```
+$ kubectl top nodes
+NAME             CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+docker-desktop   489m         6%     1823Mi          29%
+```
+
+或者查看所有 Pod 的运行状态：
+
+```
+$ kubectl top pods -A
+NAMESPACE     NAME                                     CPU(cores)   MEMORY(bytes)
+default       kubernetes-bootcamp-857b45f5bb-hvkfx     0m           10Mi
+kube-system   coredns-95db45d46-jx42f                  5m           23Mi
+kube-system   coredns-95db45d46-nbvg9                  5m           62Mi
+kube-system   etcd-docker-desktop                      48m          371Mi
+kube-system   kube-apiserver-docker-desktop            61m          409Mi
+kube-system   kube-controller-manager-docker-desktop   49m          130Mi
+kube-system   kube-proxy-zwspl                         1m           62Mi
+kube-system   kube-scheduler-docker-desktop            8m           68Mi
+kube-system   metrics-server-5db9b4b966-zt6z4          6m           18Mi
+kube-system   storage-provisioner                      4m           23Mi
+kube-system   vpnkit-controller                        1m           8Mi
+```
+
+也可以查看某个节点的 CPU 和内存占用：
+
+```
+$ kubectl top node docker-desktop
+NAME             CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+docker-desktop   425m         5%     1970Mi          31%
+```
+
+上面讲过，`kubectl top` 其实是通过 API Server 提供的接口来获取这些指标信息的，所以我们也可以直接通过接口来获取。上面的命令实际上就是调用了下面这个接口：
+
+```
+$ kubectl get --raw "/apis/metrics.k8s.io/v1beta1/nodes/docker-desktop" | jq '.'
+{
+  "kind": "NodeMetrics",
+  "apiVersion": "metrics.k8s.io/v1beta1",
+  "metadata": {
+    "name": "docker-desktop",
+    "creationTimestamp": "2022-11-19T14:57:48Z",
+    "labels": {
+      "beta.kubernetes.io/arch": "amd64",
+      "beta.kubernetes.io/os": "linux",
+      "kubernetes.io/arch": "amd64",
+      "kubernetes.io/hostname": "docker-desktop",
+      "kubernetes.io/os": "linux",
+      "node-role.kubernetes.io/control-plane": "",
+      "node.kubernetes.io/exclude-from-external-load-balancers": ""
+    }
+  },
+  "timestamp": "2022-11-19T14:57:38Z",
+  "window": "12.21s",
+  "usage": {
+    "cpu": "476038624n",
+    "memory": "2008740Ki"
+  }
+}
+```
+
+我们也可以查看某个 Pod 的运行状态：
+
+```
+$ kubectl top pod kubernetes-bootcamp-857b45f5bb-hvkfx
+NAME                                   CPU(cores)   MEMORY(bytes)
+kubernetes-bootcamp-857b45f5bb-hvkfx   0m           20Mi
+```
+
+类似的，这个命令和下面这个接口是一样的：
+
+```
+$ kubectl get --raw "/apis/metrics.k8s.io/v1beta1/namespaces/default/pods/kubernetes-bootcamp-857b45f5bb-hvkfx" | jq '.'
+{
+  "kind": "PodMetrics",
+  "apiVersion": "metrics.k8s.io/v1beta1",
+  "metadata": {
+    "name": "kubernetes-bootcamp-857b45f5bb-hvkfx",
+    "namespace": "default",
+    "creationTimestamp": "2022-11-19T14:59:11Z",
+    "labels": {
+      "app": "kubernetes-bootcamp",
+      "pod-template-hash": "857b45f5bb"
+    }
+  },
+  "timestamp": "2022-11-19T14:59:01Z",
+  "window": "15.038s",
+  "containers": [
+    {
+      "name": "kubernetes-bootcamp",
+      "usage": {
+        "cpu": "0",
+        "memory": "21272Ki"
+      }
+    }
+  ]
+}
+```
+
 ## 基于 CPU 自动扩缩容
 
 ## 基于内存自动扩缩容
