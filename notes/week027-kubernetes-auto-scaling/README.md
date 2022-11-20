@@ -341,11 +341,91 @@ kubernetes-bootcamp   Deployment/kubernetes-bootcamp   0%/10%    1         10   
 
 ## 基于内存自动扩缩容
 
+目前，HPA 有两个正式版本：v1 和 v2，v2 又有两个 beta 版本，v2beta1 和 v2beta2，这两个 beta 版本在最新的 Kubernetes 版本中都已经废弃。[HPA v1 版本](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#horizontalpodautoscaler-v1-autoscaling) 只支持基于 CPU 的自动扩缩容，如果要使用基于内存的自动扩缩容，必须使用 [HPA v2 版本](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#horizontalpodautoscaler-v2-autoscaling)。
+
+创建基于内存的 HPA 和基于 CPU 的 HPA 几乎完全一样，我们只需要将 `resource` 名称改为 `memory` 即可：
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kubernetes-bootcamp
+  namespace: default
+spec:
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: memory
+      target:
+        averageUtilization: 60
+        type: Utilization
+    type: Resource
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubernetes-bootcamp
+```
+
+创建好的 HPA 如下：
+
+```
+$ kubectl get hpa
+NAME                      REFERENCE                        TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp-mem   Deployment/kubernetes-bootcamp   22%/60%   1         10        1          4m17s
+```
+
+接下来可以想办法提高 Pod 的内存占用，在 [Kubernetes HPA 使用详解](https://www.qikqiak.com/post/k8s-hpa-usage/) 这篇文章中作者使用了一种比较有趣的方法可供参考。首先需要开启 Pod 的特权模式 `securityContext.privileged: true`，然后进入 Pod 执行下面的命令：
+
+```
+# mkdir /tmp/memory
+# mount -t tmpfs -o size=40M tmpfs /tmp/memory
+# dd if=/dev/zero of=/tmp/memory/block
+dd: writing to '/tmp/memory/block': No space left on device
+81921+0 records in
+81920+0 records out
+41943040 bytes (42 MB) copied, 0.11175 s, 375 MB/s
+```
+
+原理很简单，通过向 tmpfs 中写入数据来模拟内存占用，执行之后，可以看到 Pod 内存占用变成了差不多 100%，并且触发了 HPA 的动态扩容：
+
+```
+$ kubectl get hpa
+NAME                      REFERENCE                        TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp-mem   Deployment/kubernetes-bootcamp   99%/60%   1         10        2          4h8m
+```
+
+如果要释放内存占用，执行下面的命令即可：
+
+```
+# umount /tmp/memory
+```
+
 ## 基于自定义指标自动扩缩容
 
 ## 参考
 
-1. [Kubernetes：HPA 详解-基于 CPU、内存和自定义指标自动扩缩容](https://blog.csdn.net/fly910905/article/details/105375822/)
+1. [Pod 水平自动扩缩](https://kubernetes.io/zh-cn/docs/tasks/run-application/horizontal-pod-autoscale/)
+1. [Kubernetes HPA 使用详解](https://www.qikqiak.com/post/k8s-hpa-usage/)
 1. [自动伸缩 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/hpa.html)
 1. [自动伸缩-例子 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/walkthrough.html)
 1. [你真的理解 K8s 中的 requests 和 limits 吗？](https://kubesphere.io/zh/blogs/deep-dive-into-the-k8s-request-and-limit/)
+
+## 更多
+
+### Kubernetes Autoscaler
+
+HPA 的全称为 `Horizontal Pod Autoscaling`，表示对 Pod 进行水平自动伸缩，这里水平伸缩的意思是增加或减少 Pod 的副本数。既然有水平伸缩，那么肯定也有垂直伸缩，那就是 VPA，全称为 [`Vertical Pod Autoscaler`](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)，它可以根据 Pod 的负载情况对 Pod 的资源请求和限制进行调整。
+
+另外还有一种 Autoscaler 叫做 [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)，它可以动态的调整 Kubernetes 集群的大小，比如当集群中某个节点比较空闲，且运行在这个节点上的 Pod 也可以移到其他节点上运行时，那么就可以将这个节点去掉，减小集群规模，从而帮你节约成本。
+
+### [Metrics API](https://github.com/kubernetes/metrics)
+
+* [Custom Metrics API](https://github.com/kubernetes-sigs/custom-metrics-apiserver)
+* Resource Metrics API
+  * [metrics-server](https://github.com/kubernetes-sigs/metrics-server)
+  * [prometheus-adapter](https://github.com/kubernetes-sigs/prometheus-adapter)
+
+### Kubernetes Apiserver Aggregation
+
+https://github.com/kubernetes-sigs/apiserver-builder-alpha

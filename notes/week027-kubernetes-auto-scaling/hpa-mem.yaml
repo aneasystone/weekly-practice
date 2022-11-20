@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kubernetes-bootcamp-mem
+  namespace: default
+spec:
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: memory
+      target:
+        averageUtilization: 60
+        type: Utilization
+    type: Resource
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubernetes-bootcamp

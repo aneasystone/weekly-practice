@@ -28,4 +28,6 @@ spec:
           requests: 
             memory: 50Mi
             cpu: 50m
+        securityContext:
+          privileged: true
       restartPolicy: Always
