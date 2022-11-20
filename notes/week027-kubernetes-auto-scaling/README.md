@@ -12,7 +12,7 @@
 
 ![](./images/resource-metrics-pipeline.png)
 
-安装官方文档，我们使用下面的命令安装 Metrics Server：
+按照官方文档，我们使用下面的命令安装 Metrics Server：
 
 ```
 $ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -74,7 +74,7 @@ issuer=/CN=docker-desktop-ca@1663714811
 然后使用 `kubectl apply` 重新安装：
 
 ```
-$ kubectl apply -f components.yaml
+$ kubectl apply -f metrics-server.yaml
 ```
 
 再通过 `kubectl get pods` 确认 Metrics Server 已经成功运行起来了。这时，我们就可以通过 `kubectl top` 命令来获取 Kubernetes 集群状态了，比如查看所有节点的 CPU 和内存占用：
@@ -180,6 +180,165 @@ $ kubectl get --raw "/apis/metrics.k8s.io/v1beta1/namespaces/default/pods/kubern
 
 ## 基于 CPU 自动扩缩容
 
+Metrics Server 安装之后，我们就可以创建 HPA 来对 Pod 自动扩缩容了。首先我们使用 `jocatalin/kubernetes-bootcamp:v1` 镜像创建一个 Deployment：
+
+```
+$ kubectl create deployment kubernetes-bootcamp --image=jocatalin/kubernetes-bootcamp:v1
+deployment.apps/kubernetes-bootcamp created
+```
+
+然后再执行 `kubectl autoscale` 命令创建一个 HPA：
+
+```
+$ kubectl autoscale deployment kubernetes-bootcamp --cpu-percent=10 --min=1 --max=10
+horizontalpodautoscaler.autoscaling/kubernetes-bootcamp autoscaled
+```
+
+上面的命令为 `kubernetes-bootcamp` 这个 Deployment 创建了一个 HPA，其中 `--cpu-percent=10` 参数表示 HPA 会根据 CPU 使用率来动态调整 Pod 数量，当 CPU 占用超过 10% 时，HPA 就会自动对 Pod 进行扩容，当 CPU 占用低于 10% 时，HPA 又会自动对 Pod 进行缩容，而且扩缩容的大小由 `--min=1 --max=10` 参数限定，最小副本数为 1，最大副本数为 10。
+
+除了 `kubectl autoscale` 命令，我们也可以使用下面的 YAML 来创建 HPA：
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kubernetes-bootcamp
+  namespace: default
+spec:
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 10
+        type: Utilization
+    type: Resource
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubernetes-bootcamp
+```
+
+创建好 HPA 之后，可以使用 `kubectl get hpa` 进行查看：
+
+```
+$ kubectl get hpa
+NAME                  REFERENCE                        TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp   Deployment/kubernetes-bootcamp   <unknown>/10%   1         10        0          29s
+```
+
+这里的 `TARGETS` 一列表示 `当前 CPU 占用 / 目标 CPU 占用`，可以看到这里貌似有点问题，当前 CPU 占用显示的是 `<unknown>`，我们执行 `kubectl describe hpa` 看下这个 HPA 的详情：
+
+```
+$ kubectl describe hpa kubernetes-bootcamp
+Name:                                                  kubernetes-bootcamp
+Namespace:                                             default
+Labels:                                                <none>
+Annotations:                                           <none>
+CreationTimestamp:                                     Sun, 20 Nov 2022 10:51:00 +0800
+Reference:                                             Deployment/kubernetes-bootcamp
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  <unknown> / 10%
+Min replicas:                                          1
+Max replicas:                                          10
+Deployment pods:                                       1 current / 0 desired
+Conditions:
+  Type           Status  Reason                   Message
+  ----           ------  ------                   -------
+  AbleToScale    True    SucceededGetScale        the HPA controller was able to get the target's current scale
+  ScalingActive  False   FailedGetResourceMetric  the HPA was unable to compute the replica count: failed to get cpu utilization: missing request for cpu
+```
+
+从详情中可以看到报错信息 `failed to get cpu utilization: missing request for cpu`，这是因为我们上面创建 Deployment 时，没有为 Pod 对象配置资源请求，这样 HPA 就不知道 Pod 运行需要多少 CPU，也就无法计算 CPU 的利用率了，所以如果要想让 HPA 生效，对应的 Pod 必须添加资源请求声明。我们使用 YAML 文件重新创建 Deployment：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubernetes-bootcamp
+  name: kubernetes-bootcamp
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubernetes-bootcamp
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: kubernetes-bootcamp
+    spec:
+      containers:
+      - image: jocatalin/kubernetes-bootcamp:v1
+        imagePullPolicy: IfNotPresent
+        name: kubernetes-bootcamp
+        resources:
+          requests: 
+            memory: 50Mi
+            cpu: 50m
+      restartPolicy: Always
+```
+
+在上面的 YAML 文件中，我们使用 `resources.requests.cpu` 和 `resources.requests.memory` 声明了运行这个 Pod 至少需要 50m 的 CPU 和 50MiB 内存。稍等片刻，就能看到 HPA 状态已经正常了：
+
+```
+$ kubectl get hpa
+NAME                  REFERENCE                        TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp   Deployment/kubernetes-bootcamp   0%/10%    1         10        1          65m
+```
+
+接下来，我们对 Pod 进行简单的压测，使用 `kubectl exec` 进入容器中：
+
+```
+$ kubectl exec -it pod/kubernetes-bootcamp-69d7dddfc-k9wj7 -- bash
+```
+
+并使用一个 `while` 循环对 Pod 不断发起请求：
+
+```
+root@kubernetes-bootcamp-69d7dddfc-k9wj7:/# while true; do wget -q -O- http://localhost:8080; done
+```
+
+很快，Pod 的 CPU 占用就开始飙升了，而且能看到副本数量也开始不断增加：
+
+```
+$ kubectl get hpa
+NAME                  REFERENCE                        TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp   Deployment/kubernetes-bootcamp   219%/10%   1         10        10         93m
+```
+
+一段时间之后，副本数量增加到 10 个，并不再增加：
+
+```
+$ kubectl get pods
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-69d7dddfc-9ws7c   1/1     Running   0          2m5s
+kubernetes-bootcamp-69d7dddfc-bbpfv   1/1     Running   0          3m6s
+kubernetes-bootcamp-69d7dddfc-bqlhj   1/1     Running   0          3m6s
+kubernetes-bootcamp-69d7dddfc-fzlnq   1/1     Running   0          2m6s
+kubernetes-bootcamp-69d7dddfc-jkx9g   1/1     Running   0          65s
+kubernetes-bootcamp-69d7dddfc-k9wj7   1/1     Running   0          28m
+kubernetes-bootcamp-69d7dddfc-l5bf7   1/1     Running   0          2m5s
+kubernetes-bootcamp-69d7dddfc-q4b5f   1/1     Running   0          2m5s
+kubernetes-bootcamp-69d7dddfc-ttptc   1/1     Running   0          65s
+kubernetes-bootcamp-69d7dddfc-vtjqj   1/1     Running   0          3m6s
+```
+
+然后我们再停止发起请求，等待一段时间，Pod 数量又重新恢复如初：
+
+```
+$ kubectl get hpa
+NAME                  REFERENCE                        TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+kubernetes-bootcamp   Deployment/kubernetes-bootcamp   0%/10%    1         10        1          101m
+```
+
 ## 基于内存自动扩缩容
 
 ## 基于自定义指标自动扩缩容
@@ -189,3 +348,4 @@ $ kubectl get --raw "/apis/metrics.k8s.io/v1beta1/namespaces/default/pods/kubern
 1. [Kubernetes：HPA 详解-基于 CPU、内存和自定义指标自动扩缩容](https://blog.csdn.net/fly910905/article/details/105375822/)
 1. [自动伸缩 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/hpa.html)
 1. [自动伸缩-例子 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/walkthrough.html)
+1. [你真的理解 K8s 中的 requests 和 limits 吗？](https://kubesphere.io/zh/blogs/deep-dive-into-the-k8s-request-and-limit/)
