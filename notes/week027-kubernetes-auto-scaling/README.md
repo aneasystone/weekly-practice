@@ -409,6 +409,52 @@ kubernetes-bootcamp-mem   Deployment/kubernetes-bootcamp   99%/60%   1         1
 
 ### 部署一个带指标的应用
 
+我们直接使用 [week014-spring-boot-actuator](../week014-spring-boot-actuator/README.md) 中的例子。首先需要将其构建成 Docker 镜像并推送到 DockerHub，镜像命名为 `aneasystone/hello-actuator:v1`：
+
+```
+$ cd week014-spring-boot-actuator/demo
+$ docker build -t aneasystone/hello-actuator:v1 .
+$ docker push aneasystone/hello-actuator:v1
+```
+
+然后编写 [hello-actuator.yaml](./hello-actuator.yaml) 文件，将该镜像部署到我们的 Kubernetes 集群：
+
+```
+$ kubectl apply -f ./hello-actuator.yaml
+```
+
+查看部署的应用：
+
+```
+$ kubectl get pods -l app=hello-actuator
+NAME                             READY   STATUS    RESTARTS   AGE
+hello-actuator-b49545c55-l9m59   1/1     Running   0          2m43s
+```
+
+查看应用端口：
+
+```
+$ kubectl get svc -l app=hello-actuator
+NAME             TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+hello-actuator   NodePort   10.102.39.146   <none>        8080:31086/TCP   3m39s
+```
+
+我们通过 `31086` 端口访问应用的 `/hello` 接口，确保应用能正常访问：
+
+```
+$ curl -s http://localhost:31086/hello
+hello
+```
+
+查看 Prometheus 端点，可以看到有一个 `counter` 类型的指标 `hello_counter_total`，该指标表示接口的调用总数，每次请求 `/hello` 接口时指标的值就会自增：
+
+```
+$ curl -s http://localhost:31086/actuator/prometheus | grep hello_counter
+# HELP hello_counter_total
+# TYPE hello_counter_total counter
+hello_counter_total{app="demo",} 1.0
+```
+
 ### 部署 Prometheus Operator
 
 ### 部署 Prometheus Adapter

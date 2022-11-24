@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hello-actuator
+  name: hello-actuator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-actuator
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hello-actuator
+    spec:
+      containers:
+      - image: aneasystone/hello-actuator:v1
+        imagePullPolicy: IfNotPresent
+        name: hello-actuator
+        resources:
+          requests: 
+            memory: 256Mi
+            cpu: 100m
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hello-actuator
+  name: hello-actuator
+spec:
+  ports:
+  - name: 8080-8080
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: hello-actuator
+  type: NodePort
