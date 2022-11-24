@@ -403,10 +403,23 @@ kubernetes-bootcamp-mem   Deployment/kubernetes-bootcamp   99%/60%   1         1
 
 ## 基于自定义指标自动扩缩容
 
+上面提到过，Metrics Server 其实是通过 API Server 将自己的接口暴露出去的，这个接口的地址一般以 `/apis/metrics.k8s.io/v1beta1/` 作为前缀，这个接口又被称为 [Resource Metrics API](https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/resource-metrics-api.md)，它的作用是暴露诸如 CPU 或内存等核心指标。但是仅仅有 CPU 或内存信息往往不能满足某些自动扩缩容的场景，比如要根据应用的 QPS 来自动扩容，就得使用 QPS 这个自定义指标。为了让 HPA 支持更多的其他指标，人们很快又提出了 [Custom Metrics API](https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/custom-metrics-api.md) 和 [External Metrics API](https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/external-metrics-api.md) 规范，而 [Prometheus Adapter](https://github.com/kubernetes-sigs/prometheus-adapter) 就是该规范最常见的一个实现。
+
+这一节将学习如何使用 Prometheus Adapter 来实现自定义指标的自动扩缩容。
+
+### 部署一个带指标的应用
+
+### 部署 Prometheus Operator
+
+### 部署 Prometheus Adapter
+
+### 部署 HPA 实现自动扩缩容
+
 ## 参考
 
 1. [Pod 水平自动扩缩](https://kubernetes.io/zh-cn/docs/tasks/run-application/horizontal-pod-autoscale/)
 1. [Kubernetes HPA 使用详解](https://www.qikqiak.com/post/k8s-hpa-usage/)
+1. [对 Kubernetes 应用进行自定义指标扩缩容](https://www.qikqiak.com/post/build-k8s-app-with-custom-metrics/)
 1. [自动伸缩 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/hpa.html)
 1. [自动伸缩-例子 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/walkthrough.html)
 1. [你真的理解 K8s 中的 requests 和 limits 吗？](https://kubesphere.io/zh/blogs/deep-dive-into-the-k8s-request-and-limit/)
@@ -419,12 +432,9 @@ HPA 的全称为 `Horizontal Pod Autoscaling`，表示对 Pod 进行水平自动
 
 另外还有一种 Autoscaler 叫做 [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)，它可以动态的调整 Kubernetes 集群的大小，比如当集群中某个节点比较空闲，且运行在这个节点上的 Pod 也可以移到其他节点上运行时，那么就可以将这个节点去掉，减小集群规模，从而帮你节约成本。
 
-### [Metrics API](https://github.com/kubernetes/metrics)
+### Custom Metrics API
 
-* [Custom Metrics API](https://github.com/kubernetes-sigs/custom-metrics-apiserver)
-* Resource Metrics API
-  * [metrics-server](https://github.com/kubernetes-sigs/metrics-server)
-  * [prometheus-adapter](https://github.com/kubernetes-sigs/prometheus-adapter)
+https://github.com/kubernetes-sigs/custom-metrics-apiserver
 
 ### Kubernetes Apiserver Aggregation
 
