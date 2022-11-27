@@ -457,6 +457,144 @@ hello_counter_total{app="demo",} 1.0
 
 ### 部署 Prometheus Operator
 
+接下来继续部署 [Prometheus Operator](https://prometheus-operator.dev)，参考官方的 [快速入门](https://prometheus-operator.dev/docs/prologue/quick-start/)，我们首先下载 `kube-prometheus` 源码： 
+
+```
+$ git clone https://github.com/prometheus-operator/kube-prometheus.git
+$ kube-prometheus
+```
+
+然后第一步将 Prometheus Operator 相关的命名空间和 CRD 创建好：
+
+```
+$ kubectl create -f manifests/setup
+```
+
+接着部署 Prometheus Operator 其他组件：
+
+```
+$ kubectl create -f manifests/
+```
+
+等待一段时间，确定所有组件都启动完成：
+
+```
+$ kubectl get pods -n monitoring
+NAME                                   READY   STATUS             RESTARTS      AGE
+alertmanager-main-0                    2/2     Running            0             4m11s
+alertmanager-main-1                    2/2     Running            1 (91s ago)   4m11s
+alertmanager-main-2                    2/2     Running            1 (85s ago)   4m11s
+blackbox-exporter-59cccb5797-fljpj     3/3     Running            0             7m16s
+grafana-7b8db9f4d-tk6b9                1/1     Running            0             7m15s
+kube-state-metrics-6d68f89c45-2klv4    3/3     Running            0             7m15s
+node-exporter-2b6hn                    1/2     CrashLoopBackOff   4 (73s ago)   7m14s
+prometheus-adapter-757f9b4cf9-j8qzd    1/1     Running            0             7m13s
+prometheus-adapter-757f9b4cf9-tmdt2    1/1     Running            0             7m13s
+prometheus-k8s-0                       1/2     Running            0             4m9s
+prometheus-k8s-1                       2/2     Running            0             4m9s
+prometheus-operator-67f59d65b8-tvdxr   2/2     Running            0             7m13s
+```
+
+我们看到除 `node-exporter` 之外，其他的组件都已经启动成功了。可以使用 `kubectl describe` 看下 `node-exporter` 启动详情：
+
+```
+$ kubectl describe pod node-exporter-2b6hn -n monitoring
+...
+Events:
+  Type     Reason     Age                    From               Message
+  ----     ------     ----                   ----               -------
+  Normal   Scheduled  8m57s                  default-scheduler  Successfully assigned monitoring/node-exporter-2b6hn to docker-desktop
+  Normal   Pulling    8m53s                  kubelet            Pulling image "quay.io/prometheus/node-exporter:v1.4.0"
+  Normal   Pulled     6m12s                  kubelet            Successfully pulled image "quay.io/prometheus/node-exporter:v1.4.0" in 2m41.2451104s
+  Normal   Pulling    6m11s                  kubelet            Pulling image "quay.io/brancz/kube-rbac-proxy:v0.13.1"
+  Normal   Pulled     4m28s                  kubelet            Successfully pulled image "quay.io/brancz/kube-rbac-proxy:v0.13.1" in 1m43.3407752s
+  Normal   Created    4m28s                  kubelet            Created container kube-rbac-proxy
+  Normal   Started    4m27s                  kubelet            Started container kube-rbac-proxy
+  Warning  Failed     4m14s                  kubelet            Error: failed to start container "node-exporter": Error response from daemon: path / is mounted on / but it is not a shared or slave mount
+  Warning  BackOff    3m11s (x6 over 4m26s)  kubelet            Back-off restarting failed container
+  Normal   Created    2m56s (x5 over 6m11s)  kubelet            Created container node-exporter
+  Warning  Failed     2m56s (x4 over 6m11s)  kubelet            Error: failed to start container "node-exporter": Error response from daemon: path /sys is mounted on /sys but it is not a shared or slave mount
+  Normal   Pulled     2m56s (x4 over 4m27s)  kubelet            Container image "quay.io/prometheus/node-exporter:v1.4.0" already present on machine
+```
+
+从 Events 中我们可以看到这样的错误日志：`path / is mounted on / but it is not a shared or slave mount`，于是搜索这个错误日志，在 [prometheus-community/helm-charts](https://github.com/prometheus-community/helm-charts) 项目的 Issues 中我们找到了一个非常类似的问题 [Issue-467](https://github.com/prometheus-community/helm-charts/issues/467)，查看下面的解决办法是将 `nodeExporter.hostRootfs` 设置为 `false`。不过我们这里不是使用 Helm 安装的，于是查看它的源码，了解到这个参数实际上就是将 `node-exporter` 的启动参数 `--path.rootfs=/host/root` 以及相关的一些挂载去掉而已，于是打开 `nodeExporter-daemonset.yaml` 文件，删掉下面这些内容：
+
+```
+...
+        - --path.sysfs=/host/sys
+        - --path.rootfs=/host/root
+...
+        volumeMounts:
+        - mountPath: /host/sys
+          mountPropagation: HostToContainer
+          name: sys
+          readOnly: true
+        - mountPath: /host/root
+          mountPropagation: HostToContainer
+          name: root
+          readOnly: true
+...
+      volumes:
+      - hostPath:
+          path: /sys
+        name: sys
+      - hostPath:
+          path: /
+        name: root
+```
+
+然后重新部署 `node-exporter` 即可：
+
+```
+$ kubectl apply -f manifests/nodeExporter-daemonset.yaml
+```
+
+至此，Prometheus Operator 我们就部署好了。如果要访问 Prometheus，可以使用 `kubectl port-forward` 将其端口暴露出来：
+
+```
+$ kubectl port-forward svc/prometheus-k8s 9090 -n monitoring
+```
+
+然后在浏览器中访问 `http://localhost:9090/` 即可。
+
+不过这个时候 Prometheus 还不知道怎么去抓取我们的应用指标，我们需要创建 [PodMonitor](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) 或 [ServiceMonitor](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.ServiceMonitor) 对象告诉 Prometheus 去哪里抓取我们的 Pod 或 Service 暴露的指标，我们不妨创建一个 `ServiceMonitor` 试试：
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: hello-actuator
+  name: hello-actuator
+  namespace: default
+spec:
+  endpoints:
+  - interval: 30s
+    port: 8080-8080
+    path: /actuator/prometheus
+  jobLabel: hello-actuator
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: hello-actuator
+```
+
+创建之后，就能在 Prometheus 的 Targets 页面看到我们的应用了：
+
+![](./images/prometheus-targets.png)
+
+然后我们运行一段简单的脚本对我们的应用每秒发起一次请求：
+
+```
+$ while true; do wget -q -O- http://localhost:31086/hello; sleep 1; done
+```
+
+持续一段时间后，就能在 Prometheus 的 Graph 页面看到 `hello-counter-total` 指标在持续增加：
+
+![](./images/hello-counter-total.png)
+
 ### 部署 Prometheus Adapter
 
 ### 部署 HPA 实现自动扩缩容

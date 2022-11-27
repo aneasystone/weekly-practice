@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: hello-actuator
+  name: hello-actuator
+  namespace: default
+spec:
+  endpoints:
+  - interval: 30s
+    port: 8080-8080
+    path: /actuator/prometheus
+  jobLabel: hello-actuator
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: hello-actuator
