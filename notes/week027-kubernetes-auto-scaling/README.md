@@ -461,7 +461,6 @@ hello_counter_total{app="demo",} 1.0
 
 ```
 $ git clone https://github.com/prometheus-operator/kube-prometheus.git
-$ kube-prometheus
 ```
 
 然后第一步将 Prometheus Operator 相关的命名空间和 CRD 创建好：
@@ -585,17 +584,247 @@ spec:
 
 ![](./images/prometheus-targets.png)
 
-然后我们运行一段简单的脚本对我们的应用每秒发起一次请求：
+然后我们运行一段简单的脚本对应用进行测试，每隔 1s 发起一次请求：
 
 ```
 $ while true; do wget -q -O- http://localhost:31086/hello; sleep 1; done
 ```
 
-持续一段时间后，就能在 Prometheus 的 Graph 页面看到 `hello-counter-total` 指标在持续增加：
+持续一段时间后，就能在 Prometheus 的 Graph 页面看到 `hello_counter_total` 指标在持续增加：
 
 ![](./images/hello-counter-total.png)
 
 ### 部署 Prometheus Adapter
+
+其实在上面部署 Prometheus Operator 的时候，[Prometheus Adapter](https://github.com/kubernetes-sigs/prometheus-adapter) 也已经一起部署了。而且我们可以打开 `prometheusAdapter-apiService.yaml` 文件看看，`Prometheus Adapter` 也提供了 `metrics.k8s.io` 指标 API 的实现，所以我们完全可以使用 Prometheus Adapter 来代替 Metrics Server。
+
+我们修改这个文件，加上一个新的 APIService，用于实现 `custom.metrics.k8s.io` 自定义指标 API：
+
+```yaml
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  labels:
+    app.kubernetes.io/component: metrics-adapter
+    app.kubernetes.io/name: prometheus-adapter
+    app.kubernetes.io/part-of: kube-prometheus
+    app.kubernetes.io/version: 0.10.0
+  name: v1beta1.metrics.k8s.io
+spec:
+  group: metrics.k8s.io
+  groupPriorityMinimum: 100
+  insecureSkipTLSVerify: true
+  service:
+    name: prometheus-adapter
+    namespace: monitoring
+  version: v1beta1
+  versionPriority: 100
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.custom.metrics.k8s.io
+spec:
+  group: custom.metrics.k8s.io
+  groupPriorityMinimum: 100
+  insecureSkipTLSVerify: true
+  service:
+    name: prometheus-adapter
+    namespace: monitoring
+  version: v1beta1
+  versionPriority: 100
+```
+
+使用下面的命令可以查看 `metrics.k8s.io` 接口：
+
+```
+$ kubectl get --raw /apis/metrics.k8s.io/v1beta1 | jq .
+{
+  "kind": "APIResourceList",
+  "apiVersion": "v1",
+  "groupVersion": "metrics.k8s.io/v1beta1",
+  "resources": [
+    {
+      "name": "nodes",
+      "singularName": "",
+      "namespaced": false,
+      "kind": "NodeMetrics",
+      "verbs": [
+        "get",
+        "list"
+      ]
+    },
+    {
+      "name": "pods",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "PodMetrics",
+      "verbs": [
+        "get",
+        "list"
+      ]
+    }
+  ]
+}
+```
+
+使用下面的命令可以查看 `custom.metrics.k8s.io` 接口：
+
+```
+$ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .
+{
+    "kind": "APIResourceList",
+    "apiVersion": "v1",
+    "groupVersion": "custom.metrics.k8s.io/v1beta1",
+    "resources": []
+}
+```
+
+这两个接口实际上都是被 API Server 转发到 `prometheus-adapter` 服务的，可以发现目前还没有自定义指标，这是因为我们还没有对 `prometheus-adapter` 进行配置。打开 `prometheusAdapter-configMap.yaml` 文件，在 `config.yaml` 中添加以下内容：
+
+```yaml
+  config.yaml: |-
+    "rules":
+    - "seriesQuery": 'hello_counter_total{namespace!="",pod!=""}'
+      "resources":
+        "template": "<<.Resource>>"
+      "name":
+        "matches": "^(.*)_total"
+        "as": "${1}_per_second"
+      "metricsQuery": |
+        sum by (<<.GroupBy>>) (
+          irate (
+            <<.Series>>{<<.LabelMatchers>>}[1m]
+          )
+        )
+```
+
+上面是一个简单的 Prometheus Adapter 规则，每个规则都包括了 4 个参数：
+
+* `seriesQuery`：这个参数指定要查询哪个 Prometheus 指标；
+* `resources`：这个参数指定要将指标和哪个 Kubernetes 资源进行关联；
+* `name`：为自定义指标进行重命名，由于这里我们要使用 RPS 来对容器组进行扩容，所以将指标重名为 `hello_counter_per_second`；
+* `metricsQuery`：这个参数表示真实的 Prometheus 查询语句；我们使用 `irate()` 函数将请求总数指标变成了 RPS 指标；
+
+这 4 个参数也分别对应 Prometheus Adapter 处理的 4 个步骤：**发现（Discovery）**、**分配（Association）**、**命名（Naming）** 和 **查询（Querying）**。关于参数的详细说明可以参考 [官方文档](https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config-walkthrough.md)。
+
+然后我们更新配置文件，并重启 Prometheus Adapter：
+
+```
+$ kubectl apply -f manifests/prometheusAdapter-configMap.yaml
+$ kubectl rollout restart deployment prometheus-adapter -n monitoring
+```
+
+再次查看 `custom.metrics.k8s.io` 接口，就能看到我们上面定义的自定义指标了：
+
+```
+$ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .
+{
+  "kind": "APIResourceList",
+  "apiVersion": "v1",
+  "groupVersion": "custom.metrics.k8s.io/v1beta1",
+  "resources": [
+    {
+      "name": "pods/hello_counter_per_second",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "MetricValueList",
+      "verbs": [
+        "get"
+      ]
+    },
+    {
+      "name": "services/hello_counter_per_second",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "MetricValueList",
+      "verbs": [
+        "get"
+      ]
+    },
+    {
+      "name": "jobs.batch/hello_counter_per_second",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "MetricValueList",
+      "verbs": [
+        "get"
+      ]
+    },
+    {
+      "name": "namespaces/hello_counter_per_second",
+      "singularName": "",
+      "namespaced": false,
+      "kind": "MetricValueList",
+      "verbs": [
+        "get"
+      ]
+    }
+  ]
+}
+```
+
+我们还可以使用下面的命令查询 `hello_counter_per_second` 这个指标的值：
+
+```
+$ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/hello_counter_per_second" | jq .
+{
+  "kind": "MetricValueList",
+  "apiVersion": "custom.metrics.k8s.io/v1beta1",
+  "metadata": {},
+  "items": [
+    {
+      "describedObject": {
+        "kind": "Pod",
+        "namespace": "default",
+        "name": "hello-actuator-b49545c55-r6whf",
+        "apiVersion": "/v1"
+      },
+      "metricName": "hello_counter_per_second",
+      "timestamp": "2022-11-27T13:11:38Z",
+      "value": "967m",
+      "selector": null
+    }
+  ]
+}
+```
+
+上面的 `"value": "967m"` 就是我们自定义指标的值，也就是接口的请求频率。这里要注意的是，指标使用的是 Kubernetes 风格的计量单位，被称为 [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/)，`967m` 其实就是 `0.967`，这和我们每隔一秒请求一次是能对应上的。
+
+为了验证这个值能准确地反应出我们接口的请求频率，我们不妨将上面那个测试脚本改成每隔 0.5s 发送一次请求：
+
+```
+$ while true; do wget -q -O- http://localhost:31086/hello; sleep 0.5; done
+```
+
+等待片刻之后，我们再次查询 `hello_counter_per_second` 指标：
+
+```
+$ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/hello_counter_per_second" | jq .
+{
+  "kind": "MetricValueList",
+  "apiVersion": "custom.metrics.k8s.io/v1beta1",
+  "metadata": {},
+  "items": [
+    {
+      "describedObject": {
+        "kind": "Pod",
+        "namespace": "default",
+        "name": "hello-actuator-b49545c55-r6whf",
+        "apiVersion": "/v1"
+      },
+      "metricName": "hello_counter_per_second",
+      "timestamp": "2022-11-27T13:42:57Z",
+      "value": "1833m",
+      "selector": null
+    }
+  ]
+}
+```
+
+可以看到，指标的值差不多翻了一倍，和我们的请求频率完全一致。
+
+> 在我的测试过程中发现了一个非常奇怪的现象，当部署完 Prometheus Operator 之后，整个集群的网络就好像出了问题，从 Pod 内部无法访问 Service 暴露的 IP 和端口。经过反复的调试和验证后发现，如果将 `alertmanager-service.yaml` 和 `prometheus-service.yaml` 文件中的 `sessionAffinity: ClientIP` 配置删除掉就没有这个问题。目前尚不清楚具体原因。
 
 ### 部署 HPA 实现自动扩缩容
 
@@ -607,6 +836,8 @@ $ while true; do wget -q -O- http://localhost:31086/hello; sleep 1; done
 1. [自动伸缩 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/hpa.html)
 1. [自动伸缩-例子 | Kuboard](https://kuboard.cn/learning/k8s-advanced/hpa/walkthrough.html)
 1. [你真的理解 K8s 中的 requests 和 limits 吗？](https://kubesphere.io/zh/blogs/deep-dive-into-the-k8s-request-and-limit/)
+1. [Prometheus Adapter Walkthrough](https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md)
+1. [Prometheus Adapter Configuration Walkthroughs](https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config-walkthrough.md)
 
 ## 更多
 
