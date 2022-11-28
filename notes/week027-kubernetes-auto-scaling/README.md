@@ -828,6 +828,102 @@ $ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods
 
 ### 部署 HPA 实现自动扩缩容
 
+万事俱备，只欠东风。接下来，我们就可以通过 HPA 来实现自动扩缩容了，首先创建一个 HPA 如下：
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-actuator
+  namespace: default
+spec:
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: hello_counter_per_second
+      target:
+        type: AverageValue
+        averageValue: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-actuator
+```
+
+大体内容和上面基于 CPU 或内存的 HPA 是差不多的，只是 `metrics` 字段有一些区别：首先指标的类型不是 `Resource` 而是 `Pods`，其次 `target` 类型为 `AverageValue`（表示绝对值） 而不是 `Utilization`（表示百分比），而且要注意的是，`Pods` 类型的指标只支持 `AverageValue`。
+
+HPA 创建好了以后，我们通过 `kubectl get hpa` 查看该 HPA 的状态：
+
+```
+$ kubectl get hpa
+NAME             REFERENCE                   TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+hello-actuator   Deployment/hello-actuator   966m/2    1         10        1          2m6s
+```
+
+注意看 TARGETS 列显示的 `966m/2`，其中分子部分 `966m` 表示当前我们应用的 RPS 为 `0.966 次/秒`，分母 `2` 表示的是当 RPS 达到 2 时开始扩容。如果 TARGETS 列显示 `<unknown>/2`，可能是因为 HPA 还没有开始抓取指标，需要多刷新几次才能显示；或者因为抓取指标报错了，可以返回上一节确认获取指标的接口是否正常。
+
+接下来我们将接口的请求频率调整为 `5 次/秒`：
+
+```
+$ while true; do wget -q -O- http://localhost:31086/hello; sleep 0.2; done
+```
+
+很快，就触发了 HPA 的扩容：
+
+```
+$ kubectl get hpa
+NAME             REFERENCE                   TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+hello-actuator   Deployment/hello-actuator   1949m/2   1         10        2          20m
+```
+
+而且扩容之后，对 Service 的请求平均摊给了两个 Pod，每个 Pod 的 RPS 都是 `2 次/秒` 左右，达到了稳定状态，从而不再继续扩容。
+
+```
+$ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/hello_counter_per_second" | jq .
+{
+  "kind": "MetricValueList",
+  "apiVersion": "custom.metrics.k8s.io/v1beta1",
+  "metadata": {},
+  "items": [
+    {
+      "describedObject": {
+        "kind": "Pod",
+        "namespace": "default",
+        "name": "hello-actuator-b49545c55-2zdz7",
+        "apiVersion": "/v1"
+      },
+      "metricName": "hello_counter_per_second",
+      "timestamp": "2022-11-28T01:01:20Z",
+      "value": "2066m",
+      "selector": null
+    },
+    {
+      "describedObject": {
+        "kind": "Pod",
+        "namespace": "default",
+        "name": "hello-actuator-b49545c55-r6whf",
+        "apiVersion": "/v1"
+      },
+      "metricName": "hello_counter_per_second",
+      "timestamp": "2022-11-28T01:01:20Z",
+      "value": "1933m",
+      "selector": null
+    }
+  ]
+}
+```
+
+从 Prometheus 的图形界面可以更直观地看出整个扩容的过程：
+
+![](./images/prometheus-irate.png)
+
+一开始只有一个 Pod，请求频率为 `1 次/秒`，然后突然请求频率飙升到了 `3.5 次/秒` 左右，很快便触发了 HPA 扩容，扩容后，两个 Pod 平摊请求，对 Pod 的请求频率又降为 `2 次/秒`，从而达到稳定状态。
+
+可以看出通过 HPA 的自动扩缩容机制，我们可以很轻松地应付一些突发情况，大大地减轻了运维人员的负担。
+
 ## 参考
 
 1. [Pod 水平自动扩缩](https://kubernetes.io/zh-cn/docs/tasks/run-application/horizontal-pod-autoscale/)
