@@ -29,7 +29,7 @@
 * WEEK025 - [WebAssembly 学习笔记](./notes/week025-webassembly-notes/README.md)
 * WEEK026 - [基于 OpenTelemetry 的可观测性实战](./notes/week026-opentelemetry-observability/README.md)
 * WEEK027 - [实战 Kubernetes 的动态扩缩容](./notes/week027-kubernetes-auto-scaling/README.md)
-* WEEK028 - [JVM 诊断工具一览](./notes/week028-jvm-diagnostic-tools/README.md)
+* WEEK028 - [JVM 诊断工具汇总](./notes/week028-jvm-diagnostic-tools/README.md)
 
 ### 项目实践
 
