@@ -1,222 +1,24 @@
-# WEEK028 - JVM 诊断工具汇总
+# WEEK028 - JVM 诊断工具大汇总
 
-* 性能调优
-* 问题诊断
-* 代码调试
+在日常开发和运维过程中，我们常常会遇到各种各样的疑难杂症，比如 CPU 占用过高、内存溢出、接口响应超时、程序异常、GC 频繁等等。对于一个合格的 Java 开发人员来说，熟练地运用各种工具对这些问题进行排查是基本技能。这篇文章对常用的 JVM 工具做一个汇总，方便我们对 Java 应用进行问题诊断、代码调试或性能分析。
 
-## JDK 自带工具
+## JDK 中自带的工具
 
-### jps（ JVM Process Status Tool ）
+### 命令行工具
 
-显示所有的 HotSpot 虚拟机进程
+* [jps - JVM Process Status Tool](./jps/README.md)
+* [jinfo - JVM Configuration info](./jinfo/README.md)
+* [jstat - JVM Statistics Monitoring](./jstat/README.md)
+* [jmap - JVM Memory Map](./jmap/README.md)
+* [jhat - JVM Heap Analysis Tool](./jhat/README.md)
+* [jstack](./jstack/README.md)
+* jcmd
 
-* 命令格式
-    * jps [options] [hostid]
-* 主要参数
-    * -l : 输出主类全名或 jar 路径
-    * -q : 只输出 LVMID
-    * -m : 输出 JVM 启动时传递给 main() 的参数
-    * -v : 输出 JVM 启动时显示指定的 JVM 参数
+### 图形工具
 
-```
-# jps -l
-30362 sun.tools.jps.Jps
-20636 org.apache.zookeeper.server.quorum.QuorumPeerMain
-20895 ./zkui-2.0-SNAPSHOT-jar-with-dependencies.jar
-```
-
-### jinfo（ JVM Configuration info ）
-
-实时查看和调整虚拟机运行参数
-
-* 命令格式
-    * jinfo [option] [args] LVMID
-    * jps –v 只能查看到显示指定的参数，jinfo 可以查看未被显示指定的参数
-* 参数
-    * -flag : 输出指定 args 参数的值（也可修改）
-    * -flags : 不需要 args 参数，输出所有 JVM 参数的值
-    * -sysprops : 输出系统属性，等同于 System.getProperties()
-
-```
-# jinfo -flags 20636
-Attaching to process ID 20636, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 25.342-b07
-Non-default VM flags: -XX:CICompilerCount=15 -XX:+HeapDumpOnOutOfMemoryError -XX:InitialHeapSize=1048576000 -XX:+ManagementServer -XX:MaxHeapSize=1048576000 -XX:MaxNewSize=349175808 -XX:MinHeapDeltaBytes=524288 -XX:NewSize=349175808 -XX:OldSize=699400192 -XX:OnOutOfMemoryError=null -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseParallelGC 
-Command line:  -Dzookeeper.log.dir=/root/apache-zookeeper-3.5.5-bin/bin/../logs -Dzookeeper.log.file=zookeeper-local.log -Dzookeeper.root.logger=INFO,CONSOLE -Dzookeeper.4lw.commands.whitelist=* -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -Xmx1000m -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false
-```
-
-### jstat（ JVM Statistics Monitoring ）
-
-用于监视虚拟机运行时状态信息，可以显示出虚拟机进程中的类装载、内存、垃圾收集、JIT 编译等运行数据
-
-* 命令格式
-    * jstat [option] LVMID [interval] [count]
-* 常见 option
-    * class : class loader 统计
-    * compiler : JIT 编译器统计
-    * gc : 垃圾回收堆的统计
-    * gcutil : 垃圾回收统计概述
-
-```
-# jstat -gcutil 20636 1000 10
-  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   
-  0.00  34.38  48.32  20.40  96.47  90.26   6539  160.802     0    0.000  160.802
-  0.00  34.38  49.53  20.40  96.47  90.26   6539  160.802     0    0.000  160.802
-  0.00  34.38  49.54  20.40  96.47  90.26   6539  160.802     0    0.000  160.802
-  0.00  34.38  49.71  20.40  96.47  90.26   6539  160.802     0    0.000  160.802
-  0.00  34.38  49.71  20.40  96.47  90.26   6539  160.802     0    0.000  160.802
-```
-
-### jmap（ JVM Memory Map ）
-
-生成 heap dump 文件，查询 finalize 执行队列、Java 堆和永久代的详细信息
-
-* 命令格式
-    * jmap [option] LVMID
-* 常见 option
-    * dump : 生成堆转储快照
-    * -XX:+HeapDumpOnOutOfMemoryError
-    * finalizerinfo : 显示在 F-Queue 队列等待 Finalizer 线程执行 finalizer 方法的对象
-    * heap : 显示堆详细信息
-    * histo : 显示堆中对象的统计信息
-* 替代工具：jcmd
-
-```
-# jmap -dump:live,format=b,file=dump.hprof 20636
-Dumping heap to /root/dump.hprof ...
-Heap dump file created
-```
-
-```
-# jmap -heap 20636
-Attaching to process ID 20636, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 25.342-b07
-
-using thread-local object allocation.
-Parallel GC with 23 thread(s)
-
-Heap Configuration:
-   MinHeapFreeRatio         = 0
-   MaxHeapFreeRatio         = 100
-   MaxHeapSize              = 1048576000 (1000.0MB)
-   NewSize                  = 349175808 (333.0MB)
-   MaxNewSize               = 349175808 (333.0MB)
-   OldSize                  = 699400192 (667.0MB)
-   NewRatio                 = 2
-   SurvivorRatio            = 8
-   MetaspaceSize            = 21807104 (20.796875MB)
-   CompressedClassSpaceSize = 1073741824 (1024.0MB)
-   MaxMetaspaceSize         = 17592186044415 MB
-   G1HeapRegionSize         = 0 (0.0MB)
-
-Heap Usage:
-PS Young Generation
-Eden Space:
-   capacity = 57671680 (55.0MB)
-   used     = 47560256 (45.35699462890625MB)
-   free     = 10111424 (9.64300537109375MB)
-   82.46726296164773% used
-From Space:
-   capacity = 1048576 (1.0MB)
-   used     = 0 (0.0MB)
-   free     = 1048576 (1.0MB)
-   0.0% used
-To Space:
-   capacity = 1048576 (1.0MB)
-   used     = 0 (0.0MB)
-   free     = 1048576 (1.0MB)
-   0.0% used
-PS Old Generation
-   capacity = 262668288 (250.5MB)
-   used     = 10726192 (10.229293823242188MB)
-   free     = 251942096 (240.2707061767578MB)
-   4.083550428439995% used
-
-4773 interned Strings occupying 390856 bytes.
-```
-
-### jhat（ JVM Heap Analysis Tool ）
-
-与 jmap 搭配使用，用来分析 jmap 生成的 dump
-
-* 命令格式
-    * jhat [options] [dumpfile]
-* 注意事项
-    * 内置微型的 HTTP 服务器，生成分析结果后，可以在浏览器中查看，默认端口 7000
-    * 一般不会直接在服务器上进行分析，因为 jhat 是一个耗时并且耗费硬件资源的过程，一般把服务器生成的 dump 文件复制到本地进行分析
-
-```
-# jhat /root/dump.hprof
-Reading from /root/dump.hprof...
-Dump file created Wed Nov 30 09:00:09 CST 2022
-Snapshot read, resolving...
-Resolving 142345 objects...
-Chasing references, expect 28 dots............................
-Eliminating duplicate references............................
-Snapshot resolved.
-Started HTTP server on port 7000
-Server is ready.
-```
-### jstack
-
-用于生成 Java 虚拟机当前时刻的线程快照
-
-* 命令格式：
-    * jstack option LVMID
-* 用途
-    * 定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间等待等
-
-```
-# jstack -l 20636
-2022-11-30 09:00:58
-Full thread dump OpenJDK 64-Bit Server VM (25.342-b07 mixed mode):
-
-"Attach Listener" #115 daemon prio=9 os_prio=0 tid=0x00007f142c001000 nid=0x1f4f waiting on condition [0x0000000000000000]
-   java.lang.Thread.State: RUNNABLE
-
-   Locked ownable synchronizers:
-        - None
-
-"NIOWorkerThread-64" #114 daemon prio=5 os_prio=0 tid=0x00007f1384022000 nid=0x518a waiting on condition [0x00007f148f3f2000]
-   java.lang.Thread.State: WAITING (parking)
-        at sun.misc.Unsafe.park(Native Method)
-        - parking to wait for  <0x00000000c1810720> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
-        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
-        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
-        at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
-        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
-        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
-        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-        at java.lang.Thread.run(Thread.java:750)
-
-   Locked ownable synchronizers:
-        - None
-
-...
-```
-
-## Java VisualVM
-
-* 配置
-    * 本地
-    * 远程：JMX
-        * -Dcom.sun.management.jmxremote 
-        * -Dcom.sun.management.jmxremote.port=41001 
-        * -Dcom.sun.management.jmxremote.authenticate=false 
-        * -Dcom.sun.management.jmxremote.ssl=false
-    * 远程：jstatd
-* 插件
-    * Visual GC
-    * Mbeans
-* 类似工具
-    * jconsole
-    * JRocket Mission Control
-
-![](./images/java-visualvm.png)
+* jconsole
+* jmc
+* [jvisualvm - Java VisualVM](./jvisualvm/README.md)
 
 ## 系统工具
 
@@ -377,3 +179,39 @@ Warnings
 * [vjtools](https://github.com/vipshop/vjtools)
 * [bistoury](https://github.com/qunarcorp/bistoury)
 * [XPocket](https://xpocket.perfma.com/)
+
+https://my.oschina.net/feichexia/blog/196575
+
+https://ithelp.ithome.com.tw/users/20140481/ironman/4472
+
+https://cloud.tencent.com/developer/article/1790337
+
+https://cloud.tencent.com/developer/article/1130026
+
+https://juejin.cn/post/7104441940921286686
+
+https://guns-y.github.io/2019/09/04/JVM/JVM%E9%97%AE%E9%A2%98%E8%AF%8A%E6%96%AD%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/
+
+https://blog.csdn.net/wj1314250/article/details/118370096
+
+https://juejin.cn/post/6972450999034183710
+
+https://www.cnblogs.com/dwtfukgv/p/15126148.html
+
+https://tobebetterjavaer.com/jvm/problem-tools.html
+
+https://github.com/patric-r/jvmtop
+
+https://doctording.github.io/sword_at_offer/content/java_jvm/jvm_tools.html
+
+https://coderbee.net/index.php/jvm/20190913/1929
+
+https://blog.csdn.net/jicahoo/article/details/50933469
+
+https://www.jianshu.com/p/27c06a43797b
+
+* What
+* When
+* How
+* Why
+* Compare
