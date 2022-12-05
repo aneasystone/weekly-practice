@@ -6,6 +6,8 @@
 
 ### 命令行工具
 
+在 JDK 中自带了很多实用的命令行工具可以帮助开发人员解决 Java 应用的疑难杂症，这些工具位于 JDK 的 bin 目录下：
+
 * [jps - JVM Process Status Tool](./jps/README.md)
 * [jinfo - JVM Configuration info](./jinfo/README.md)
 * [jstat - JVM Statistics Monitoring](./jstat/README.md)
@@ -14,11 +16,36 @@
 * [jstack](./jstack/README.md)
 * jcmd
 
+尽管这些工具看上去都是 `.exe` 可执行文件，实际上它们只是 Java 程序的一层包装，真正的实现位于 `tools.jar` 中：
+
+![](./images/tools.jar.png)
+
+所以当我们执行 `jps.exe` 命令的时候，和执行 `java -classpath %JAVA_HOME%/lib/tools.jar sun.tools.jps.Jps` 是完全一样的。
+
+不过要注意的是，在 JDK 9 之后，`tools.jar` 文件已经没有了，而是增加了一个 `jmods` 目录，之前的工具类可以通过引入模块来加载：
+
+```
+$ java --add-modules jdk.jcmd sun.tools.jps.Jps
+```
+
 ### 图形工具
+
+除了命令行工具，JDK 还提供了一些图形化的监控工具方便观察 Java 应用的运行情况，可以非常直观地对程序的内存、线程、类加载等进行分析。
 
 * jconsole
 * jmc
 * [jvisualvm - Java VisualVM](./jvisualvm/README.md)
+
+## 问题诊断工具
+
+* [Arthas](https://arthas.aliyun.com/zh-cn/)
+* [vjtools](https://github.com/vipshop/vjtools)
+* [bistoury](https://github.com/qunarcorp/bistoury)
+* [XPocket](https://xpocket.perfma.com/)
+
+## 内存分析工具
+
+* MAT - Eclipse Memory Analyzer
 
 ## 系统工具
 
@@ -30,10 +57,6 @@
     * 统计 CPU、内存使用情况、swap 使用情况等
 * iostat
     * 显示磁盘 I/O 使用情况
-
-## MAT（Eclipse Memory Analyzer）
-
-![](./images/mat.png)
 
 ## 性能调优
 
@@ -140,26 +163,6 @@ Warnings
 
 ![](./images/java-monitor.png)
 
-### 内存分析
-
-* OOM 原因
-    * 堆 OOM
-    * 元空间 OOM
-    * 线程栈 OOM
-    * 直接内存 OOM
-
-![](./images/oom.png)
-
-* MAT 的使用
-    * 找出占用内存最大的对象
-    * List objects（outgoing、ingoing）
-    * Shallow Heap vs. Retained Heap
-* Histogram：显示每个类使用情况以及占用空间大小
-* Thread_overview：显示线程相关的信息
-* OQL：通过类似SQL语句的表达式查询对象信息
-
-![](./images/mat-list-objects.png)
-
 ### GC 分析
 
 * 分析 GC 日志
@@ -173,12 +176,6 @@ Warnings
     * Full GC 会对整个堆内存进行回收，耗时长，尽量减少 Full GC 次数
     * **GC tuning is the last task to be done**
 
-## 其他开源工具
-
-* [Arthas](https://arthas.aliyun.com/zh-cn/)
-* [vjtools](https://github.com/vipshop/vjtools)
-* [bistoury](https://github.com/qunarcorp/bistoury)
-* [XPocket](https://xpocket.perfma.com/)
 
 https://my.oschina.net/feichexia/blog/196575
 
@@ -215,3 +212,7 @@ https://www.jianshu.com/p/27c06a43797b
 * How
 * Why
 * Compare
+
+## 参考
+
+1. [JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/)
