@@ -66,7 +66,7 @@ $ jinfo -flag UseParallelGC 3452
 -XX:+UseParallelGC
 ```
 
-> TODO 支持的 JVM 参数列表？
+> 完整的 JVM 参数列表可以参考 [Java 官方文档](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html)。
 
 ### `jinfo -flag [+|-]<name> <pid>` 和 `jinfo -flag <name>=<value> <pid>`
 
@@ -78,7 +78,25 @@ $ jinfo -flag PrintGC 3452
 -XX:+PrintGC
 ```
 
-> TODO 哪些参数支持动态修改？
+> 仅有部分参数支持动态修改，如下（[参考链接](https://knowledge.informatica.com/s/article/528321?language=en_US)）：
+>
+> * CMSTriggerInterval
+> * CMSWaitDuration
+> * HeapDumpAfterFullGC
+> * HeapDumpBeforeFullGC
+> * HeapDumpOnOutOfMemoryError
+> * HeapDumpPath
+> * MaxHeapFreeRatio
+> * MinHeapFreeRatio
+> * PrintClassHistogram
+> * PrintClassHistogramAfterFullGC
+> * PrintClassHistogramBeforeFullGC
+> * PrintConcurrentLocks
+> * PrintGC
+> * PrintGCDateStamps
+> * PrintGCDetails
+> * PrintGCID
+> * PrintGCTimeStamps
 
 ### `jinfo -sysprops <pid>`
 
