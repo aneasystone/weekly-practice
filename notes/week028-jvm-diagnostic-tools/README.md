@@ -9,7 +9,7 @@
 在 JDK 中自带了很多实用的命令行工具可以帮助开发人员解决 Java 应用的疑难杂症，这些工具位于 JDK 的 bin 目录下：
 
 * [jps - JVM Process Status Tool](./jps/README.md)
-* [jinfo - JVM Configuration info](./jinfo/README.md)
+* [jinfo - JVM Configuration Info](./jinfo/README.md)
 * [jstat - JVM Statistics Monitoring](./jstat/README.md)
 * [jmap - JVM Memory Map](./jmap/README.md)
 * [jhat - JVM Heap Analysis Tool](./jhat/README.md)

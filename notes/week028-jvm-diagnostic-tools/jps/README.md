@@ -2,6 +2,17 @@
 
 `jps` 命令类似于 Linux 下的 `ps` 命令，只不过它只显示 Java 进程。使用 `jps` 可以方便地查看 Java 进程的启动类、启动参数和 JVM 参数等。
 
+它的命令格式如下：
+
+```
+$ jps -help
+usage: jps [-help]
+       jps [-q] [-mlvV] [<hostid>]
+
+Definitions:
+    <hostid>:      <hostname>[:<port>]
+```
+
 ### `jps`
 
 不带任何参数的 `jps` 命令可以列出所有 Java 进程的 PID 和主函数类名（对于 `java -jar` 启动的程序显示的是 jar 文件名称）：
