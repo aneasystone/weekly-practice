@@ -96,9 +96,80 @@ enum {
 
 ### `jstat -gc <pid>`
 
-垃圾回收堆的统计
+`-gc` 选项用于输出垃圾回收堆的统计。
+
+```
+$ jstat -gc 11324
+   S0C    S1C  S0U      S1U      EC       EU        OC         OU        MC      MU   CCSC   CCSU    YGC     YGCT   FGC     FGCT      GCT
+9728.0 4096.0  0.0   4069.0 51200.0  26670.1   68608.0    10714.9   29824.0 27948.7 3968.0 3502.4      5    0.045     1    0.030    0.075
+```
+
+这里的列比较多，前面一部分显示了和 GC 相关的堆的各个区域的大小（单位均为 KB）：
+
+* `S0C` - S0 总大小（第一个幸存区）
+* `S1C` - S1 总大小（第二个幸存区）
+* `S0U` - S0 已使用大小
+* `S1U` - S1 已使用大小
+* `EC` - Eden 区总大小（伊甸园区）
+* `EU` - Eden 区已使用大小
+
+S0、S1 和 Eden 三个区域合称为新生代（`New Generation`）。
+
+* `OC` - 老年代总大小（`Old Generation`）
+* `OU` - 老年代已使用大小
+* `MC` - 元数据空间总大小（`Metaspace`）
+* `MU` - 元数据空间已使用大小
+* `CCSC` - 压缩类空间总大小（`Compressed Class Space`）
+* `CCSU` - 压缩类空间已使用大小
+
+在 Java 8 之前的版本中没有元数据空间，所以显示的是永久代大小：
+
+* `PC` - 永久代总大小（`Permanent Generation`）
+* `PU` - 永久代已使用大小
+
+后面几列显示了 GC 的次数和耗时：
+
+* `YGC` - 新生代 GC 次数
+* `YGCT` - 新生代 GC 耗时
+* `FGC` - Full GC 次数
+* `FGCT` - Full GC 耗时
+* `GCT` - GC 总耗时
+
+下面这张图比较直观地显示了 GC 堆的各个区域以及它们之间的关系（[图片来源](https://www.cnblogs.com/ruoli-0/p/14275977.html)）：
+
+![](./images/gc-heap.png)
 
 ### `jstat -gccapacity <pid>`
+
+`-gccapacity` 选项和 `-gc` 选项类似，也是用于输出垃圾回收堆的统计，和 `-gc` 相比，它不仅输出了各个代的当前大小，还输出了各个代的最大值和最小值，这可以方便地计算出各个代的内存占用情况，排查 OOM 问题。
+
+```
+$ jstat -gccapacity 11324
+ NGCMN    NGCMX     NGC     S0C   S1C       EC      OGCMN      OGCMX       OGC         OC       MCMN     MCMX      MC     CCSMN    CCSMX     CCSC    YGC    FGC
+ 33792.0 170496.0  99840.0 9728.0 4096.0  51200.0    68608.0   341504.0    68608.0    68608.0      0.0 1075200.0  29824.0      0.0 1048576.0   3968.0      5     1
+```
+
+* `NGCMN` - 新生代最小值
+* `NGCMX` - 新生代最大值
+* `NGC` - 当前新生代的大小
+* `S0C` - 当前 S0 区的大小
+* `S1C` - 当前 S1 区的大小
+* `EC` - 当前 Eden 区的大小
+
+> S0C + S1C + EC 为啥不等于 NGC？
+
+* `OGCMN`
+* `OGCMX`
+* `OGC`
+* `OC`
+* `MCMN`
+* `MCMX`
+* `MC`
+* `CCSMN`
+* `CCSMX`
+* `CCSC`
+* `YGC`
+* `FGC`
 
 ### `jstat -gccause <pid>`
 
