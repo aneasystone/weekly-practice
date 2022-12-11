@@ -57,6 +57,23 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
     * 统计 CPU、内存使用情况、swap 使用情况等
 * iostat
     * 显示磁盘 I/O 使用情况
+* gdb
+* ldd
+* lsof
+* ps
+* pstack
+* strace
+* ipcs
+* free
+* sar
+* readelf
+* objdump
+* nm
+* size
+* gprof
+* nmon
+* valgrind
+* asan
 
 ## 性能调优
 

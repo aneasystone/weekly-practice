@@ -30,10 +30,6 @@ where <option> is one of:
 
 ```
 $ jinfo -flags 3452
-Attaching to process ID 3452, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 25.351-b10
 Non-default VM flags: -XX:CICompilerCount=4 -XX:InitialHeapSize=104857600 -XX:MaxHeapSize=524288000 -XX:MaxNewSize=174587904 -XX:MinHeapDeltaBytes=524288 -XX:NewSize=34603008 -XX:OldSize=70254592 -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseFastUnorderedTimeStamps -XX:-UseLargePagesIndividualAllocation -XX:+UseParallelGC
 Command line:  -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=localhost:52443 -Xms100M -Xmx500M
 ```
@@ -104,10 +100,6 @@ $ jinfo -flag PrintGC 3452
 
 ```
 $ jinfo -sysprops 3452
-Attaching to process ID 3452, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 25.351-b10
 java.runtime.name = Java(TM) SE Runtime Environment
 java.vm.version = 25.351-b10
 sun.boot.library.path = C:\Program Files\Java\jdk1.8.0_351\jre\bin
