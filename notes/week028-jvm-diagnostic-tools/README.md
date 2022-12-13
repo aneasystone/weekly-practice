@@ -194,6 +194,8 @@ Warnings
     * **GC tuning is the last task to be done**
 
 
+https://northcoder.com/post/jvm-heap-dumps-and-oql/
+
 https://my.oschina.net/feichexia/blog/196575
 
 https://ithelp.ithome.com.tw/users/20140481/ironman/4472

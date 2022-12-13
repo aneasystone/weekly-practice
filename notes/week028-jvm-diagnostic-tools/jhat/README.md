@@ -35,7 +35,7 @@ All boolean options default to "true"
 
 ### `jhat heap.hprof`
 
-可以不带参数直接执行 `jhat` 命令：
+可以不带参数地直接执行 `jhat` 命令，对堆文件进行分析：
 
 ```
 $ jhat .\heap.hprof
@@ -50,16 +50,68 @@ Started HTTP server on port 7000
 Server is ready.
 ```
 
+> 一般不会直接在服务器上进行分析，因为 `jhat` 是一个耗时并且耗费硬件资源的过程，我们一般把服务器生成的堆文件复制到本地进行分析。
+
 `jhat` 内置了一个微型的 HTTP 服务器，生成分析结果后，可以在浏览器中查看，默认端口 7000，我们访问 http://localhost:7000，如下：
 
 ![](./images/all-classes.png)
 
-页面中显示了所有的 **非平台类**，我们点击其中某个类，进入该类的详情页面：
+页面中显示了所有的 **非平台类**，由于我们的代码比较简单，就只有两个类。我们点击其中某个类，进入该类的详情页面：
 
 ![](./images/class-person.png)
 
 这里展示了该类的超类、ClassLoader、子类、成员变量以及该类的实例对象和引用等信息。
 
-TODO
+除此之外，页面底部还有另外几个比较常用的查询入口：
 
-> 值得注意的是，一般不会直接在服务器上进行分析，因为 `jhat` 是一个耗时并且耗费硬件资源的过程，我们一般把服务器生成的堆文件复制到本地进行分析。
+* All classes including platform
+
+![](./images/all-classes-including-platform.png)
+
+这个页面显示了包括平台类在内的所有类。
+
+* Show all members of the rootset
+
+![](./images/rootset-members.png)
+
+这个页面显示了从根集（rootset）能引用到的所有对象。
+
+* Show instance counts for all classes (including platform)
+
+![](./images/instance-counts-including-platform.png)
+
+这个页面显示了包括平台类在内的所有类的实例数，可以看到实例数最多的是 `class [C`，这实际上就是 `char[]`，一般来说，大多数 `class [C` 都是我们代码中的字符串对象，因为 `String` 的内部实现就是 `char[]`。
+
+* Show instance counts for all classes (excluding platform)
+
+![](./images/instance-counts.png)
+
+这个页面显示了除平台类之外的所有类的实例数。
+
+* Show heap histogram
+
+![](./images/heap-hist.png)
+
+这个页面比较直观的显示了堆内类的统计信息，和命令 `jmap -histo <pid>` 的效果一样。
+
+* Show finalizer summary
+
+![](./images/finalizer.png)
+
+这个页面统计堆积在 finalizer 队列中的对象，和命令 `jmap -finalizerinfo <pid>` 的效果一样。
+
+* Execute Object Query Language (OQL) query
+
+![](./images/oql.png)
+
+`Object Query Language (OQL)` 是一种非常强大的对象查询语言。通常导出的堆文件都比较大，很难通过页面的链接找到想要的信息，这时就可以使用 OQL 来帮我们查询了。
+
+```
+select { 
+  s: s, 
+  value: s.toString() 
+} from java.lang.String s 
+where /zhangsan/.test(s.toString())
+```
+
+上面是一个简单的例子，查询所有包含 `zhangsan` 的字符串，关于它具体的语法，可以参考 [Object Query Language (OQL)](http://cr.openjdk.java.net/~sundar/8022483/webrev.01/raw_files/new/src/share/classes/com/sun/tools/hat/resources/oqlhelp.html)。
