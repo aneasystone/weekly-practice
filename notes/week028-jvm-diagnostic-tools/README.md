@@ -8,13 +8,7 @@
 
 在 JDK 中自带了很多实用的命令行工具可以帮助开发人员解决 Java 应用的疑难杂症，这些工具位于 JDK 的 bin 目录下：
 
-* [jps - JVM Process Status Tool](./jps/README.md)
-* [jinfo - JVM Configuration Info](./jinfo/README.md)
-* [jstat - JVM Statistics Monitoring](./jstat/README.md)
-* [jmap - JVM Memory Map](./jmap/README.md)
-* [jhat - JVM Heap Analysis Tool](./jhat/README.md)
-* [jstack](./jstack/README.md)
-* jcmd
+![](./images/java-bin.png)
 
 尽管这些工具看上去都是 `.exe` 可执行文件，实际上它们只是 Java 程序的一层包装，真正的实现位于 `tools.jar` 中：
 
@@ -28,15 +22,29 @@
 $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 ```
 
+下面是一些常用的诊断工具的用法总结：
+
+* [jps - JVM Process Status Tool](./jps/README.md)
+* [jinfo - Configuration Info for Java](./jinfo/README.md)
+* [jstat - JVM Statistics Monitoring Tool](./jstat/README.md)
+* jstatd - JVM jstat Daemon
+* [jmap - Memory Map for Java](./jmap/README.md)
+* [jhat - JVM Heap Analysis Tool](./jhat/README.md)
+* [jstack - Stack Trace for Java](./jstack/README.md)
+* jsadebugd - Serviceability Agent Debug Daemon for Java
+* jcmd - JVM Diagnostic Commands tool
+
 ### 图形工具
 
 除了命令行工具，JDK 还提供了一些图形化的监控工具方便观察 Java 应用的运行情况，可以非常直观地对程序的内存、线程、类加载等进行分析。
 
-* jconsole
-* jmc
+* jconsole - A JMX-compliant graphical tool for monitoring a Java virtual machine
+* jmc - Java Mission Control
 * [jvisualvm - Java VisualVM](./jvisualvm/README.md)
 
 ## 问题诊断工具
+
+除了 JDK 自带的工具，还有一些开源的 JVM 诊断工具提供了更为丰富和强大的功能。
 
 * [Arthas](https://arthas.aliyun.com/zh-cn/)
 * [vjtools](https://github.com/vipshop/vjtools)
