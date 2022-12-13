@@ -35,3 +35,24 @@ Full thread dump OpenJDK 64-Bit Server VM (25.342-b07 mixed mode):
 
 ...
 ```
+
+### 线程分析
+
+* 线程的几种状态
+    * NEW
+    * RUNNABLE
+    * BLOCKED
+    * WAITING
+    * TIMED_WAITING
+    * TERMINATED
+
+![](./images/thread-states.jpg)
+
+* Monitor
+    * 用以实现线程之间的互斥与协作
+    * 每个对象有且仅有一个
+* Entry Set：表示线程通过 synchronized 要求获取对象的锁，如果对象未被锁住，则变为 The Owner，否则则在 Entry Set 等待。一旦对象锁被其他线程释放，立即参与竞争。
+* The Owner：表示线程成功竞争到对象锁。
+* Wait Set：表示线程通过对象的 wait 方法释放对象的锁，并在等待区等待被唤醒。
+
+![](./images/java-monitor.png)
