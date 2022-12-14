@@ -1,4 +1,4 @@
-## jmap - JVM Memory Map
+## jmap - Memory Map for Java
 
 `jmap` 是一款强大的 JVM 内存分析的命令行工具，它可以用于生成 Java 程序的 Heap Dump 文件，或者对堆中的对象实例进行统计，还可以查看 ClassLoader 信息以及 finalizer 执行队列等。
 

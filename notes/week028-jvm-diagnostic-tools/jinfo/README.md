@@ -1,4 +1,4 @@
-## jinfo - JVM Configuration Info
+## jinfo - Configuration Info for Java
 
 `jinfo` 命令用于查看 Java 应用的 JVM 参数，它和 `jps -v` 的作用类似，但是不同的是，`jps` 只能看到显式指定的参数，而 `jinfo` 可以看到未被显式指定的参数。在很多情况下，我们启动 Java 应用时不会指定所有的 JVM 参数，未指定的 JVM 参数会采用默认值，但是默认值是多少，我们不得不去翻阅官方文档，有了 `jinfo` 我们就可以很方便地知道某个 JVM 参数的默认值了。另外，`jinfo` 还支持在运行时动态地修改某些 JVM 参数。
 

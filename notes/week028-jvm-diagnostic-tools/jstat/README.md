@@ -1,4 +1,4 @@
-## jstat - JVM Statistics Monitoring
+## jstat - JVM Statistics Monitoring Tool
 
 `jstat` 命令用于监视虚拟机运行时状态信息，可以显示出虚拟机进程中的类装载、内存、垃圾收集、JIT 编译等运行数据。
 

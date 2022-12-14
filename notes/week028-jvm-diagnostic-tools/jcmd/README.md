@@ -1,1 +1,1 @@
-## jcmd - JVM Diagnostic Commands tool
+## jcmd - JVM Diagnostic Commands Tool
