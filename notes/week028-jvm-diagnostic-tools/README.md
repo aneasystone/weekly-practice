@@ -46,7 +46,7 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 
 ## 参考
 
-1. [JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/)
+1. [JDK Tools and Utilities](https://docs.oracle.com/javase/8/docs/technotes/tools/)
 1. [Java问题诊断和排查工具](https://tobebetterjavaer.com/jvm/problem-tools.html)
 1. [JVM监控和诊断工具](https://www.cnblogs.com/dwtfukgv/p/15126148.html)
 1. [Java自带的各类型命令工具](https://doctording.github.io/sword_at_offer/content/java_jvm/jvm_tools.html)
