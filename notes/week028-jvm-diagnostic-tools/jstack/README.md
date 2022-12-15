@@ -182,23 +182,117 @@ JVM 在进行垃圾回收时，会检测对象是否实现了 `finalize()` 方�
         at com.example.DemoApp.main(DemoApp.java:14)
 ```
 
-* 线程的几种状态
-    * NEW
-    * RUNNABLE
-    * BLOCKED
-    * WAITING
-    * TIMED_WAITING
-    * TERMINATED
+这里每个字段的含义如下：
+
+* `"main"` - 线程的名字
+* `#1` - 线程的编号
+* `prio=5` - 线程优先级
+* `os_prio=0` - 系统级别的线程优先级
+* `tid=0x00000152c4b53000` - 线程 ID
+* `nid=0x9fc` - Native 线程 ID
+* `waiting on condition [0x0000000ab3dff000]` - 线程当前的状态
+
+我们在做线程分析时，最关注的就是线程当前的状态，它有下面几种不同的状态：
+
+* `runnable` - 运行中状态
+* `blocked` - 阻塞状态，等待锁的释放
+* `wating` - 等待状态，等待特定的操作被唤醒，一般停留在 `park()`、`wait()`、`sleep()`、`join()` 等语句
+* `time_wating` - 有时限的等待状态
+* `terminated` - 线程已经退出
+
+这几种状态之间的转换关系如下图所示：
 
 ![](./images/thread-states.jpg)
 
-* Monitor
-    * 用以实现线程之间的互斥与协作
-    * 每个对象有且仅有一个
-* Entry Set：表示线程通过 synchronized 要求获取对象的锁，如果对象未被锁住，则变为 The Owner，否则则在 Entry Set 等待。一旦对象锁被其他线程释放，立即参与竞争。
-* The Owner：表示线程成功竞争到对象锁。
-* Wait Set：表示线程通过对象的 wait 方法释放对象的锁，并在等待区等待被唤醒。
+每个对象都有且仅有一个 `Monitor` 用以实现线程之间的互斥与协作，它可能存在下面几个不同的区域：
 
 ![](./images/java-monitor.png)
 
+* `Entry Set` - 表示线程通过 `synchronized` 要求获取对象的锁，如果对象未被锁住，则变为 `The Owner`，否则则在 `Entry Set` 等待。一旦对象锁被其他线程释放，立即参与竞争；
+* `The Owner` - 表示线程成功竞争到对象锁；
+* `Wait Set` - 表示线程通过对象的 `wait` 方法释放对象的锁，并在等待区等待被唤醒。
+
+#### 死锁检测
+
+`jstack` 不仅能输出 Java 进程当前的线程堆栈，而且还能对线程进行死锁检查，如果它发现存在死锁问题，会在最下面输出它找到的死锁。这里有一个简单的 [死锁演示程序](../demo-3/)，运行之后可以看到两个线程在互相等待，我们使用 `jstack` 命令对其进行检查，可以看到下面输出了死锁信息：
+
+```
+Found one Java-level deadlock:
+=============================
+"Thread-B":
+  waiting for ownable synchronizer 0x00000000fbe5eda0, (a java.util.concurrent.locks.ReentrantLock$NonfairSync),
+  which is held by "Thread-A"
+"Thread-A":
+  which is held by "Thread-B"
+
+Java stack information for the threads listed above:
+===================================================
+"Thread-B":
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x00000000fbe5eda0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:836)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireQueued(AbstractQueuedSynchronizer.java:870)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire(AbstractQueuedSynchronizer.java:1199)
+        at java.util.concurrent.locks.ReentrantLock$NonfairSync.lock(ReentrantLock.java:209)
+        at java.util.concurrent.locks.ReentrantLock.lock(ReentrantLock.java:285)
+        at com.example.DemoApp.lambda$1(DemoApp.java:36)
+        at com.example.DemoApp$$Lambda$2/1123225098.run(Unknown Source)
+        at java.lang.Thread.run(Thread.java:750)
+"Thread-A":
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x00000000fbe5edd0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:836)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireQueued(AbstractQueuedSynchronizer.java:870)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire(AbstractQueuedSynchronizer.java:1199)
+        at java.util.concurrent.locks.ReentrantLock$NonfairSync.lock(ReentrantLock.java:209)
+        at java.util.concurrent.locks.ReentrantLock.lock(ReentrantLock.java:285)
+        at com.example.DemoApp.lambda$0(DemoApp.java:19)
+        at com.example.DemoApp$$Lambda$1/1151020327.run(Unknown Source)
+        at java.lang.Thread.run(Thread.java:750)
+
+Found 1 deadlock.
+```
+
 ## `jstack -l <pid>`
+
+正常情况下 `jstack` 只会打印线程的堆栈信息，使用 `-l` 选项可以用于输出有关该线程锁的信息，如下所示：
+
+```
+"Thread-B" #15 prio=5 os_prio=0 tid=0x000001b5934fb800 nid=0x18c4 waiting on condition [0x000000519abfe000]
+   java.lang.Thread.State: WAITING (parking)
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x00000000fbe5eda0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:836)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireQueued(AbstractQueuedSynchronizer.java:870)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire(AbstractQueuedSynchronizer.java:1199)
+        at java.util.concurrent.locks.ReentrantLock$NonfairSync.lock(ReentrantLock.java:209)
+        at java.util.concurrent.locks.ReentrantLock.lock(ReentrantLock.java:285)
+        at com.example.DemoApp.lambda$1(DemoApp.java:36)
+        at com.example.DemoApp$$Lambda$2/1123225098.run(Unknown Source)
+        at java.lang.Thread.run(Thread.java:750)
+
+   Locked ownable synchronizers:
+        - <0x00000000fbe5edd0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+
+"Thread-A" #14 prio=5 os_prio=0 tid=0x000001b5934fa800 nid=0x1f1c waiting on condition [0x000000519aaff000]
+   java.lang.Thread.State: WAITING (parking)
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x00000000fbe5edd0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:836)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireQueued(AbstractQueuedSynchronizer.java:870)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire(AbstractQueuedSynchronizer.java:1199)
+        at java.util.concurrent.locks.ReentrantLock$NonfairSync.lock(ReentrantLock.java:209)
+        at java.util.concurrent.locks.ReentrantLock.lock(ReentrantLock.java:285)
+        at com.example.DemoApp.lambda$0(DemoApp.java:19)
+        at com.example.DemoApp$$Lambda$1/1151020327.run(Unknown Source)
+        at java.lang.Thread.run(Thread.java:750)
+
+   Locked ownable synchronizers:
+        - <0x00000000fbe5eda0> (a java.util.concurrent.locks.ReentrantLock$NonfairSync)
+```
+
+在线程堆栈的下方，可以看到 `Locked ownable synchronizers` 这样的信息，这个表示的是该线程持有的锁，很显然，`Thread-B` 持有锁 `0x00000000fbe5edd0`，`Thread-A` 持有锁 `0x00000000fbe5eda0`；另外，堆栈中的 `parking to wait for` 表示线程在等待的锁，`Thread-B` 在等待锁 `0x00000000fbe5eda0`，`Thread-A` 在等待锁 `0x00000000fbe5edd0`；两个线程互相等待，所以出现了死锁。
