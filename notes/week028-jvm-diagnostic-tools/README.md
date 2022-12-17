@@ -12,7 +12,7 @@
 
 ![](./images/tools.jar.png)
 
-所以当我们执行 `jps.exe` 命令的时候，和执行 `java -classpath %JAVA_HOME%/lib/tools.jar sun.tools.jps.Jps` 是完全一样的。
+所以当我们执行 `jps.exe` 命令的时候，和执行 `java -classpath %JAVA_HOME%/lib/tools.jar sun.tools.jps.Jps` 是完全一样的。正因为此，我们在查看 `jstat`、`jmap` 和 `jhat` 等命令的使用帮助时，可以看到一个 `-J<flag>` 参数，这个参数用于指定 JVM 参数，比如 `-J-Xmx512m` 可以限定程序使用的最大堆内存。
 
 不过要注意的是，在 JDK 9 之后，`tools.jar` 文件已经没有了，而是增加了一个 `jmods` 目录，之前的工具类可以通过引入模块来加载：
 
