@@ -42,6 +42,7 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 
 ## Java Agent
 
+* [JMX - Java Management Extensions Agent](./jmx/README.md)
 * [hprof - A Heap/CPU Profiling Tool](./hprof/README.md)
 
 ## 参考
@@ -53,8 +54,6 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 1. [JVM监控及诊断工具-GUI上篇](https://juejin.cn/post/6972450999034183710)
 1. [史上最全图详解Jvm—诊断工具和JVM监控](https://blog.csdn.net/wj1314250/article/details/118370096)
 1. [JVM问题诊断快速入门](https://guns-y.github.io/2019/09/04/JVM/JVM%E9%97%AE%E9%A2%98%E8%AF%8A%E6%96%AD%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/)
-1. [java性能分析--JDK自带监控工具之jcmd](https://juejin.cn/post/7104441940921286686)
-1. [jvm 性能调优工具之 jcmd](https://cloud.tencent.com/developer/article/1130026)
 1. [JVM性能调优-命令行工具jps/jstat/jinfo/jmap/jhat/jstack/jcmd](https://cloud.tencent.com/developer/article/1790337)
 1. [展開JDK工具的30天應用之旅 系列](https://ithelp.ithome.com.tw/users/20140481/ironman/4472)
 1. [JVM 性能调优监控工具 jps、jstack、jmap、jhat、jstat、hprof 使用详解](https://my.oschina.net/feichexia/blog/196575)
@@ -74,12 +73,6 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 ### 内存分析工具
 
 * [MAT - Eclipse Memory Analyzer](https://www.eclipse.org/mat/)
-
-#### 相关博客
-
-* [JVM 堆外内存泄漏分析（一）](https://coderbee.net/index.php/jvm/20190913/1929)
-* [Java内存之本地内存分析神器： NMT 和 pmap](https://blog.csdn.net/jicahoo/article/details/50933469)
-* [一次完整的JVM NativeMemoryTracking 堆外内存泄露分析](https://www.jianshu.com/p/27c06a43797b)
 
 ### 系统工具
 

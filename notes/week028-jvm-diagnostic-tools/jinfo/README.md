@@ -62,7 +62,7 @@ $ jinfo -flag UseParallelGC 3452
 -XX:+UseParallelGC
 ```
 
-> 完整的 JVM 参数列表可以参考 [Java 官方文档](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html)。
+> 完整的 JVM 参数列表可以使用 `java -XX:+PrintFlagsFinal` 查看，或者参考 [Java 官方文档](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html)。
 
 ### `jinfo -flag [+|-]<name> <pid>` 和 `jinfo -flag <name>=<value> <pid>`
 
@@ -74,25 +74,28 @@ $ jinfo -flag PrintGC 3452
 -XX:+PrintGC
 ```
 
-> 仅有部分参数支持动态修改，如下（[参考链接](https://knowledge.informatica.com/s/article/528321?language=en_US)）：
+> 仅有部分参数支持动态修改，可以使用 `java -XX:+PrintFlagsFinal | grep manageable` 查看：
 >
-> * CMSTriggerInterval
-> * CMSWaitDuration
-> * HeapDumpAfterFullGC
-> * HeapDumpBeforeFullGC
-> * HeapDumpOnOutOfMemoryError
-> * HeapDumpPath
-> * MaxHeapFreeRatio
-> * MinHeapFreeRatio
-> * PrintClassHistogram
-> * PrintClassHistogramAfterFullGC
-> * PrintClassHistogramBeforeFullGC
-> * PrintConcurrentLocks
-> * PrintGC
-> * PrintGCDateStamps
-> * PrintGCDetails
-> * PrintGCID
-> * PrintGCTimeStamps
+> ```
+>      intx CMSAbortablePrecleanWaitMillis            = 100                                 {manageable}
+>      intx CMSTriggerInterval                        = -1                                  {manageable}
+>      intx CMSWaitDuration                           = 2000                                {manageable}
+>      bool HeapDumpAfterFullGC                       = false                               {manageable}
+>      bool HeapDumpBeforeFullGC                      = false                               {manageable}
+>      bool HeapDumpOnOutOfMemoryError                = false                               {manageable}
+>     ccstr HeapDumpPath                              =                                     {manageable}
+>     uintx MaxHeapFreeRatio                          = 100                                 {manageable}
+>     uintx MinHeapFreeRatio                          = 0                                   {manageable}
+>      bool PrintClassHistogram                       = false                               {manageable}
+>      bool PrintClassHistogramAfterFullGC            = false                               {manageable}
+>      bool PrintClassHistogramBeforeFullGC           = false                               {manageable}
+>      bool PrintConcurrentLocks                      = false                               {manageable}
+>      bool PrintGC                                   = false                               {manageable}
+>      bool PrintGCDateStamps                         = false                               {manageable}
+>      bool PrintGCDetails                            = false                               {manageable}
+>      bool PrintGCID                                 = false                               {manageable}
+>      bool PrintGCTimeStamps                         = false                               {manageable}
+> ```
 
 ### `jinfo -sysprops <pid>`
 
