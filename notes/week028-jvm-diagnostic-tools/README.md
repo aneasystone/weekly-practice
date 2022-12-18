@@ -42,7 +42,8 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 
 ## Java Agent
 
-* [JMX - Java Management Extensions Agent](./jmx/README.md)
+* [jmx - Java Management Extensions Agent](./jmx/README.md)
+* [jdwp - Java Debug Wire Protocol](./jdwp/README.md)
 * [hprof - A Heap/CPU Profiling Tool](./hprof/README.md)
 
 ## 参考
@@ -57,6 +58,7 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 1. [JVM性能调优-命令行工具jps/jstat/jinfo/jmap/jhat/jstack/jcmd](https://cloud.tencent.com/developer/article/1790337)
 1. [展開JDK工具的30天應用之旅 系列](https://ithelp.ithome.com.tw/users/20140481/ironman/4472)
 1. [JVM 性能调优监控工具 jps、jstack、jmap、jhat、jstat、hprof 使用详解](https://my.oschina.net/feichexia/blog/196575)
+1. [jvm 性能调优工具之 jcmd](https://cloud.tencent.com/developer/article/1130026)
 
 ## 更多
 
@@ -73,6 +75,18 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 ### 内存分析工具
 
 * [MAT - Eclipse Memory Analyzer](https://www.eclipse.org/mat/)
+
+### Native Memory Tracking
+
+1. [Native Memory Tracking 详解（1）:基础介绍](https://heapdump.cn/article/4644018)
+1. [Native Memory Tracking 详解（2）:追踪区域分析(一)](https://heapdump.cn/article/4690198)
+1. [Native Memory Tracking 详解（3）:追踪区域分析(二)](https://heapdump.cn/article/4813403)
+1. [Native Memory Tracking 详解（4）:使用 NMT 协助排查内存问题案例](https://heapdump.cn/article/4926566)
+1. [聊聊HotSpot VM的Native Memory Tracking](https://cloud.tencent.com/developer/article/1406522)
+1. [JVM 堆外内存泄漏分析（一）](https://coderbee.net/index.php/jvm/20190913/1929)
+1. [JVM 堆外内存泄漏分析（二）](https://coderbee.net/index.php/jvm/20190916/1936)
+1. [Java内存之本地内存分析神器： NMT 和 pmap](https://blog.csdn.net/jicahoo/article/details/50933469)
+1. [一次完整的JVM NativeMemoryTracking 堆外内存泄露分析](https://www.jianshu.com/p/27c06a43797b)
 
 ### 系统工具
 

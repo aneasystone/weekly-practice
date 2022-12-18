@@ -528,19 +528,3 @@ $ jcmd 4332 ManagementAgent.stop
 4332:
 Command executed successfully
 ```
-
-### 参考
-
-1. [jvm 性能调优工具之 jcmd](https://cloud.tencent.com/developer/article/1130026)
-
-#### Native Memory Tracking
-
-1. [Native Memory Tracking 详解（1）:基础介绍](https://heapdump.cn/article/4644018)
-1. [Native Memory Tracking 详解（2）:追踪区域分析(一)](https://heapdump.cn/article/4690198)
-1. [Native Memory Tracking 详解（3）:追踪区域分析(二)](https://heapdump.cn/article/4813403)
-1. [Native Memory Tracking 详解（4）:使用 NMT 协助排查内存问题案例](https://heapdump.cn/article/4926566)
-1. [聊聊HotSpot VM的Native Memory Tracking](https://cloud.tencent.com/developer/article/1406522)
-1. [JVM 堆外内存泄漏分析（一）](https://coderbee.net/index.php/jvm/20190913/1929)
-1. [JVM 堆外内存泄漏分析（二）](https://coderbee.net/index.php/jvm/20190916/1936)
-1. [Java内存之本地内存分析神器： NMT 和 pmap](https://blog.csdn.net/jicahoo/article/details/50933469)
-1. [一次完整的JVM NativeMemoryTracking 堆外内存泄露分析](https://www.jianshu.com/p/27c06a43797b)
