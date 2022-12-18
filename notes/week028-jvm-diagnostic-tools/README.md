@@ -32,6 +32,14 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 * [jstatd - JVM jstat Daemon](./jstatd/README.md)
 * [jsadebugd - Serviceability Agent Debug Daemon for Java](./jsadebugd/README.md)
 
+## Java Agent
+
+有一些诊断工具比较特殊，它们并不是可执行文件，而是 JVM 内置的，或者以 Java Agent 的形式存在。
+
+* [jmx - Java Management Extensions Agent](./jmx/README.md)
+* [jdwp - Java Debug Wire Protocol](./jdwp/README.md)
+* [hprof - A Heap/CPU Profiling Tool](./hprof/README.md)
+
 ## 图形化工具
 
 除了命令行工具，JDK 还提供了一些图形化的监控工具方便观察 Java 应用的运行情况，可以非常直观地对程序的内存、线程、类加载等进行分析。
@@ -39,12 +47,6 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 * [jconsole - A JMX-compliant graphical tool for monitoring a Java virtual machine](./jconsole/README.md)
 * [jmc - JRocket Mission Control](./jmc/README.md)
 * [jvisualvm - Java VisualVM](./jvisualvm/README.md)
-
-## Java Agent
-
-* [jmx - Java Management Extensions Agent](./jmx/README.md)
-* [jdwp - Java Debug Wire Protocol](./jdwp/README.md)
-* [hprof - A Heap/CPU Profiling Tool](./hprof/README.md)
 
 ## 参考
 
