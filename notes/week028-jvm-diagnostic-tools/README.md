@@ -31,6 +31,7 @@ $ java --add-modules jdk.jcmd sun.tools.jps.Jps
 * [jcmd - JVM Diagnostic Commands Tool](./jcmd/README.md)
 * [jstatd - JVM jstat Daemon](./jstatd/README.md)
 * [jsadebugd - Serviceability Agent Debug Daemon for Java](./jsadebugd/README.md)
+* [jdb - The Java Debugger](./jdb/README.md)
 
 ## Java Agent
 
