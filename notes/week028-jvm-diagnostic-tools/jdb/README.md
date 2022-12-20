@@ -130,3 +130,5 @@ threadb = instance of java.lang.Thread(name='Thread-1', id=656)
 ```
 
 或者使用 `step` 命令单步执行，`cont` 命令继续执行代码，可以使用 `help` 查看所有的命令清单，或者参考 [jdb 的官方文档](http://docs.oracle.com/javase/7/docs/technotes/tools/windows/jdb.html)。
+
+> 如果没有源码，虽然在 jdb 里也可以用 step 来单步，但是没有办法显示当前正在运行的代码，这简直就是盲调。这个时候只能使用字节码调试工具了，常见的字节码调试器有：[Bytecode Visualizer](http://www.drgarbage.com/bytecode-visualizer/)、[JSwat Debugger](https://github.com/nlfiedler/jswat)、[Java ByteCode Debugger (JBCD)](http://sourceforge.net/projects/jbcd/) 等等，参考[这里](https://reverseengineering.stackexchange.com/questions/7991/java-class-bytecode-debugger)。
