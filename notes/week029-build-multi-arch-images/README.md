@@ -149,13 +149,13 @@ $ docker manifest inspect alpine:3.17
 
 那么，我们要如何构建这样的多架构镜像呢？
 
-### docker manifest
+### 使用 `docker manifest` 创建多架构镜像
 
 https://docs.docker.com/engine/reference/commandline/manifest/
 
 https://github.com/estesp/manifest-tool
 
-### docker buildx
+### 使用 `docker buildx` 创建多架构镜像
 
 https://github.com/docker/buildx
 
