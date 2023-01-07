@@ -2,7 +2,152 @@
 
 最近在一个国产化项目中遇到了这样一个场景，在同一个 Kubernetes 集群中的节点是混合架构的，也就是说，其中某些节点的 CPU 架构是 x86 的，而另一些节点是 ARM 的。为了让我们的镜像在这样的环境下运行，一种最简单的做法是根据节点类型为其打上相应的标签，然后针对不同的架构构建不同的镜像，比如 `demo:v1-amd64` 和 `demo:v1-arm64`，然后还需要写两套 YAML：一套使用 `demo:v1-amd64` 镜像，并通过 `nodeSelector` 选择 x86 的节点，另一套使用 `demo:v1-arm64` 镜像，并通过 `nodeSelector` 选择 ARM 的节点。很显然，这种做法不仅非常繁琐，而且管理起来也相当麻烦，如果集群中还有其他架构的节点，那么维护成本将成倍增加。
 
-解决这个问题更好的方法是使用 **多架构镜像（ multi-arch images ）**。
+你可能知道，每个 Docker 镜像都是通过一个 manifest 来描述的，manifest 中包含了这个镜像的基本信息，包括它的 mediaType、大小、摘要以及每一层的分层信息等。可以使用 `docker manifest inspect` 查看某个镜像的 manifest 信息：
+
+```
+$ docker manifest inspect aneasystone/hello-actuator:v1
+{
+        "schemaVersion": 2,
+        "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "config": {
+                "mediaType": "application/vnd.docker.container.image.v1+json",
+                "size": 3061,
+                "digest": "sha256:d6d5f18d524ce43346098c5d5775de4572773146ce9c0c65485d60b8755c0014"
+        },
+        "layers": [
+                {
+                        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+                        "size": 2811478,
+                        "digest": "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b"
+                },
+                {
+                        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+                        "size": 928436,
+                        "digest": "sha256:53c9466125e464fed5626bde7b7a0f91aab09905f0a07e9ad4e930ae72e0fc63"
+                },
+                {
+                        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+                        "size": 186798299,
+                        "digest": "sha256:d8d715783b80cab158f5bf9726bcada5265c1624b64ca2bb46f42f94998d4662"
+                },
+                {
+                        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+                        "size": 19609795,
+                        "digest": "sha256:112ce4ba7a4e8c2b5bcf3f898ae40a61b416101eba468397bb426186ee435281"
+                }
+        ]
+}
+```
+
+> 可以加上 `--verbose` 查看更详细的信息，包括该 manifest 引用的镜像标签和架构信息：
+> 
+> ```
+> $ docker manifest inspect --verbose aneasystone/hello-actuator:v1
+> {
+>         "Ref": "docker.io/aneasystone/hello-actuator:v1",
+>         "Descriptor": {
+>                 "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+>                 "digest": "sha256:f16a1fcd331a6d196574a0c0721688360bf53906ce0569bda529ba09335316a2",
+>                 "size": 1163,
+>                 "platform": {
+>                         "architecture": "amd64",
+>                         "os": "linux"
+>                 }
+>         },
+>         "SchemaV2Manifest": {
+>                 ...
+>         }
+> }
+> ```
+
+我们一般不会直接使用 manifest，而是通过标签来关联它，方便人们使用。从上面的输出结果可以看出，该 manifest 通过 `docker.io/aneasystone/hello-actuator:v1` 这个镜像标签来关联，支持的平台是 `linux/amd64`，该镜像有四个分层，另外注意这里的 `mediaType` 字段，它的值是 `application/vnd.docker.distribution.manifest.v2+json`，表示这是 Docker 镜像格式（如果是 `application/vnd.oci.image.manifest.v1+json` 表示 OCI 镜像）。
+
+可以看出这个镜像标签只关联了一个 manifest ，而一个 manifest 只对应一种架构；如果同一个镜像标签能关联多个 manifest ，不同的 manifest 对应不同的架构，那么当我们通过这个镜像标签启动容器时，容器引擎就可以自动根据当前系统的架构找到对应的 manifest 并下载对应的镜像。实际上这就是 **多架构镜像（ multi-arch images ）** 的基本原理，我们把这里的多个 manifest 合称为 `manifest list`，镜像标签不仅可以关联 manifest，也可以关联 manifest list。
+
+可以使用 `docker manifest inspect` 查看某个多架构镜像的 manifest list 信息：
+
+```
+$ docker manifest inspect alpine:3.17
+{
+   "schemaVersion": 2,
+   "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+   "manifests": [
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c",
+         "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:ecc4c9eff5b0c4de6be6b4b90b5ab2c2c1558374852c2f5854d66f76514231bf",
+         "platform": {
+            "architecture": "arm",
+            "os": "linux",
+            "variant": "v6"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:4c679bd1e6b6516faf8466986fc2a9f52496e61cada7c29ec746621a954a80ac",
+         "platform": {
+            "architecture": "arm",
+            "os": "linux",
+            "variant": "v7"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:af06af3514c44a964d3b905b498cf6493db8f1cde7c10e078213a89c87308ba0",
+         "platform": {
+            "architecture": "arm64", 
+            "os": "linux",
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:af6a986619d570c975f9a85b463f4aa866da44c70427e1ead1fd1efdf6150d38",
+         "platform": {
+            "architecture": "386", 
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:a7a53c2331d0c5fedeaaba8d716eb2b06f7a9c8d780407d487fd0fbc1244f7e6",
+         "platform": {
+            "architecture": "ppc64le",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:07afab708df2326e8503aff2f860584f2bfe7a95aee839c8806897e808508e12",
+         "platform": {
+            "architecture": "s390x",
+            "os": "linux"
+         }
+      }
+   ]
+}
+```
+
+这里的 `alpine:3.17` 就是一个多架构镜像，从输出结果可以看到 `mediaType` 是 `application/vnd.docker.distribution.manifest.list.v2+json`，说明这个镜像标签关联的是一个 manifest list，它包含了多个 manifest，支持 amd64、arm/v6、arm/v7、arm64、i386、ppc64le、s390x 多个架构。我们也可以直接在 [Docker Hub](https://hub.docker.com/_/alpine/tags) 上看到这些信息：
+
+![](./images/alpine-image.png)
+
+很显然，在我们这个混合架构的 Kubernetes 集群中，这个镜像是可以直接运行的。我们也可以将我们的应用构建成这样的多架构镜像，那么在这个 Kubernetes 集群中就可以自由地运行我们自己的应用了，这种方法比上面那种为每个架构构建一个镜像的方法要优雅得多。
+
+那么，我们要如何构建这样的多架构镜像呢？
 
 ### docker manifest
 
