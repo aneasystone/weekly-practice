@@ -247,7 +247,7 @@ Error response from daemon: Get "https://192.168.1.39:5000/v2/": http: server ga
 
 ### 开启 TLS 安全
 
-我们首先需要 [获得一份 TLS 证书](https://docs.docker.com/registry/deploying/#get-a-certificate)，官方文档中要求你拥有一个 HTTPS 域名，并从权威的 CA 机构获得一份证书，不过大很多人估计没这个条件，所以我们 [使用自签名证书](https://docs.docker.com/registry/insecure/#use-self-signed-certificates)（self-signed certificate）。
+我们首先需要 [获得一份 TLS 证书](https://docs.docker.com/registry/deploying/#get-a-certificate)，官方文档中要求你拥有一个 HTTPS 域名，并从权威的 CA 机构获得一份证书，不过大多数人估计都没这个条件，所以我们 [使用自签名证书](https://docs.docker.com/registry/insecure/#use-self-signed-certificates)（self-signed certificate）。
 
 创建一个 `certs` 目录：
 

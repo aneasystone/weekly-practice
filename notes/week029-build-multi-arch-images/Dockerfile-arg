@@ -1,0 +1,3 @@
+ARG ARCH=amd64
+FROM ${ARCH}/alpine:3.17
+CMD ["echo", "Hello"]

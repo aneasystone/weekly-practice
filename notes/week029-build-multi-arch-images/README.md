@@ -62,7 +62,7 @@ $ docker manifest inspect aneasystone/hello-actuator:v1
 
 我们一般不会直接使用 manifest，而是通过标签来关联它，方便人们使用。从上面的输出结果可以看出，该 manifest 通过 `docker.io/aneasystone/hello-actuator:v1` 这个镜像标签来关联，支持的平台是 `linux/amd64`，该镜像有四个分层，另外注意这里的 `mediaType` 字段，它的值是 `application/vnd.docker.distribution.manifest.v2+json`，表示这是 Docker 镜像格式（如果是 `application/vnd.oci.image.manifest.v1+json` 表示 OCI 镜像）。
 
-可以看出这个镜像标签只关联了一个 manifest ，而一个 manifest 只对应一种架构；如果同一个镜像标签能关联多个 manifest ，不同的 manifest 对应不同的架构，那么当我们通过这个镜像标签启动容器时，容器引擎就可以自动根据当前系统的架构找到对应的 manifest 并下载对应的镜像。实际上这就是 **多架构镜像（ multi-arch images ）** 的基本原理，我们把这里的多个 manifest 合称为 `manifest list`，镜像标签不仅可以关联 manifest，也可以关联 manifest list。
+可以看出这个镜像标签只关联了一个 manifest ，而一个 manifest 只对应一种架构；如果同一个镜像标签能关联多个 manifest ，不同的 manifest 对应不同的架构，那么当我们通过这个镜像标签启动容器时，容器引擎就可以自动根据当前系统的架构找到对应的 manifest 并下载对应的镜像。实际上这就是 **多架构镜像（ multi-arch images ）** 的基本原理，我们把这里的多个 manifest 合称为 [manifest list](https://docs.docker.com/registry/spec/manifest-v2-2/#manifest-list)（ 在 OCI 规范中被称为 [image index](https://github.com/opencontainers/image-spec/blob/v1.0.0/image-index.md) ），镜像标签不仅可以关联 manifest，也可以关联 manifest list。
 
 可以使用 `docker manifest inspect` 查看某个多架构镜像的 manifest list 信息：
 
@@ -147,11 +147,92 @@ $ docker manifest inspect alpine:3.17
 
 很显然，在我们这个混合架构的 Kubernetes 集群中，这个镜像是可以直接运行的。我们也可以将我们的应用构建成这样的多架构镜像，那么在这个 Kubernetes 集群中就可以自由地运行我们自己的应用了，这种方法比上面那种为每个架构构建一个镜像的方法要优雅得多。
 
-那么，我们要如何构建这样的多架构镜像呢？
+那么，我们要如何构建这样的多架构镜像呢？一般来说，如果你使用 Docker 作为你的构建工具，通常有两种方法：`docker manifest` 和 `docker buildx`。
 
 ### 使用 `docker manifest` 创建多架构镜像
 
-https://docs.docker.com/engine/reference/commandline/manifest/
+`docker build` 是最常用的镜像构建命令，首先，我们创建一个 `Dockerfile` 文件，内容如下：
+
+```
+FROM alpine:3.17
+CMD ["echo", "Hello"]
+```
+
+然后使用 `docker build` 构建镜像：
+
+```
+$ docker build -f Dockerfile -t aneasystone/demo:v1 .
+```
+
+这样一个简单的镜像就构建好了，使用 `docker run` 对其进行测试：
+
+```
+$ docker run --rm -it aneasystone/demo:v1
+Hello
+```
+
+非常顺利，镜像能正常运行。不过这样构建的镜像有一个问题，Docker Engine 是根据当前我们的系统自动拉取基础镜像的，我的系统是 x86 的，所以拉取的 alpine:3.17 镜像架构是 `linux/amd64` 的：
+
+```
+$ docker image inspect alpine:3.17 | grep Architecture
+
+        "Architecture": "amd64",
+```
+
+如果要构建其他架构的镜像，可以有三种办法。第一种是最原始的方法，Docker 官方为每种 [不同的架构创建了不同的独立账号](https://github.com/docker-library/official-images#architectures-other-than-amd64)，比如下面是一些常用的账号：
+
+* ARMv6 32-bit (arm32v6): https://hub.docker.com/u/arm32v6/
+* ARMv7 32-bit (arm32v7): https://hub.docker.com/u/arm32v7/
+* ARMv8 64-bit (arm64v8): https://hub.docker.com/u/arm64v8/
+* Linux x86-64 (amd64): https://hub.docker.com/u/amd64/
+* Windows x86-64 (windows-amd64): https://hub.docker.com/u/winamd64/
+
+所以我们就可以通过 `amd64/alpine` 和 `arm64v8/alpine` 来拉取相应架构的镜像，我们对 `Dockerfile` 文件稍微修改一下：
+
+```
+ARG ARCH=amd64
+FROM ${ARCH}/alpine:3.17
+CMD ["echo", "Hello"]
+```
+
+然后使用 `--build-arg` 参数来构建不同架构的镜像：
+
+```
+$ docker build --build-arg ARCH=amd64 -f Dockerfile-arg -t aneasystone/demo:v1-amd64 .
+$ docker build --build-arg ARCH=arm64v8 -f Dockerfile-arg -t aneasystone/demo:v1-arm64 .
+```
+
+不过从 2017 年 9 月开始，一个镜像可以支持多个架构了，这种方法就渐渐不用了。第二种办法就是直接使用 `alpine:3.17` 这个基础镜像，通过 `FROM` 指令的 `--platform` 参数，让 Docker Engine 自动拉取特定架构的镜像。我们新建两个文件 `Dockerfile-amd64` 和 `Dockerfile-arm64`，`Dockerfile-amd64` 文件内容如下：
+
+```
+FROM --platform=linux/amd64 alpine:3.17
+CMD ["echo", "Hello"]
+```
+
+`Dockerfile-arm64` 文件内容如下：
+
+```
+FROM --platform=linux/arm64 alpine:3.17
+CMD ["echo", "Hello"]
+```
+
+然后使用 `docker build` 再次构建镜像即可：
+
+```
+$ docker build --pull -f Dockerfile-amd64 -t aneasystone/demo:v1-amd64 .
+$ docker build --pull -f Dockerfile-arm64 -t aneasystone/demo:v1-arm64 .
+```
+
+> 注意这里的 `--pull` 参数，强制要求 Docker Engine 拉取基础镜像，要不然第二次构建时会使用第一次的缓存，这样基础镜像就不对了。
+
+第三种方法不用修改 `Dockerfile` 文件，因为 `docker build` 也支持 `--platform` 参数，我们只需要像下面这样构建镜像即可：
+
+```
+$ docker build --pull --platform=linux/amd64 -f Dockerfile -t aneasystone/demo:v1-amd64 .
+$ docker build --pull --platform=linux/arm64 -f Dockerfile -t aneasystone/demo:v1-arm64 .
+```
+
+构建完不同架构的镜像后，我们就可以使用 [docker manifest](https://docs.docker.com/engine/reference/commandline/manifest/) 命令创建 manifest list，生成自己的多架构镜像了。
 
 https://github.com/estesp/manifest-tool
 
@@ -176,3 +257,39 @@ https://github.com/moby/buildkit/blob/master/docs/multi-platform.md
 1. [基于QEMU和binfmt-misc透明运行不同架构程序](https://blog.lyle.ac.cn/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/)
 1. [多架构镜像三部曲（一）组合](https://blog.csdn.net/mycosmos/article/details/123587243)
 1. [多架构镜像三部曲（二）构建](https://blog.csdn.net/mycosmos/article/details/125020271)
+
+## 更多
+
+### 使用 QEMU 运行不同架构的程序
+
+在构建好多个架构的镜像之后，我们可以使用 `docker run` 测试一下：
+
+```
+$ docker run --rm -it aneasystone/demo:v1-amd64
+Hello
+
+$ docker run --rm -it aneasystone/demo:v1-arm64
+WARNING: The requested image's platform (linux/arm64/v8) does not match the detected host platform (linux/amd64) and no specific platform was requested
+Hello
+```
+
+这里可以发现一个非常奇怪的现象，我们的系统明明不是 arm64 的，为什么 arm64 的镜像也能正常运行呢？除了一行 WARNING 信息之外，看上去并没有异样，而且我们也可以使用 `sh` 进到容器内部正常操作：
+
+```
+> docker run --rm -it aneasystone/demo:v1-arm64 sh
+WARNING: The requested image's platform (linux/arm64/v8) does not match the detected host platform (linux/amd64) and no specific platform was requested
+/ # ls
+bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ #
+```
+
+不过当我们执行 `ps` 命令时，发现了一些端倪：
+
+```
+/ # ps aux
+PID   USER     TIME  COMMAND
+    1 root      0:00 {sh} /usr/bin/qemu-aarch64 /bin/sh sh
+    8 root      0:00 ps aux
+```
+
+可以看出我们所执行的 `sh` 命令实际上被 `/usr/bin/qemu-aarch64` 转换了，而 [QEMU](https://www.qemu.org/) 是一款强大的模拟器，可以在 x86 机器上模拟 arm 的指令。关于 QEMU 执行跨架构程序可以参考 [这篇文章](https://blog.lyle.ac.cn/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/)。
