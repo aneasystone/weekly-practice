@@ -232,9 +232,85 @@ $ docker build --pull --platform=linux/amd64 -f Dockerfile -t aneasystone/demo:v
 $ docker build --pull --platform=linux/arm64 -f Dockerfile -t aneasystone/demo:v1-arm64 .
 ```
 
-构建完不同架构的镜像后，我们就可以使用 [docker manifest](https://docs.docker.com/engine/reference/commandline/manifest/) 命令创建 manifest list，生成自己的多架构镜像了。
+> 在执行 `docker build` 命令时，可能会遇到下面这样的报错信息：
+> 
+> ```
+> $ docker build -f Dockerfile-arm64 -t aneasystone/demo:v1-arm64 .
+> [+] Building 1.2s (3/3) FINISHED
+>  => [internal] load build definition from > Dockerfile-arm64                   0.0s
+>  => => transferring dockerfile: > 37B                                          0.0s
+>  => [internal] load .> dockerignore                                            0.0s
+>  => => transferring context: > 2B                                              0.0s
+>  => ERROR [internal] load metadata for docker.io/library/alpine:3.> 17         1.1s
+> ------
+>  > [internal] load metadata for docker.io/library/alpine:3.17:
+> ------
+> failed to solve with frontend dockerfile.v0: failed to create LLB > definition: unexpected status code [manifests 3.17]: 403 Forbidden
+> ```
+>
+> 根据 [这里](https://github.com/docker/buildx/issues/680) 的信息，修改 Docker Daemon 的配置文件，将 `buildkit` 设置为 false 即可：
+>
+> ```
+>   "features": {
+>     "buildkit": false
+>   },
+> ```
 
-https://github.com/estesp/manifest-tool
+构建完不同架构的镜像后，我们就可以使用 [docker manifest](https://docs.docker.com/engine/reference/commandline/manifest/) 命令创建 manifest list，生成自己的多架构镜像了。由于目前创建 manifest list 必须引用远程仓库中的镜像，所以在这之前，我们需要先将刚刚生成的两个镜像推送到镜像仓库中：
+
+```
+$ docker push aneasystone/demo:v1-amd64
+$ docker push aneasystone/demo:v1-arm64
+```
+
+然后使用 `docker manifest create` 创建一个 manifest list，包含我们的两个镜像：
+
+```
+$ docker manifest create aneasystone/demo:v1 \
+    --amend aneasystone/demo:v1-amd64 \
+    --amend aneasystone/demo:v1-arm64
+```
+
+最后将该 manifest list 也推送到镜像仓库中就大功告成了：
+
+```
+$ docker manifest push aneasystone/demo:v1
+```
+
+可以使用 `docker manifest inspect` 查看这个镜像的 manifest list 信息：
+
+```
+$ docker manifest inspect aneasystone/demo:v1
+{
+   "schemaVersion": 2,
+   "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+   "manifests": [
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:170c4a5295f928a248dc58ce500fdb5a51e46f17866369fdcf4cbab9f7e4a1ab",
+         "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 528,
+         "digest": "sha256:3bb9c02263447e63c193c1196d92a25a1a7171fdacf6a29156f01c56989cf88b",
+         "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+         }
+      }
+   ]
+}
+```
+
+也可以在 [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/aneasystone/demo/tags) 上看到这个镜像的架构信息：
+
+![](./images/demo-image.png)
 
 ### 使用 `docker buildx` 创建多架构镜像
 
@@ -293,3 +369,10 @@ PID   USER     TIME  COMMAND
 ```
 
 可以看出我们所执行的 `sh` 命令实际上被 `/usr/bin/qemu-aarch64` 转换了，而 [QEMU](https://www.qemu.org/) 是一款强大的模拟器，可以在 x86 机器上模拟 arm 的指令。关于 QEMU 执行跨架构程序可以参考 [这篇文章](https://blog.lyle.ac.cn/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/)。
+
+### 查看镜像的 manifest 信息
+
+除了 `docker manifest` 命令，还有很多其他方法也可以查看镜像的 manifest 信息，比如：
+
+* [crane manifest](https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_manifest.md)
+* [manifest-tool](https://github.com/estesp/manifest-tool)
