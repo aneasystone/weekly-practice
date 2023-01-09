@@ -314,7 +314,54 @@ $ docker manifest inspect aneasystone/demo:v1
 
 ### 使用 `docker buildx` 创建多架构镜像
 
-https://github.com/docker/buildx
+从上一节可以看出，使用 `docker manifest` 来构建多架构镜像的步骤大致分为以下四步：
+
+1. 使用 `docker build` 依次构建每个架构的镜像；
+1. 使用 `docker push` 将镜像推送到镜像仓库；
+1. 使用 `docker manifest create` 创建一个 manifest list，包含上面的每个镜像；
+1. 使用 `docker manifest push` 将 manifest list 推送到镜像仓库；
+
+每次构建多架构镜像都要经历这么多步骤还是非常麻烦的，这一节将介绍一种更方便的方式，使用 `docker buildx` 来创建多架构镜像。
+
+[buildx](https://github.com/docker/buildx) 是一款 Docker CLI 插件，它对 [Moby BuildKit](https://github.com/moby/buildkit) 的构建功能进行了大量的扩展，同时在使用体验上还保持和 `docker build` 一样，用户可以很快上手。如果你的系统是 Windows 或 MacOS，`buildx` 已经内置在 [Docker Desktop](https://docs.docker.com/desktop/) 里了，无需额外安装；如果你的系统是 Linux，可以使用 DEB 或 RPM 包的形式安装，也可以手工安装，具体安装步骤参考 [官方文档](https://github.com/docker/buildx#installing)。
+
+使用 `docker buildx` 创建多架构镜像只需简单一行命令即可：
+
+```
+$ docker buildx build --platform=linux/amd64,linux/arm64 -t aneasystone/demo:v2 .
+```
+
+不过第一次执行这行命令时会报下面这样的错：
+
+```
+ERROR: multiple platforms feature is currently not supported for docker driver. Please switch to a different driver (eg. "docker buildx create --use")
+```
+
+这是因为 `buildx` 默认使用的 **构建器（ builder ）** 驱动是 `docker driver`，它不支持同时构建多个 platform 的镜像，我们可以使用 `docker buildx create` 创建其他驱动的构建器（ 关于 `buildx` 的四种驱动以及它们支持的特性可以 [参考这里](https://docs.docker.com/build/drivers/) ）：
+
+```
+$ docker buildx create --use
+nice_cartwright
+```
+
+这样创建的构建器驱动是 `docker-container driver`，它目前还没有启动：
+
+```
+$ docker buildx ls
+NAME/NODE          DRIVER/ENDPOINT                STATUS   BUILDKIT PLATFORMS
+nice_cartwright *  docker-container
+  nice_cartwright0 npipe:////./pipe/docker_engine inactive
+default            docker
+  default          default                        running  20.10.17 linux/amd64, linux/arm64, ...
+```
+
+当执行 `docker buildx build` 时会自动下载 `moby/buildkit:buildx-stable-1` 镜像并运行：
+
+```
+$ docker ps
+CONTAINER ID   IMAGE                           COMMAND       CREATED         STATUS         PORTS     NAMES
+e776505153c0   moby/buildkit:buildx-stable-1   "buildkitd"   7 minutes ago   Up 7 minutes             buildx_buildkit_nice_cartwright0
+```
 
 https://github.com/docker/buildx#building-multi-platform-images
 
