@@ -1,3 +1,3 @@
-[registry."172.31.164.40:5000"]
+[registry."192.168.1.39:5000"]
   http = true
   insecure = true

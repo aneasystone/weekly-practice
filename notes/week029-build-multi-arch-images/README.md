@@ -420,7 +420,6 @@ $ docker buildx build --push --platform=linux/amd64,linux/arm64 -t aneasystone/d
 
 1. [Faster Multi-platform builds: Dockerfile cross-compilation guide (Part 1)](https://medium.com/@tonistiigi/faster-multi-platform-builds-dockerfile-cross-compilation-guide-part-1-ec087c719eaf)
 1. [Multi-arch build and images, the simple way](https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/)
-1. [Docker: Exporting Image for Multiple Architectures](https://stackoverflow.com/questions/73515781/docker-exporting-image-for-multiple-architectures)
 1. [如何使用 docker buildx 构建跨平台 Go 镜像](https://waynerv.com/posts/building-multi-architecture-images-with-docker-buildx/)
 1. [构建多种系统架构支持的 Docker 镜像](https://yeasy.gitbook.io/docker_practice/image/manifest)
 1. [使用buildx来构建支持多平台的Docker镜像(Mac系统)](https://blog.cnscud.com/docker/2021/11/17/docker-buildx.html)
@@ -534,22 +533,70 @@ ERROR: output file is required for oci exporter. refusing to write to console
 $ docker buildx build --output=type=oci,dest=./demo-v2-oci.tar --platform=linux/amd64 .
 ```
 
+```
+$ mkdir demo-v2-docker && tar -C demo-v2-docker -xf demo-v2-docker.tar
+$ tree demo-v2-docker
+demo-v2-docker
+├── blobs
+│   └── sha256
+│       ├── 4463076cf4b016381c6722f6cce481e015487b35318ccc6dc933cf407c212b11
+│       ├── 6057d58c0c6df1fbc55d89e1429ede402558ad4f9a243b06d81e26a40d31eb0d
+│       └── 8921db27df2831fa6eaa85321205a2470c669b855f3ec95d5a3c2b46de0442c9
+├── index.json
+├── manifest.json
+└── oci-layout
+
+2 directories, 6 files
+```
+
 > 有一点奇怪的是，OCI 镜像格式的 tar 包和 docker 镜像格式的 tar 包是完全一样的，不知道怎么回事？
 
 如果我们不关心构建结果，而只是想看下构建镜像的文件系统，比如看看它的目录结构是什么样的，或是看看有没有我们需要的文件，可以使用 `local` 或 `tar` 导出器。`local` 导出器将文件系统导到本地的目录：
 
 ```
-$ docker buildx build --output=type=tar,dest=./demo-v2.tar --platform=linux/amd64 .
+$ docker buildx build --output=type=local,dest=./demo-v2 --platform=linux/amd64 .
 ```
 
 `tar` 导出器将文件系统导到一个 tar 文件中：
 
 ```
-$ docker buildx build --output=type=local,dest=./demo-v2 --platform=linux/amd64 .
+$ docker buildx build --output=type=tar,dest=./demo-v2.tar --platform=linux/amd64 .
 ```
 
 值得注意的是，这个 tar 文件并不是标准的镜像格式，所以我们不能使用 `docker load` 加载，但是我们可以使用 `docker import` 加载，加载的镜像中只有文件系统，Dockerfile 中的 `CMD` 或 `ENTRYPOINT` 等命令都不会生效。
 
+```
+$ mkdir demo-v2 && tar -C demo-v2 -xf demo-v2.tar
+$ ls demo-v2
+bin  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+```
+
 ### 不安全的镜像仓库
 
-TODO
+在上文中，我们使用了两种方法构建了多架构镜像，并将镜像推送到官方的 Docker Hub 仓库，如果需要推送到自己搭建的镜像仓库（ 关于如何搭建自己的镜像仓库，可以参考 [week023-build-your-own-image-registry](../week023-build-your-own-image-registry/README.md) ），由于这个仓库可能是不安全的，可能会遇到一些问题。
+
+第一种方式是直接使用 `docker push` 推送，推送前我们需要修改 Docker 的配置文件 `/etc/docker/daemon.json`，将仓库地址添加到 `insecure-registries` 配置项中：
+
+```
+{
+  "insecure-registries" : ["192.168.1.39:5000"]
+}
+```
+
+然后重启 Docker 后即可。
+
+第二种方式是使用 `docker buildx` 的 `image` 或 `registry` 导出器推送，这个推送工作实际上是由 buildkitd 完成的，所以我们需要让 buildkitd 忽略这个不安全的镜像仓库。我们首先创建一个配置文件 `buildkitd.toml`：
+
+```toml
+[registry."192.168.1.39:5000"]
+  http = true
+  insecure = true
+```
+
+关于 buildkitd 的详情配置可以 [参考这里](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md)。然后使用 `docker buildx create` 重新创建一个构建器：
+
+```
+$ docker buildx create --config=buildkitd.toml --use
+```
+
+这样就可以让 `docker buildx` 将镜像推送到不安全的镜像仓库了。
