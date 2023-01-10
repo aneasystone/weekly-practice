@@ -308,7 +308,7 @@ $ docker manifest inspect aneasystone/demo:v1
 }
 ```
 
-也可以在 [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/aneasystone/demo/tags) 上看到这个镜像的架构信息：
+也可以在 [Docker Hub](https://hub.docker.com/repository/docker/aneasystone/demo/tags) 上看到这个镜像的架构信息：
 
 ![](./images/demo-image.png)
 
@@ -355,7 +355,27 @@ default            docker
   default          default                        running  20.10.17 linux/amd64, linux/arm64, ...
 ```
 
-当执行 `docker buildx build` 时会自动下载 `moby/buildkit:buildx-stable-1` 镜像并运行：
+当执行 `docker buildx build` 时会自动启动构建器：
+
+```
+$ docker buildx build --platform=linux/amd64,linux/arm64 -t aneasystone/demo:v2 .
+[+] Building 14.1s (7/7) FINISHED
+ => [internal] booting buildkit                                                                                                            1.2s 
+ => => starting container buildx_buildkit_nice_cartwright0                                                                                 1.2s 
+ => [internal] load build definition from Dockerfile                                                                                       0.1s 
+ => => transferring dockerfile: 78B                                                                                                        0.0s 
+ => [internal] load .dockerignore                                                                                                          0.0s 
+ => => transferring context: 2B                                                                                                            0.0s 
+ => [linux/amd64 internal] load metadata for docker.io/library/alpine:3.17                                                                12.3s 
+ => [linux/arm64 internal] load metadata for docker.io/library/alpine:3.17                                                                12.2s 
+ => [linux/arm64 1/1] FROM docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a           0.2s 
+ => => resolve docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a                       0.1s 
+ => [linux/amd64 1/1] FROM docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a           0.2s 
+ => => resolve docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a                       0.1s 
+WARNING: No output specified with docker-container driver. Build result will only remain in the build cache. To push result image into registry use --push or to load image into docker use --load
+```
+
+使用 `docker ps` 可以看到正在运行的构建器，实际上就是 [buildkitd 服务](https://github.com/moby/buildkit#starting-the-buildkitd-daemon)，`docker buildx build` 为我们自动下载了 `moby/buildkit:buildx-stable-1` 镜像并运行：
 
 ```
 $ docker ps
@@ -363,9 +383,38 @@ CONTAINER ID   IMAGE                           COMMAND       CREATED         STA
 e776505153c0   moby/buildkit:buildx-stable-1   "buildkitd"   7 minutes ago   Up 7 minutes             buildx_buildkit_nice_cartwright0
 ```
 
-https://github.com/docker/buildx#building-multi-platform-images
+上面的构建结果中有一行 WARNING 信息，意思是我们没有指定 output 参数，所以构建的结果只存在于构建缓存中，如果要将构建的镜像推送到镜像仓库，可以加上一个 `--push` 参数：
 
-https://github.com/moby/buildkit/blob/master/docs/multi-platform.md
+```
+$ docker buildx build --push --platform=linux/amd64,linux/arm64 -t aneasystone/demo:v2 .
+[+] Building 14.4s (10/10) FINISHED
+ => [internal] load build definition from Dockerfile                                                                                       0.1s 
+ => => transferring dockerfile: 78B                                                                                                        0.0s 
+ => [internal] load .dockerignore                                                                                                          0.0s 
+ => => transferring context: 2B                                                                                                            0.0s 
+ => [linux/arm64 internal] load metadata for docker.io/library/alpine:3.17                                                                 9.1s 
+ => [linux/amd64 internal] load metadata for docker.io/library/alpine:3.17                                                                 9.0s 
+ => [auth] library/alpine:pull token for registry-1.docker.io                                                                              0.0s 
+ => [linux/arm64 1/1] FROM docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a           0.1s 
+ => => resolve docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a                       0.1s 
+ => [linux/amd64 1/1] FROM docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a           0.1s 
+ => => resolve docker.io/library/alpine:3.17@sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a                       0.1s 
+ => exporting to image                                                                                                                     5.1s 
+ => => exporting layers                                                                                                                    0.0s 
+ => => exporting manifest sha256:4463076cf4b016381c6722f6cce481e015487b35318ccc6dc933cf407c212b11                                          0.0s 
+ => => exporting config sha256:6057d58c0c6df1fbc55d89e1429ede402558ad4f9a243b06d81e26a40d31eb0d                                            0.0s 
+ => => exporting manifest sha256:05276d99512d2cdc401ac388891b0735bee28ff3fc8e08be207a0ef585842cef                                          0.0s 
+ => => exporting config sha256:86506d4d3917a7bb85cd3d147e651150b83943ee89199777ba214dd359d30b2e                                            0.0s 
+ => => exporting manifest list sha256:a26956bd9bd966b50312b4a7868d8461d596fe9380652272db612faef5ce9798                                     0.0s 
+ => => pushing layers                                                                                                                      3.0s 
+ => => pushing manifest for docker.io/aneasystone/demo:v2@sha256:a26956bd9bd966b50312b4a7868d8461d596fe9380652272db612faef5ce9798          2.0s 
+ => [auth] aneasystone/demo:pull,push token for registry-1.docker.io                                                                       0.0s 
+ => [auth] aneasystone/demo:pull,push library/alpine:pull token for registry-1.docker.io   
+```
+
+访问 [Docker Hub](https://hub.docker.com/repository/docker/aneasystone/demo/tags)，可以看到我们的镜像已经成功推送到仓库中了：
+
+![](./images/demo-v2-image.png)
 
 ## 参考
 
@@ -423,3 +472,84 @@ PID   USER     TIME  COMMAND
 
 * [crane manifest](https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_manifest.md)
 * [manifest-tool](https://github.com/estesp/manifest-tool)
+
+### `buildx` 支持的几种输出类型
+
+在上文中，我们使用了 `--push` 参数将镜像推送到镜像仓库中：
+
+```
+$ docker buildx build --push --platform=linux/amd64,linux/arm64 -t aneasystone/demo:v2 .
+```
+
+这个命令实际上等同于：
+
+```
+$ docker buildx build --output=type=image,name=aneasystone/demo:v2,push=true --platform=linux/amd64,linux/arm64 .
+```
+
+也等同于：
+
+```
+$ docker buildx build --output=type=registry,name=aneasystone/demo:v2 --platform=linux/amd64,linux/arm64 .
+```
+
+我们通过 `--output` 参数指定镜像的输出类型，这又被称为 [导出器（ exporter ）](https://docs.docker.com/build/exporters/)，`buildx` 支持如下几种不同的导出器：
+
+* `image` - 将构建结果导出到镜像
+* `registry` - 将构建结果导出到镜像，并推送到镜像仓库
+* `local` - 将构建的文件系统导出成本地目录
+* `tar` - 将构建的文件系统打成 tar 包
+* `oci` - 构建 [OCI 镜像格式](https://github.com/opencontainers/image-spec/blob/v1.0.1/image-layout.md) 的镜像
+* `docker` - 构建 [Docker 镜像格式](https://github.com/docker/docker/blob/v20.10.2/image/spec/v1.2.md) 的镜像
+* `cacheonly` - 将构建结果放在构建缓存中
+
+其中 `image` 和 `registry` 这两个导出器上面已经用过，一般用来将镜像推送到远程镜像仓库。如果我们只想构建本地镜像，而不希望将其推送到远程镜像仓库，可以使用 `oci` 或 `docker` 导出器，比如下面的命令使用 `docker` 导出器将构建结果导出成本地镜像：
+
+```
+$ docker buildx build --output=type=docker,name=aneasystone/demo:v2-amd64 --platform=linux/amd64 .
+```
+
+也可以使用 `docker` 导出器将构建结果导出成 tar 文件：
+
+```
+$ docker buildx build --output=type=docker,dest=./demo-v2-docker.tar --platform=linux/amd64 .
+```
+
+这个 tar 文件可以通过 `docker load` 加载：
+
+```
+$ docker load -i ./demo-v2-docker.tar
+```
+
+因为我本地运行的是 Docker 服务，不支持 OCI 镜像格式，所以指定 `type=oci` 时会报错：
+
+```
+$ docker buildx build --output=type=oci,name=aneasystone/demo:v2-amd64 --platform=linux/amd64 .
+ERROR: output file is required for oci exporter. refusing to write to console
+```
+
+不过我们可以将 OCI 镜像导出成 tar 包：
+
+```
+$ docker buildx build --output=type=oci,dest=./demo-v2-oci.tar --platform=linux/amd64 .
+```
+
+> 有一点奇怪的是，OCI 镜像格式的 tar 包和 docker 镜像格式的 tar 包是完全一样的，不知道怎么回事？
+
+如果我们不关心构建结果，而只是想看下构建镜像的文件系统，比如看看它的目录结构是什么样的，或是看看有没有我们需要的文件，可以使用 `local` 或 `tar` 导出器。`local` 导出器将文件系统导到本地的目录：
+
+```
+$ docker buildx build --output=type=tar,dest=./demo-v2.tar --platform=linux/amd64 .
+```
+
+`tar` 导出器将文件系统导到一个 tar 文件中：
+
+```
+$ docker buildx build --output=type=local,dest=./demo-v2 --platform=linux/amd64 .
+```
+
+值得注意的是，这个 tar 文件并不是标准的镜像格式，所以我们不能使用 `docker load` 加载，但是我们可以使用 `docker import` 加载，加载的镜像中只有文件系统，Dockerfile 中的 `CMD` 或 `ENTRYPOINT` 等命令都不会生效。
+
+### 不安全的镜像仓库
+
+TODO
