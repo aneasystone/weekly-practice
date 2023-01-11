@@ -533,6 +533,8 @@ ERROR: output file is required for oci exporter. refusing to write to console
 $ docker buildx build --output=type=oci,dest=./demo-v2-oci.tar --platform=linux/amd64 .
 ```
 
+将这个 tar 包解压后，可以看到一个标准的镜像是什么格式：
+
 ```
 $ mkdir demo-v2-docker && tar -C demo-v2-docker -xf demo-v2-docker.tar
 $ tree demo-v2-docker
@@ -563,7 +565,7 @@ $ docker buildx build --output=type=local,dest=./demo-v2 --platform=linux/amd64 
 $ docker buildx build --output=type=tar,dest=./demo-v2.tar --platform=linux/amd64 .
 ```
 
-值得注意的是，这个 tar 文件并不是标准的镜像格式，所以我们不能使用 `docker load` 加载，但是我们可以使用 `docker import` 加载，加载的镜像中只有文件系统，Dockerfile 中的 `CMD` 或 `ENTRYPOINT` 等命令都不会生效。
+值得注意的是，这个 tar 文件并不是标准的镜像格式，所以我们不能使用 `docker load` 加载，但是我们可以使用 `docker import` 加载，加载的镜像中只有文件系统，在运行这个镜像时，Dockerfile 中的 `CMD` 或 `ENTRYPOINT` 等命令是不会生效的：
 
 ```
 $ mkdir demo-v2 && tar -C demo-v2 -xf demo-v2.tar
@@ -593,7 +595,7 @@ bin  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp 
   insecure = true
 ```
 
-关于 buildkitd 的详情配置可以 [参考这里](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md)。然后使用 `docker buildx create` 重新创建一个构建器：
+关于 buildkitd 的详细配置可以 [参考这里](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md)。然后使用 `docker buildx create` 重新创建一个构建器：
 
 ```
 $ docker buildx create --config=buildkitd.toml --use
