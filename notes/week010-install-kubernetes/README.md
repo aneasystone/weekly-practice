@@ -966,13 +966,35 @@ node/localhost.localdomain untainted
 
 到这里一个单机版的 Kubernetes 最小集群就搭建好了。
 
-## 其他安装或管理 Kubernetes 的工具
+## 其他部署或管理 Kubernetes 的工具
+
+### 部署工具
+
+* [sealos](https://github.com/labring/sealos)
+* [easzlab/kubeasz](https://github.com/easzlab/kubeasz) - 使用Ansible脚本安装K8S集群
+* [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray) - Deploy a Production Ready Kubernetes Cluster
+* [K8E - Simple Kubernetes Distribution](https://getk8e.com/)
+* [kubesphere/kubekey](https://github.com/kubesphere/kubekey) - Install Kubernetes/K3s only, both Kubernetes/K3s and KubeSphere, and related cloud-native add-ons, it supports all-in-one, multi-node, and HA
+* [Kuboard Spray](https://kuboard-spray.cn/)
+
+### 管理平台
 
 * [Kubernetes Dashboard](https://github.com/kubernetes/dashboard)
-* [sealos](https://github.com/labring/sealos)
-* [Rancher](https://rancher.com/quick-start)
+* [Rancher](https://rancher.com/)
+* [TKEStack](https://github.com/tkestack/tke) - Tencent Kubernetes Engine Stack
+* [KubeSphere](https://kubesphere.io/zh/)
 * [Kuboard](https://kuboard.cn/)
-* [Kubernetes Web View](https://kube-web-view.readthedocs.io/en/latest/index.html)
+* [KubeVela](https://kubevela.io/zh/)
+	* [Open Application Model](https://oam.dev/)
+* [HashiCorp Nomad](https://www.nomadproject.io/docs)
+* [Rainbond](https://www.rainbond.com/) - 云原生多云应用管理平台
+    * [开源云原生平台 KubeSphere 与 Rainbond 对比](https://mp.weixin.qq.com/s/VIxJNlJHQu91T7ASXg7sAQ)
+* [BlueKing](https://bk.tencent.com/) - 蓝鲸智云
+* [KubeOperator](https://kubeoperator.io/)
+* [OpenKruise](https://openkruise.io/)
+* [Kubeapps](https://kubeapps.dev/) - Kubeapps is an in-cluster web-based application that enables users with a one-time installation to deploy, manage, and upgrade applications on a Kubernetes cluster..
+* [yunionio/cloudpods](https://github.com/yunionio/cloudpods) - A cloud-native open-source unified multi-cloud and hybrid-cloud platform. 开源、云原生的多云管理及混合云融合平台
+* [Clusternet](https://github.com/clusternet/clusternet)
 
 ## 参考
 

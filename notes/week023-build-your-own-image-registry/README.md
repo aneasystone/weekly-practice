@@ -443,5 +443,4 @@ $ docker login 192.168.1.39:5000
 * [Docker Registry UI](https://github.com/Joxit/docker-registry-ui) - The simplest and most complete UI for your private registry
 * [SUSE/Portus](https://github.com/SUSE/Portus) - Authorization service and frontend for Docker registry (v2)
 * [Harbor](https://github.com/goharbor/harbor) - An open source trusted cloud native registry project that stores, signs, and scans content.
-* [Sonatype Nexus](https://www.sonatype.com/products/nexus-repository) - Manage binaries and build artifacts across your
-software supply chain.
+* [Sonatype Nexus](https://www.sonatype.com/products/nexus-repository) - Manage binaries and build artifacts across your software supply chain.
