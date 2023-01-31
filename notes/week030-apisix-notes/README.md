@@ -46,7 +46,56 @@ $ curl http://127.0.0.1:9180/apisix/admin/routes \
 {"list":[],"total":0}
 ```
 
+目前我们还没有创建任何路由，所以 `/apisix/admin/routes` 接口返回的结果为空。我们可以使用 Admin API 和 Dashboard 两种方式来创建路由：
+
 ### 使用 Admin API 创建路由
+
+**路由（ Route ）** 是 APISIX 中最基础和最核心的资源对象，APISIX 通过路由定义规则来匹配客户端请求，根据匹配结果加载并执行相应的插件，最后将请求转发给到指定的上游服务。一条路由主要包含三部分信息：
+
+* 匹配规则：比如 `uri`、`host`、`remote_addr` 等等，你也可以自定义匹配规则。详细信息可参考 [Route body 请求参数](https://apisix.apache.org/zh/docs/apisix/admin-api/#route-request-body-parameters)；
+* 插件配置：这是可选的，你可以根据需要，在路由中配置相应的插件来实现某些功能。详细信息可参考 [Plugin](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/) 和 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)；
+* 上游信息：路由会根据配置的负载均衡信息，将请求按照规则转发至相应的上游。详细信息可参考 [Upstream](https://apisix.apache.org/zh/docs/apisix/terminology/upstream/)。
+
+下面的例子将入门示例中的 web1 服务添加到路由中：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
+-H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "uri": "/web1",
+    "upstream": {
+        "type": "roundrobin",
+        "nodes": {
+            "web1:80": 1
+        }
+    }
+}'
+```
+
+如果路由创建成功，将返回下面的 `201 Created` 信息：
+
+```
+HTTP/1.1 201 Created
+Connection: close
+Transfer-Encoding: chunked
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Access-Control-Max-Age: 3600
+Content-Type: application/json
+Date: Tue, 31 Jan 2023 00:19:03 GMT
+Server: APISIX/3.1.0
+X-Api-Version: v3
+
+{"key":"\/apisix\/routes\/1","value":{"create_time":1675124057,"uri":"\/web1","status":1,"upstream":{"pass_host":"pass","scheme":"http","nodes":{"web1:80":1},"hash_on":"vars","type":"roundrobin"},"priority":0,"update_time":1675124057,"id":"1"}}
+```
+
+然后我们就可以通过上面定义的 `uri` 来访问 web1 服务了：
+
+```
+$ curl http://localhost:9080/web1
+hello web1
+```
 
 ### 使用 Dashboard 创建路由
 
