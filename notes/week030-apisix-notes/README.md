@@ -52,16 +52,17 @@ $ curl http://127.0.0.1:9180/apisix/admin/routes \
 
 **路由（ Route ）** 是 APISIX 中最基础和最核心的资源对象，APISIX 通过路由定义规则来匹配客户端请求，根据匹配结果加载并执行相应的插件，最后将请求转发给到指定的上游服务。一条路由主要包含三部分信息：
 
-* 匹配规则：比如 `uri`、`host`、`remote_addr` 等等，你也可以自定义匹配规则。详细信息可参考 [Route body 请求参数](https://apisix.apache.org/zh/docs/apisix/admin-api/#route-request-body-parameters)；
-* 插件配置：这是可选的，你可以根据需要，在路由中配置相应的插件来实现某些功能。详细信息可参考 [Plugin](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/) 和 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)；
-* 上游信息：路由会根据配置的负载均衡信息，将请求按照规则转发至相应的上游。详细信息可参考 [Upstream](https://apisix.apache.org/zh/docs/apisix/terminology/upstream/)。
+* 匹配规则：比如 `methods`、`uri`、`host` 等，也可以根据需要自定义匹配规则，当请求满足匹配规则时，才会执行后续的插件，并转发到指定的上游服务；
+* 插件配置：这是可选的，但也是 APISIX 最强大的功能之一，APISIX 提供了非常丰富的插件来实现各种不同的访问策略，比如认证授权、安全、限流限速、可观测性等；
+* 上游信息：路由会根据配置的负载均衡信息，将请求按照规则转发至相应的上游。
 
 下面的例子将入门示例中的 web1 服务添加到路由中：
 
 ```
 $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
--H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
 {
+    "methods": ["GET"],
     "uri": "/web1",
     "upstream": {
         "type": "roundrobin",
@@ -90,14 +91,72 @@ X-Api-Version: v3
 {"key":"\/apisix\/routes\/1","value":{"create_time":1675124057,"uri":"\/web1","status":1,"upstream":{"pass_host":"pass","scheme":"http","nodes":{"web1:80":1},"hash_on":"vars","type":"roundrobin"},"priority":0,"update_time":1675124057,"id":"1"}}
 ```
 
-然后我们就可以通过上面定义的 `uri` 来访问 web1 服务了：
+这个路由的含义是当请求的方法是 `GET` 且请求的路径是 `/web1` 时，APISIX 就将请求转发到上游服务 `web1:80`。我们可以通过这个路径来访问 web1 服务：
 
 ```
-$ curl http://localhost:9080/web1
+$ curl http://127.0.0.1:9080/web1
 hello web1
 ```
 
+如果上游信息需要在不同的路由中复用，我们可以先创建一个 [上游（Upstream）](https://apisix.apache.org/zh/docs/apisix/terminology/upstream/)：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/upstreams/1 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "type": "roundrobin",
+    "nodes": {
+        "web1:80": 1
+    }
+}'
+```
+
+然后在创建路由时直接使用 `upstream_id` 即可：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/web1",
+    "upstream_id": "1"
+}'
+```
+
+另外，你可以使用下面的命令删除一条路由：
+
+```
+$ curl -X DELETE http://127.0.0.1:9180/apisix/admin/routes/1 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+```
+
 ### 使用 Dashboard 创建路由
+
+APISIX 提供了一套图形化 Dashboard 用来对网关的路由、插件、上游等进行管理，在入门示例中已经自带部署了 Dashboard，通过浏览器 `http://localhost:9000` 即可访问：
+
+![](./images/dashboard-login.png)
+
+默认的用户名和密码可以在 `dashboard_conf/conf.yaml` 文件中进行配置：
+
+```
+authentication:
+  secret:
+    secret     
+  expire_time: 3600
+  users:
+    - username: admin
+      password: admin
+    - username: user
+      password: user
+```
+
+登录成功后进入路由页面：
+
+![](./images/dashboard-routes.png)
+
+## 使用 APISIX 插件
+
+参考 [Plugin](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/) 和 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)
 
 ## 参考
 
