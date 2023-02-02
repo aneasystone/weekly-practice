@@ -2,7 +2,7 @@
 
 [Apache APISIX](https://apisix.apache.org/zh/) 是基于 Nginx/OpenResty + Lua 方案打造的一款 **动态**、**实时**、**高性能** 的 **云原生** API 网关，提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。APISIX 由国内初创公司 [支流科技](https://www.apiseven.com/) 于 2019 年 6 月开源，并于 7 月纳入 CNCF 全景图，10 月进入 Apache 孵化器，次年 7 月 毕业，成为国内唯一一个由初创公司贡献的项目，也是中国最快毕业的 Apache 顶级项目。
 
-## 入门示例
+## 入门示例初体验
 
 学习一门技术最好的方法就是使用它。这一节，我们将通过官方的入门示例，对 APISIX 的概念和用法有个基本了解。
 
@@ -46,15 +46,25 @@ $ curl http://127.0.0.1:9180/apisix/admin/routes \
 {"list":[],"total":0}
 ```
 
-目前我们还没有创建任何路由，所以 `/apisix/admin/routes` 接口返回的结果为空。我们可以使用 Admin API 和 Dashboard 两种方式来创建路由：
+目前我们还没有创建任何路由，所以 `/apisix/admin/routes` 接口返回的结果为空。我们可以使用 Admin API 和 Dashboard 两种方式来创建路由。
 
 ### 使用 Admin API 创建路由
 
-**路由（ Route ）** 是 APISIX 中最基础和最核心的资源对象，APISIX 通过路由定义规则来匹配客户端请求，根据匹配结果加载并执行相应的插件，最后将请求转发给到指定的上游服务。一条路由主要包含三部分信息：
+**路由（ Route ）** 是 APISIX 中最基础和最核心的资源对象，APISIX 通过路由定义规则来匹配客户端请求，根据匹配结果加载并执行相应的插件，最后将请求转发到指定的上游服务。一条路由主要包含三部分信息：
 
 * 匹配规则：比如 `methods`、`uri`、`host` 等，也可以根据需要自定义匹配规则，当请求满足匹配规则时，才会执行后续的插件，并转发到指定的上游服务；
 * 插件配置：这是可选的，但也是 APISIX 最强大的功能之一，APISIX 提供了非常丰富的插件来实现各种不同的访问策略，比如认证授权、安全、限流限速、可观测性等；
-* 上游信息：路由会根据配置的负载均衡信息，将请求按照规则转发至相应的上游。
+* 上游信息：路由会根据配置的负载均衡信息，将请求按照规则转发到相应的上游。
+
+所有的 Admin API 都采用了 Restful 风格，路由资源的请求地址为 `/apisix/admin/routes/{id}`，我们可以通过不同的 HTTP 方法来查询、新增、编辑或删除路由资源（[官方示例](https://apisix.apache.org/zh/docs/apisix/admin-api/#route-example)）：
+
+* `GET /apisix/admin/routes` -	获取资源列表；
+* `GET /apisix/admin/routes/{id}` - 获取资源；
+* `PUT /apisix/admin/routes/{id}` - 根据 id 创建资源；
+* `POST /apisix/admin/routes` - 创建资源，id 将会自动生成；
+* `DELETE /apisix/admin/routes/{id}` - 删除指定资源；
+* `PATCH /apisix/admin/routes/{id}` - 标准 PATCH，修改指定 Route 的部分属性，其他不涉及的属性会原样保留；
+* `PATCH /apisix/admin/routes/{id}/{path}` - SubPath PATCH，通过 {path} 指定 Route 要更新的属性，全量更新该属性的数据，其他不涉及的属性会原样保留。
 
 下面的例子将入门示例中的 web1 服务添加到路由中：
 
@@ -71,6 +81,22 @@ $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
         }
     }
 }'
+```
+
+其中 `X-API-KEY: edd1c9f034335f136f87ad84b625c8f1` 是 Admin API 的访问 Token，可以在 APISIX 的配置文件 `apisix_conf/config.yaml` 中找到：
+
+```
+deployment:
+  admin:
+    allow_admin:
+      - 0.0.0.0/0
+    admin_key:
+      - name: "admin"
+        key: edd1c9f034335f136f87ad84b625c8f1
+        role: admin
+      - name: "viewer"
+        key: 4054f7cf07e344346cd3f287985e76a2
+        role: viewer
 ```
 
 如果路由创建成功，将返回下面的 `201 Created` 信息：
@@ -153,6 +179,25 @@ authentication:
 登录成功后进入路由页面：
 
 ![](./images/dashboard-routes.png)
+
+然后点击 “创建” 按钮创建一个路由：
+
+![](./images/dashboard-create-route.png)
+
+看上去这里的路由信息非常复杂，但是实际上我们只需要填写 `名称`、`路径`、`HTTP 方法` 即可，其他的维持默认值，当我们对 APISIX 的路由理解更深刻的时候可以再回过头来看看这些参数。
+
+点击 “下一步” 设置上游信息：
+
+![](./images/dashboard-create-route-2.png)
+
+同样的，我们只关心目标节点的 `主机名` 和 `端口` 两个参数即可。
+
+然后再点击 “下一步” 进入插件配置，这里暂时先跳过，直接 “下一步” 完成路由的创建。路由创建完成后，访问 `/web2` 来验证路由是否生效：
+
+```
+$ curl http://127.0.0.1:9080/web2
+hello web2
+```
 
 ## 使用 APISIX 插件
 
