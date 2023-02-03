@@ -201,13 +201,48 @@ hello web2
 
 ## 使用 APISIX 插件
 
+[APISIX 插件中心](https://apisix.apache.org/zh/plugins/)
+
 参考 [Plugin](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/) 和 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)
+
+### 认证授权
+
+### 安全
+
+### 流量处理
+
+### 可观测性
 
 ## 参考
 
 1. [快速入门指南 | Apache APISIX® -- Cloud-Native API Gateway](https://apisix.apache.org/zh/docs/apisix/getting-started/)
+1. [API 网关策略的二三事](https://mp.weixin.qq.com/s/Hp3cbFCIJdG3VgI6w45yzQ)
 1. [从 Apache APISIX 来看 API 网关的演进](https://opentalk-blog.b0.upaiyun.com/prod/2019-12-14/a4ae6b3784b87a46a3f43ed062e47391.pdf)
 1. [云原生时代的中外 API 网关之争](https://2d2d.io/s1/kong-vs-apisix/)
+
+## 更多
+
+### [APISIX 的部署模式](https://apisix.apache.org/zh/docs/apisix/deployment-modes/)
+
+上面的示例中使用了 APISIX 最常用的部署模式：`traditional` 模式，这个模式下 APISIX 的控制平台和数据平面在一起：
+
+![](./images/deployment-traditional.png)
+
+我们也可以将 APISIX 部署两个实例，一个作为数据平面，一个作为控制平面，这被称为 `decoupled` 模式，这样可以提高 APISIX 的稳定性：
+
+![](./images/deployment-decoupled.png)
+
+上面两种模式都依赖于从 `etcd` 中监听和获取配置信息，此外，我们还可以将 APISIX 部署成 [`standalone` 模式](https://apisix.apache.org/zh/docs/apisix/stand-alone/)，这个模式使用 `conf/apisix.yaml` 作为配置文件，并且每间隔一段时间自动检测文件内容是否有更新，如果有更新则重新加载配置。不过这个模式只能作为数据平面，无法使用 Admin API 等管理功能（这是因为 Admin API 是基于 etcd 实现的）：
+
+```
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+```
+
+### 将 APISIX 扩展为服务网格的边车
+
 1. [Apache APISIX 借助服务网格实现统一技术栈的全流量管理](https://cloudnative.to/blog/2022-service-mesh-summit-apache-apisix-mesh/)
 1. [如何将 Apache APISIX 扩展为一个服务网格的边车](https://apisix.apache.org/articles/How-To-Extend-Apache-APISIX-into-a-Service-Mesh-Sidecar/)
 1. [将 Apache APISIX 扩展为服务网格边车的探索与实践](https://www.infoq.cn/article/fuhshcgz7jp8gyowypbr)
