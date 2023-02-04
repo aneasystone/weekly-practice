@@ -201,9 +201,106 @@ hello web2
 
 ## 使用 APISIX 插件
 
-[APISIX 插件中心](https://apisix.apache.org/zh/plugins/)
+通过上面的示例，我们了解了 APISIX 的基本用法，学习了如何通过 Admin API 或 Dashboard 来创建路由，实现了网关最基础的路由转发功能。APISIX 不仅具有高性能且低延迟的特性，而且它强大的插件机制为其高扩展性提供了无限可能。我们可以在 [APISIX 插件中心](https://apisix.apache.org/zh/plugins/) 查看所有官方已经支持的插件，也可以 [使用 lua 语言开发自己的插件](https://apisix.apache.org/zh/docs/apisix/plugin-develop/)，如果你对 lua 不熟悉，还可以使用其他语言 [开发 External Plugin](https://apisix.apache.org/zh/docs/apisix/external-plugin/)，APISIX 支持通过 [Plugin Runner](https://apisix.apache.org/docs/apisix/internal/plugin-runner/) 以 sidecar 的形式来运行你的插件，APISIX 和 sidecar 之间通过 RPC 通信，不过这种方式对性能有一定的影响，如果你比较关注性能问题，那么可以使用你熟悉的语言开发 wasm 程序，APISIX 也支持 [运行 wasm 插件](https://apisix.apache.org/zh/docs/apisix/wasm/)。
 
-参考 [Plugin](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/) 和 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)
+![](./images/external-plugin.png)
+
+这一节我们将通过几个官方插件来实现一些常见的网关需求。
+
+在上面的学习中我们知道，一个路由是由匹配规则、插件配置和上游信息三个部分组成的，但是为了学习的递进性，我们有意地避免了插件配置部分。现在我们可以重新创建一个路由，并为其加上插件信息：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/3 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/web3",
+    "plugins": {
+        "limit-count": {
+            "count": 2,
+            "time_window": 60,
+            "rejected_code": 503,
+            "key": "remote_addr"
+        },
+        "prometheus": {}
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "nodes": {
+            "web1:80": 1
+        }
+    }
+}'
+```
+
+上面的命令创建了一个 `/web3` 路由，并配置了两个插件：
+
+* `limit-count` - 该插件使用 `固定窗口算法（Fixed Window algorithm）` 对该路由进行限流，每分钟仅允许 2 次请求，超出时返回 503 错误码；
+* `prometheus` - 该插件将路由请求相关的指标暴露到 Prometheus 端点；
+
+我们连续访问 3 次 `/web3` 路由：
+
+```
+$ curl http://127.0.0.1:9080/web3
+hello web1
+$ curl http://127.0.0.1:9080/web3
+hello web1
+$ curl http://127.0.0.1:9080/web3
+<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>openresty</center>
+<p><em>Powered by <a href="https://apisix.apache.org/">APISIX</a>.</em></p></body>
+</html>
+```
+
+可以看到 `limit-count` 插件的限流功能生效了，第 3 次请求被拒绝，返回了 503 错误码。另外，可以使用下面的命令查看 Prometheus 指标：
+
+```
+$ curl -i http://127.0.0.1:9091/apisix/prometheus/metrics
+```
+
+这个 Prometheus 指标地址可以在 `apisix_conf/config.yaml` 文件的 `plugin_attr` 中配置：
+
+```
+plugin_attr:
+  prometheus:
+    export_uri: /apisix/prometheus/metrics
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
+```
+
+APISIX 的插件可以动态的启用和禁用、自定义错误响应、自定义优先级、根据条件动态执行，具体内容可以参考 [官方的 Plugin 文档](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/)。此外，如果一个插件需要在多个地方复用，我们也可以创建一个 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)：
+
+```
+curl http://127.0.0.1:9180/apisix/admin/plugin_configs/1 \
+  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -i -d '
+{
+    "desc": "enable limit-count plugin",
+    "plugins": {
+        "limit-count": {
+            "count": 2,
+            "time_window": 60,
+            "rejected_code": 503
+        }
+    }
+}'
+```
+
+然后在创建路由时，通过 `plugin_config_id` 关联：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/web1",
+    "upstream_id": "1",
+    "plugin_config_id": "1"
+}'
+```
 
 ### 认证授权
 
