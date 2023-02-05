@@ -201,7 +201,7 @@ hello web2
 
 ## 使用 APISIX 插件
 
-通过上面的示例，我们了解了 APISIX 的基本用法，学习了如何通过 Admin API 或 Dashboard 来创建路由，实现了网关最基础的路由转发功能。APISIX 不仅具有高性能且低延迟的特性，而且它强大的插件机制为其高扩展性提供了无限可能。我们可以在 [APISIX 插件中心](https://apisix.apache.org/zh/plugins/) 查看所有官方已经支持的插件，也可以 [使用 lua 语言开发自己的插件](https://apisix.apache.org/zh/docs/apisix/plugin-develop/)，如果你对 lua 不熟悉，还可以使用其他语言 [开发 External Plugin](https://apisix.apache.org/zh/docs/apisix/external-plugin/)，APISIX 支持通过 [Plugin Runner](https://apisix.apache.org/docs/apisix/internal/plugin-runner/) 以 sidecar 的形式来运行你的插件，APISIX 和 sidecar 之间通过 RPC 通信，不过这种方式对性能有一定的影响，如果你比较关注性能问题，那么可以使用你熟悉的语言开发 wasm 程序，APISIX 也支持 [运行 wasm 插件](https://apisix.apache.org/zh/docs/apisix/wasm/)。
+通过上面的示例，我们了解了 APISIX 的基本用法，学习了如何通过 Admin API 或 Dashboard 来创建路由，实现了网关最基础的路由转发功能。APISIX 不仅具有高性能且低延迟的特性，而且它强大的插件机制为其高扩展性提供了无限可能。我们可以在 [APISIX 插件中心](https://apisix.apache.org/zh/plugins/) 查看所有官方已经支持的插件，也可以 [使用 lua 语言开发自己的插件](https://apisix.apache.org/zh/docs/apisix/plugin-develop/)，如果你对 lua 不熟悉，还可以使用其他语言 [开发 External Plugin](https://apisix.apache.org/zh/docs/apisix/external-plugin/)，APISIX 支持通过 [Plugin Runner](https://apisix.apache.org/docs/apisix/internal/plugin-runner/) 以 sidecar 的形式来运行你的插件，APISIX 和 sidecar 之间通过 RPC 通信，不过这种方式对性能有一定的影响，如果你比较关注性能问题，那么可以使用你熟悉的语言开发 [WebAssembly](https://webassembly.org/) 程序，APISIX 也支持 [运行 wasm 插件](https://apisix.apache.org/zh/docs/apisix/wasm/)。
 
 ![](./images/external-plugin.png)
 
@@ -275,7 +275,7 @@ plugin_attr:
 APISIX 的插件可以动态的启用和禁用、自定义错误响应、自定义优先级、根据条件动态执行，具体内容可以参考 [官方的 Plugin 文档](https://apisix.apache.org/zh/docs/apisix/terminology/plugin/)。此外，如果一个插件需要在多个地方复用，我们也可以创建一个 [Plugin Config](https://apisix.apache.org/zh/docs/apisix/terminology/plugin-config/)：
 
 ```
-curl http://127.0.0.1:9180/apisix/admin/plugin_configs/1 \
+$ curl http://127.0.0.1:9180/apisix/admin/plugin_configs/1 \
   -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -i -d '
 {
     "desc": "enable limit-count plugin",
@@ -302,13 +302,16 @@ $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
 }'
 ```
 
-### 认证授权
+在 APISIX 的插件中心，我们可以看到 APISIX 将插件分成了下面几个大类：
 
-### 安全
-
-### 流量处理
-
-### 可观测性
+* `General` - 通用功能，比如 gzip 压缩配置、重定向配置等；
+* `Transformation` - 这类插件会对请求做一些转换操作，比如重写请求响应、gRPC 协议转换等；
+* `Authentication` - 提供一些常见的认证授权相关的功能，比如 API Key 认证、JWT 认证、Basic 认证、CAS 认证、LDAP 认证等；
+* `Security` - 安全相关的插件，比如开启 IP 黑白名单、开启 CORS、开启 CSRF 等；
+* `Traffic` - 这些插件对流量进行管理，比如限流、限速、流量镜像等；
+* `Observability` - 可观测性插件，支持常见的日志（比如 File-Logger、Http-Logger、Kafka-Logger、Rocketmq-Logger 等）、指标（比如 Prometheus、Datadog 等）和链路跟踪（比如 Skywalking、Zipkin、Opentelemetry 等）系统；
+* `Serverless` - 对接常见的 Serverless 平台，实现函数计算功能，比如 AWS Lambda、Apache OpenWhisk、CNCF Function 等；
+* `Other Protocols` - 这些插件用于支持 Dubbo、MQTT 等其他类型的协议；
 
 ## 参考
 
@@ -319,9 +322,9 @@ $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
 
 ## 更多
 
-### [APISIX 的部署模式](https://apisix.apache.org/zh/docs/apisix/deployment-modes/)
+### APISIX 的部署模式
 
-上面的示例中使用了 APISIX 最常用的部署模式：`traditional` 模式，这个模式下 APISIX 的控制平台和数据平面在一起：
+APISIX 支持多种不同的 [部署模式](https://apisix.apache.org/zh/docs/apisix/deployment-modes/)，上面的示例中使用的是最常用的一种部署模式：`traditional` 模式，在这个模式下 APISIX 的控制平台和数据平面在一起：
 
 ![](./images/deployment-traditional.png)
 
@@ -329,7 +332,7 @@ $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/1 \
 
 ![](./images/deployment-decoupled.png)
 
-上面两种模式都依赖于从 `etcd` 中监听和获取配置信息，此外，我们还可以将 APISIX 部署成 [`standalone` 模式](https://apisix.apache.org/zh/docs/apisix/stand-alone/)，这个模式使用 `conf/apisix.yaml` 作为配置文件，并且每间隔一段时间自动检测文件内容是否有更新，如果有更新则重新加载配置。不过这个模式只能作为数据平面，无法使用 Admin API 等管理功能（这是因为 Admin API 是基于 etcd 实现的）：
+上面两种模式都依赖于从 `etcd` 中监听和获取配置信息，如果我们不想使用 `etcd`，我们还可以将 APISIX 部署成 [`standalone` 模式](https://apisix.apache.org/zh/docs/apisix/stand-alone/)，这个模式使用 `conf/apisix.yaml` 作为配置文件，并且每间隔一段时间自动检测文件内容是否有更新，如果有更新则重新加载配置。不过这个模式只能作为数据平面，无法使用 Admin API 等管理功能（这是因为 Admin API 是基于 etcd 实现的）：
 
 ```
 deployment:
@@ -345,3 +348,13 @@ deployment:
 1. [将 Apache APISIX 扩展为服务网格边车的探索与实践](https://www.infoq.cn/article/fuhshcgz7jp8gyowypbr)
 1. [深度剖析 Apache APISIX Mesh Agent](https://www.apiseven.com/blog/how-to-use-mesh-agent)
 1. [api7/apisix-mesh-agent](https://github.com/api7/apisix-mesh-agent)
+
+### 集成服务发现注册中心
+
+* [基于 DNS 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/dns/)
+* [基于 Consul 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul/)
+* [基于 Consul KV 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul_kv/)
+* [基于 Nacos 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/nacos/)
+* [基于 Eureka 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/)
+* [基于 APISIX-Seed 架构的控制面服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/control-plane-service-discovery/)
+* [基于 Kubernetes 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/)
