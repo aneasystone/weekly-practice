@@ -343,11 +343,11 @@ deployment:
 
 ### 将 APISIX 扩展为服务网格的边车
 
-1. [Apache APISIX 借助服务网格实现统一技术栈的全流量管理](https://cloudnative.to/blog/2022-service-mesh-summit-apache-apisix-mesh/)
-1. [如何将 Apache APISIX 扩展为一个服务网格的边车](https://apisix.apache.org/articles/How-To-Extend-Apache-APISIX-into-a-Service-Mesh-Sidecar/)
-1. [将 Apache APISIX 扩展为服务网格边车的探索与实践](https://www.infoq.cn/article/fuhshcgz7jp8gyowypbr)
-1. [深度剖析 Apache APISIX Mesh Agent](https://www.apiseven.com/blog/how-to-use-mesh-agent)
-1. [api7/apisix-mesh-agent](https://github.com/api7/apisix-mesh-agent)
+* [Apache APISIX 借助服务网格实现统一技术栈的全流量管理](https://cloudnative.to/blog/2022-service-mesh-summit-apache-apisix-mesh/)
+* [如何将 Apache APISIX 扩展为一个服务网格的边车](https://apisix.apache.org/articles/How-To-Extend-Apache-APISIX-into-a-Service-Mesh-Sidecar/)
+* [将 Apache APISIX 扩展为服务网格边车的探索与实践](https://www.infoq.cn/article/fuhshcgz7jp8gyowypbr)
+* [深度剖析 Apache APISIX Mesh Agent](https://www.apiseven.com/blog/how-to-use-mesh-agent)
+* [api7/apisix-mesh-agent](https://github.com/api7/apisix-mesh-agent)
 
 ### 集成服务发现注册中心
 
