@@ -32,7 +32,7 @@
 * WEEK028 - [细数 JDK 自带的那些调试和诊断工具](./notes/week028-jvm-diagnostic-tools/README.md)
 * WEEK029 - [构建多架构容器镜像实战](./notes/week029-build-multi-arch-images/README.md)
 * WEEK030 - [APISIX 使用小记](./notes/week030-apisix-notes/README.md)
-* WEEK031 - [Helm 学习笔记](./notes/week031-helm-notes/README.md)
+* WEEK031 - [使用 Helm 部署 Kubernetes 应用](./notes/week031-deploying-kubernetes-app-with-helm/README.md)
 
 ### 项目实践
 
