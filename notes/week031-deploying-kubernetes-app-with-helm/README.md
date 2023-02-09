@@ -18,7 +18,33 @@ Helm 在 2018 年 6 月加入 CNCF，并在 2020 年 4 月正式毕业，目前�
 
 ## 快速开始
 
+这一节我们将通过官方的入门示例快速掌握 Helm 的基本用法。
+
 ### 安装 Helm
+
+我们首先从 Helm 的 [Github Release](https://github.com/helm/helm/releases) 页面找到最新版本，然后通过 `curl` 将安装包下载下来：
+
+```
+$ curl -LO https://get.helm.sh/helm-v3.11.1-linux-amd64.tar.gz
+```
+
+然后解压安装包，并将 `helm` 安装到 `/usr/local/bin` 目录：
+
+```
+$ tar -zxvf helm-v3.11.1-linux-amd64.tar.gz
+$ sudo mv linux-amd64/helm /usr/local/bin/helm
+```
+
+这样 Helm 就安装好了，通过 `helm version` 检查是否安装成功：
+
+```
+$ helm version
+version.BuildInfo{Version:"v3.11.1", GitCommit:"293b50c65d4d56187cd4e2f390f0ada46b4c4737", GitTreeState:"clean", GoVersion:"go1.18.10"}
+```
+
+使用 `helm help` 查看 Helm 支持的其他命令和参数。
+
+> 一般来说，直接下载 Helm 二进制文件就可以完成安装，不过官方也提供了一些其他方法来安装 Helm，比如通过 [get_helm.sh](https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3) 脚本来自动安装，或者通过 `yum` 或 `apt` 这些操作系统的包管理器来安装，具体内容可参考官方的 [安装文档](https://helm.sh/zh/docs/intro/install/)。
 
 ### 使用 Helm
 
