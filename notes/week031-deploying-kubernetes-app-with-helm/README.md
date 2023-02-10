@@ -48,6 +48,36 @@ version.BuildInfo{Version:"v3.11.1", GitCommit:"293b50c65d4d56187cd4e2f390f0ada4
 
 ### 使用 Helm
 
+Helm 安装完成之后，我们就可以使用 Helm 在 Kubernetes 中安装应用了。对于新手来说，最简单的方法是在 [ArtifactHub](https://artifacthub.io/) 上搜索要安装的应用，然后按照文档中的安装步骤来操作即可。比如我们想要部署 Nginx，首先在 ArtifactHub 上进行搜索：
+
+![](./images/search-nginx.png)
+
+注意左侧的 KIND 勾选上 `Helm charts`，搜索出来的结果会有很多条，这些都是由不同的组织或个人发布的，可以在列表中看出发布的组织或个人名称，以及该 Charts 所在的仓库。[Bitnami](https://bitnami.com/) 是 Helm 中最常用的仓库之一，它内置了很多常用的 Kubernetes 应用，于是我们选择第一条搜索结果：
+
+![](./images/bitnami-nginx.png)
+
+这里可以查看关于 Nginx 应用的安装步骤、使用说明、以及支持的配置参数等信息，我们可以点击 `INSTALL` 按钮，会弹出一个对话框，并显示该应用的安装步骤：
+
+![](./images/nginx-install.png)
+
+我们按照它的提示，首先使用 `helm repo add` 将 Bitnami 仓库添加到我们的电脑：
+
+```
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+然后使用 `helm install` 安装 Nginx 应用：
+
+```
+$ helm install my-nginx bitnami/nginx --version 13.2.23
+```
+
+## 常用的 Helm 命令
+
+https://zhuanlan.zhihu.com/p/165651732
+
+https://stackoverflow.com/questions/62371422/how-to-list-full-url-about-helm-search-url-in-v3-2-1
+
 ## 制作自己的 Helm Chart
 
 ## 参考
