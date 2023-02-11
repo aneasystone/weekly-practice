@@ -141,16 +141,100 @@ $ helm install my-nginx bitnami/nginx --version 13.2.23 \
 
 ## 常用的 Helm 命令
 
-https://zhuanlan.zhihu.com/p/165651732
+通过上一节的学习，我们大致了解了 Helm 中三个非常重要的概念：
+
+* `Repository`
+* `Chart`
+* `Release`
+
+`Repository` 比较好理解，就是存放安装包的仓库，可以使用 `helm env` 查看 `HELM_REPOSITORY_CACHE` 环境变量的值，这就是仓库的本地地址，用于缓存仓库信息以及已下载的安装包：
+
+```
+$ helm env | grep HELM_REPOSITORY_CACHE
+HELM_REPOSITORY_CACHE="/home/aneasystone/.cache/helm/repository"
+```
+
+当我们执行 `helm repo add` 命令时，会将仓库信息缓存到该目录；当我们执行 `helm install` 命令时，也会将安装包下载并缓存到该目录。查看该目录，可以看到我们已经添加的 `bitnami` 仓库信息，还有已下载的 `nginx` 安装包：
+
+```
+$ ls /home/aneasystone/.cache/helm/repository
+bitnami-charts.txt  bitnami-index.yaml  nginx-13.2.23.tgz
+```
+
+这个安装包就被称为 `Chart`，是 Helm 特有的安装包格式，这个安装包中包含了一个 Kubernetes 应用的所有资源文件。而 `Release` 就是安装到 Kubernetes 中的 Chart 实例，每个 Chart 可以在集群中安装多次，每安装一次，就会产生一个 Release。
+
+明白了这三个基本概念，我们就可以这样理解 Helm 的用途：**它先从 `Repository` 中下载 `Chart`，然后将 `Chart` 实例化后以 `Release` 的形式部署到 Kubernetes 集群中**，如下图所示（[图片来源](https://docs.couchbase.com/cloud-native-database/helm-overview.html)）：
+
+![](./images/helm-overview.png)
+
+而绝大多数的 Helm 命令，都是围绕着这三大概念进行的。
 
 https://stackoverflow.com/questions/62371422/how-to-list-full-url-about-helm-search-url-in-v3-2-1
 
 ## 制作自己的 Helm Chart
 
+如前所述，Helm 的安装包被称为 `Chart`，这个安装包中包含了一个 Kubernetes 应用的所有资源文件。我们不妨将本地仓库中的 Nginx 安装包解压开来，看看里面都有些什么：
+
+```
+$ tar zxvf nginx-13.2.23.tgz
+$ tree nginx
+nginx
+├── Chart.lock
+├── Chart.yaml
+├── README.md
+├── charts
+│   └── common
+│       ├── Chart.yaml
+│       ├── README.md
+│       ├── templates
+│       │   ├── _affinities.tpl
+│       │   ├── _capabilities.tpl
+│       │   ├── _errors.tpl
+│       │   ├── _images.tpl
+│       │   ├── _ingress.tpl
+│       │   ├── _labels.tpl
+│       │   ├── _names.tpl
+│       │   ├── _secrets.tpl
+│       │   ├── _storage.tpl
+│       │   ├── _tplvalues.tpl
+│       │   ├── _utils.tpl
+│       │   ├── _warnings.tpl
+│       │   └── validations
+│       │       ├── _cassandra.tpl
+│       │       ├── _mariadb.tpl
+│       │       ├── _mongodb.tpl
+│       │       ├── _mysql.tpl
+│       │       ├── _postgresql.tpl
+│       │       ├── _redis.tpl
+│       │       └── _validations.tpl
+│       └── values.yaml
+├── templates
+│   ├── NOTES.txt
+│   ├── _helpers.tpl
+│   ├── deployment.yaml
+│   ├── extra-list.yaml
+│   ├── health-ingress.yaml
+│   ├── hpa.yaml
+│   ├── ingress.yaml
+│   ├── pdb.yaml
+│   ├── prometheusrules.yaml
+│   ├── server-block-configmap.yaml
+│   ├── serviceaccount.yaml
+│   ├── servicemonitor.yaml
+│   ├── svc.yaml
+│   └── tls-secrets.yaml
+├── values.schema.json
+└── values.yaml
+
+5 directories, 41 files
+```
+
 ## 参考
 
 1. [Helm | 快速入门指南](https://helm.sh/zh/docs/intro/quickstart/)
+1. [Helm | 使用Helm](https://helm.sh/zh/docs/intro/using_helm/)
 1. [Helm | 项目历史](https://helm.sh/zh/docs/community/history/)
 1. [微软 Deis Labs 的传奇故事](https://zhuanlan.zhihu.com/p/496603933)
 1. [Helm Dashboard](https://github.com/komodorio/helm-dashboard)
 1. [Kubernetes Tutorials ｜ k8s 教程](https://github.com/guangzhengli/k8s-tutorials#helm)
+1. [使用Helm管理kubernetes应用](https://jimmysong.io/kubernetes-handbook/practice/helm.html)
