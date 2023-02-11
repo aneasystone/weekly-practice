@@ -52,7 +52,7 @@ Helm 安装完成之后，我们就可以使用 Helm 在 Kubernetes 中安装应
 
 ![](./images/search-nginx.png)
 
-注意左侧的 KIND 勾选上 `Helm charts`，搜索出来的结果会有很多条，这些都是由不同的组织或个人发布的，可以在列表中看出发布的组织或个人名称，以及该 Charts 所在的仓库。[Bitnami](https://bitnami.com/) 是 Helm 中最常用的仓库之一，它内置了很多常用的 Kubernetes 应用，于是我们选择第一条搜索结果：
+注意左侧的 KIND 勾选上 `Helm charts`，搜索出来的结果会有很多条，这些都是由不同的组织或个人发布的，可以在列表中看出发布的组织或个人名称，以及该 Charts 所在的仓库。[Bitnami](https://bitnami.com/) 是 Helm 中最常用的仓库之一，它内置了很多常用的 Kubernetes 应用，于是我们选择进入 [第一条搜索结果](https://artifacthub.io/packages/helm/bitnami/nginx)：
 
 ![](./images/bitnami-nginx.png)
 
@@ -64,12 +64,79 @@ Helm 安装完成之后，我们就可以使用 Helm 在 Kubernetes 中安装应
 
 ```
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
+"bitnami" has been added to your repositories
 ```
 
 然后使用 `helm install` 安装 Nginx 应用：
 
 ```
 $ helm install my-nginx bitnami/nginx --version 13.2.23
+NAME: my-nginx
+LAST DEPLOYED: Sat Feb 11 08:58:10 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: nginx
+CHART VERSION: 13.2.23
+APP VERSION: 1.23.3
+
+** Please be patient while the chart is being deployed **
+NGINX can be accessed through the following DNS name from within your cluster:
+
+    my-nginx.default.svc.cluster.local (port 80)
+
+To access NGINX from outside the cluster, follow the steps below:
+
+1. Get the NGINX URL by running these commands:
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        Watch the status with: 'kubectl get svc --namespace default -w my-nginx'
+
+    export SERVICE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].port}" services my-nginx)
+    export SERVICE_IP=$(kubectl get svc --namespace default my-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    echo "http://${SERVICE_IP}:${SERVICE_PORT}"
+```
+
+稍等片刻，Nginx 就安装好了，我们可以使用 `kubectl` 来验证：
+
+```
+$ kubectl get deployments
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+my-nginx   1/1     1            1           12m
+$ kubectl get svc
+NAME             TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes       ClusterIP      10.96.0.1        <none>        443/TCP          75d
+my-nginx         LoadBalancer   10.111.151.137   localhost     80:31705/TCP     12m
+```
+
+访问 `localhost:80` 可以看到 Nginx 已成功启动：
+
+![](./images/nginx.png)
+
+卸载和安装一样也很简单，使用 `helm delete` 命令即可：
+
+```
+$ helm delete my-nginx
+release "my-nginx" uninstalled
+```
+
+我们还可以通过 `--set` 选项来改写 Nginx 的一些参数，比如默认情况下创建的 Service 端口是 80，使用下面的命令将端口改为 8080：
+
+```
+$ helm install my-nginx bitnami/nginx --version 13.2.23 \
+	--set service.ports.http=8080
+```
+
+更多的参数列表可以参考安装文档中的 [`Parameters`](https://artifacthub.io/packages/helm/bitnami/nginx#parameters) 部分。
+
+另外，[`helm`](https://helm.sh/zh/docs/helm/helm/) 命令和它的子命令还支持一些其他选项，比如上面的 `--version` 和 `--set` 都是 [`helm install`](https://helm.sh/zh/docs/helm/helm_install/) 子命令的选项，我们可以使用 `helm` 命令的 `--namespace` 选项将应用部署到指定的命名空间中：
+
+```
+$ helm install my-nginx bitnami/nginx --version 13.2.23 \
+	--set service.ports.http=8080 \
+	--namespace nginx --create-namespace
 ```
 
 ## 常用的 Helm 命令
