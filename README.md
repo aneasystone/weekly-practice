@@ -33,6 +33,7 @@
 * WEEK029 - [构建多架构容器镜像实战](./notes/week029-build-multi-arch-images/README.md)
 * WEEK030 - [APISIX 使用小记](./notes/week030-apisix-notes/README.md)
 * WEEK031 - [使用 Helm 部署 Kubernetes 应用](./notes/week031-deploying-kubernetes-app-with-helm/README.md)
+* WEEK032 - [学习 Kubernetes 的网络技术](./notes/week032-kubernetes-network/README.md)
 
 ### 项目实践
 

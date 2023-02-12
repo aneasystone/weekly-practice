@@ -220,10 +220,9 @@ $ helm repo remove bitnami
 
 ```
 $ helm search hub nginx
-URL                                                     CHART VERSION   APP VERSION                     DESCRIPTION
-
-https://artifacthub.io/packages/helm/cloudnativ...      3.2.0           1.16.0                          Chart for the nginx server
-https://artifacthub.io/packages/helm/bitnami/nginx      13.2.23         1.23.3                          NGINX Open Source is a web server that can be a...
+URL                                                     CHART VERSION   APP VERSION          DESCRIPTION
+https://artifacthub.io/packages/helm/cloudnativ...      3.2.0           1.16.0               Chart for the nginx server
+https://artifacthub.io/packages/helm/bitnami/nginx      13.2.23         1.23.3               NGINX Open Source is a web server that can be a...
 ```
 
 要注意搜索出来的 Chart 链接可能不完整，不能直接使用，根据 [stackoverflow](https://stackoverflow.com/questions/62371422/how-to-list-full-url-about-helm-search-url-in-v3-2-1) 这里的解答，我们可以使用 `-o json` 选项将结果以 JSON 格式输出：
@@ -460,8 +459,6 @@ release "my-nginx" uninstalled
 1. [Helm | 使用Helm](https://helm.sh/zh/docs/intro/using_helm/)
 1. [Helm | 项目历史](https://helm.sh/zh/docs/community/history/)
 1. [微软 Deis Labs 的传奇故事](https://zhuanlan.zhihu.com/p/496603933)
-1. [Helm Dashboard](https://github.com/komodorio/helm-dashboard)
-1. [Kubernetes Tutorials ｜ k8s 教程](https://github.com/guangzhengli/k8s-tutorials#helm)
 1. [使用Helm管理kubernetes应用](https://jimmysong.io/kubernetes-handbook/practice/helm.html)
 
 ## 更多
@@ -479,3 +476,8 @@ release "my-nginx" uninstalled
 
 * [创建你自己的 charts](https://helm.sh/zh/docs/intro/using_helm/#%E5%88%9B%E5%BB%BA%E4%BD%A0%E8%87%AA%E5%B7%B1%E7%9A%84-charts)
 * [Chart仓库指南](https://helm.sh/zh/docs/topics/chart_repository/)
+* [Kubernetes Tutorials ｜ k8s 教程](https://github.com/guangzhengli/k8s-tutorials#helm)
+
+### 可视化管理工具
+
+* [Helm Dashboard](https://github.com/komodorio/helm-dashboard)
