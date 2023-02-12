@@ -169,64 +169,289 @@ bitnami-charts.txt  bitnami-index.yaml  nginx-13.2.23.tgz
 
 而绝大多数的 Helm 命令，都是围绕着这三大概念进行的。
 
-https://stackoverflow.com/questions/62371422/how-to-list-full-url-about-helm-search-url-in-v3-2-1
+### Repository 相关命令
 
-## 制作自己的 Helm Chart
+#### `helm repo`
 
-如前所述，Helm 的安装包被称为 `Chart`，这个安装包中包含了一个 Kubernetes 应用的所有资源文件。我们不妨将本地仓库中的 Nginx 安装包解压开来，看看里面都有些什么：
+该命令用于添加、删除或更新仓库等操作。
+
+将远程仓库添加到本地：
 
 ```
-$ tar zxvf nginx-13.2.23.tgz
-$ tree nginx
-nginx
-├── Chart.lock
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+查看本地已安装仓库列表：
+
+```
+$ helm repo list
+NAME    URL
+bitnami https://charts.bitnami.com/bitnami
+```
+
+更新本地仓库：
+
+```
+$ helm repo update bitnami
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "bitnami" chart repository
+Update Complete. ⎈Happy Helming!⎈
+```
+
+读取某个仓库目录，根据找到的 Chart 生成索引文件：
+
+```
+$ helm repo index SOME_REPO_DIR
+# cat SOME_REPO_DIR/index.yaml
+```
+
+删除本地仓库：
+
+```
+$ helm repo remove bitnami
+"bitnami" has been removed from your repositories
+```
+
+#### `helm search`
+
+该命令用于在 ArtifactHub 或本地仓库中搜索 Chart。
+
+在 ArtifactHub 中搜索 Chart：
+
+```
+$ helm search hub nginx
+URL                                                     CHART VERSION   APP VERSION                     DESCRIPTION
+
+https://artifacthub.io/packages/helm/cloudnativ...      3.2.0           1.16.0                          Chart for the nginx server
+https://artifacthub.io/packages/helm/bitnami/nginx      13.2.23         1.23.3                          NGINX Open Source is a web server that can be a...
+```
+
+要注意搜索出来的 Chart 链接可能不完整，不能直接使用，根据 [stackoverflow](https://stackoverflow.com/questions/62371422/how-to-list-full-url-about-helm-search-url-in-v3-2-1) 这里的解答，我们可以使用 `-o json` 选项将结果以 JSON 格式输出：
+
+```
+$ helm search hub nginx -o json | jq .
+[
+  {
+    "url": "https://artifacthub.io/packages/helm/cloudnativeapp/nginx",
+    "version": "3.2.0",
+    "app_version": "1.16.0",
+    "description": "Chart for the nginx server",
+    "repository": {
+      "url": "https://cloudnativeapp.github.io/charts/curated/",
+      "name": "cloudnativeapp"
+    }
+  },
+  {
+    "url": "https://artifacthub.io/packages/helm/bitnami/nginx",
+    "version": "13.2.23",
+    "app_version": "1.23.3",
+    "description": "NGINX Open Source is a web server that can be also used as a reverse proxy, load balancer, and HTTP cache. Recommended for high-demanding sites due to its ability to provide faster content.",
+    "repository": {
+      "url": "https://charts.bitnami.com/bitnami",
+      "name": "bitnami"
+    }
+  }
+}
+```
+
+在本地配置的所有仓库中搜索 Chart：
+
+```
+$ helm search repo nginx
+NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
+bitnami/nginx                           13.2.23         1.23.3          NGINX Open Source is a web server that can be a...
+bitnami/nginx-ingress-controller        9.3.28          1.6.2           NGINX Ingress Controller is an Ingress controll...
+bitnami/nginx-intel                     2.1.15          0.4.9           DEPRECATED NGINX Open Source for Intel is a lig...
+```
+
+### Chart 相关命令
+
+#### `helm create`
+
+该命令用于创建一个新的 Chart 目录：
+
+```
+$ helm create demo
+Creating demo
+```
+
+创建的 Chart 目录是下面这样的结构：
+
+```
+$ tree demo
+demo
 ├── Chart.yaml
-├── README.md
 ├── charts
-│   └── common
-│       ├── Chart.yaml
-│       ├── README.md
-│       ├── templates
-│       │   ├── _affinities.tpl
-│       │   ├── _capabilities.tpl
-│       │   ├── _errors.tpl
-│       │   ├── _images.tpl
-│       │   ├── _ingress.tpl
-│       │   ├── _labels.tpl
-│       │   ├── _names.tpl
-│       │   ├── _secrets.tpl
-│       │   ├── _storage.tpl
-│       │   ├── _tplvalues.tpl
-│       │   ├── _utils.tpl
-│       │   ├── _warnings.tpl
-│       │   └── validations
-│       │       ├── _cassandra.tpl
-│       │       ├── _mariadb.tpl
-│       │       ├── _mongodb.tpl
-│       │       ├── _mysql.tpl
-│       │       ├── _postgresql.tpl
-│       │       ├── _redis.tpl
-│       │       └── _validations.tpl
-│       └── values.yaml
 ├── templates
 │   ├── NOTES.txt
 │   ├── _helpers.tpl
 │   ├── deployment.yaml
-│   ├── extra-list.yaml
-│   ├── health-ingress.yaml
 │   ├── hpa.yaml
 │   ├── ingress.yaml
-│   ├── pdb.yaml
-│   ├── prometheusrules.yaml
-│   ├── server-block-configmap.yaml
+│   ├── service.yaml
 │   ├── serviceaccount.yaml
-│   ├── servicemonitor.yaml
-│   ├── svc.yaml
-│   └── tls-secrets.yaml
-├── values.schema.json
+│   └── tests
+│       └── test-connection.yaml
 └── values.yaml
 
-5 directories, 41 files
+3 directories, 10 files
+```
+
+#### `helm package`
+
+将 Chart 目录（必须包含 `Chart.yaml` 文件）打包成 Chart 归档文件：
+
+```
+$ helm package nginx
+Successfully packaged chart and saved it to: /home/aneasystone/helm/nginx-13.2.23.tgz
+```
+
+#### `helm lint`
+
+验证 Chart 是否存在问题：
+
+```
+$ helm lint ./nginx
+==> Linting ./nginx
+
+1 chart(s) linted, 0 chart(s) failed
+```
+
+#### `helm show`
+
+该命令用于显示 Chart 的基本信息，包括：
+
+* `helm show chart` - 显示 Chart 定义，实际上就是 `Chart.yaml` 文件的内容
+* `helm show crds` - 显示 Chart 的 CRD
+* `helm show readme` - 显示 Chart 的 `README.md` 文件中的内容
+* `helm show values` - 显示 Chart 的 `values.yaml` 文件中的内容
+* `helm show all` - 显示 Chart 的所有信息
+
+#### `helm pull`
+
+从仓库中将 Chart 安装包下载到本地：
+
+```
+$ helm pull bitnami/nginx
+$ ls
+nginx-13.2.23.tgz
+```
+
+#### `helm push`
+
+将 Chart 安装包推送到远程仓库：
+
+```
+$ helm push [chart] [remote]
+```
+
+### Release 相关命令
+
+#### `helm install`
+
+将 Chart 安装到 Kubernetes 集群：
+
+```
+$ helm install my-nginx bitnami/nginx --version 13.2.23
+```
+
+安装时可以通过 `--set` 选项修改配置参数：
+
+```
+$ helm install my-nginx bitnami/nginx --version 13.2.23 \
+	--set service.ports.http=8080
+```
+
+其中 `bitnami/nginx` 是要安装的 Chart，这种写法是最常用的格式，被称为 `Chart 引用`，一共有六种不同的 Chart 写法： 
+
+* 通过 Chart 引用：`helm install my-nginx bitnami/nginx`
+* 通过 Chart 包：`helm install my-nginx ./nginx-13.2.23.tgz`
+* 通过未打包的 Chart 目录：`helm install my-nginx ./nginx`
+* 通过 Chart URL：`helm install my-nginx https://example.com/charts/nginx-13.2.23.tgz`
+* 通过仓库 URL 和 Chart 引用：`helm install --repo https://example.com/charts/ my-nginx nginx`
+* 通过 OCI 注册中心：`helm install my-nginx --version 13.2.23 oci://example.com/charts/nginx`
+
+#### `helm list`
+
+显示某个命名空间下的所有 Release：
+
+```
+$ helm list --namespace default
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+my-nginx        default         1               2023-02-11 09:35:09.4058393 +0800 CST   deployed        nginx-13.2.23   1.23.3
+```
+
+#### `helm status`
+
+查询某个 Release 的状态信息：
+
+```
+$ helm status my-nginx
+```
+
+#### `helm get`
+
+获取某个 Release 的扩展信息，包括：
+
+* `helm get hooks` - 获取 Release 关联的钩子信息
+* `helm get manifest` - 获取 Release 的清单信息
+* `helm get notes` - 获取 Release 的注释
+* `helm get values` - 获取 Release 的 values 文件
+* `helm get all` - 获取 Release 的所有信息
+
+#### `helm upgrade`
+
+将 Release 升级到新版本的 Chart：
+
+```
+$ helm upgrade my-nginx ./nginx
+Release "my-nginx" has been upgraded. Happy Helming!
+```
+
+升级时可以通过 `--set` 选项修改配置参数：
+
+```
+$ helm upgrade my-nginx ./nginx \
+    --set service.ports.http=8080
+```
+
+#### `helm history`
+
+查看某个 Release 的版本记录：
+
+```
+$ helm history my-nginx
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
+1               Sun Feb 12 11:14:18 2023        superseded      nginx-13.2.23   1.23.3          Install complete
+2               Sun Feb 12 11:15:53 2023        deployed        nginx-13.2.23   1.23.3          Upgrade complete
+```
+
+#### `helm rollback`
+
+将 Release 回滚到某个版本：
+
+```
+$ helm rollback my-nginx 1
+Rollback was a success! Happy Helming!
+```
+
+再查看版本记录可以看到多了一条记录：
+
+```
+$ helm history my-nginx
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
+1               Sun Feb 12 11:14:18 2023        superseded      nginx-13.2.23   1.23.3          Install complete
+2               Sun Feb 12 11:15:53 2023        superseded      nginx-13.2.23   1.23.3          Upgrade complete
+3               Sun Feb 12 11:20:27 2023        deployed        nginx-13.2.23   1.23.3          Rollback to 1
+```
+
+#### `helm uninstall`
+
+卸载 Release：
+
+```
+$ helm uninstall my-nginx
+release "my-nginx" uninstalled
 ```
 
 ## 参考
@@ -238,3 +463,19 @@ nginx
 1. [Helm Dashboard](https://github.com/komodorio/helm-dashboard)
 1. [Kubernetes Tutorials ｜ k8s 教程](https://github.com/guangzhengli/k8s-tutorials#helm)
 1. [使用Helm管理kubernetes应用](https://jimmysong.io/kubernetes-handbook/practice/helm.html)
+
+## 更多
+
+### 其他 Helm 命令
+
+除了本文介绍的 Helm 三大概念以及围绕这三大概念的常用命令，也还有一些其他的命令：
+
+* [插件](https://helm.sh/zh/docs/helm/helm_plugin/)
+* [依赖](https://helm.sh/zh/docs/helm/helm_dependency/)
+* [注册表](https://helm.sh/zh/docs/helm/helm_registry/)
+* [自动补全](https://helm.sh/zh/docs/helm/helm_completion/)
+
+### 制作自己的 Helm Chart
+
+* [创建你自己的 charts](https://helm.sh/zh/docs/intro/using_helm/#%E5%88%9B%E5%BB%BA%E4%BD%A0%E8%87%AA%E5%B7%B1%E7%9A%84-charts)
+* [Chart仓库指南](https://helm.sh/zh/docs/topics/chart_repository/)
