@@ -1,12 +1,102 @@
 # WEEK032 - 实战 Docker 容器网络
 
+我们知道，容器技术出现的初衷是对容器之间以及容器和宿主机之间的进程、用户、网络、存储等进行隔离，提供一种类似沙盒的虚拟环境，但是网络作为一种特殊的通信机制，我们有时候又希望容器之间、容器和宿主机之间甚至容器和远程主机之间能够互相通信，既要保证容器网络的隔离性，又要实现容器网络的连通性，这使得在容器环境下，网络的问题变得异常复杂。
+
+Docker 是目前最流行的容器技术之一，它提供了一套完整的网络解决方案，不仅可以解决单机网络问题，也可以实现跨主机容器之间的通信。
+
 ## 单机容器网络方案
+
+```
+$ docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+04eb1fccf2a8   bridge    bridge    local
+189dfa3e3e64   host      host      local
+1e63120a4e7a   none      null      local
+```
 
 ### None 网络
 
+```
+$ docker run --rm -it --network=none busybox
+/ # ifconfig
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
+
 ### Host 网络
 
+```
+> docker run --rm -it --network=host busybox
+/ # ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:07:3E:52:7E
+          inet addr:172.17.0.1  Bcast:172.17.255.255  Mask:255.255.0.0
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth0      Link encap:Ethernet  HWaddr 0A:3E:D1:F7:58:33
+          inet addr:192.168.65.4  Bcast:0.0.0.0  Mask:255.255.255.255
+          inet6 addr: fe80::83e:d1ff:fef7:5833/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1280 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1271 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:2752699 (2.6 MiB)  TX bytes:107715 (105.1 KiB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:709688 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:709688 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:149025485 (142.1 MiB)  TX bytes:149025485 (142.1 MiB)
+
+veth2fbdd331 Link encap:Ethernet  HWaddr 46:B7:0B:D6:16:C2
+          inet6 addr: fe80::44b7:bff:fed6:16c2/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:3876 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3830 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:370360 (361.6 KiB)  TX bytes:413700 (404.0 KiB)
+
+veth4d3538f6 Link encap:Ethernet  HWaddr 56:C0:72:ED:10:21
+          inet6 addr: fe80::54c0:72ff:feed:1021/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:10934 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:12400 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:2197702 (2.0 MiB)  TX bytes:3897932 (3.7 MiB)
+```
+
 ### Bridge 网络
+
+```
+$ docker run --rm -it --network=bridge busybox
+/ # ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02
+          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:9 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:782 (782.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
 
 ## 跨主机容器网络方案
 
@@ -16,20 +106,22 @@
 
 ### IPvlan 网络
 
-## 其他开源的容器网络方案
-
-### flannel
-
-### weave
-
-### calico
-
 ## 参考
 
 1. [Networking overview | Docker Documentation](https://docs.docker.com/network/)
 1. [每天5分钟玩转Docker容器技术](https://book.douban.com/subject/27593748/)
+1. [Docker 网络模式详解及容器间网络通信](https://www.cnblogs.com/mrhelloworld/p/docker11.html)
+1. [网络 - Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/underly/network)
+1. [花了三天时间终于搞懂 Docker 网络了](https://cloud.tencent.com/developer/article/1747307)
+1. [Docker容器网络互联](https://chende.ren/2021/07/14113656-docker-net.html)
 
 ## 更多
+
+### 其他开源的容器网络方案
+
+* [flannel](https://github.com/flannel-io/flannel)
+* [weave](https://github.com/weaveworks/weave)
+* [calico](https://github.com/projectcalico/calico)
 
 ### Kubernetes 网络
 
