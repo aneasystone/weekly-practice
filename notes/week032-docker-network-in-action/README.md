@@ -1,8 +1,39 @@
 # WEEK032 - 实战 Docker 容器网络
 
-我们知道，容器技术出现的初衷是对容器之间以及容器和宿主机之间的进程、用户、网络、存储等进行隔离，提供一种类似沙盒的虚拟环境，但是网络作为一种特殊的通信机制，我们有时候又希望容器之间、容器和宿主机之间甚至容器和远程主机之间能够互相通信，既要保证容器网络的隔离性，又要实现容器网络的连通性，这使得在容器环境下，网络的问题变得异常复杂。
+我们知道，容器技术出现的初衷是对容器之间以及容器和宿主机之间的进程、用户、网络、存储等进行隔离，提供一种类似沙盒的虚拟环境，容器网络是这个虚拟环境的一部分，它能让应用从宿主机操作系统的网络环境中独立出来，形成容器自有的网络设备、IP 协议栈、端口套接字、IP 路由表、防火墙等模块。但是网络作为一种特殊的通信机制，我们有时候又希望容器之间、容器和宿主机之间甚至容器和远程主机之间能够互相通信，既要保证容器网络的隔离性，又要实现容器网络的连通性，这使得在容器环境下，网络的问题变得异常复杂。
 
 Docker 是目前最流行的容器技术之一，它提供了一套完整的网络解决方案，不仅可以解决单机网络问题，也可以实现跨主机容器之间的通信。
+
+## 容器网络模型
+
+在学习各种不同的容器网络解决方案之前，我们首先来了解下 CNM 的概念。[CNM（Container Network Model）](https://github.com/moby/libnetwork/blob/master/docs/design.md) 是 Docker 提出并主推的一种容器网络架构，这是一套抽象的设计规范，主要包含三个主要概念：
+
+* `Sandbox` - 提供了容器的虚拟网络栈，即端口套接字、IP 路由表、防火墙、DNS 配置等内容，主要用于隔离容器网络与宿主机网络，形成了完全独立的容器网络环境，一般通过 Linux 中的 [Network Namespace](https://man7.org/linux/man-pages/man7/network_namespaces.7.html) 或类似的技术实现。一个 Sandbox 中可以包含多个 Endpoint。
+* `Endpoint` - 就是虚拟网络的接口，就像普通网络接口一样，它的主要职责是创建 Sandbox 到 Network 之间的连接，一般使用 [veth pair](https://man7.org/linux/man-pages/man4/veth.4.html) 之类的技术实现。一个已连接的 Endpoint 只能归属于一个 Sandbox 和 一个 Network。
+* `Network` - 提供了一个 Docker 内部的虚拟子网，一个 Network 可以包含多个 Endpoint，同一个 Network 内的 Endpoint 之间可以互相通讯，一般使用 Linux bridge 或 VLAN 来实现。
+
+这三个概念之间的关系如下图所示：
+
+![](./images/cnm.jpeg)
+
+[libnetwork](https://github.com/moby/libnetwork) 是一个 Go 语言编写的开源库，它是 CNM 规范的标准实现，Docker 就是通过 libnetwork 库来实现 CNM 规范中的三大概念，此外它还实现了本地服务发现、基于 Ingress 的容器负载均衡、以及网络控制层和管理层功能。
+
+除了控制层和管理层，我们还需要实现网络的数据层，这部分 Docker 是通过 [驱动（Driver）](https://docs.docker.com/network/#network-drivers) 来实现的。驱动负责处理网络的连通性和隔离性，通过不同的驱动，我们可以扩展 Docker 的网络栈，实现不同的网络类型。
+
+Docker 内置如下这些驱动，通常被称作 **原生驱动** 或者 **本地驱动**：
+
+* [none](https://docs.docker.com/network/none/)
+* [host](https://docs.docker.com/network/host/)
+* [bridge](https://docs.docker.com/network/bridge/)
+* [overlay](https://docs.docker.com/network/overlay/)
+* [ipvlan](https://docs.docker.com/network/ipvlan/)
+* [macvlan](https://docs.docker.com/network/macvlan/)
+
+第三方也可以通过 [Network plugins](https://docs.docker.com/engine/extend/plugins_services/) 实现自己的网络驱动，这些驱动也被称作 **远程驱动**，比如 [calico](https://github.com/projectcalico/calico)、[flannel](https://github.com/flannel-io/flannel)、[weave](https://github.com/weaveworks/weave) 等。
+
+![](./images/network-drivers.png)
+
+基于 Docker 网络的这种可插拔的设计，我们通过切换不同的网络驱动，就可以实现不同的容器网络解决方案。
 
 ## 单机容器网络方案
 
