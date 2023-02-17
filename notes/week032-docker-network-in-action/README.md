@@ -22,9 +22,9 @@ Docker 是目前最流行的容器技术之一，它提供了一套完整的网�
 
 Docker 内置如下这些驱动，通常被称作 **原生驱动** 或者 **本地驱动**：
 
-* [none](https://docs.docker.com/network/none/)
-* [host](https://docs.docker.com/network/host/)
 * [bridge](https://docs.docker.com/network/bridge/)
+* [host](https://docs.docker.com/network/host/)
+* [none](https://docs.docker.com/network/none/)
 * [overlay](https://docs.docker.com/network/overlay/)
 * [ipvlan](https://docs.docker.com/network/ipvlan/)
 * [macvlan](https://docs.docker.com/network/macvlan/)
@@ -37,6 +37,8 @@ Docker 内置如下这些驱动，通常被称作 **原生驱动** 或者 **本�
 
 ## 单机容器网络方案
 
+让我们从最简单的单机网络方案开始。Docker 在安装时，默认会在系统上创建三个网络，可以通过 `docker network ls` 命令查看：
+
 ```
 $ docker network ls
 NETWORK ID     NAME      DRIVER    SCOPE
@@ -45,11 +47,21 @@ NETWORK ID     NAME      DRIVER    SCOPE
 1e63120a4e7a   none      null      local
 ```
 
-### None 网络
+这三个网络分别是 `bridge`、`host` 和 `none`，可以看到这三个网络都是 `local` 类型的。
+
+### Bridge 网络
 
 ```
-$ docker run --rm -it --network=none busybox
+$ docker run --rm -it --network=bridge busybox
 / # ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02
+          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:9 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:782 (782.0 B)  TX bytes:0 (0.0 B)
+
 lo        Link encap:Local Loopback
           inet addr:127.0.0.1  Mask:255.0.0.0
           UP LOOPBACK RUNNING  MTU:65536  Metric:1
@@ -60,6 +72,8 @@ lo        Link encap:Local Loopback
 ```
 
 ### Host 网络
+
+通过 `--network=host` 参数可以指定容器使用 Host 网络，使用 Host 网络的容器和宿主机共用同一个网络栈，也就是说，在容器里面，端口套接字、IP 路由表、防火墙、DNS 配置都和宿主机完全一样：
 
 ```
 > docker run --rm -it --network=host busybox
@@ -107,19 +121,19 @@ veth4d3538f6 Link encap:Ethernet  HWaddr 56:C0:72:ED:10:21
           RX bytes:2197702 (2.0 MiB)  TX bytes:3897932 (3.7 MiB)
 ```
 
-### Bridge 网络
+在容器里使用 `ifconfig` 命令，输出的结果其实是我们宿主机的网卡，容器里的 `hostname` 也和宿主机一样，所以我们可以在容器里使用 `localhost` 访问宿主机。
+
+由于直接使用宿主机的网络，少了一层网络转发，所以 Host 网络具有非常好的性能，如果你的应用对网络传输效率有较高的要求，则可以选择使用 Host 网络。另外，使用 Host 网络还可以在容器里直接对宿主机网络进行配置，比如管理 iptables 或 DNS 配置等。
+
+需要注意的是，Host 网络的主要优点是提高了网络性能，但代价是容器与主机共享网络命名空间，这可能会带来安全隐患。因此，需要仔细考虑使用 Host 网络的场景，并采取适当的安全措施，以确保容器和主机的安全性。
+
+### None 网络
+
+None 网络是一种特殊类型的网络，顾名思义，它表示容器不连接任何网络。None 网络的容器是一个完全隔绝的环境，它无法访问任何其他容器或宿主机。我们在创建容器时通过 `--network=none` 参数使用 None 网络：
 
 ```
-$ docker run --rm -it --network=bridge busybox
+$ docker run --rm -it --network=none busybox
 / # ifconfig
-eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02
-          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0
-          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-          RX packets:9 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:0
-          RX bytes:782 (782.0 B)  TX bytes:0 (0.0 B)
-
 lo        Link encap:Local Loopback
           inet addr:127.0.0.1  Mask:255.0.0.0
           UP LOOPBACK RUNNING  MTU:65536  Metric:1
@@ -128,6 +142,8 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
+
+在使用 None 网络的容器里，除了 lo 设备之外，没有任何其他的网卡设备。这种与世隔离的环境非常适合一些安全性工作或测试工作，比如，对恶意软件进行逆向分析时，我们不希望恶意软件访问外部网络，使用 None 网络可以避免它对宿主机或其他服务造成影响；或者在单元测试时，通过 None 网络可以模拟网络隔离的效果，这样我们可以测试和验证没有网络情况下的程序表现。
 
 ## 跨主机容器网络方案
 
