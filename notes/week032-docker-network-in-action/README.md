@@ -51,6 +51,8 @@ NETWORK ID     NAME      DRIVER    SCOPE
 
 ### Bridge 网络
 
+Bridge 网络是目前使用最广泛的 Docker 网络方案，当我们使用 `docker run` 启动容器时，默认使用的就是 Bridge 网络，我们也可以通过命令行参数 `--network=bridge` 显式地指定使用 Bridge 网络：
+
 ```
 $ docker run --rm -it --network=bridge busybox
 / # ifconfig
@@ -70,6 +72,130 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
+
+可以看到，使用 Bridge 网络的容器里除了 `lo` 这个本地回环网卡外，还有一个 `eth0` 以太网卡，那么这个 `eth0` 网卡是连接到哪里呢？我们可以从 `/sys/class/net/eth0` 目录下的 `ifindex` 和 `iflink` 文件中一探究竟：
+
+```
+/ # cat /sys/class/net/eth0/ifindex
+74
+/ # cat /sys/class/net/eth0/iflink
+75
+```
+
+其中 `ifindex` 表示网络设备的全局唯一 ID，而 `iflink` 主要被隧道设备使用，用于标识隧道另一头的设备 ID。也可以直接使用 `ip link` 命令查看：
+
+```
+/ # ip link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+74: eth0@if75: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff
+```
+
+如果 `ifindex` 和 `iflink` 相同，表示这是一个真实的设备，`ip link` 中直接显示设备名，比如上面的 `lo` 网卡；如果 `ifindex` 和 `iflink` 不相同，表示这是一个隧道设备，`ip link` 中显示格式为 `ifindex: eth0@iflink`，比如上面的 `eth0` 网卡。
+
+所以容器中的 `eth0` 是一个隧道设备，它的 ID 为 74，连接它的另一头设备 ID 为 75，那么这个 ID 为 75 的设备又在哪里呢？答案在宿主机上。
+
+我们在宿主机上运行 `ip link` 命令，很快就可以找到这个 ID 为 75 的设备：
+
+```
+# ip link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT group default qlen 1000
+    link/ether 08:00:27:c1:96:99 brd ff:ff:ff:ff:ff:ff
+3: docker0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default 
+    link/ether 02:42:43:d2:12:6f brd ff:ff:ff:ff:ff:ff
+75: vethe118873@if74: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master docker0 state UP mode DEFAULT group default 
+    link/ether 96:36:59:73:43:cc brd ff:ff:ff:ff:ff:ff link-netnsid 0
+```
+
+设备的名称为 `vethe118873@if74`，也暗示着另一头连接着容器里的 ID 为 74 的设备。像上面这样成对出现的设备，被称为 `veth pair`， `veth` 表示虚拟以太网（`Virtual Ethernet`），而 `veth pair` 就是一个虚拟的以太网隧道（`Ethernet tunnel`），它可以实现隧道一头接收网络数据后，隧道另一头也能立即接收到，可以把它想象成一根网线，一头插在容器里，另一头插在宿主机上。那么它又插在宿主机的什么位置呢？答案是 `docker0` 网桥。
+
+使用 `brctl show` 查看宿主机的网桥：
+
+```
+# brctl show
+bridge name	bridge id		STP enabled	interfaces
+docker0		8000.024243d2126f	no		vethe118873
+```
+
+可以看到一个名为 `docker0` 的网桥设备，并且能看到 `vethe118873` 接口就插在这个网桥上。这个 `docker0` 网桥是 Docker 在安装时默认创建的，当我们不指定 `--network` 参数时，创建的容器默认都挂在这个网桥上，它也是实现 Bridge 网络的核心部分。
+
+使用下面的命令可以更直观的看出该网桥的详细信息：
+
+```
+# docker network inspect bridge
+[
+    {
+        "Name": "bridge",
+        "Id": "ea473e613c26e31fb6d51edb0fb541be0d11a73f24f81d069e3104eef97b5cfc",
+        "Created": "2022-06-03T11:56:33.258310522+08:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "33c8609c8cbe8e99f63fd430c926bd05167c2c92b64f97e4a06cfd0892f7e74c": {
+                "Name": "suspicious_ganguly",
+                "EndpointID": "3bf4b3d642826ab500f50eec4d5c381d20c75393ab1ed62a8425f8094964c122",
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]
+```
+
+其中 `IPAM` 部分表明这个网桥的网段为 `172.17.0.0/16`，所以上面看容器的 IP 地址为 `172.17.0.2`；另外网关的地址为 `172.17.0.1`，这个就是 `docker0` 的地址：
+
+```
+# ip addr show type bridge
+3: docker0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:43:d2:12:6f brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:43ff:fed2:126f/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+下图是 Bridge 网络大致的网络拓扑结构：
+
+![](./images/bridge-network.png)
+
+#### 自定义 Bridge 网络
+
+![](./images/custom-network.png)
+
+#### Container 网络
+
+![](./images/container-network.png)
 
 ### Host 网络
 
@@ -127,6 +253,10 @@ veth4d3538f6 Link encap:Ethernet  HWaddr 56:C0:72:ED:10:21
 
 需要注意的是，Host 网络的主要优点是提高了网络性能，但代价是容器与主机共享网络命名空间，这可能会带来安全隐患。因此，需要仔细考虑使用 Host 网络的场景，并采取适当的安全措施，以确保容器和主机的安全性。
 
+下图是 Host 网络大致的网络拓扑结构：
+
+![](./images/host-network.png)
+
 ### None 网络
 
 None 网络是一种特殊类型的网络，顾名思义，它表示容器不连接任何网络。None 网络的容器是一个完全隔绝的环境，它无法访问任何其他容器或宿主机。我们在创建容器时通过 `--network=none` 参数使用 None 网络：
@@ -144,6 +274,10 @@ lo        Link encap:Local Loopback
 ```
 
 在使用 None 网络的容器里，除了 lo 设备之外，没有任何其他的网卡设备。这种与世隔离的环境非常适合一些安全性工作或测试工作，比如，对恶意软件进行逆向分析时，我们不希望恶意软件访问外部网络，使用 None 网络可以避免它对宿主机或其他服务造成影响；或者在单元测试时，通过 None 网络可以模拟网络隔离的效果，这样我们可以测试和验证没有网络情况下的程序表现。
+
+下图是 None 网络大致的网络拓扑结构：
+
+![](./images/none-network.png)
 
 ## 跨主机容器网络方案
 
