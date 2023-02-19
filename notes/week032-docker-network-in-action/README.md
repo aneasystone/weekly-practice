@@ -185,6 +185,33 @@ docker0		8000.024243d2126f	no		vethe118873
        valid_lft forever preferred_lft forever
 ```
 
+> `docker0` 网段地址可以在 Docker Daemon 的配置文件 `/etc/docker/daemon.json` 中进行修改：
+> 
+> ```
+> $ vi /etc/docker/daemon.json
+> {
+>   "bip": "172.100.0.1/24"
+> }
+> ```
+>
+> 修改之后重启 Docker Daemon：
+> 
+> ```
+> $ systemctl restart docker
+> ```
+> 
+> 验证配置是否生效：
+> 
+> ```
+> $ ip addr show docker0
+> 3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+>     link/ether 02:42:43:d2:12:6f brd ff:ff:ff:ff:ff:ff
+>     inet 172.100.0.1/24 brd 172.100.0.255 scope global docker0
+>        valid_lft forever preferred_lft forever
+>     inet6 fe80::42:43ff:fed2:126f/64 scope link 
+>        valid_lft forever preferred_lft forever
+> ```
+
 下图是 Bridge 网络大致的网络拓扑结构：
 
 ![](./images/bridge-network.png)
