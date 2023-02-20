@@ -218,6 +218,52 @@ docker0		8000.024243d2126f	no		vethe118873
 
 #### 自定义 Bridge 网络
 
+从 Bridge 的网络拓扑结构中我们可以看到，所有的容器都连接到同一个 `docker0` 网桥，它们之间的网络是互通的，这存在着一定的安全风险。为了保证我们的容器和其他的容器之间是隔离的，我们可以创建自定义的网络：
+
+```
+$ docker network create --driver=bridge test
+5266130b7e5da2e655a68d00b280bc274ff4acd9b76f46c9992bcf0cd6df7f6a
+```
+
+创建之后，再次查看系统中的网桥列表：
+
+```
+$ brctl show
+bridge name	bridge id		STP enabled	interfaces
+br-5266130b7e5d		8000.0242474f9085	no		
+docker0		8000.024243d2126f	no	
+```
+
+从 `brctl show` 的运行结果中可以看出多了一个新的网桥，网桥的名字正是我们创建的网络 ID，Docker 会自动为网桥分配子网和网关，我们也可以在创建网络时通过 `--subnet` 和 `--gateway` 参数手工设置：
+
+```
+$ docker network create --driver=bridge --subnet=172.200.0.0/24 --gateway=172.200.0.1 test2
+18f549f753e382c5054ef36af28b6b6a2208e4a89ee710396eb2b729ee8b1281
+```
+
+创建好自定义网络之后，就可以在启动容器时通过 `--network` 指定：
+
+```
+$ docker run --rm -it --network=test2 busybox
+/ # ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+80: eth0@if81: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:c8:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.200.0.2/24 brd 172.200.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+```
+
+由于 test2 的网段为 `172.200.0.0/24`，所以 Docker 为我们的容器分配的 IP 地址是 `172.200.0.2`，这个网段和 `docker0` 是隔离的，我们 ping 之前的容器 IP 是 ping 不同的：
+
+```
+/ # ping 172.17.0.2
+```
+
+自定义 Bridge 网络的拓扑结构如下图所示：
+
 ![](./images/custom-network.png)
 
 #### Container 网络
