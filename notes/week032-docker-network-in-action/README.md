@@ -345,6 +345,36 @@ PING 172.17.0.2 (172.17.0.2): 56 data bytes
 > $ iptables -R DOCKER-ISOLATION-STAGE-2 3 -o br-18f549f753e3 -j DROP
 > ```
 
+#### `docker network connect`
+
+上面介绍了 Docker 如何通过 iptables 隔离不同网桥之间的通信，但是在一些现实场景中，我们可能需要它们之间互相通信，这可以通过 `docker network connect` 命令来实现：
+
+```
+$ docker network connect test2 8f358828cec2
+```
+
+这条命令的意思是将 8f358828cec2 容器连接到 test2 网络，相当于在容器里添加了一张网卡，并使用一根网线连接到 test2 网络上。我们在容器里可以看到多了一张新网卡 `eth1`：
+
+```
+/ # ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+8: eth0@if9: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:c8:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/24 brd 172.17.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+20: eth1@if21: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.3/16 brd 172.17.255.255 scope global eth1
+       valid_lft forever preferred_lft forever
+```
+
+从 `eth1@if21` 这个名字可以看出，它也是一个 veth pair 隧道设备，设备的一头插在容器里的 eth1 网卡上，另一头插在自定义网桥上：
+
+![](./images/docker-network-connect.png)
+
 #### Container 网络
 
 ![](./images/container-network.png)
