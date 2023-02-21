@@ -260,11 +260,90 @@ $ docker run --rm -it --network=test2 busybox
 
 ```
 / # ping 172.17.0.2
+PING 172.17.0.2 (172.17.0.2): 56 data bytes
+^C
+--- 172.17.0.2 ping statistics ---
+4 packets transmitted, 0 packets received, 100% packet loss
 ```
 
 自定义 Bridge 网络的拓扑结构如下图所示：
 
 ![](./images/custom-network.png)
+
+虽然通过上面的实验我们发现不同网桥之间的网络是隔离的，不过仔细思考后会发现这里有一个奇怪的地方，自定义网桥和 docker0 网桥实际上都连接着宿主机上的 eth0 网卡，如果有对应的路由规则它们之间按理应该是可以通信的，为什么会网络不通呢？这就要从 iptables 中寻找答案了。
+
+Docker 在创建网络时会自动添加一些 iptables 规则，用于隔离不同的 Docker 网络，可以通过下面的命令查看 iptables 规则：
+
+```
+$ iptables-save | grep ISOLATION
+:DOCKER-ISOLATION-STAGE-1 - [0:0]
+:DOCKER-ISOLATION-STAGE-2 - [0:0]
+-A FORWARD -j DOCKER-ISOLATION-STAGE-1
+-A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -i br-5266130b7e5d ! -o br-5266130b7e5d -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -i br-18f549f753e3 ! -o br-18f549f753e3 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -j RETURN
+-A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -o br-5266130b7e5d -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -o br-18f549f753e3 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -j RETURN
+```
+
+前两行以 `:` 开头，表示创建两条空的 **规则链（Rule Chain）**，在 iptables 中，规则链是由一系列规则（Rule）组成的列表，每个规则可以根据指定的条件来匹配或过滤数据包，并执行特定的动作。规则链可以包含其他规则链，从而形成一个规则链树。iptables 中有五个默认的规则链，分别是：
+
+* `INPUT`：用于处理进入本地主机的数据包；
+* `OUTPUT`：用于处理从本地主机发出的数据包；
+* `FORWARD`：用于处理转发到其他主机的数据包，这个规则链一般用于 NAT；
+* `PREROUTING`：用于处理数据包在路由之前的处理，如 DNAT；
+* `POSTROUTING`：用于处理数据包在路由之后的处理，如 SNAT。
+
+第三行 `-A FORWARD -j DOCKER-ISOLATION-STAGE-1` 表示将在 `FORWARD` 规则链中添加一个新的规则 `DOCKER-ISOLATION-STAGE-1`，而这个新的规则链包含下面定义的几条规则：
+
+```
+-A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -i br-5266130b7e5d ! -o br-5266130b7e5d -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -i br-18f549f753e3 ! -o br-18f549f753e3 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -j RETURN
+```
+
+第一条规则中的 `-i docker0 ! -o docker0` 表示当数据包来自 docker0 接口并且不是发往 docker0 接口时，匹配该规则，然后跳转到 `DOCKER-ISOLATION-STAGE-2` 规则链继续处理。后面的规则都非常类似，每一条对应一个 Docker 创建的网桥的名字。最后一条表示当所有的规则都不满足时，那么这个数据包将被直接返回到原始的调用链，也就是被防火墙规则调用链中的下一条规则处理。
+
+在上面的实验中，我们的容器位于 test2 网络中（对应的网桥是 br-18f549f753e3），要 ping 的 IP 地址属于 docker0 网络中的容器，很显然数据包是来自 br-18f549f753e3 接口，并且是发往 docker0 接口的，所以数据包满足 `DOCKER-ISOLATION-STAGE-1` 规则链中的第三条规则，将进入 `DOCKER-ISOLATION-STAGE-2` 规则链：
+
+```
+-A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -o br-5266130b7e5d -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -o br-18f549f753e3 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -j RETURN
+```
+
+`DOCKER-ISOLATION-STAGE-2` 规则链的第一规则是，当数据包发往 docker0 接口时直接丢弃。这就是我们为什么在自定义网络中 ping 不通 docker0 网络的原因。
+
+我们可以通过 `iptables -R` 命令，将规则链中的规则修改为 ACCEPT：
+
+```
+$ iptables -R DOCKER-ISOLATION-STAGE-2 1 -o docker0 -j ACCEPT
+$ iptables -R DOCKER-ISOLATION-STAGE-2 2 -o br-5266130b7e5d -j ACCEPT
+$ iptables -R DOCKER-ISOLATION-STAGE-2 3 -o br-18f549f753e3 -j ACCEPT
+```
+
+此时再测试网络的连通性发现可以正常 ping 通了：
+
+```
+/ # ping 172.17.0.2
+PING 172.17.0.2 (172.17.0.2): 56 data bytes
+64 bytes from 172.17.0.2: seq=0 ttl=63 time=0.123 ms
+64 bytes from 172.17.0.2: seq=1 ttl=63 time=0.258 ms
+64 bytes from 172.17.0.2: seq=2 ttl=63 time=0.318 ms
+```
+
+> 测试完记得将规则还原回来：
+> 
+> ```
+> $ iptables -R DOCKER-ISOLATION-STAGE-2 1 -o docker0 -j DROP
+> $ iptables -R DOCKER-ISOLATION-STAGE-2 2 -o br-5266130b7e5d -j DROP
+> $ iptables -R DOCKER-ISOLATION-STAGE-2 3 -o br-18f549f753e3 -j DROP
+> ```
 
 #### Container 网络
 
