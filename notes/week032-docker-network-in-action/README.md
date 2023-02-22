@@ -377,7 +377,48 @@ $ docker network connect test2 8f358828cec2
 
 #### Container 网络
 
+上面学习了两种容器间通信的方式，一种是通过 `--network` 参数在创建容器时指定自定义网络，另一种是 `docker network connect` 命令将已有容器加入指定网络，这两种方式都可以理解为：在容器内加一张网卡，并用网线连接到指定的网桥设备。
+
+Docker 还提供了另一种容器间通信的方式：**container 网络**（也被称为 **joined 网络**），它可以让两个容器共享一个网络栈。我们通过 `--network=container:xx` 参数创建一个容器：
+
+```
+$ docker run --rm -it --network=container:9bd busybox
+```
+
+这个新容器将共享 9bd 这个容器的网络栈，容器的网络信息如下：
+
+```
+/ # ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+6: eth0@if7: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+```
+
+我们进入 9bd 容器并查看该容器的网络信息：
+
+```
+# docker exec -it 9bd sh
+/ # ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+6: eth0@if7: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+```
+
+可以发现新容器和 9bd 两个容器具有完全相同的网络信息，不仅 IP 地址一样，连 MAC 地址也一样，这两个容器之间可以通过 `127.0.0.1` 来通信。这种网络模式的拓扑图如下所示：
+
 ![](./images/container-network.png)
+
+Container 网络一般用于多个服务的联合部署，比如有些应用需要运行多个服务，使用 Container 网络可以将它们放在同一个网络中，从而让它们可以互相访问，相比于自定义网桥的方式，这种方式通过 loopback 通信更高效。此外 Container 网络也非常适合边车模式，比如对已有的容器进行测试或监控等。
 
 ### Host 网络
 
