@@ -306,9 +306,9 @@ $ iptables-save | grep ISOLATION
 -A DOCKER-ISOLATION-STAGE-1 -j RETURN
 ```
 
-第一条规则中的 `-i docker0 ! -o docker0` 表示当数据包来自 docker0 接口并且不是发往 docker0 接口时，匹配该规则，然后跳转到 `DOCKER-ISOLATION-STAGE-2` 规则链继续处理。后面的规则都非常类似，每一条对应一个 Docker 创建的网桥的名字。最后一条表示当所有的规则都不满足时，那么这个数据包将被直接返回到原始的调用链，也就是被防火墙规则调用链中的下一条规则处理。
+第一条规则中的 `-i docker0 ! -o docker0` 表示数据包想进入 docker0 接口并且不是从 docker0 接口发出的，`-i` 表示 `输入接口（input interface）`，`-o` 表示 `输出接口（output interface）`，后面的 `-j DOCKER-ISOLATION-STAGE-2` 表示当匹配该规则时，跳转到 `DOCKER-ISOLATION-STAGE-2` 规则链继续处理。后面的规则都非常类似，每一条对应一个 Docker 创建的网桥的名字。最后一条表示当所有的规则都不满足时，那么这个数据包将被直接返回到原始的调用链，也就是被防火墙规则调用链中的下一条规则处理。
 
-在上面的实验中，我们的容器位于 test2 网络中（对应的网桥是 br-18f549f753e3），要 ping 的 IP 地址属于 docker0 网络中的容器，很显然数据包是来自 br-18f549f753e3 接口，并且是发往 docker0 接口的，所以数据包满足 `DOCKER-ISOLATION-STAGE-1` 规则链中的第三条规则，将进入 `DOCKER-ISOLATION-STAGE-2` 规则链：
+在上面的实验中，我们的容器位于 test2 网络中（对应的网桥是 br-18f549f753e3），要 ping 的 IP 地址属于 docker0 网络中的容器，很显然，数据包是发往 docker0 接口的（输入接口），并且是来自 br-18f549f753e3 接口的（输出接口），所以数据包满足 `DOCKER-ISOLATION-STAGE-1` 规则链中的第一条规则，将进入 `DOCKER-ISOLATION-STAGE-2` 规则链：
 
 ```
 -A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
@@ -317,7 +317,7 @@ $ iptables-save | grep ISOLATION
 -A DOCKER-ISOLATION-STAGE-2 -j RETURN
 ```
 
-`DOCKER-ISOLATION-STAGE-2` 规则链的第一规则是，当数据包发往 docker0 接口时直接丢弃。这就是我们为什么在自定义网络中 ping 不通 docker0 网络的原因。
+`DOCKER-ISOLATION-STAGE-2` 规则链的第三条规则是，如果数据包从 br-18f549f753e3 接口发出则被直接丢弃。这就是我们为什么在自定义网络中 ping 不通 docker0 网络的原因。
 
 我们可以通过 `iptables -R` 命令，将规则链中的规则修改为 ACCEPT：
 
@@ -365,15 +365,34 @@ $ docker network connect test2 8f358828cec2
     link/ether 02:42:ac:c8:00:02 brd ff:ff:ff:ff:ff:ff
     inet 172.17.0.2/24 brd 172.17.0.255 scope global eth0
        valid_lft forever preferred_lft forever
-20: eth1@if21: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
-    link/ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff
-    inet 172.17.0.3/16 brd 172.17.255.255 scope global eth1
+30: eth1@if31: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue 
+    link/ether 02:42:ac:c8:00:03 brd ff:ff:ff:ff:ff:ff
+    inet 172.200.0.3/24 brd 172.200.0.255 scope global eth1
        valid_lft forever preferred_lft forever
 ```
 
-从 `eth1@if21` 这个名字可以看出，它也是一个 veth pair 隧道设备，设备的一头插在容器里的 eth1 网卡上，另一头插在自定义网桥上：
+从 `eth1@if31` 这个名字可以看出，它也是一个 veth pair 隧道设备，设备的一头插在容器里的 eth1 网卡上，另一头插在自定义网桥上：
 
 ![](./images/docker-network-connect.png)
+
+此时，容器之间就可以互相通信了，不过要注意的是，连接在 docker0 的容器现在有两个 IP，我们只能 ping 通 `172.200.0.3`，`172.17.0.2` 这个 IP 仍然是 ping 不通的：
+
+```
+/ # ping 172.200.0.3
+PING 172.200.0.3 (172.200.0.3): 56 data bytes
+64 bytes from 172.200.0.3: seq=0 ttl=64 time=0.109 ms
+64 bytes from 172.200.0.3: seq=1 ttl=64 time=0.106 ms
+^C
+--- 172.200.0.3 ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.106/0.107/0.109 ms
+/ #
+/ # ping 172.17.0.2
+PING 172.17.0.2 (172.17.0.2): 56 data bytes
+^C
+--- 172.17.0.2 ping statistics ---
+3 packets transmitted, 0 packets received, 100% packet loss
+```
 
 #### Container 网络
 
