@@ -523,11 +523,19 @@ lo        Link encap:Local Loopback
 
 ## 跨主机容器网络方案
 
-### Overlay 网络
+在前一节中我们学习了 Docker 的几种网络模式，它们都是用于解决单个主机上的容器通信问题，那么如何实现不同主机上的容器通信呢？实际上，Docker 提供了几种原生的跨主机网络解决方案，包括：
 
-### Macvlan 网络
+* [overlay](https://docs.docker.com/network/overlay/)
+* [macvlan](https://docs.docker.com/network/macvlan/)
+* [ipvlan](https://docs.docker.com/network/ipvlan/)
 
-### IPvlan 网络
+这些跨主机网络方案需要具备一定的网络知识，比如 overlay 网络是基于 VxLAN 技术（Virtual eXtensible LAN）实现的，这是一种隧道技术，将二层数据封装到 UDP 进行传输，这种网络技术我们将其称为 `overlay 网络`，指的是建立在其他网络上的网络；macvlan 是一种网卡虚拟化技术，它本身是 linux kernel 的一个模块，可以为同一个物理网卡配置多个 MAC 地址，每个 MAC 地址对应一个虚拟接口，由于它直接使用真实网卡通信，所以性能非常好，不过每个虚拟接口都有自己的 MAC 地址，而网络接口和交换机支持的 MAC 地址个数是有限的，MAC 地址过多时会造成严重的性能损失；ipvlan 解决了 MAC 地址过多的问题，它和 macvlan 类似，也是 linux kernel 的一个模块，但是它和 macvlan 不一样的是，macvlan 是为同一个网卡虚拟出多个 MAC 地址，而 ipvlan 是为同一个 MAC 地址虚拟多个 IP 地址；macvlan 和 ipvlan 不需要对包进行封装，这种网络技术又被称为 `underlay 网络`。
+
+除此之外，还有很多第三方网络解决方案，它们通过 Docker 网络的插件机制实现，包括：
+
+* [flannel](https://github.com/flannel-io/flannel)
+* [weave](https://github.com/weaveworks/weave)
+* [calico](https://github.com/projectcalico/calico)
 
 ## 参考
 
@@ -536,15 +544,15 @@ lo        Link encap:Local Loopback
 1. [Docker 网络模式详解及容器间网络通信](https://www.cnblogs.com/mrhelloworld/p/docker11.html)
 1. [网络 - Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/underly/network)
 1. [花了三天时间终于搞懂 Docker 网络了](https://cloud.tencent.com/developer/article/1747307)
+1. [docker的网络-Container network interface(CNI)与Container network model(CNM)](https://xuxinkun.github.io/2016/07/22/cni-cnm/)
 1. [Docker容器网络互联](https://chende.ren/2021/07/14113656-docker-net.html)
+1. [linux 网络虚拟化： network namespace 简介](https://cizixs.com/2017/02/10/network-virtualization-network-namespace/)
+1. [Linux 虚拟网络设备 veth-pair 详解，看这一篇就够了](https://www.cnblogs.com/bakari/p/10613710.html)
+1. [从宿主机直接进入docker容器的网络空间](https://www.lijiaocn.com/%E6%8A%80%E5%B7%A7/2017/05/19/docker-enter-net-from-host.html)
+1. [Deep dive into Linux Networking and Docker — Bridge, vETH and IPTables](https://medium.com/techlog/diving-into-linux-networking-and-docker-bridge-veth-and-iptables-a05eb27b1e72)
+1. [Container Networking: What You Should Know](https://www.tigera.io/learn/guides/kubernetes-networking/container-networking/)
 
 ## 更多
-
-### 其他开源的容器网络方案
-
-* [flannel](https://github.com/flannel-io/flannel)
-* [weave](https://github.com/weaveworks/weave)
-* [calico](https://github.com/projectcalico/calico)
 
 ### Kubernetes 网络
 
