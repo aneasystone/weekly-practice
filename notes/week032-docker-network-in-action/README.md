@@ -297,7 +297,7 @@ $ iptables-save | grep ISOLATION
 * `PREROUTING`：用于处理数据包在路由之前的处理，如 DNAT；
 * `POSTROUTING`：用于处理数据包在路由之后的处理，如 SNAT。
 
-第三行 `-A FORWARD -j DOCKER-ISOLATION-STAGE-1` 表示将在 `FORWARD` 规则链中添加一个新的规则 `DOCKER-ISOLATION-STAGE-1`，而这个新的规则链包含下面定义的几条规则：
+第三行 `-A FORWARD -j DOCKER-ISOLATION-STAGE-1` 表示将在 `FORWARD` 规则链中添加一个新的规则链 `DOCKER-ISOLATION-STAGE-1`，而这个新的规则链包含下面定义的几条规则：
 
 ```
 -A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
@@ -529,7 +529,7 @@ lo        Link encap:Local Loopback
 * [macvlan](https://docs.docker.com/network/macvlan/)
 * [ipvlan](https://docs.docker.com/network/ipvlan/)
 
-这些跨主机网络方案需要具备一定的网络知识，比如 overlay 网络是基于 VxLAN 技术（Virtual eXtensible LAN）实现的，这是一种隧道技术，将二层数据封装到 UDP 进行传输，这种网络技术我们将其称为 `overlay 网络`，指的是建立在其他网络上的网络；macvlan 是一种网卡虚拟化技术，它本身是 linux kernel 的一个模块，可以为同一个物理网卡配置多个 MAC 地址，每个 MAC 地址对应一个虚拟接口，由于它直接使用真实网卡通信，所以性能非常好，不过每个虚拟接口都有自己的 MAC 地址，而网络接口和交换机支持的 MAC 地址个数是有限的，MAC 地址过多时会造成严重的性能损失；ipvlan 解决了 MAC 地址过多的问题，它和 macvlan 类似，也是 linux kernel 的一个模块，但是它和 macvlan 不一样的是，macvlan 是为同一个网卡虚拟出多个 MAC 地址，而 ipvlan 是为同一个 MAC 地址虚拟多个 IP 地址；macvlan 和 ipvlan 不需要对包进行封装，这种网络技术又被称为 `underlay 网络`。
+这些跨主机网络方案需要具备一定的网络知识，比如 overlay 网络是基于 [VxLAN （Virtual eXtensible LAN）](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN) 技术实现的，这是一种 [隧道技术](https://en.wikipedia.org/wiki/Tunneling_protocol)，将二层数据封装到 UDP 进行传输，这种网络技术我们将其称为 `overlay 网络`，指的是建立在其他网络上的网络；macvlan 是一种网卡虚拟化技术，它本身是 linux kernel 的一个模块，可以为同一个物理网卡配置多个 MAC 地址，每个 MAC 地址对应一个虚拟接口，由于它直接使用真实网卡通信，所以性能非常好，不过每个虚拟接口都有自己的 MAC 地址，而网络接口和交换机支持的 MAC 地址个数是有限的，MAC 地址过多时会造成严重的性能损失；ipvlan 解决了 MAC 地址过多的问题，它和 macvlan 类似，也是 linux kernel 的一个模块，但是它和 macvlan 不一样的是，macvlan 是为同一个网卡虚拟出多个 MAC 地址，而 ipvlan 是为同一个 MAC 地址虚拟多个 IP 地址；macvlan 和 ipvlan 不需要对包进行封装，这种网络技术又被称为 `underlay 网络`。
 
 除此之外，还有很多第三方网络解决方案，它们通过 Docker 网络的插件机制实现，包括：
 

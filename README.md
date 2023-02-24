@@ -34,6 +34,7 @@
 * WEEK030 - [APISIX 使用小记](./notes/week030-apisix-notes/README.md)
 * WEEK031 - [使用 Helm 部署 Kubernetes 应用](./notes/week031-deploying-kubernetes-app-with-helm/README.md)
 * WEEK032 - [实战 Docker 容器网络](./notes/week032-docker-network-in-action/README.md)
+* WEEK033 - [gRPC 快速入门](./notes/week033-grpc-quickstart/README.md)
 
 ### 项目实践
 
