@@ -80,7 +80,7 @@ message HelloResponse {
 * `protoc-gen-go`
 * `protoc-gen-go-grpc`
 
-`protoc` 是 Protocol Buffers 编译器，用于将 `.proto` 文件转换为其他编程语言，而不同语言的转换工作由不同语言的插件来实现。Go 语言的插件有两个：`protoc-gen-go` 和 `protoc-gen-go-grpc`，插件 `protoc-gen-go` 会生成一个后缀为 `.pb.go` 的文件，其中包含 `.proto` 文件中定义数据类型和其序列化方法；插件 `protoc-gen-go-grpc` 会生成一个后缀为 `_grpc.pb.go` 的文件，其中包含供客户端调用的服务方法和服务器要实现的接口类型。
+`protoc` 是 Protocol Buffers 编译器，用于将 `.proto` 文件转换为其他编程语言，而不同语言的转换工作由不同语言的插件来实现。Go 语言的插件有两个：`protoc-gen-go` 和 `protoc-gen-go-grpc`，插件 `protoc-gen-go` 会生成一个后缀为 `.pb.go` 的文件，其中包含 `.proto` 文件中定义数据类型和其序列化方法；插件 `protoc-gen-go-grpc` 会生成一个后缀为 `_grpc.pb.go` 的文件，其中包含供客户端调用的服务方法和服务端要实现的接口类型。
 
 `protoc` 可以从 Protocol Buffers 的 [Release 页面](https://github.com/protocolbuffers/protobuf/releases) 下载，下载后将 bin 目录添加到 PATH 环境变量即可：
 
@@ -198,6 +198,88 @@ $ go run ./server/main.go
 一个 gRPC 的服务端就启动成功了！
 
 ### 实现客户端
+
+接下来，我们来实现客户端。其实，在 `hello_grpc.pb.go` 文件中，`protoc` 也为我们定义了一个 `HelloServiceClient` 接口：
+
+```
+type HelloServiceClient interface {
+	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+}
+```
+
+并提供了该接口的默认实现：
+
+```
+type helloServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewHelloServiceClient(cc grpc.ClientConnInterface) HelloServiceClient {
+	return &helloServiceClient{cc}
+}
+
+func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
+	out := new(HelloResponse)
+	err := c.cc.Invoke(ctx, "/HelloService/SayHello", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+```
+
+和 `HelloServiceServer` 不同的是，这个客户端实现我们无需修改，可以直接使用。首先我们创建一个 `client` 目录，并创建一个 `main.go` 文件：
+
+```
+$ mkdir client && cd client
+$ vim main.go
+```
+
+然后在入口方法中，通过 `grpc.Dial` 创建一个和服务端的连接：
+
+```
+conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+if err != nil {
+	log.Fatalf("Connect grpc server failed: %v", err)
+}
+defer conn.Close()
+```
+
+注意我们的服务端没有开启 TLS，连接是不安全的，所以我们需要加一个不安全证书的连接选项，否则连接的时候会报错：
+
+```
+Connect grpc server failed: grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)
+```
+
+然后使用 `hello_grpc.pb.go` 文件中提供的 `NewHelloServiceClient` 方法创建一个客户端实例：
+
+```
+c := proto.NewHelloServiceClient(conn)
+```
+
+同时使用 `context` 创建一个带超时的上下文：
+
+```
+ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+defer cancel()
+```
+
+使用创建的客户端调用 `SayHello` 方法：
+
+```
+r, err := c.SayHello(ctx, &proto.HelloRequest{Name: "zhangsan"})
+if err != nil {
+	log.Fatalf("Call SayHello failed: %v", err)
+}
+log.Printf("SayHello response: %s", r.GetMessage())
+```
+
+从调用的代码上看起来，确实和调用本地方法一样，传入 `HelloRequest` 请求，得到 `HelloResponse` 响应。至此，一个简单的客户端就编写完成了，使用 `go run` 运行该代码：
+
+```
+$ go run ./client/main.go
+2023/03/03 07:03:34 SayHello response: Hello zhangsan
+```
 
 ### 测试服务端
 
