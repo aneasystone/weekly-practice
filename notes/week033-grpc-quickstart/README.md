@@ -48,7 +48,7 @@ go: added google.golang.org/protobuf v1.28.1
 一般使用 `.proto` 后缀的文件来定义接口和数据类型，所以接下来，我们要创建一个 `hello.proto` 文件，我们将其放在 `proto` 目录下：
 
 ```
-$ mkdir proto
+$ mkdir proto && cd proto
 $ vim hello.proto
 ```
 
@@ -121,9 +121,85 @@ $ protoc --go_out=. --go_opt=paths=source_relative \
 
 ### 实现服务端
 
-### 测试服务端
+在生成的 `hello_grpc.pb.go` 文件中，定义了一个 `HelloServiceServer` 接口：
+
+```
+// HelloServiceServer is the server API for HelloService service.
+// All implementations must embed UnimplementedHelloServiceServer
+// for forward compatibility
+type HelloServiceServer interface {
+	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
+	mustEmbedUnimplementedHelloServiceServer()
+}
+```
+
+并且在接口的下面提供了一个默认实现：
+
+```
+type UnimplementedHelloServiceServer struct {
+}
+
+func (UnimplementedHelloServiceServer) SayHello(context.Context, *HelloRequest) (*HelloResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedHelloServiceServer) mustEmbedUnimplementedHelloServiceServer() {}
+```
+
+注意看 `HelloServiceServer` 的上面有一行注释：**All implementations must embed UnimplementedHelloServiceServer for forward compatibility**，为了保证向前兼容性，我们自己在实现这个接口时必须要嵌入 `UnimplementedHelloServiceServer` 这个默认实现，[这篇文章](https://blog.csdn.net/Canon_in_D_Major/article/details/108135724) 对此有一个简单的说明。
+
+接下来我们创建一个 `server` 目录，并创建一个 `main.go` 文件：
+
+```
+$ mkdir server && cd server
+$ vim main.go
+```
+
+定义 `server` 结构体，继承 `UnimplementedHelloServiceServer` 并重写 `SayHello` 方法：
+
+```
+type server struct {
+	proto.UnimplementedHelloServiceServer
+}
+
+func (s *server) SayHello(ctx context.Context, request *proto.HelloRequest) (*proto.HelloResponse, error) {
+	log.Printf("Request recieved: %v\n", request.GetName())
+	return &proto.HelloResponse{
+		Message: "Hello " + request.GetName(),
+	}, nil
+}
+```
+
+然后在入口方法中，通过 `proto.RegisterHelloServiceServer(s, &server{})` 将我们的实现注册到 grpc Server 中：
+
+```
+func main() {
+
+	lis, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatalf("Server listen failed!")
+	}
+	log.Printf("Server listening at: %s", lis.Addr())
+
+	s := grpc.NewServer()
+	proto.RegisterHelloServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("Server serve failed!")
+	}
+}
+```
+
+使用 `go run` 运行该代码：
+
+```
+$ go run ./server/main.go
+2023/03/02 07:40:50 Server listening at: [::]:8080
+```
+
+一个 gRPC 的服务端就启动成功了！
 
 ### 实现客户端
+
+### 测试服务端
 
 ## gRPC 的四种形式
 
