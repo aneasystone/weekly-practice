@@ -283,6 +283,70 @@ $ go run ./client/main.go
 
 ### 测试服务端
 
+除了编写客户端，我们也可以使用其他的工具来测试服务端，对于 HTTP 服务，我们一般使用 [curl](https://curl.se/) 或 [Postman](https://www.postman.com/) 之类的工具；而对于 gRPC 服务，也有类似的工具，比如 [grpcurl](https://github.com/fullstorydev/grpcurl) 或 [grpcui](https://github.com/fullstorydev/grpcui) 等，这里整理了一份 [关于 gRPC 工具的清单](https://github.com/grpc-ecosystem/awesome-grpc#tools)。
+
+这里使用 `grpcurl` 来对我们的服务端进行简单的测试。首先从它的 [Release 页面](https://github.com/fullstorydev/grpcurl/releases) 下载并安装 `grpcurl`：
+
+```
+$ curl -LO https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz
+```
+
+`grpcurl` 中最常使用的是 `list` 子命令，它可以列出服务端支持的所有服务：
+
+```
+$ grpcurl -plaintext localhost:8080 list
+Failed to list services: server does not support the reflection API
+```
+
+不过这要求我们的服务端必须开启 [反射 API](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1alpha/reflection.proto)，打开 `server/main.go` 文件，在其中加上下面这行代码：
+
+```
+reflection.Register(s)
+```
+
+这样我们就通过 Go 语言中提供的 `reflection` 包开启了反射 API，然后使用 `grpcurl` 的 `list` 命令重新列出服务端的所有服务：
+
+```
+$ grpcurl -plaintext localhost:8080 list
+HelloService
+grpc.reflection.v1alpha.ServerReflection
+```
+
+> 如果服务端没有开启反射 API，`grpc` 也支持直接使用 [Proto 文件](https://github.com/fullstorydev/grpcurl#proto-source-files) 或 [Protoset 文件](https://github.com/fullstorydev/grpcurl#protoset-files)。
+
+我们还可以使用 `list` 命令继续列出 `HelloService` 服务的所有方法：
+
+```
+$ grpcurl -plaintext localhost:8080 list HelloService
+HelloService.SayHello
+```
+
+如果要查看某个方法的详细信息，可以使用 `describe` 命令：
+
+```
+$ grpcurl -plaintext localhost:8080 describe HelloService.SayHello
+HelloService.SayHello is a method:
+rpc SayHello ( .HelloRequest ) returns ( .HelloResponse );
+```
+
+可以看出，这和我们在 `proto` 文件中的定义是一致的。最后，使用 `grpcurl` 来调用这个方法：
+
+```
+$ grpcurl -plaintext -d '{"name": "zhangsan"}' localhost:8080 HelloService.SayHello
+{
+  "message": "Hello zhangsan"
+}
+```
+
+如果入参比较大，可以将其保存在一个文件中，使用下面的方法来调用：
+
+```
+$ cat input.json | grpcurl -plaintext -d @ localhost:8080 HelloService.SayHello
+{
+  "message": "Hello zhangsan"
+}
+```
+
 ## gRPC 的四种形式
 
 ## 参考
@@ -296,3 +360,4 @@ $ go run ./client/main.go
 * [RPC 发展史](https://cloud.tencent.com/developer/article/1864288)
 * [GRPC简介](https://zhuanlan.zhihu.com/p/411315625)
 * [怎么看待谷歌的开源 RPC 框架 gRPC？](https://www.zhihu.com/question/30027669)
+* [grpcurl工具 - Go语言高级编程](https://chai2010.cn/advanced-go-programming-book/ch4-rpc/ch4-08-grpcurl.html)

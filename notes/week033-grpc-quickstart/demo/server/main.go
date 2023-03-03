@@ -7,6 +7,7 @@ import (
 
 	"example.com/demo/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type server struct {
@@ -30,6 +31,7 @@ func main() {
 
 	s := grpc.NewServer()
 	proto.RegisterHelloServiceServer(s, &server{})
+	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Server serve failed!")
 	}
