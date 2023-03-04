@@ -23,6 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HelloServiceClient interface {
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+	Split(ctx context.Context, in *SplitRequest, opts ...grpc.CallOption) (HelloService_SplitClient, error)
+	Sum(ctx context.Context, opts ...grpc.CallOption) (HelloService_SumClient, error)
+	Chat(ctx context.Context, opts ...grpc.CallOption) (HelloService_ChatClient, error)
 }
 
 type helloServiceClient struct {
@@ -42,11 +45,111 @@ func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opt
 	return out, nil
 }
 
+func (c *helloServiceClient) Split(ctx context.Context, in *SplitRequest, opts ...grpc.CallOption) (HelloService_SplitClient, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloService_ServiceDesc.Streams[0], "/HelloService/Split", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloServiceSplitClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type HelloService_SplitClient interface {
+	Recv() (*SplitResponse, error)
+	grpc.ClientStream
+}
+
+type helloServiceSplitClient struct {
+	grpc.ClientStream
+}
+
+func (x *helloServiceSplitClient) Recv() (*SplitResponse, error) {
+	m := new(SplitResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *helloServiceClient) Sum(ctx context.Context, opts ...grpc.CallOption) (HelloService_SumClient, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloService_ServiceDesc.Streams[1], "/HelloService/Sum", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloServiceSumClient{stream}
+	return x, nil
+}
+
+type HelloService_SumClient interface {
+	Send(*SumRequest) error
+	CloseAndRecv() (*SumResponse, error)
+	grpc.ClientStream
+}
+
+type helloServiceSumClient struct {
+	grpc.ClientStream
+}
+
+func (x *helloServiceSumClient) Send(m *SumRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *helloServiceSumClient) CloseAndRecv() (*SumResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(SumResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *helloServiceClient) Chat(ctx context.Context, opts ...grpc.CallOption) (HelloService_ChatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloService_ServiceDesc.Streams[2], "/HelloService/Chat", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloServiceChatClient{stream}
+	return x, nil
+}
+
+type HelloService_ChatClient interface {
+	Send(*ChatRequest) error
+	Recv() (*ChatResponse, error)
+	grpc.ClientStream
+}
+
+type helloServiceChatClient struct {
+	grpc.ClientStream
+}
+
+func (x *helloServiceChatClient) Send(m *ChatRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *helloServiceChatClient) Recv() (*ChatResponse, error) {
+	m := new(ChatResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // HelloServiceServer is the server API for HelloService service.
 // All implementations must embed UnimplementedHelloServiceServer
 // for forward compatibility
 type HelloServiceServer interface {
 	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
+	Split(*SplitRequest, HelloService_SplitServer) error
+	Sum(HelloService_SumServer) error
+	Chat(HelloService_ChatServer) error
 	mustEmbedUnimplementedHelloServiceServer()
 }
 
@@ -56,6 +159,15 @@ type UnimplementedHelloServiceServer struct {
 
 func (UnimplementedHelloServiceServer) SayHello(context.Context, *HelloRequest) (*HelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedHelloServiceServer) Split(*SplitRequest, HelloService_SplitServer) error {
+	return status.Errorf(codes.Unimplemented, "method Split not implemented")
+}
+func (UnimplementedHelloServiceServer) Sum(HelloService_SumServer) error {
+	return status.Errorf(codes.Unimplemented, "method Sum not implemented")
+}
+func (UnimplementedHelloServiceServer) Chat(HelloService_ChatServer) error {
+	return status.Errorf(codes.Unimplemented, "method Chat not implemented")
 }
 func (UnimplementedHelloServiceServer) mustEmbedUnimplementedHelloServiceServer() {}
 
@@ -88,6 +200,79 @@ func _HelloService_SayHello_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HelloService_Split_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SplitRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(HelloServiceServer).Split(m, &helloServiceSplitServer{stream})
+}
+
+type HelloService_SplitServer interface {
+	Send(*SplitResponse) error
+	grpc.ServerStream
+}
+
+type helloServiceSplitServer struct {
+	grpc.ServerStream
+}
+
+func (x *helloServiceSplitServer) Send(m *SplitResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _HelloService_Sum_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HelloServiceServer).Sum(&helloServiceSumServer{stream})
+}
+
+type HelloService_SumServer interface {
+	SendAndClose(*SumResponse) error
+	Recv() (*SumRequest, error)
+	grpc.ServerStream
+}
+
+type helloServiceSumServer struct {
+	grpc.ServerStream
+}
+
+func (x *helloServiceSumServer) SendAndClose(m *SumResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *helloServiceSumServer) Recv() (*SumRequest, error) {
+	m := new(SumRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _HelloService_Chat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HelloServiceServer).Chat(&helloServiceChatServer{stream})
+}
+
+type HelloService_ChatServer interface {
+	Send(*ChatResponse) error
+	Recv() (*ChatRequest, error)
+	grpc.ServerStream
+}
+
+type helloServiceChatServer struct {
+	grpc.ServerStream
+}
+
+func (x *helloServiceChatServer) Send(m *ChatResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *helloServiceChatServer) Recv() (*ChatRequest, error) {
+	m := new(ChatRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // HelloService_ServiceDesc is the grpc.ServiceDesc for HelloService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -100,6 +285,23 @@ var HelloService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _HelloService_SayHello_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Split",
+			Handler:       _HelloService_Split_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Sum",
+			Handler:       _HelloService_Sum_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "Chat",
+			Handler:       _HelloService_Chat_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "hello.proto",
 }

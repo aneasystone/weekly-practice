@@ -4,6 +4,9 @@ option go_package = "example.com/demo/proto";
 
 service HelloService {
   rpc SayHello (HelloRequest) returns (HelloResponse) {}
+  rpc Split (SplitRequest) returns (stream SplitResponse) {}
+  rpc Sum (stream SumRequest) returns (SumResponse) {}
+  rpc Chat (stream ChatRequest) returns (stream ChatResponse) {}
 }
 
 message HelloRequest {
@@ -12,4 +15,30 @@ message HelloRequest {
 
 message HelloResponse {
   string message = 1;
+}
+
+message SplitRequest {
+  string sentence = 1;
+}
+
+message SplitResponse {
+  string word = 1;
+}
+
+message SumRequest {
+  int32 num = 1;
+}
+
+message SumResponse {
+  int32 sum = 1;
+}
+
+message ChatRequest {
+  string name = 1;
+  string message = 2;
+}
+
+message ChatResponse {
+  string name = 1;
+  string message = 2;
 }

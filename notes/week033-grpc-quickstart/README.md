@@ -349,6 +349,81 @@ $ cat input.json | grpcurl -plaintext -d @ localhost:8080 HelloService.SayHello
 
 ## gRPC 的四种形式
 
+gRPC 支持四种不同的通信方式：
+
+* 简单 RPC（`Simple RPC`）
+* 服务端流 RPC（`Server-side streaming RPC`）
+* 客户端流 RPC（`Client-side streaming RPC`）
+* 双向流 RPC（`Bidirectional streaming RPC`）
+
+上一节中的 `SayHello` 就是一个简单 RPC 的例子：
+
+```
+rpc SayHello (HelloRequest) returns (HelloResponse) {}
+```
+
+除此之外，gRPC 还支持三种流式通信方法。
+
+### 服务端流 RPC（`Server-side streaming RPC`）
+
+第一种叫服务端流 RPC，它接受一个正常的请求，并以流的形式向客户端发送多个响应。在下面的例子中，客户端向服务端发送一个字符串，服务端对字符串进行分词，并将分词结果以流式返回给客户端。首先，我们在 `.proto` 文件中定义 `Split` 方法和相应的消息体：
+
+```
+rpc Split (SplitRequest) returns (stream SplitResponse) {}
+```
+
+然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
+
+```
+TODO
+```
+
+在 `client/main.go` 文件中添加客户端实现：
+
+```
+TODO
+```
+
+### 客户端流 RPC（`Client-side streaming RPC`）
+
+第二种叫客户端流 RPC，它以流的形式接受客户端发送来的多个请求，服务端处理之后返回一个正常的响应。在下面的例子中，客户端向服务端发送多个数字，服务端收集之后进行求和，并将求和结果返回给客户端。首先，我们在 `.proto` 文件中定义 `Sum` 方法和相应的消息体：
+
+```
+rpc Sum (stream SumRequest) returns (SumResponse) {}
+```
+
+然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
+
+```
+TODO
+```
+
+在 `client/main.go` 文件中添加客户端实现：
+
+```
+TODO
+```
+
+### 双向流 RPC（`Bidirectional streaming RPC`）
+
+第三种叫双向流 RPC，这有点像网络聊天，服务端和客户端双方以任意的顺序互相通信，服务端可以在每次接受客户端请求时就返回一次响应，也可以接受多个请求后再返回一次响应。首先，我们在 `.proto` 文件中定义 `Chat` 方法和相应的消息体：
+
+```
+rpc Chat (stream ChatRequest) returns (stream ChatResponse) {}
+```
+
+然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
+
+```
+TODO
+```
+
+在 `client/main.go` 文件中添加客户端实现：
+
+```
+TODO
+```
+
 ## 参考
 
 * [gRPC 官方文档](https://grpc.io/docs/guides/)
