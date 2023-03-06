@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strings"
 
 	"example.com/demo/proto"
 	"google.golang.org/grpc"
@@ -19,6 +20,17 @@ func (s *server) SayHello(ctx context.Context, request *proto.HelloRequest) (*pr
 	return &proto.HelloResponse{
 		Message: "Hello " + request.GetName(),
 	}, nil
+}
+
+func (s *server) Split(request *proto.SplitRequest, stream proto.HelloService_SplitServer) error {
+	log.Printf("Request recieved: %v\n", request.GetSentence())
+	words := strings.Split(request.GetSentence(), " ")
+	for _, word := range words {
+		if err := stream.Send(&proto.SplitResponse{Word: word}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func main() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"time"
 
@@ -27,4 +28,19 @@ func main() {
 		log.Fatalf("Call SayHello failed: %v", err)
 	}
 	log.Printf("SayHello response: %s", r.GetMessage())
+
+	stream, err := c.Split(ctx, &proto.SplitRequest{Sentence: "Hello World"})
+	if err != nil {
+		log.Fatalf("Call Split failed: %v", err)
+	}
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("%v.ListFeatures(_) = _, %v", c, err)
+		}
+		log.Printf("Split response: %s", r.GetWord())
+	}
 }

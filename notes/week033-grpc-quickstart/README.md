@@ -375,14 +375,58 @@ rpc Split (SplitRequest) returns (stream SplitResponse) {}
 然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
 
 ```
-TODO
+func (s *server) Split(request *proto.SplitRequest, stream proto.HelloService_SplitServer) error {
+	log.Printf("Request recieved: %v\n", request.GetSentence())
+	words := strings.Split(request.GetSentence(), " ")
+	for _, word := range words {
+		if err := stream.Send(&proto.SplitResponse{Word: word}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 ```
+
+和简单 RPC 的 `SayHello` 方法相比，服务端流 RPC 的 `Split` 方法在参数上有一些细微的差别，少了一个 `ctx context.Context` 参数，而多了一个 `stream proto.HelloService_SplitServer` 参数，这是 `protoc` 自动生成的一个接口：
+
+```
+type HelloService_SplitServer interface {
+	Send(*SplitResponse) error
+	grpc.ServerStream
+}
+```
+
+这个接口继承自 `grpc.ServerStream` 接口，并具有一个 `Send` 方法，用来向客户端发送响应。
 
 在 `client/main.go` 文件中添加客户端实现：
 
 ```
-TODO
+stream, err := c.Split(ctx, &proto.SplitRequest{Sentence: "Hello World"})
+if err != nil {
+	log.Fatalf("Call Split failed: %v", err)
+}
+for {
+	r, err := stream.Recv()
+	if err == io.EOF {
+		break
+	}
+	if err != nil {
+		log.Fatalf("%v.ListFeatures(_) = _, %v", c, err)
+	}
+	log.Printf("Split response: %s", r.GetWord())
+}
 ```
+
+和简单 RPC 的客户端代码相比，`Split` 方法不是直接返回 `SplitResponse`，而是返回一个 `stream` 流，它的类型为 `HelloService_SplitClient` 接口：
+
+```
+type HelloService_SplitClient interface {
+	Recv() (*SplitResponse, error)
+	grpc.ClientStream
+}
+```
+
+这个接口继承自 `grpc.ClientStream` 接口，并具有一个 `Recv` 方法，用来接受服务端发送的响应，当服务端发送结束后，`Recv` 方法将返回 `io.EOF` 错误。
 
 ### 客户端流 RPC（`Client-side streaming RPC`）
 
