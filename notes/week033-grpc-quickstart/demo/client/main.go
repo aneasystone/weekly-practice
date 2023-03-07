@@ -39,8 +39,25 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.ListFeatures(_) = _, %v", c, err)
+			log.Fatalf("%v.Split(_) = _, %v", c, err)
 		}
 		log.Printf("Split response: %s", r.GetWord())
 	}
+
+	stream2, err := c.Sum(ctx)
+	if err != nil {
+		log.Fatalf("%v.Sum(_) = _, %v", c, err)
+	}
+	nums := []int32{1, 2, 3, 4, 5, 6, 7}
+	for _, num := range nums {
+		if err := stream2.Send(&proto.SumRequest{Num: num}); err != nil {
+			log.Fatalf("%v.Send(%v) = %v", stream, num, err)
+		}
+	}
+	response, err := stream2.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("%v.CloseAndRecv() failed: %v", stream2, err)
+	}
+	log.Printf("Sum response: %v", response.GetSum())
+
 }

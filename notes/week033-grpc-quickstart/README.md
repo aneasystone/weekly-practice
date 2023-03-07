@@ -439,14 +439,44 @@ rpc Sum (stream SumRequest) returns (SumResponse) {}
 然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
 
 ```
-TODO
+func (s *server) Sum(stream proto.HelloService_SumServer) error {
+	var sum int32 = 0
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&proto.SumResponse{Sum: sum})
+		}
+		if err != nil {
+			return err
+		}
+		sum = sum + r.GetNum()
+	}
+}
 ```
+
+从上面的代码可以看到，`Sum` 方法没有了 `request` 参数，只有一个 `stream` 参数，请求参数通过 `stream.Recv` 以流的形式读取，当读取结束后，`stream.Recv` 方法将返回 `io.EOF` 错误，这时我们通过 `stream.SendAndClose` 将处理之后的结果返回给客户端，并关闭连接。
 
 在 `client/main.go` 文件中添加客户端实现：
 
 ```
-TODO
+stream2, err := c.Sum(ctx)
+if err != nil {
+	log.Fatalf("%v.Sum(_) = _, %v", c, err)
+}
+nums := []int32{1, 2, 3, 4, 5, 6, 7}
+for _, num := range nums {
+	if err := stream2.Send(&proto.SumRequest{Num: num}); err != nil {
+		log.Fatalf("%v.Send(%v) = %v", stream, num, err)
+	}
+}
+response, err := stream2.CloseAndRecv()
+if err != nil {
+	log.Fatalf("%v.CloseAndRecv() failed: %v", stream2, err)
+}
+log.Printf("Sum response: %v", response.GetSum())
 ```
+
+在上面的代码中，`Sum` 方法返回一个 `stream` 变量，然后通过 `stream.Send` 不断向服务端发送请求，当数据发送结束后，再通过 `stream.CloseAndRecv` 关闭连接，并接受服务端响应。
 
 ### 双向流 RPC（`Bidirectional streaming RPC`）
 

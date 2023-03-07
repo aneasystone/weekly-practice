@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"net"
 	"strings"
@@ -31,6 +32,20 @@ func (s *server) Split(request *proto.SplitRequest, stream proto.HelloService_Sp
 		}
 	}
 	return nil
+}
+
+func (s *server) Sum(stream proto.HelloService_SumServer) error {
+	var sum int32 = 0
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&proto.SumResponse{Sum: sum})
+		}
+		if err != nil {
+			return err
+		}
+		sum = sum + r.GetNum()
+	}
 }
 
 func main() {
