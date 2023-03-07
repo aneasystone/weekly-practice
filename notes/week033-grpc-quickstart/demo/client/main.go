@@ -60,4 +60,31 @@ func main() {
 	}
 	log.Printf("Sum response: %v", response.GetSum())
 
+	stream3, err := c.Chat(ctx)
+	if err != nil {
+		log.Fatalf("%v.Chat(_) = _, %v", c, err)
+	}
+	waitc := make(chan struct{})
+	go func() {
+		for {
+			in, err := stream3.Recv()
+			if err == io.EOF {
+				close(waitc)
+				return
+			}
+			if err != nil {
+				log.Fatalf("Failed to receive: %v", err)
+			}
+			log.Printf("Got message %s", in.GetMessage())
+		}
+	}()
+
+	messages := []string{"Hello", "How're you?", "Bye"}
+	for _, message := range messages {
+		if err := stream3.Send(&proto.ChatRequest{Message: message}); err != nil {
+			log.Fatalf("Failed to send: %v", err)
+		}
+	}
+	stream3.CloseSend()
+	<-waitc
 }

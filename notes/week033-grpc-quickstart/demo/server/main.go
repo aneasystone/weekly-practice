@@ -48,6 +48,21 @@ func (s *server) Sum(stream proto.HelloService_SumServer) error {
 	}
 }
 
+func (s *server) Chat(stream proto.HelloService_ChatServer) error {
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if err = stream.Send(&proto.ChatResponse{Message: "Reply to " + r.GetMessage()}); err != nil {
+			return err
+		}
+	}
+}
+
 func main() {
 
 	lis, err := net.Listen("tcp", ":8080")

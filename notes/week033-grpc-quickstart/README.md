@@ -489,14 +489,57 @@ rpc Chat (stream ChatRequest) returns (stream ChatResponse) {}
 然后，使用 `protoc` 生成服务端和客户端的代码，接着在 `server/main.go` 文件中添加服务端实现：
 
 ```
-TODO
+func (s *server) Chat(stream proto.HelloService_ChatServer) error {
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if err = stream.Send(&proto.ChatResponse{Message: "Reply to " + r.GetMessage()}); err != nil {
+			return err
+		}
+	}
+}
 ```
+
+上面的代码和客户端流 RPC 比较类似，只不过服务端的响应变得更及时，每次接受到客户端请求时都会响应，而不是等客户端请求结束后再响应。
 
 在 `client/main.go` 文件中添加客户端实现：
 
 ```
-TODO
+stream3, err := c.Chat(ctx)
+if err != nil {
+	log.Fatalf("%v.Chat(_) = _, %v", c, err)
+}
+waitc := make(chan struct{})
+go func() {
+	for {
+		in, err := stream3.Recv()
+		if err == io.EOF {
+			close(waitc)
+			return
+		}
+		if err != nil {
+			log.Fatalf("Failed to receive: %v", err)
+		}
+		log.Printf("Got message %s", in.GetMessage())
+	}
+}()
+
+messages := []string{"Hello", "How're you?", "Bye"}
+for _, message := range messages {
+	if err := stream3.Send(&proto.ChatRequest{Message: message}); err != nil {
+		log.Fatalf("Failed to send: %v", err)
+	}
+}
+stream3.CloseSend()
+<-waitc
 ```
+
+双向流 RPC 的客户端实现要稍微复杂一点。首先，我们通过 `stream.Send` 来发送请求，由于发送和接受都是流式的，所以我们没法像客户端流 RPC 那样通过 `stream.CloseAndRecv()` 来获取响应，我们只能调用 `stream.CloseSend()` 告诉服务端发送结束，然后我们需要创建一个新的 goroutine 来接受响应，另外，我们创建了一个 channel，用于在响应接受结束后通知主线程，以便程序能正常退出。
 
 ## 参考
 
