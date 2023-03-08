@@ -1,10 +1,5 @@
 # TODO LIST
 
-## APISIX 服务发现
-
-* [集成服务发现注册中心](https://apisix.apache.org/zh/docs/apisix/discovery/)
-* [APISIX Blog](https://apisix.apache.org/zh/blog/)
-
 ## Istio + Envoy
 
 * [Istio Handbook——Istio 服务网格进阶实战](http://www.zhaowenyu.com/istio-doc/)

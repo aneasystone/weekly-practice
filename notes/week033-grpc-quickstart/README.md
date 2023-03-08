@@ -43,7 +43,7 @@ go: added google.golang.org/protobuf v1.28.1
 
 ### 编写 `.proto` 文件
 
-正如前文所述，Google 在 2009 年开源了一种高效的结构化数据存储格式 - [Protocol Buffers](https://protobuf.dev/)，这种格式非常适合用于 RPC 的数据交换，所以顺理成章的，Google 在开发 gRPC 时就采用了 Protocol Buffers 作为默认的数据格式。不过要注意的是 Protocol Buffers 不仅仅是一种数据格式，而且也是一种 **IDL**（Interface Description Language，接口描述语言），它通过一种中立的方式来描述接口和数据类型，从而实现跨语言和跨平台开发。
+正如前文所述，Google 在 2009 年开源了一种高效的结构化数据存储格式 [Protocol Buffers](https://protobuf.dev/)，这种格式非常适合用于 RPC 的数据交换，所以顺理成章的，Google 在开发 gRPC 时就采用了 Protocol Buffers 作为默认的数据格式。不过要注意的是 Protocol Buffers 不仅仅是一种数据格式，而且也是一种 **IDL**（Interface Description Language，接口描述语言），它通过一种中立的方式来描述接口和数据类型，从而实现跨语言和跨平台开发。
 
 一般使用 `.proto` 后缀的文件来定义接口和数据类型，所以接下来，我们要创建一个 `hello.proto` 文件，我们将其放在 `proto` 目录下：
 
