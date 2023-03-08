@@ -113,8 +113,8 @@ protoc-gen-go-grpc 1.2.0
 ```
 $ cd proto
 $ protoc --go_out=. --go_opt=paths=source_relative \
-	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-	hello.proto
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    hello.proto
 ```
 
 这个命令在当前目录下生成了 `hello.pb.go` 和 `hello_grpc.pb.go` 两个文件。
@@ -128,8 +128,8 @@ $ protoc --go_out=. --go_opt=paths=source_relative \
 // All implementations must embed UnimplementedHelloServiceServer
 // for forward compatibility
 type HelloServiceServer interface {
-	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
-	mustEmbedUnimplementedHelloServiceServer()
+    SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
+    mustEmbedUnimplementedHelloServiceServer()
 }
 ```
 
@@ -140,7 +140,7 @@ type UnimplementedHelloServiceServer struct {
 }
 
 func (UnimplementedHelloServiceServer) SayHello(context.Context, *HelloRequest) (*HelloResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+    return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
 }
 func (UnimplementedHelloServiceServer) mustEmbedUnimplementedHelloServiceServer() {}
 ```
@@ -158,14 +158,14 @@ $ vim main.go
 
 ```
 type server struct {
-	proto.UnimplementedHelloServiceServer
+    proto.UnimplementedHelloServiceServer
 }
 
 func (s *server) SayHello(ctx context.Context, request *proto.HelloRequest) (*proto.HelloResponse, error) {
-	log.Printf("Request recieved: %v\n", request.GetName())
-	return &proto.HelloResponse{
-		Message: "Hello " + request.GetName(),
-	}, nil
+    log.Printf("Request recieved: %v\n", request.GetName())
+    return &proto.HelloResponse{
+        Message: "Hello " + request.GetName(),
+    }, nil
 }
 ```
 
@@ -174,17 +174,17 @@ func (s *server) SayHello(ctx context.Context, request *proto.HelloRequest) (*pr
 ```
 func main() {
 
-	lis, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		log.Fatalf("Server listen failed!")
-	}
-	log.Printf("Server listening at: %s", lis.Addr())
+    lis, err := net.Listen("tcp", ":8080")
+    if err != nil {
+        log.Fatalf("Server listen failed!")
+    }
+    log.Printf("Server listening at: %s", lis.Addr())
 
-	s := grpc.NewServer()
-	proto.RegisterHelloServiceServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Server serve failed!")
-	}
+    s := grpc.NewServer()
+    proto.RegisterHelloServiceServer(s, &server{})
+    if err := s.Serve(lis); err != nil {
+        log.Fatalf("Server serve failed!")
+    }
 }
 ```
 
@@ -203,7 +203,7 @@ $ go run ./server/main.go
 
 ```
 type HelloServiceClient interface {
-	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+    SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 }
 ```
 
@@ -211,20 +211,20 @@ type HelloServiceClient interface {
 
 ```
 type helloServiceClient struct {
-	cc grpc.ClientConnInterface
+    cc grpc.ClientConnInterface
 }
 
 func NewHelloServiceClient(cc grpc.ClientConnInterface) HelloServiceClient {
-	return &helloServiceClient{cc}
+    return &helloServiceClient{cc}
 }
 
 func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
-	out := new(HelloResponse)
-	err := c.cc.Invoke(ctx, "/HelloService/SayHello", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+    out := new(HelloResponse)
+    err := c.cc.Invoke(ctx, "/HelloService/SayHello", in, out, opts...)
+    if err != nil {
+        return nil, err
+    }
+    return out, nil
 }
 ```
 
@@ -240,7 +240,7 @@ $ vim main.go
 ```
 conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 if err != nil {
-	log.Fatalf("Connect grpc server failed: %v", err)
+    log.Fatalf("Connect grpc server failed: %v", err)
 }
 defer conn.Close()
 ```
@@ -269,7 +269,7 @@ defer cancel()
 ```
 r, err := c.SayHello(ctx, &proto.HelloRequest{Name: "zhangsan"})
 if err != nil {
-	log.Fatalf("Call SayHello failed: %v", err)
+    log.Fatalf("Call SayHello failed: %v", err)
 }
 log.Printf("SayHello response: %s", r.GetMessage())
 ```
@@ -362,7 +362,7 @@ gRPC 支持四种不同的通信方式：
 rpc SayHello (HelloRequest) returns (HelloResponse) {}
 ```
 
-除此之外，gRPC 还支持三种流式通信方法。
+这种 RPC 有时候也被称为 **Unary RPC**，除此之外，gRPC 还支持三种流式通信方法，也即 **Streaming RPC**。
 
 ### 服务端流 RPC（`Server-side streaming RPC`）
 
@@ -376,14 +376,14 @@ rpc Split (SplitRequest) returns (stream SplitResponse) {}
 
 ```
 func (s *server) Split(request *proto.SplitRequest, stream proto.HelloService_SplitServer) error {
-	log.Printf("Request recieved: %v\n", request.GetSentence())
-	words := strings.Split(request.GetSentence(), " ")
-	for _, word := range words {
-		if err := stream.Send(&proto.SplitResponse{Word: word}); err != nil {
-			return err
-		}
-	}
-	return nil
+    log.Printf("Request recieved: %v\n", request.GetSentence())
+    words := strings.Split(request.GetSentence(), " ")
+    for _, word := range words {
+        if err := stream.Send(&proto.SplitResponse{Word: word}); err != nil {
+            return err
+        }
+    }
+    return nil
 }
 ```
 
@@ -391,8 +391,8 @@ func (s *server) Split(request *proto.SplitRequest, stream proto.HelloService_Sp
 
 ```
 type HelloService_SplitServer interface {
-	Send(*SplitResponse) error
-	grpc.ServerStream
+    Send(*SplitResponse) error
+    grpc.ServerStream
 }
 ```
 
@@ -403,17 +403,17 @@ type HelloService_SplitServer interface {
 ```
 stream, err := c.Split(ctx, &proto.SplitRequest{Sentence: "Hello World"})
 if err != nil {
-	log.Fatalf("Call Split failed: %v", err)
+    log.Fatalf("Call Split failed: %v", err)
 }
 for {
-	r, err := stream.Recv()
-	if err == io.EOF {
-		break
-	}
-	if err != nil {
-		log.Fatalf("%v.ListFeatures(_) = _, %v", c, err)
-	}
-	log.Printf("Split response: %s", r.GetWord())
+    r, err := stream.Recv()
+    if err == io.EOF {
+        break
+    }
+    if err != nil {
+        log.Fatalf("%v.Split(_) = _, %v", c, err)
+    }
+    log.Printf("Split response: %s", r.GetWord())
 }
 ```
 
@@ -421,8 +421,8 @@ for {
 
 ```
 type HelloService_SplitClient interface {
-	Recv() (*SplitResponse, error)
-	grpc.ClientStream
+    Recv() (*SplitResponse, error)
+    grpc.ClientStream
 }
 ```
 
@@ -440,17 +440,17 @@ rpc Sum (stream SumRequest) returns (SumResponse) {}
 
 ```
 func (s *server) Sum(stream proto.HelloService_SumServer) error {
-	var sum int32 = 0
-	for {
-		r, err := stream.Recv()
-		if err == io.EOF {
-			return stream.SendAndClose(&proto.SumResponse{Sum: sum})
-		}
-		if err != nil {
-			return err
-		}
-		sum = sum + r.GetNum()
-	}
+    var sum int32 = 0
+    for {
+        r, err := stream.Recv()
+        if err == io.EOF {
+            return stream.SendAndClose(&proto.SumResponse{Sum: sum})
+        }
+        if err != nil {
+            return err
+        }
+        sum = sum + r.GetNum()
+    }
 }
 ```
 
@@ -461,17 +461,17 @@ func (s *server) Sum(stream proto.HelloService_SumServer) error {
 ```
 stream2, err := c.Sum(ctx)
 if err != nil {
-	log.Fatalf("%v.Sum(_) = _, %v", c, err)
+    log.Fatalf("%v.Sum(_) = _, %v", c, err)
 }
 nums := []int32{1, 2, 3, 4, 5, 6, 7}
 for _, num := range nums {
-	if err := stream2.Send(&proto.SumRequest{Num: num}); err != nil {
-		log.Fatalf("%v.Send(%v) = %v", stream, num, err)
-	}
+    if err := stream2.Send(&proto.SumRequest{Num: num}); err != nil {
+        log.Fatalf("%v.Send(%v) = %v", stream, num, err)
+    }
 }
 response, err := stream2.CloseAndRecv()
 if err != nil {
-	log.Fatalf("%v.CloseAndRecv() failed: %v", stream2, err)
+    log.Fatalf("%v.CloseAndRecv() failed: %v", stream2, err)
 }
 log.Printf("Sum response: %v", response.GetSum())
 ```
@@ -490,18 +490,18 @@ rpc Chat (stream ChatRequest) returns (stream ChatResponse) {}
 
 ```
 func (s *server) Chat(stream proto.HelloService_ChatServer) error {
-	for {
-		r, err := stream.Recv()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		if err = stream.Send(&proto.ChatResponse{Message: "Reply to " + r.GetMessage()}); err != nil {
-			return err
-		}
-	}
+    for {
+        r, err := stream.Recv()
+        if err == io.EOF {
+            return nil
+        }
+        if err != nil {
+            return err
+        }
+        if err = stream.Send(&proto.ChatResponse{Message: "Reply to " + r.GetMessage()}); err != nil {
+            return err
+        }
+    }
 }
 ```
 
@@ -512,28 +512,28 @@ func (s *server) Chat(stream proto.HelloService_ChatServer) error {
 ```
 stream3, err := c.Chat(ctx)
 if err != nil {
-	log.Fatalf("%v.Chat(_) = _, %v", c, err)
+    log.Fatalf("%v.Chat(_) = _, %v", c, err)
 }
 waitc := make(chan struct{})
 go func() {
-	for {
-		in, err := stream3.Recv()
-		if err == io.EOF {
-			close(waitc)
-			return
-		}
-		if err != nil {
-			log.Fatalf("Failed to receive: %v", err)
-		}
-		log.Printf("Got message %s", in.GetMessage())
-	}
+    for {
+        in, err := stream3.Recv()
+        if err == io.EOF {
+            close(waitc)
+            return
+        }
+        if err != nil {
+            log.Fatalf("Failed to receive: %v", err)
+        }
+        log.Printf("Chat response: %s", in.GetMessage())
+    }
 }()
 
 messages := []string{"Hello", "How're you?", "Bye"}
 for _, message := range messages {
-	if err := stream3.Send(&proto.ChatRequest{Message: message}); err != nil {
-		log.Fatalf("Failed to send: %v", err)
-	}
+    if err := stream3.Send(&proto.ChatRequest{Message: message}); err != nil {
+        log.Fatalf("Failed to send: %v", err)
+    }
 }
 stream3.CloseSend()
 <-waitc
@@ -553,3 +553,11 @@ stream3.CloseSend()
 * [GRPC简介](https://zhuanlan.zhihu.com/p/411315625)
 * [怎么看待谷歌的开源 RPC 框架 gRPC？](https://www.zhihu.com/question/30027669)
 * [grpcurl工具 - Go语言高级编程](https://chai2010.cn/advanced-go-programming-book/ch4-rpc/ch4-08-grpcurl.html)
+
+## 更多
+
+### gRPC 安全认证
+
+根据官方的 [gRPC 认证指南](https://grpc.io/docs/guides/auth/)，gRPC 支持多种不同的认证方法，包括：[SSL/TLS 认证](https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-auth-support.md)、[ALTS 认证](https://grpc.io/docs/languages/go/alts/) 以及一些基于 token 的认证方法，如 OAuth2、GCE 等。
+
+除了这些原生的认证方法，我们也可以通过 [Metadata](https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md) 来传送认证信息，从而实现 gRPC 的认证功能；另外，gRPC 还支持拦截器特性，通过拦截器也可以实现安全认证，[Go gRPC Middleware](https://github.com/grpc-ecosystem/go-grpc-middleware) 提供了很多拦截器的例子。
