@@ -1,5 +1,17 @@
 # TODO LIST
 
+## 排错技巧
+
+* [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
+
+## Reactor 响应式编程
+
+* [Flux、Mono、Reactor 实战（史上最全）](https://blog.csdn.net/crazymakercircle/article/details/124120506)
+
+## Java 动态代理
+
+* [动态代理大揭秘，带你彻底弄清楚动态代理！](https://my.oschina.net/u/1584523/blog/5261706)
+
 ## Istio + Envoy
 
 * [Istio Handbook——Istio 服务网格进阶实战](http://www.zhaowenyu.com/istio-doc/)
