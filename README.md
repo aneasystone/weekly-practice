@@ -2,7 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
-* WEEK034 - [实现 APISIX 服务注册和发现](./notes/week034-apisix-service-registry-and-discovery/README.md)
+* WEEK034 - [实战 APISIX 服务注册和发现](./notes/week034-apisix-service-registry-and-discovery/README.md)
 * WEEK033 - [gRPC 快速入门](./notes/week033-grpc-quickstart/README.md)
 * WEEK032 - [实战 Docker 容器网络](./notes/week032-docker-network-in-action/README.md)
 * WEEK031 - [使用 Helm 部署 Kubernetes 应用](./notes/week031-deploying-kubernetes-app-with-helm/README.md)
