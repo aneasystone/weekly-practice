@@ -2,11 +2,27 @@
 
 在 [week030-apisix-notes](../week030-apisix-notes/README.md) 中，我们通过 APISIX 官方提供的入门示例学习了 APISIX 的基本概念，并使用 Admin API 和 Dashboard 两种方法创建路由。在创建路由时，我们必须明确地知道服务的 IP 和端口，这给运维人员带来了一定的负担，因为服务的重启或扩缩容都可能会导致服务的 IP 和端口发生变化，当服务数量非常多的时候，维护成本将急剧升高。
 
-APISIX 集成了多种服务发现机制来解决这个问题，通过服务注册中心，APISIX 可以动态地获取服务的实例信息，这样我们就不用在路由中写死固定的 IP 和端口了：
+APISIX 集成了多种服务发现机制来解决这个问题，通过服务注册中心，APISIX 可以动态地获取服务的实例信息，这样我们就不用在路由中写死固定的 IP 和端口了。
+
+## 服务发现
+
+如下图所示，一个标准的服务发现流程大致包含了三大部分：
 
 ![](./images/discovery-cn.png)
 
-## 服务发现
+1. 服务启动时将自身的一些信息，比如服务名、IP、端口等信息上报到注册中心；各个服务与注册中心使用一定机制（例如心跳）通信，如果注册中心与服务长时间无法通信，就会注销该实例；当服务下线时，会删除注册中心的实例信息；
+2. 网关会准实时地从注册中心获取服务实例信息；
+3. 当用户通过网关请求服务时，网关从注册中心获取的实例列表中选择一个进行代理；
+
+目前市面上流行着很多注册中心，比如 Eureka、Nacos、Consul 等，APISIX 内置了下面这些服务发现机制：
+
+* [基于 Eureka 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/)
+* [基于 Nacos 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/nacos/)
+* [基于 Consul 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul/)
+* [基于 Consul KV 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul_kv/)
+* [基于 DNS 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/dns/)
+* [基于 APISIX-Seed 架构的控制面服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/control-plane-service-discovery/)
+* [基于 Kubernetes 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/)
 
 ### 基于 Eureka 的服务发现
 
@@ -57,21 +73,70 @@ server.port=8081
 eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
 ```
 
+默认情况下，Eureka Client 是将该服务所在的主机名注册到 Eureka Server，这在某些情况下可能会导致其他服务调不通该服务，我们可以通过下面的参数，让 Eureka Client 注册 IP 地址：
+
+```
+eureka.instance.prefer-ip-address=true
+eureka.instance.ip-address=192.168.1.40
+```
+
 启动后，在 Eureka 页面的实例中可以看到我们注册的服务：
 
 ![](./images/eureka-instances.png)
 
-https://www.apiseven.com/blog/apigateway-integration-eureka-service-discovery
+接下来，我们要让 APISIX 通过 Eureka Server 找到我们的服务。首先，在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
 
-https://apisix.apache.org/zh/docs/apisix/discovery/
+```
+discovery:
+  eureka:
+    host:
+      - "http://192.168.1.40:8761"
+    prefix: /eureka/
+```
 
-### 基于 Consul 的服务发现
+然后向 APISIX 中添加如下路由：
 
-https://apisix.apache.org/zh/docs/apisix/discovery/consul/
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/11 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/eureka",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/eureka", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "eureka",
+		"service_name": "EUREKA-CLIENT"
+    }
+}'
+```
+
+之前创建路由时，我们在 `upstream` 中通过 `nodes` 参数表示上游服务器节点，这里我们不再需要写死服务器节点信息，而是通过 `"discovery_type": "eureka"` 和 `"service_name": "EUREKA-CLIENT"` 来让 APISIX 使用 `eureka` 服务发现机制，上游的服务名称为 `EUREKA-CLIENT`。
+
+值得注意的是，虽然上面的 Eureka Client 的 `spring.application.name` 是小写，但是注册到 Eureka Server 的服务名称是大写，所以这里的 `service_name` 参数必须是大写。此外，这里我们还使用了 `proxy-rewrite` 插件，它相当于 Nginx 中的路径重写功能，当多个上游服务的接口地址相同时，通过路径重写可以将它们区分开来。
+
+访问 APISIX 的 `/eureka` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/eureka
+Hello, I'm eureka client.
+```
+
+我们成功通过 APISIX 访问到了我们的服务。
+
+关于 APISIX 集成 Eureka 的更多信息，可以参考官方文档 [集成服务发现注册中心](https://apisix.apache.org/zh/docs/apisix/discovery/) 和官方博客 [API 网关 Apache APISIX 集成 Eureka 作为服务发现](https://www.apiseven.com/blog/apigateway-integration-eureka-service-discovery)。
 
 ### 基于 Nacos 的服务发现
 
 https://apisix.apache.org/zh/docs/apisix/discovery/nacos/
+
+### 基于 Consul 的服务发现
+
+https://apisix.apache.org/zh/docs/apisix/discovery/consul/
 
 ### 基于 DNS 的服务发现
 
