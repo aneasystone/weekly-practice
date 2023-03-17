@@ -132,6 +132,18 @@ Hello, I'm eureka client.
 
 ### 基于 Nacos 的服务发现
 
+[Nacos](https://nacos.io/zh-cn/index.html) 是阿里开源的一款集服务发现、配置管理和服务管理于一体的管理平台，APISIX 同样支持 Nacos 的服务发现机制。
+
+首先，我们需要准备一个 Nacos Server，Nacos 官网提供了多种部署方式，可以 [通过源码或安装包安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html)、[通过 Docker 安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start-docker.html) 或 [通过 Kubernetes 安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start-kubernetes.html)，我们这里直接使用 docker 命令启动一个本地模式的 Nacos Server：
+
+```
+$ docker run -e MODE=standalone -p 8848:8848 -p 9848:9848 -d nacos/nacos-server:v2.2.0
+```
+
+启动成功后，访问 http://localhost:8848/nacos/ 进入 Nacos 管理页面，默认用户名和密码为 `nacos/nacos`：
+
+![](./images/nacos-home.png)
+
 https://apisix.apache.org/zh/docs/apisix/discovery/nacos/
 
 ### 基于 Consul 的服务发现
