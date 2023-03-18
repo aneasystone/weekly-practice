@@ -41,7 +41,7 @@ $ cd eureka && ./gradlew bootRun
 $ docker run -d -p 8761:8761 springcloud/eureka
 ```
 
-启动之后访问 http://localhost:8761/ 看看 Eureka Server 是否已正常运行，如果一切顺利，我们再准备一个简单的 Spring Boot 客户端程序，通过 `@EnableEurekaClient` 注解将服务信息注册到 Eureka Server：
+启动之后访问 http://localhost:8761/ 看看 Eureka Server 是否已正常运行，如果一切顺利，我们再准备一个简单的 Spring Boot 客户端程序，引入 `spring-cloud-starter-netflix-eureka-client` 依赖，再通过 `@EnableEurekaClient` 注解将服务信息注册到 Eureka Server：
 
 ```
 @EnableEurekaClient
@@ -94,7 +94,7 @@ discovery:
     prefix: /eureka/
 ```
 
-然后向 APISIX 中添加如下路由：
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
 
 ```
 $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/11 \
@@ -140,11 +140,103 @@ Hello, I'm eureka client.
 $ docker run -e MODE=standalone -p 8848:8848 -p 9848:9848 -d nacos/nacos-server:v2.2.0
 ```
 
+> 不知道为什么，有时候启动会报这样的错误：`com.alibaba.nacos.api.exception.runtime.NacosRuntimeException: errCode: 500, errMsg: load derby-schema.sql error`，多启动几次又可以了。
+
 启动成功后，访问 http://localhost:8848/nacos/ 进入 Nacos 管理页面，默认用户名和密码为 `nacos/nacos`：
 
 ![](./images/nacos-home.png)
 
-https://apisix.apache.org/zh/docs/apisix/discovery/nacos/
+
+接下来，我们再准备一个简单的 Spring Boot 客户端程序，引入 `nacos-discovery-spring-boot-starter` 依赖，并通过它提供的 NameService 将服务信息注册到 Nacos Server：
+
+```
+@SpringBootApplication
+@RestController
+public class NacosApplication implements CommandLineRunner {
+
+	@Value("${spring.application.name}")
+    private String applicationName;
+
+    @Value("${server.port}")
+    private Integer serverPort;
+	
+	@NacosInjected
+    private NamingService namingService;
+	
+	public static void main(String[] args) {
+		SpringApplication.run(NacosApplication.class, args);
+	}
+
+	@Override
+    public void run(String... args) throws Exception {
+        namingService.registerInstance(applicationName, "192.168.1.40", serverPort);
+    }
+
+	@RequestMapping("/")
+	public String home() {
+		return String.format("Hello, I'm nacos client.");
+	}
+}
+```
+
+在配置文件中设置服务名称和服务端口：
+
+```
+spring.application.name=nacos-client
+server.port=8082
+```
+
+以及 Nacos Server 的地址：
+
+```
+nacos.discovery.server-addr=127.0.0.1:8848
+```
+
+启动后，在 Nacos 的服务管理页面中就可以看到我们注册的服务了：
+
+![](./images/nacos-service-management.png)
+
+接下来，我们要让 APISIX 通过 Nacos Server 找到我们的服务。首先，在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
+
+```
+discovery:
+  nacos:
+    host:
+      - "http://192.168.1.40:8848"
+    prefix: "/nacos/v1/"
+```
+
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/22 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/nacos",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/nacos", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "nacos",
+		"service_name": "nacos-client"
+    }
+}'
+```
+
+和上面 Eureka 服务发现的例子一样，我们也使用 `proxy-rewrite` 插件实现了路径重写功能，访问 APISIX 的 `/nacos` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/nacos
+Hello, I'm nacos client.
+```
+
+我们成功通过 APISIX 访问到了我们的服务。
+
+关于 APISIX 集成 Nacos 的更多信息，可以参考官方文档 [基于 Nacos 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/nacos/) 和官方博客 [Nacos 在 API 网关中的服务发现实践](https://www.apiseven.com/blog/nacos-api-gateway)。
 
 ### 基于 Consul 的服务发现
 
@@ -177,3 +269,4 @@ https://apisix.apache.org/zh/docs/apisix/discovery/
 * [借助 APISIX Ingress，实现与注册中心的无缝集成](https://www.apiseven.com/blog/apisix-ingress-integrates-with-service-discovery)
 * [APISIX Blog](https://apisix.apache.org/zh/blog/)
 * [API7.ai Blog](https://www.apiseven.com/blog)
+* [SpringBoot使用Nacos进行服务注册发现与配置管理](https://cloud.tencent.com/developer/article/1650073)
