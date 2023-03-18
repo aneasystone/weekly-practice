@@ -15,22 +15,22 @@ import com.alibaba.nacos.api.naming.NamingService;
 public class NacosApplication implements CommandLineRunner {
 
 	@Value("${spring.application.name}")
-    private String applicationName;
+	private String applicationName;
 
-    @Value("${server.port}")
-    private Integer serverPort;
+	@Value("${server.port}")
+	private Integer serverPort;
 	
 	@NacosInjected
-    private NamingService namingService;
+	private NamingService namingService;
 	
 	public static void main(String[] args) {
 		SpringApplication.run(NacosApplication.class, args);
 	}
 
 	@Override
-    public void run(String... args) throws Exception {
-        namingService.registerInstance(applicationName, "192.168.1.40", serverPort);
-    }
+	public void run(String... args) throws Exception {
+		namingService.registerInstance(applicationName, "192.168.1.40", serverPort);
+	}
 
 	@RequestMapping("/")
 	public String home() {
