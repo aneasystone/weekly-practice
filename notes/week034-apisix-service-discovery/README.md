@@ -26,6 +26,8 @@ APISIX 集成了多种服务发现机制来解决这个问题，通过服务注�
 
 [Eureka](https://spring.io/projects/spring-cloud-netflix) 是 Netflix 开源的一款注册中心服务，它也被称为 Spring Cloud Netflix，是 Spring Cloud 全家桶中的核心成员。本节将演示如何让 APISIX 通过 Eureka 来实现服务发现，动态地获取下游服务信息。
 
+### 启动 Eureka Server
+
 我们可以直接运行官方的示例代码 [spring-cloud-samples/eureka](https://github.com/spring-cloud-samples/eureka) 来启动一个 Eureka Server：
 
 ```
@@ -39,7 +41,11 @@ $ cd eureka && ./gradlew bootRun
 $ docker run -d -p 8761:8761 springcloud/eureka
 ```
 
-启动之后访问 http://localhost:8761/ 看看 Eureka Server 是否已正常运行，如果一切顺利，我们再准备一个简单的 Spring Boot 客户端程序，引入 `spring-cloud-starter-netflix-eureka-client` 依赖，再通过 `@EnableEurekaClient` 注解将服务信息注册到 Eureka Server：
+启动之后访问 http://localhost:8761/ 看看 Eureka Server 是否已正常运行。
+
+### 启动 Eureka Client
+
+如果一切顺利，我们再准备一个简单的 Spring Boot 客户端程序，引入 `spring-cloud-starter-netflix-eureka-client` 依赖，再通过 `@EnableEurekaClient` 注解将服务信息注册到 Eureka Server：
 
 ```
 @EnableEurekaClient
@@ -81,6 +87,8 @@ eureka.instance.ip-address=192.168.1.40
 启动后，在 Eureka 页面的实例中可以看到我们注册的服务：
 
 ![](./images/eureka-instances.png)
+
+### APISIX 集成 Eureka 服务发现
 
 接下来，我们要让 APISIX 通过 Eureka Server 找到我们的服务。首先，在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
 
@@ -132,6 +140,8 @@ Hello, I'm eureka client.
 
 [Nacos](https://nacos.io/zh-cn/index.html) 是阿里开源的一款集服务发现、配置管理和服务管理于一体的管理平台，APISIX 同样支持 Nacos 的服务发现机制。
 
+### 启动 Nacos Server
+
 首先，我们需要准备一个 Nacos Server，Nacos 官网提供了多种部署方式，可以 [通过源码或安装包安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html)、[通过 Docker 安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start-docker.html) 或 [通过 Kubernetes 安装](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start-kubernetes.html)，我们这里直接使用 docker 命令启动一个本地模式的 Nacos Server：
 
 ```
@@ -144,6 +154,7 @@ $ docker run -e MODE=standalone -p 8848:8848 -p 9848:9848 -d nacos/nacos-server:
 
 ![](./images/nacos-home.png)
 
+### 启动 Nacos Client
 
 接下来，我们再准备一个简单的 Spring Boot 客户端程序，引入 `nacos-discovery-spring-boot-starter` 依赖，并通过它提供的 NameService 将服务信息注册到 Nacos Server：
 
@@ -152,7 +163,7 @@ $ docker run -e MODE=standalone -p 8848:8848 -p 9848:9848 -d nacos/nacos-server:
 @RestController
 public class NacosApplication implements CommandLineRunner {
 
-	@Value("${spring.application.name}")
+    @Value("${spring.application.name}")
     private String applicationName;
 
     @Value("${server.port}")
@@ -163,9 +174,9 @@ public class NacosApplication implements CommandLineRunner {
 	
 	public static void main(String[] args) {
 		SpringApplication.run(NacosApplication.class, args);
-	}
+    }
 
-	@Override
+    @Override
     public void run(String... args) throws Exception {
         namingService.registerInstance(applicationName, "192.168.1.40", serverPort);
     }
@@ -193,6 +204,8 @@ nacos.discovery.server-addr=127.0.0.1:8848
 启动后，在 Nacos 的服务管理页面中就可以看到我们注册的服务了：
 
 ![](./images/nacos-service-management.png)
+
+### APISIX 集成 Nacos 服务发现
 
 接下来，我们要让 APISIX 通过 Nacos Server 找到我们的服务。首先，在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
 
@@ -238,6 +251,70 @@ Hello, I'm nacos client.
 
 ## 基于 Consul 的服务发现
 
+[Consul](https://www.consul.io/) 是由 HashiCorp 开源的一套分布式系统的解决方案，同时也可以作为一套服务网格解决方案，提供了丰富的控制平面功能，包括：服务发现、健康检查、键值存储、安全服务通信、多数据中心等。
+
+### 启动 Consul Server
+
+Consul 使用 Go 语言编写，安装和部署都非常简单，官方提供了 Consul 的多种安装方式，包括 [二进制安装](https://learn.hashicorp.com/collections/consul/get-started-vms)、[Kubernetes 安装](https://learn.hashicorp.com/tutorials/consul/kubernetes-deployment-guide) 或 [HCP 安装](https://developer.hashicorp.com/consul/tutorials/get-started-hcp/hcp-gs-deploy)。这里我们使用最简单的二进制安装方式，这种方式只需要执行一个可执行文件即可，首先，我们从 [Install Consul](https://developer.hashicorp.com/consul/downloads) 页面找到对应操作系统的安装包并下载：
+
+```
+$ curl -LO https://releases.hashicorp.com/consul/1.15.1/consul_1.15.1_linux_amd64.zip
+$ unzip consul_1.15.1_linux_amd64.zip
+```
+
+下载并解压之后，Consul 就算安装成功了，使用 `consul version` 命令进行验证：
+
+```
+$ ./consul version
+Consul v1.15.1
+Revision 7c04b6a0
+Build Date 2023-03-07T20:35:33Z
+Protocol 2 spoken by default, understands 2 to 3 (agent will automatically use protocol >2 when speaking to compatible agents)
+```
+
+Consul 安装完成后，就可以启动 Consul Agent 了，Consul Agent 有 `-server` 和 `-client` 两种模式，`-client` 一般用于服务网格等场景，这里我们通过 `-server` 模式启动：
+
+```
+$ ./consul agent -server -ui -bootstrap-expect=1 -node=agent-one -bind=127.0.0.1 -client=0.0.0.0 -data-dir=./data_dir
+==> Starting Consul agent...
+              Version: '1.15.1'
+           Build Date: '2023-03-07 20:35:33 +0000 UTC'
+              Node ID: '8c1ccd5a-69b3-4c95-34c1-f915c19a3d08'
+            Node name: 'agent-one'
+           Datacenter: 'dc1' (Segment: '<all>')
+               Server: true (Bootstrap: true)
+          Client Addr: [0.0.0.0] (HTTP: 8500, HTTPS: -1, gRPC: -1, gRPC-TLS: 8503, DNS: 8600)
+         Cluster Addr: 127.0.0.1 (LAN: 8301, WAN: 8302)
+    Gossip Encryption: false
+     Auto-Encrypt-TLS: false
+            HTTPS TLS: Verify Incoming: false, Verify Outgoing: false, Min Version: TLSv1_2
+             gRPC TLS: Verify Incoming: false, Min Version: TLSv1_2
+     Internal RPC TLS: Verify Incoming: false, Verify Outgoing: false (Verify Hostname: false), Min Version: TLSv1_2
+
+==> Log data will now stream in as it occurs:
+```
+
+其中 `-ui` 表示开启内置的 Web UI 管理界面，`-bootstrap-expect=1` 表示服务器希望以 bootstrap 模式启动，`-node=agent-one` 用于指定节点名称，`-bind=127.0.0.1` 这个地址用于 Consul 集群内通信，`-client=0.0.0.0` 这个地址用于 Consul 和客户端之间的通信，包括 HTTP 和 DNS 两种通信方式，`-data-dir` 参数用于设置数据目录。关于 `consul agent` 更多的命令行参数，可以参考 [Agents Overview](https://developer.hashicorp.com/consul/docs/agent) 和 [Agents Command-line Reference](https://developer.hashicorp.com/consul/docs/agent/config/cli-flags)。
+
+> 
+> 简单起见，我们也可以使用 `-dev` 参数以开发模式启动 Consul Agent：
+> ```
+> $ ./consul agent -dev
+> ```
+> 
+
+如果 Consul Agent 启动成功，访问 http://localhost:8500/ 进入 Consul 的管理页面，在服务列表可以看到 consul 这个服务：
+
+![](./images/consul-services.png)
+
+在节点列表可以看到 agent-one 这个节点：
+
+![](./images/consul-nodes.png)
+
+### 启动 Consul Client
+
+### APISIX 集成 Consul 服务发现
+
 https://apisix.apache.org/zh/docs/apisix/discovery/consul/
 
 ## 基于 DNS 的服务发现
@@ -266,3 +343,5 @@ https://apisix.apache.org/zh/docs/apisix/discovery/
 * [APISIX Blog](https://apisix.apache.org/zh/blog/)
 * [API7.ai Blog](https://www.apiseven.com/blog)
 * [SpringBoot使用Nacos进行服务注册发现与配置管理](https://cloud.tencent.com/developer/article/1650073)
+* [springcloud(十三)：注册中心 Consul 使用详解](http://www.ityouknow.com/springcloud/2018/07/20/spring-cloud-consul.html)
+* [Spring Cloud Consul 官方文档](https://docs.spring.io/spring-cloud-consul/docs/current/reference/html/)
