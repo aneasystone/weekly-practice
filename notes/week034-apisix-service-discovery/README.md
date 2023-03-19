@@ -313,9 +313,92 @@ $ ./consul agent -server -ui -bootstrap-expect=1 -node=agent-one -bind=127.0.0.1
 
 ### 启动 Consul Client
 
+让我们继续编写 Consul Client 程序，引入 `spring-cloud-starter-consul-discovery` 依赖，并通过 `@EnableDiscoveryClient` 注解将服务信息注册到 Consul Server：
+
+```
+@EnableDiscoveryClient
+@SpringBootApplication
+@RestController
+public class ConsulApplication {
+	
+	public static void main(String[] args) {
+		SpringApplication.run(ConsulApplication.class, args);
+	}
+
+	@RequestMapping("/")
+	public String home() {
+		return String.format("Hello, I'm consul client.");
+	}
+}
+```
+
+可以看到和 Eureka Client 的代码几乎是完全一样的，不过有一点要注意，我们还需要在 pom.xml 文件中引入 `spring-boot-starter-actuator` 依赖，开启 Actuator 端点，因为 Consul 默认是通过 `/actuator/health` 接口来对程序做健康检查的。
+
+在配置文件中设置服务名称和服务端口：
+
+```
+spring.application.name=consul-client
+server.port=8083
+```
+
+以及 Consul 相关的配置：
+
+```
+spring.cloud.consul.host=127.0.0.1
+spring.cloud.consul.port=8500
+spring.cloud.consul.discovery.service-name=${spring.application.name}
+spring.cloud.consul.discovery.prefer-ip-address=true
+spring.cloud.consul.discovery.ip-address=192.168.1.40
+```
+
+启动后，在 Consul 的服务管理页面中就可以看到我们注册的服务了：
+
+![](./images/consul-service-detail.png)
+
 ### APISIX 集成 Consul 服务发现
 
-https://apisix.apache.org/zh/docs/apisix/discovery/consul/
+接下来，我们要让 APISIX 通过 Consul Server 找到我们的服务。首先，在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
+
+```
+discovery:
+  consul:
+    servers:
+      - "http://192.168.1.40:8500"
+```
+
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/33 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/consul",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/consul", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "consul",
+		"service_name": "consul-client"
+    }
+}'
+```
+
+访问 APISIX 的 `/consul` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/consul
+Hello, I'm consul client.
+```
+
+我们成功通过 APISIX 访问到了我们的服务。
+
+关于 APISIX 集成 Consul 的更多信息，可以参考官方文档 [基于 Consul 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul/)。
+
+
 
 ## 基于 DNS 的服务发现
 
