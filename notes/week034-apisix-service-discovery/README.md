@@ -394,11 +394,67 @@ $ curl http://127.0.0.1:9080/consul
 Hello, I'm consul client.
 ```
 
-我们成功通过 APISIX 访问到了我们的服务。
-
 关于 APISIX 集成 Consul 的更多信息，可以参考官方文档 [基于 Consul 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul/)。
 
+### 基于 Consul KV 的服务发现
 
+Consul 还提供了分布式键值数据库的功能，这个功能和 Etcd、ZooKeeper 类似，主要用于存储配置参数和元数据。基于 Consul KV 我们也可以实现服务发现的功能。
+
+首先准备 consul-kv-client 客户端程序，它的地址为 `192.168.1.40:8084`，我们通过 Consul KV 的 HTTP API 手工注册服务：
+
+```
+$ curl -X PUT http://127.0.0.1:8500/v1/kv/upstreams/consul-kv-client/192.168.1.40:8084 -d ' {"weight": 1, "max_fails": 2, "fail_timeout": 1}'
+```
+
+其中，`/v1/kv/` 后的路径按照 `{Prefix}/{Service Name}/{IP}:{Port}` 的格式构成。可以在 Consul 的 Key/Value 管理页面看到我们注册的服务：
+
+![](./images/consul-key-value.png)
+
+然后在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
+
+```
+discovery:
+  consul_kv:
+    servers:
+      - "http://192.168.1.40:8500"
+    prefix: "upstreams"
+```
+
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/44 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/consul_kv",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/consul_kv", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "consul_kv",
+		"service_name": "http://192.168.1.40:8500/v1/kv/upstreams/consul-kv-client/"
+    }
+}'
+```
+
+注意这里的 `service_name` 参数需要设置为 KV 的 URL 路径，访问 APISIX 的 `/consul_kv` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/consul_kv
+Hello, I'm consul_kv client.
+```
+
+另一点需要注意的是，这种方式注册的服务没有健康检查机制，服务退出后需要手工删除对应的 KV：
+
+```
+$ curl -X DELETE http://127.0.0.1:8500/v1/kv/upstreams/consul-kv-client/192.168.1.40:8084
+```
+
+关于 APISIX 集成 Consul KV 的更多信息，可以参考官方文档 [基于 Consul KV 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/consul_kv/) 和官方博客 [Apache APISIX 集成 Consul KV，服务发现能力再升级](https://www.apiseven.com/blog/integrate-consul-kv-with-apache-apisix)。
 
 ## 基于 DNS 的服务发现
 
@@ -428,3 +484,4 @@ https://apisix.apache.org/zh/docs/apisix/discovery/
 * [SpringBoot使用Nacos进行服务注册发现与配置管理](https://cloud.tencent.com/developer/article/1650073)
 * [springcloud(十三)：注册中心 Consul 使用详解](http://www.ityouknow.com/springcloud/2018/07/20/spring-cloud-consul.html)
 * [Spring Cloud Consul 官方文档](https://docs.spring.io/spring-cloud-consul/docs/current/reference/html/)
+* [Consul 简介和快速入门](https://book-consul-guide.vnzmi.com/)
