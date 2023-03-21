@@ -458,7 +458,106 @@ $ curl -X DELETE http://127.0.0.1:8500/v1/kv/upstreams/consul-kv-client/192.168.
 
 ## 基于 DNS 的服务发现
 
-https://apisix.apache.org/zh/docs/apisix/discovery/dns/
+Consul 不仅支持 HTTP API，而且还支持 DNS API，它内置了一个小型的 DNS 服务器，默认端口为 8600，我们以上面的 `consul-client` 为例，介绍如何在 APISIX 中集成 DNS 的服务发现。
+
+注册到 Consul 中的服务默认会在 Consul DNS 中添加一条 `<服务名>.service.consul` 这样的域名记录，使用 `dig` 命令可以查询该域名的信息：
+
+```
+$ dig @192.168.1.40 -p 8600 consul-client.service.consul
+
+; <<>> DiG 9.11.3-1ubuntu1.17-Ubuntu <<>> @192.168.1.40 -p 8600 consul-client.service.consul
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 32989
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;consul-client.service.consul.  IN      A
+
+;; ANSWER SECTION:
+consul-client.service.consul. 0 IN      A       192.168.1.40
+
+;; Query time: 4 msec
+;; SERVER: 192.168.1.40#8600(192.168.1.40)
+;; WHEN: Tue Mar 21 07:17:40 CST 2023
+;; MSG SIZE  rcvd: 73
+```
+
+上面的查询结果中只包含 `A` 记录，`A` 记录中只有 IP 地址，没有服务端口，如果用 `A` 记录来做服务发现，服务的端口必须得固定；好在 Consul 还支持 `SRV` 记录，`SRV` 记录中包含了服务的 IP 和端口信息：
+
+```
+$ dig @192.168.1.40 -p 8600 consul-client.service.consul SRV
+
+; <<>> DiG 9.11.3-1ubuntu1.17-Ubuntu <<>> @192.168.1.40 -p 8600 consul-client.service.consul SRV
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 41141
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 3
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;consul-client.service.consul.  IN      SRV
+
+;; ANSWER SECTION:
+consul-client.service.consul. 0 IN      SRV     1 1 8083 c0a80128.addr.dc1.consul.
+
+;; ADDITIONAL SECTION:
+c0a80128.addr.dc1.consul. 0     IN      A       192.168.1.40
+agent-one.node.dc1.consul. 0    IN      TXT     "consul-network-segment="
+
+;; Query time: 3 msec
+;; SERVER: 192.168.1.40#8600(192.168.1.40)
+;; WHEN: Tue Mar 21 07:18:22 CST 2023
+;; MSG SIZE  rcvd: 168
+```
+
+我们在 APISIX 的配置文件 `config.yaml` 中添加如下内容：
+
+```
+discovery:
+  dns:
+    servers:
+      - "192.168.1.40:8600"
+```
+
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/55 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/dns",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/dns", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "dns",
+		"service_name": "consul-client.service.consul"
+    }
+}'
+```
+
+访问 APISIX 的 `/dns` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/dns
+Hello, I'm consul client.
+```
+
+关于 Consul DNS 的更多信息，可以参考官方文档 [Discover services with DNS](https://developer.hashicorp.com/consul/docs/services/discovery/dns-overview)，除了 Consul DNS，我们也可以使用其他的 DNS 服务器来做服务发现，比如 [CoreDNS](https://coredns.io/) 就是 Kubernetes 环境下的服务发现默认实现。
+
+关于 APISIX 集成 DNS 的更多信息，可以参考官方文档 [基于 DNS 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/dns/) 和官方博客 [API 网关 Apache APISIX 携手 CoreDNS 打开服务发现新大门](https://www.apiseven.com/blog/apisix-uses-coredns-enable-service-discovery)。
 
 ## 基于 APISIX-Seed 架构的控制面服务发现
 
