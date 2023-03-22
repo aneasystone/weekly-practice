@@ -561,7 +561,97 @@ Hello, I'm consul client.
 
 ## 基于 APISIX-Seed 架构的控制面服务发现
 
-https://apisix.apache.org/zh/docs/apisix/discovery/control-plane-service-discovery/
+上面所介绍的所有服务发现机制都是在 APISIX 上进行的，我们需要修改 APISIX 的配置，并重启 APISIX 才能生效，这种直接在网关上实现的服务发现也被称为 **数据面服务发现**，APISIX 还支持另一种服务发现机制，称为 **控制面服务发现**。
+
+控制面服务发现不直接对 APISIX 进行修改，而是将服务发现结果保存到 Etcd 中，APISIX 实时监听 Etcd 的数据变化，从而实现服务发现：
+
+![](./images/control-plane-service-discovery.png)
+
+APISIX 通过 [APISIX-Seed](https://github.com/api7/apisix-seed) 项目实现了控制面服务发现，这样做有下面几个好处：
+
+* 简化了 APISIX 的网络拓扑，APISIX 只需要关注 Etcd 的数据变化即可，不再和每个注册中心保持网络连接；
+* APISIX 不用额外存储注册中心的服务数据，减小内存占用；
+* APISIX 的配置变得简单，更容易管理；
+
+虽然如此，目前 APISIX-Seed 还只是一个实验性的项目，从 GitHub 上的活跃度来看，官方似乎对它的投入并不是很高，目前只支持 [ZooKeeper](https://github.com/api7/apisix-seed/blob/main/docs/zh/latest/zookeeper.md) 和 [Nacos](https://github.com/api7/apisix-seed/blob/main/docs/zh/latest/nacos.md) 两种服务发现，而且官方也没有提供 APISIX-Seed 安装包的下载，需要我们自己通过源码来构建：
+
+```
+$ git clone https://github.com/api7/apisix-seed.git
+$ make build
+```
+
+构建完成后，可以得到一个 `apisix-seed` 可执行文件，然后我们以上面的 Nacos 为例，介绍如何通过 APISIX-Seed 来实现控制面服务发现。
+
+首先，我们将 APISIX 的配置文件中所有服务发现相关的配置都删掉，并重启 APISIX，接着打开 `conf/conf.yaml` 配置文件，文件中已经提前配置好了 Etcd、ZooKeeper、Nacos 等相关的配置，我们对其做一点裁剪，只保留下面这些信息：
+
+```
+etcd:
+  host:
+    - "http://127.0.0.1:2379"
+  prefix: /apisix
+  timeout: 30
+    
+log:
+  level: warn
+  path: apisix-seed.log
+  maxage: 168h
+  maxsize: 104857600
+  rotation_time: 1h
+
+discovery:
+  nacos:
+    host:
+      - "http://127.0.0.1:8848"
+    prefix: /nacos
+```
+
+然后启动 `apisix-seed`：
+
+```
+$ ./apisix-seed
+panic: no discoverer with key: dns
+
+goroutine 15 [running]:
+github.com/api7/apisix-seed/internal/discoverer.GetDiscoverer(...)
+        D:/code/apisix-seed/internal/discoverer/discovererhub.go:42
+        D:/code/apisix-seed/internal/core/components/watcher.go:84 +0x1d4
+created by github.com/api7/apisix-seed/internal/core/components.(*Watcher).Init
+        D:/code/apisix-seed/internal/core/components/watcher.go:48 +0x2b6
+panic: no discoverer with key: consul
+
+goroutine 13 [running]:
+github.com/api7/apisix-seed/internal/discoverer.GetDiscoverer(...)
+        D:/code/apisix-seed/internal/discoverer/discovererhub.go:42
+github.com/api7/apisix-seed/internal/core/components.(*Watcher).handleQuery(0x0?, 0xc000091200, 0x0?)
+        D:/code/apisix-seed/internal/core/components/watcher.go:84 +0x1d4
+created by github.com/api7/apisix-seed/internal/core/components.(*Watcher).Init
+        D:/code/apisix-seed/internal/core/components/watcher.go:48 +0x2b6
+```
+
+不过由于上面我们在路由中添加了 dns、consul 这些服务发现类型，这些 APISIX-Seed 是不支持的，所以启动会报错，我们需要将这些路由删掉：
+
+```
+$ curl -X DELETE http://127.0.0.1:9180/apisix/admin/routes/11 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+$ curl -X DELETE http://127.0.0.1:9180/apisix/admin/routes/33 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+$ curl -X DELETE http://127.0.0.1:9180/apisix/admin/routes/44 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+$ curl -X DELETE http://127.0.0.1:9180/apisix/admin/routes/55 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+```
+
+只保留一条 `/nacos` 的路由，然后重启 `apisix-seed` 即可：
+
+```
+$ ./apisix-seed
+2023-03-22T07:49:53.849+0800    INFO    naming_client/push_receiver.go:80       udp server start, port: 55038
+```
+
+访问 APISIX 的 `/nacos` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/nacos
+Hello, I'm nacos client.
+```
+
+关于 APISIX-Seed 的更多信息，可以参考官方文档 [基于 APISIX-Seed 架构的控制面服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/control-plane-service-discovery/) 和 [APISIX-Seed 项目文档](https://github.com/api7/apisix-seed)。
 
 ## 基于 Kubernetes 的服务发现
 
