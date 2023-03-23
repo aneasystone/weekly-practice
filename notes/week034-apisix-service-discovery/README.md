@@ -655,7 +655,177 @@ Hello, I'm nacos client.
 
 ## 基于 Kubernetes 的服务发现
 
-https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/
+我们的服务还可能部署在 Kubernetes 集群中，这时，不用依赖外部的服务注册中心也可以实现服务发现，因为 Kubernetes 提供了强大而丰富的监听资源的接口，我们可以通过监听 Kubernetes 集群中 Services 或 Endpoints 等资源的实时变化来实现服务发现，APISIX 就是这样做的。
+
+我们以 [week013-playing-with-kubernetes](../week013-playing-with-kubernetes/README.md) 中的 `kubernetes-bootcamp` 为例，体验一下 APISIX 基于 Kubernetes 的服务发现。
+
+首先在 Kubernetes 集群中创建对应的 Deployment 和 Service：
+
+```
+$ kubectl create deployment kubernetes-bootcamp --image=jocatalin/kubernetes-bootcamp:v1
+deployment.apps/kubernetes-bootcamp created
+
+$ kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
+service/kubernetes-bootcamp exposed
+```
+
+通过 `kubectl get svc` 获取 NodePort 端口，并验证服务能正常访问：
+
+```
+$ kubectl get svc
+NAME                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1       <none>        443/TCP          115d
+kubernetes-bootcamp   NodePort    10.101.31.128   <none>        8080:32277/TCP   59s
+
+$ curl http://192.168.1.40:32277
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-857b45f5bb-jtzs4 | v=1
+```
+
+接下来，为了让 APISIX 能查询和监听 Kubernetes 的 Endpoints 资源变动，我们需要创建一个 `ServiceAccount`：
+
+```
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+ name: apisix-test
+ namespace: default
+```
+
+以及一个具有集群级查询和监听 Endpoints 资源权限的 `ClusterRole`：
+
+```
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: apisix-test
+rules:
+- apiGroups: [ "" ]
+  resources: [ endpoints ]
+  verbs: [ get,list,watch ]
+```
+
+再将这个 `ServiceAccount` 和 `ClusterRole` 关联起来：
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: apisix-test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: apisix-test
+subjects:
+  - kind: ServiceAccount
+    name: apisix-test
+    namespace: default
+```
+
+然后我们需要获取这个 ServiceAccount 的 token 值，如果 Kubernetes 是 v1.24 之前的版本，可以通过下面的方法获取 token 值：
+
+```
+$ kubectl get secrets | grep apisix-test
+$ kubectl get secret apisix-test-token-c64cv -o jsonpath={.data.token} | base64 -d
+```
+
+Kubernetes 从 v1.24 版本开始，不能再通过 `kubectl get secret` 获取 token 了，需要使用 `TokenRequest API` 来获取，首先开启代理：
+
+```
+$ kubectl proxy --port=8001
+Starting to serve on 127.0.0.1:8001
+```
+
+然后调用 `TokenRequest API` 生成一个 token：
+
+```
+$ curl 'http://127.0.0.1:8001/api/v1/namespaces/default/serviceaccounts/apisix-test/token' \
+  -H "Content-Type:application/json" -X POST -d '{}'
+{
+  "kind": "TokenRequest",
+  "apiVersion": "authentication.k8s.io/v1",
+  "metadata": {
+    "name": "apisix-test",
+    "namespace": "default",
+    "creationTimestamp": "2023-03-22T23:57:20Z",
+    "managedFields": [
+      {
+        "manager": "curl",
+        "operation": "Update",
+        "apiVersion": "authentication.k8s.io/v1",
+        "time": "2023-03-22T23:57:20Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:spec": {
+            "f:expirationSeconds": {}
+          }
+        },
+        "subresource": "token"
+      }
+    ]
+  },
+  "spec": {
+    "audiences": [
+      "https://kubernetes.default.svc.cluster.local"
+    ],
+    "expirationSeconds": 3600,
+    "boundObjectRef": null
+  },
+  "status": {
+    "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImtLdHRyVzFmNTRHWGFVUjVRS3hrLVJMSElNaXM4aENLMnpfSGk1SUJhbVkifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNjc5NTMzMDQwLCJpYXQiOjE2Nzk1Mjk0NDAsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwic2VydmljZWFjY291bnQiOnsibmFtZSI6ImFwaXNpeC10ZXN0IiwidWlkIjoiMzVjZWJkYTEtNGZjNC00N2JlLWIxN2QtZDA4NWJlNzU5ODRlIn19LCJuYmYiOjE2Nzk1Mjk0NDAsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmFwaXNpeC10ZXN0In0.YexM_VoumpdwZNbSkwh6IbEu59PCtZrG1lkTnCqG24G-TC0U1sGxgbXf6AnUQ5ybh-CHWbJ7oewhkg_J4j7FiSAnV_yCcEygLkaCveGIQbWldB3phDlcJ52f8YDpHFtN2vdyVTm79ECwEInDsqKhn4n9tPY4pgTodI6D9j-lcK0ywUdbdlL5VHiOw9jlnS7b60fKWBwCPyW2uohX5X43gnUr3E1Wekgpo47vx8lahTZQqnORahTdl7bsPsu_apf7LMw40FLpspVO6wih-30Ke8CNBxjpORtX2n3oteE1fi2vxYHoyJSeh1Pro_Oykauch0InFUNyEVI4kJQ720glOw",
+    "expirationTimestamp": "2023-03-23T00:57:20Z"
+  }
+}
+```
+
+默认的 token 有效期只有一个小时，可以通过参数改为一年：
+
+```
+$ curl 'http://127.0.0.1:8001/api/v1/namespaces/default/serviceaccounts/apisix-test/token' \
+  -H "Content-Type:application/json" -X POST \
+  -d '{"kind":"TokenRequest","apiVersion":"authentication.k8s.io/v1","metadata":{"name":"apisix-test","namespace":"default"},"spec":{"audiences":["https://kubernetes.default.svc.cluster.local"],"expirationSeconds":31536000}}'
+```
+
+我们在 APISIX 的配置文件 `config.yaml` 中添加如下内容（ 将上面生成的 token 填写到 `token` 字段 ）：
+
+```
+discovery:
+  kubernetes:
+    service:
+      schema: https
+      host: 127.0.0.1
+      port: 6443
+    client:
+      token: ...
+```
+
+然后重启 APISIX，接着向 APISIX 中添加如下路由：
+
+```
+$ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/66 \
+    -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -i -d '
+{
+    "methods": ["GET"],
+    "uri": "/kubernetes",
+    "plugins": {
+        "proxy-rewrite" : {
+            "regex_uri": ["/kubernetes", "/"]
+        }
+    },
+    "upstream": {
+        "type": "roundrobin",
+        "discovery_type": "kubernetes",
+        "service_name": "kubernetes-bootcamp"
+    }
+}'
+```
+
+访问 APISIX 的 `/kubernetes` 地址验证一下：
+
+```
+$ curl http://127.0.0.1:9080/kubernetes
+```
+
+关于 APISIX 集成 Kubernetes 的更多信息，可以参考官方文档 [基于 Kubernetes 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/)。
 
 ## 实现自定义服务发现
 
