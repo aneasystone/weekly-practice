@@ -793,10 +793,18 @@ discovery:
     service:
       schema: https
       host: 127.0.0.1
-      port: 6443
+      port: "6443"
     client:
       token: ...
 ```
+
+>
+> 这里有一个比较坑的地方，`port` 必须是字符串，否则会导致 APISIX 启动报错：
+> 
+> ```
+> invalid discovery kubernetes configuration: object matches none of the required
+> ```
+> 
 
 然后重启 APISIX，接着向 APISIX 中添加如下路由：
 
@@ -825,11 +833,26 @@ $ curl -X PUT http://127.0.0.1:9180/apisix/admin/routes/66 \
 $ curl http://127.0.0.1:9080/kubernetes
 ```
 
-关于 APISIX 集成 Kubernetes 的更多信息，可以参考官方文档 [基于 Kubernetes 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/)。
+不过，如果你的 APISIX 运行在 Kubernetes 集群之外，大概率是访问不通的，因为 APISIX 监听的 Endpoints 地址是 Kubernetes 集群内的 Pod 地址：
 
-## 实现自定义服务发现
+```
+$ kubectl describe endpoints/kubernetes-bootcamp
+Name:         kubernetes-bootcamp
+Namespace:    default
+Labels:       app=kubernetes-bootcamp
+Annotations:  endpoints.kubernetes.io/last-change-trigger-time: 2023-03-25T00:31:43Z
+Subsets:
+  Addresses:          10.1.5.12
+  NotReadyAddresses:  <none>
+  Ports:
+    Name     Port  Protocol
+    ----     ----  --------
+    <unset>  8080  TCP
 
-https://apisix.apache.org/zh/docs/apisix/discovery/
+Events:  <none>
+```
+
+所以想使用基于 Kubernetes 的服务发现，最佳做法是将 APISIX 部署在 Kubernetes 中，或者使用 [APISIX Ingress](https://apisix.apache.org/zh/docs/ingress-controller/getting-started/)，关于 APISIX 集成 Kubernetes 的更多信息，可以参考官方文档 [基于 Kubernetes 的服务发现](https://apisix.apache.org/zh/docs/apisix/discovery/kubernetes/) 和官方博客 [借助 APISIX Ingress，实现与注册中心的无缝集成](https://www.apiseven.com/blog/apisix-ingress-integrates-with-service-discovery)。
 
 ## 参考
 
@@ -837,10 +860,16 @@ https://apisix.apache.org/zh/docs/apisix/discovery/
 * [API 网关 Apache APISIX 集成 Eureka 作为服务发现](https://www.apiseven.com/blog/apigateway-integration-eureka-service-discovery)
 * [API 网关 Apache APISIX 携手 CoreDNS 打开服务发现新大门](https://www.apiseven.com/blog/apisix-uses-coredns-enable-service-discovery)
 * [Nacos 在 API 网关中的服务发现实践](https://www.apiseven.com/blog/nacos-api-gateway)
-* [借助 APISIX Ingress，实现与注册中心的无缝集成](https://www.apiseven.com/blog/apisix-ingress-integrates-with-service-discovery)
 * [APISIX Blog](https://apisix.apache.org/zh/blog/)
 * [API7.ai Blog](https://www.apiseven.com/blog)
 * [SpringBoot使用Nacos进行服务注册发现与配置管理](https://cloud.tencent.com/developer/article/1650073)
 * [springcloud(十三)：注册中心 Consul 使用详解](http://www.ityouknow.com/springcloud/2018/07/20/spring-cloud-consul.html)
 * [Spring Cloud Consul 官方文档](https://docs.spring.io/spring-cloud-consul/docs/current/reference/html/)
 * [Consul 简介和快速入门](https://book-consul-guide.vnzmi.com/)
+
+## 更多
+
+### 实现自定义服务发现
+
+https://apisix.apache.org/zh/docs/apisix/discovery/
+
