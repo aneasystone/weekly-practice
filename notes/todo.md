@@ -1,5 +1,18 @@
 # TODO LIST
 
+## Spring Security
+
+* [Getting started with Spring Security and Spring Boot](https://reflectoring.io/spring-security/)
+
+## 数据库分片
+
+* [数据库分片（Database Sharding)详解](https://zhuanlan.zhihu.com/p/57185574)
+* [图解数据库分片技术](https://posts.careerengine.us/p/641433ce681dcb4a7b7d6da4)
+
+## Spring Boot 启动优化
+
+* [7min到40s：SpringBoot启动优化实践](https://juejin.cn/post/7181342523728592955)
+
 ## 排错技巧
 
 * [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
