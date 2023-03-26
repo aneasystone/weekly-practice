@@ -25,10 +25,6 @@
 
 * [动态代理大揭秘，带你彻底弄清楚动态代理！](https://my.oschina.net/u/1584523/blog/5261706)
 
-## Istio + Envoy
-
-* [Istio Handbook——Istio 服务网格进阶实战](http://www.zhaowenyu.com/istio-doc/)
-
 ## 开发一个 Vue 组件
 
 * [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
