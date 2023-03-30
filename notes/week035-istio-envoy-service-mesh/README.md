@@ -30,16 +30,40 @@
 
 * 第五阶段：将边车代理统一管控起来实现安全、可控、可观测的通信，将数据平面与控制平面分离开来，实现通用、透明的通信，这项工作就由专门的服务网格框架来保障
 
+服务网格（*Service Mesh*）一词是 Buoyant 公司的 CEO William Morgan 于 2017 年在他的一篇博客 [《What's a service mesh? And why do I need one?》](https://linkerd.io/2017/04/25/whats-a-service-mesh-and-why-do-i-need-one/) 中首次提出的，他是世界上第一款服务网格产品 Linkerd 的创始人之一，在博客中，William Morgan 对服务网格做了如下定义：
+
+> 服务网格是一种用于管控服务间通信的的基础设施，它负责为现代云原生应用程序在复杂服务拓扑中可靠地传递请求。在实践中，服务网格通常以轻量级网络代理阵列的形式实现，这些代理与应用程序部署在一起，对应用程序来说无需感知代理的存在。
+
+服务网格将上一阶段的边车代理联合起来形成如下所示的网格状结构：
+
 ![](./images/stage-5.png)
 
-服务网格（*Service Mesh*）一词是 Buoyant 公司的 CEO William Morgan 于 2017 年在他的一篇博客 [《What's a service mesh? And why do I need one?》](https://linkerd.io/2017/04/25/whats-a-service-mesh-and-why-do-i-need-one/) 中首次提出的，他是 Linkerd 创始人之一，而 Linkerd 是第一个服务网格产品。
+在服务网格中，主要由数据平面与控制平面组成。数据平面是所有边车代理的集合，负责拦截所有服务流入和流出的流量，并配置控制平面对流量进行管理；控制平面对数据平面进行管理，完成配置分发、服务发现、授权鉴权等功能。如上图所示，整个系统中的通信包括两个部分：实线表示数据平面之间的通信，虚线表示控制平面和数据平面之间的通信。
+
+服务网格的概念一经提出，其价值迅速被业界所认可，业界几乎所有的云原生玩家都积极参与了进来：
+
+* 2016 年，[Buoyant 公司](https://buoyant.io/) 推出 [Linkerd](https://linkerd.io/)，同年，[Lyft 公司](https://www.lyft.com/) 推出 [Envoy](https://www.envoyproxy.io/)
+* 2017 年，Linkerd 加入 CNCF，同年，Google、IBM 和 Lyft 共同发布 [Istio](https://istio.io/)，为了和 Istio 展开竞争，Buoyant 公司将自家的 Conduit 产品合并到 Linkerd 中发布了 Linkerd 2
+* 2018 年后，Google、亚马逊、微软分别推出各自的公有云版本 Service Mesh 产品，国内的阿里巴巴也推出了基于 Istio 的修改版 [SOFAMesh](https://www.sofastack.tech/projects/sofa-mesh/overview/)（目前已经废弃），并开源了自己研发的 [MOSN](https://mosn.io/) 代理
+
+随着各巨头的参与，Istio 逐渐超过了 Linkerd 的地位，几乎成了原云生环境下服务网格中控制平面的事实标准，而 Envoy 凭借其卓越的性能和强大的动态配置功能，成为了服务网格中数据平面的不二选择，下图是使用 Istio 作为服务网格方案后的典型架构：
+
+![](./images/istio-envoy.png)
+
+这篇笔记将以 Istio 的官方示例来学习如何使用 Istio 和 Envoy 打造一个基于服务网格的微服务架构。
+
+## 快速开始
+
+https://istio.io/latest/zh/docs/setup/getting-started/
 
 ## 参考
 
+* [服务网格 | 凤凰架构](http://icyfenix.cn/immutable-infrastructure/mesh/)
 * [透明通信的涅槃 | 凤凰架构](http://icyfenix.cn/immutable-infrastructure/mesh/communication.html)
 * [服务网格与生态 | 凤凰架构](http://icyfenix.cn/immutable-infrastructure/mesh/ecosystems.html)
 * [Pattern: Service Mesh](https://philcalcado.com/2017/08/03/pattern_service_mesh.html)
 * [什么是Service Mesh（服务网格）？](https://jimmysong.io/blog/what-is-a-service-mesh/)
+* [服务网格新生代-Istio](https://skyao.io/talk/201709-istio-introduction/)
 * [Istio 服务网格](https://istio.io/latest/zh/about/service-mesh/)
 * [服务网格终极指南第二版——下一代微服务开发](https://cloudnative.to/blog/service-mesh-ultimate-guide-e2/)
 * [Istio Handbook——Istio 服务网格进阶实战](http://www.zhaowenyu.com/istio-doc/)
