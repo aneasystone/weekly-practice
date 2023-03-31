@@ -54,7 +54,93 @@
 
 ## 快速开始
 
+首先从 Istio 的 [Release 页面](https://github.com/istio/istio/releases) 找到最新版本的安装包并下载和解压：
+
+```
+$ curl -LO https://github.com/istio/istio/releases/download/1.17.1/istio-1.17.1-linux-amd64.tar.gz
+$ tar zxvf istio-1.17.1-linux-amd64.tar.gz
+```
+
+解压后的目录中包含几个文件和目录：
+
+```
+$ tree -L 1 istio-1.17.1
+istio-1.17.1
+├── LICENSE
+├── README.md
+├── bin
+├── manifest.yaml
+├── manifests
+├── samples
+└── tools
+
+4 directories, 3 files
+```
+
+其中，`bin` 目录下包含了 `istioctl` 可执行文件，我们可以将这个目录添加到 `PATH` 环境变量；`samples` 目录下是一些示例程序，用于体验 Istio 的不同功能特性。
+
+配置好 `istioctl` 之后，就可以使用 `istioctl install` 命令安装 Istio 了：
+
+```
+$ istioctl install --set profile=demo
+This will install the Istio 1.17.1 demo profile with ["Istio core" "Istiod" "Ingress gateways" "Egress gateways"] components into the cluster. Proceed? (y/N) y
+✔ Istio core installed
+✔ Istiod installed
+✔ Ingress gateways installed
+✔ Egress gateways installed
+✔ Installation complete
+```
+
+Istio 提供了几种 [不同的安装配置](https://istio.io/latest/zh/docs/setup/additional-setup/config-profiles/)：
+
+```
+$ istioctl profile list
+Istio configuration profiles:
+    ambient
+    default
+    demo
+    empty
+    external
+    minimal
+    openshift
+    preview
+    remote
+```
+
+这里为了演示和体验，我们使用了 `demo` 配置，它相对于默认的 `default` 配置来说，开启了一些用于演示的特性，日志级别也比较高，性能会有一定影响，所以不推荐在生产环境使用。 我们可以通过 `istioctl profile dump demo` 查看配置详情，或者通过 `istioctl profile diff` 对比两个配置之间的差异：
+
+```
+$ istioctl profile diff default demo
+```
+
+从安装的输出结果可以看到，安装内容包括下面四个部分：
+
+* Istio core
+* Istiod
+* Ingress gateways
+* Egress gateways
+
+也可以使用 `kubectl get deployments` 来看看 Istio 具体安装了哪些服务：
+
+```
+$ kubectl get deployments -n istio-system
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+istio-egressgateway    1/1     1            1           20m
+istio-ingressgateway   1/1     1            1           20m
+istiod                 1/1     1            1           21m
+```
+
+### 部署 Bookinfo 示例应用
+
 https://istio.io/latest/zh/docs/setup/getting-started/
+
+### 卸载
+
+如果要卸载 Istio，可以执行 `istioctl uninstall` 命令：
+
+```
+$ istioctl uninstall -y --purge
+```
 
 ## 参考
 
