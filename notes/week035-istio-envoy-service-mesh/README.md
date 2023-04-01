@@ -77,9 +77,7 @@ istio-1.17.1
 4 directories, 3 files
 ```
 
-其中，`bin` 目录下包含了 `istioctl` 可执行文件，我们可以将这个目录添加到 `PATH` 环境变量；`samples` 目录下是一些示例程序，用于体验 Istio 的不同功能特性。
-
-配置好 `istioctl` 之后，就可以使用 `istioctl install` 命令安装 Istio 了：
+其中，`bin` 目录下包含了 `istioctl` 可执行文件，我们可以将这个目录添加到 `PATH` 环境变量，配置之后，就可以使用 `istioctl install` 命令安装 Istio 了：
 
 ```
 $ istioctl install --set profile=demo
@@ -91,7 +89,7 @@ This will install the Istio 1.17.1 demo profile with ["Istio core" "Istiod" "Ing
 ✔ Installation complete
 ```
 
-Istio 提供了几种 [不同的安装配置](https://istio.io/latest/zh/docs/setup/additional-setup/config-profiles/)：
+Istio 内置了几种 [不同的安装配置](https://istio.io/latest/zh/docs/setup/additional-setup/config-profiles/)：
 
 ```
 $ istioctl profile list
@@ -107,20 +105,32 @@ Istio configuration profiles:
     remote
 ```
 
-这里为了演示和体验，我们使用了 `demo` 配置，它相对于默认的 `default` 配置来说，开启了一些用于演示的特性，日志级别也比较高，性能会有一定影响，所以不推荐在生产环境使用。 我们可以通过 `istioctl profile dump demo` 查看配置详情，或者通过 `istioctl profile diff` 对比两个配置之间的差异：
+所有的配置都位于 `manifests/profiles` 目录下，你也可以 [定制自己的配置](https://istio.io/latest/zh/docs/setup/additional-setup/customize-installation/)。这里为了演示和体验，我们使用了 `demo` 配置，它相对于默认的 `default` 配置来说，开启了一些用于演示的特性，日志级别也比较高，性能会有一定影响，所以不推荐在生产环境使用。这些配置通过统一的 [IstioOperator API](https://istio.io/latest/zh/docs/reference/config/istio.operator.v1alpha1/) 来定义，我们可以通过 `istioctl profile dump` 查看配置详情：
+
+```
+$ istioctl profile dump demo
+```
+
+或者通过 `istioctl profile diff` 对比两个配置之间的差异：
 
 ```
 $ istioctl profile diff default demo
 ```
 
-从安装的输出结果可以看到，安装内容包括下面四个部分：
+执行 `istioctl` 命令时会创建了一个名为 `installed-state` 的自定义资源，内容就是上面所看到的 `demo` 配置：
+
+```
+$ kubectl get IstioOperator installed-state -n istio-system -o yaml
+```
+
+从安装的输出结果可以看到，`demo` 配置安装内容包括下面四个部分：
 
 * Istio core
 * Istiod
 * Ingress gateways
 * Egress gateways
 
-也可以使用 `kubectl get deployments` 来看看 Istio 具体安装了哪些服务：
+可以使用 `kubectl get deployments` 来看看 Istio 具体安装了哪些服务：
 
 ```
 $ kubectl get deployments -n istio-system
@@ -130,9 +140,59 @@ istio-ingressgateway   1/1     1            1           20m
 istiod                 1/1     1            1           21m
 ```
 
+除此之外，`istioctl` 命令还生成了很多其他的 Kubernetes 资源，我们可以使用 `istioctl manifest generate` 生成最原始的 Kubernetes YAML 定义：
+
+```
+$ istioctl manifest generate --set profile=demo > demo.yaml
+```
+
+生成上面的 YAML 后，我们甚至可以通过执行 `kubectl apply -f` 来安装 Istio，不过这种安装方式有很多 [需要注意的地方](https://istio.io/latest/zh/docs/setup/install/istioctl/#generate-a-manifest-before-installation)，官方并不推荐这种做法，但这也不失为一种深入了解 Istio 原理的好方法。
+
+除了 [使用 Istioctl 安装](https://istio.io/latest/zh/docs/setup/install/istioctl/)，官方还提供了很多 [其他的安装方式](https://istio.io/latest/zh/docs/setup/install/)，比如 [使用 Helm 安装](https://istio.io/latest/zh/docs/setup/install/helm/)，[虚拟机安装](https://istio.io/latest/zh/docs/setup/install/virtual-machine/) 和 [使用 Istio Operator 安装](https://istio.io/latest/zh/docs/setup/install/operator/) 等，[各个云平台](https://istio.io/latest/zh/docs/setup/platform-setup/) 也对 Istio 提供了支持。
+
 ### 部署 Bookinfo 示例应用
 
+在部署应用之前，我们还需给命名空间打上 `istio-injection=enabled` 标签，这个标签可以让 Istio 部署应用时自动注入 Envoy 边车代理：
+
+```
+$ kubectl label namespace default istio-injection=enabled
+namespace/default labeled
+```
+
+上面在解压 Istio 安装包时，可以看到有一个 `samples` 目录，这个目录里包含了一些官方的示例程序，用于体验 Istio 的不同功能特性。其中 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能，执行下面的命令部署 Bookinfo 示例应用：
+
+```
+$ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+service/details created
+serviceaccount/bookinfo-details created
+deployment.apps/details-v1 created
+service/ratings created
+serviceaccount/bookinfo-ratings created
+deployment.apps/ratings-v1 created
+service/reviews created
+serviceaccount/bookinfo-reviews created
+deployment.apps/reviews-v1 created
+deployment.apps/reviews-v2 created
+deployment.apps/reviews-v3 created
+service/productpage created
+serviceaccount/bookinfo-productpage created
+deployment.apps/productpage-v1 created
+```
+
+这是一个简单的在线书店应用，包含了四个微服务，这些微服务由不同的语言编写：
+
+* `productpage` - 产品页面，它会调用 `details` 和 `reviews` 两个服务；
+* `details` - 书籍详情服务；
+* `reviews` - 书籍评论服务，它有三个不同的版本，v1 版本不包含评价信息，v2 和 v3 版本会调用 `ratings` 服务获取书籍评价，不过 v2 显示的是黑色星星，v3 显示的是红色星星；
+* `ratings` - 书籍评价服务；
+
+部署之后整个系统的架构图如下所示：
+
+![](./images/bookinfo.png)
+
 https://istio.io/latest/zh/docs/setup/getting-started/
+
+https://istio.io/latest/zh/docs/examples/bookinfo/
 
 ### 卸载
 
@@ -156,3 +216,15 @@ $ istioctl uninstall -y --purge
 * [谈谈微服务架构中的基础设施：Service Mesh与Istio](https://www.zhaohuabing.com/2018/03/29/what-is-service-mesh-and-istio/)
 * [Jimmy Song 的原创博客](https://jimmysong.io/blog/)
 * [云原生社区博客](https://cloudnative.to/blog/)
+
+## 更多
+
+### 其他官方学习文档
+
+* [使用 Kubernetes 和 Istio 学习微服务](https://istio.io/latest/zh/docs/examples/microservices-istio/)
+* Istio 任务 - 使用 Istio 实现单个特定的目标行为
+    * [流量管理](https://istio.io/latest/zh/docs/tasks/traffic-management/)
+    * [安全](https://istio.io/latest/zh/docs/tasks/security/)
+    * [策略执行](https://istio.io/latest/zh/docs/tasks/policy-enforcement/)
+    * [可观察性](https://istio.io/latest/zh/docs/tasks/observability/)
+    * [可扩展性](https://istio.io/latest/zh/docs/tasks/extensibility/)
