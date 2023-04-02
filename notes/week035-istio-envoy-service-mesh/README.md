@@ -150,16 +150,89 @@ $ istioctl manifest generate --set profile=demo > demo.yaml
 
 除了 [使用 Istioctl 安装](https://istio.io/latest/zh/docs/setup/install/istioctl/)，官方还提供了很多 [其他的安装方式](https://istio.io/latest/zh/docs/setup/install/)，比如 [使用 Helm 安装](https://istio.io/latest/zh/docs/setup/install/helm/)，[虚拟机安装](https://istio.io/latest/zh/docs/setup/install/virtual-machine/) 和 [使用 Istio Operator 安装](https://istio.io/latest/zh/docs/setup/install/operator/) 等，[各个云平台](https://istio.io/latest/zh/docs/setup/platform-setup/) 也对 Istio 提供了支持。
 
-### 部署 Bookinfo 示例应用
+### 一个简单的例子
 
-在部署应用之前，我们还需给命名空间打上 `istio-injection=enabled` 标签，这个标签可以让 Istio 部署应用时自动注入 Envoy 边车代理：
+为了充分发挥 Istio 的所有特性，网格中的每个应用服务都必须有一个边车代理，这个边车代理可以拦截应用服务的所有出入流量，这样我们就可以利用 Istio 控制平面为应用提供服务发现、限流、可观测性等功能了。
+
+[边车代理的注入](https://istio.io/latest/zh/docs/setup/additional-setup/sidecar-injection/) 一般有两种方法：自动注入和手动注入。上面在解压 Istio 安装包时，可以看到有一个 `samples` 目录，这个目录里包含了一些官方的示例程序，用于体验 Istio 的不同功能特性，其中 `samples/sleep` 目录下是一个简单的 sleep 应用，这一节就使用这个简单的例子来演示如何在我们的应用服务中注入一个边车代理。
+
+首先，执行下面的命令部署 sleep 应用：
+
+```
+$ kubectl apply -f samples/sleep/sleep.yaml
+serviceaccount/sleep created
+service/sleep created
+deployment.apps/sleep created
+```
+
+默认情况下，一个 Pod 里只有一个容器（从下面的 `READY` 字段是 `1/1` 可以看出来）：
+
+```
+$ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+sleep-78ff5975c6-hw2lv   1/1     Running   0          23s
+```
+
+接下来，我们给 `default` 命名空间打上 `istio-injection=enabled` 标签：
 
 ```
 $ kubectl label namespace default istio-injection=enabled
 namespace/default labeled
 ```
 
-上面在解压 Istio 安装包时，可以看到有一个 `samples` 目录，这个目录里包含了一些官方的示例程序，用于体验 Istio 的不同功能特性。其中 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能，执行下面的命令部署 Bookinfo 示例应用：
+这个标签可以让 Istio 部署应用时自动注入 Envoy 边车代理，这个过程是在 Pod 创建时自动完成的，Istio 使用了 Kubernetes 的 [准入控制器（Admission Controllers）](https://kubernetes.io/zh-cn/docs/reference/access-authn-authz/admission-controllers/)，通过 [MutatingAdmissionWebhook](https://kubernetes.io/zh-cn/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) 可以对创建的 Pod 进行修改，从而将边车代理容器注入到原始的 Pod 定义中。
+
+我们将刚刚的 Pod 删除，这样 Deployment 会尝试创建一个新的 Pod，从而触发自动注入的过程：
+
+```
+$ kubectl delete pod sleep-78ff5975c6-hw2lv
+pod "sleep-78ff5975c6-hw2lv" deleted
+```
+
+再次查看 Pod 列表，`READY` 字段已经变成了 `2/2`，说明每个 Pod 里变成了两个容器：
+
+```
+$ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+sleep-78ff5975c6-v6qg4   2/2     Running   0          12s
+```
+
+也可以使用 `kubectl describe` 查看 Pod 详情：
+
+```
+$ kubectl describe pod sleep-78ff5975c6-v6qg4
+Name:             sleep-78ff5975c6-v6qg4
+Namespace:        default
+Priority:         0
+Service Account:  sleep
+Init Containers:
+  istio-init:
+    Container ID:  docker://c724b0c29ffd828e497cfdff45706061855b1b8c93073f9f037acc112367bceb
+    Image:         docker.io/istio/proxyv2:1.17.1
+Containers:
+  sleep:
+    Container ID:  docker://44f35a4934841c5618eb68fb5615d75ea5dd9c5dd826cb6a99a6ded6efaa6707
+    Image:         curlimages/curl
+  istio-proxy:
+    Container ID:  docker://10a9ff35f45c7f07c1fcf88d4f8daa76282d09ad96912e026e59a4d0a99f02cf
+    Image:         docker.io/istio/proxyv2:1.17.1
+
+Events:
+  Type     Reason     Age    From               Message
+  ----     ------     ----   ----               -------
+  Normal   Created    4m22s  kubelet            Created container istio-init
+  Normal   Started    4m21s  kubelet            Started container istio-init
+  Normal   Created    4m20s  kubelet            Created container sleep
+  Normal   Started    4m20s  kubelet            Started container sleep
+  Normal   Created    4m20s  kubelet            Created container istio-proxy
+  Normal   Started    4m20s  kubelet            Started container istio-proxy
+```
+
+可以看到除了原始的 `sleep` 容器，多了一个 `istio-proxy` 容器，这就是边车代理，另外还多了一个 `istio-init` 初始化容器，它使用 `iptables` 将网络流量自动转发到边车代理，从而实现应用透明。
+
+### 部署 Bookinfo 示例应用
+
+这一节我们来学习一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。首先，执行下面的命令部署 Bookinfo 示例应用：
 
 ```
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
@@ -185,6 +258,19 @@ deployment.apps/productpage-v1 created
 * `details` - 书籍详情服务；
 * `reviews` - 书籍评论服务，它有三个不同的版本，v1 版本不包含评价信息，v2 和 v3 版本会调用 `ratings` 服务获取书籍评价，不过 v2 显示的是黑色星星，v3 显示的是红色星星；
 * `ratings` - 书籍评价服务；
+
+部署时 Istio 会对每个微服务自动注入 Envoy 边车代理，我们可以通过 `kubectl get pods` 看到，每个 Pod 里都有两个容器在运行，其中一个是真实服务，另一个就是代理服务：
+
+```
+$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS        AGE
+details-v1-5ffd6b64f7-755f9      2/2     Running   2 (5m12s ago)   22h
+productpage-v1-979d4d9fc-r8hm9   2/2     Running   2 (5m12s ago)   22h
+ratings-v1-5f9699cfdf-6j265      2/2     Running   1 (5m12s ago)   22h
+reviews-v1-569db879f5-kq5s7      2/2     Running   1 (5m12s ago)   22h
+reviews-v2-65c4dc6fdc-wc7pn      2/2     Running   2 (5m12s ago)   22h
+reviews-v3-c9c4fb987-zzzdm       2/2     Running   2 (5m12s ago)   22h
+```
 
 部署之后整个系统的架构图如下所示：
 
