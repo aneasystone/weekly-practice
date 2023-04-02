@@ -300,18 +300,94 @@ deployment.apps/productpage-v1 created
 
 ```
 $ kubectl get pods
-NAME                             READY   STATUS    RESTARTS        AGE
-details-v1-5ffd6b64f7-755f9      2/2     Running   2 (5m12s ago)   22h
-productpage-v1-979d4d9fc-r8hm9   2/2     Running   2 (5m12s ago)   22h
-ratings-v1-5f9699cfdf-6j265      2/2     Running   1 (5m12s ago)   22h
-reviews-v1-569db879f5-kq5s7      2/2     Running   1 (5m12s ago)   22h
-reviews-v2-65c4dc6fdc-wc7pn      2/2     Running   2 (5m12s ago)   22h
-reviews-v3-c9c4fb987-zzzdm       2/2     Running   2 (5m12s ago)   22h
+NAME                             READY   STATUS    RESTARTS   AGE
+details-v1-5ffd6b64f7-r6pr5      2/2     Running   0          14m
+productpage-v1-979d4d9fc-gdmzh   2/2     Running   0          14m
+ratings-v1-5f9699cfdf-trqj6      2/2     Running   0          14m
+reviews-v1-569db879f5-gd9st      2/2     Running   0          14m
+reviews-v2-65c4dc6fdc-5lph4      2/2     Running   0          14m
+reviews-v3-c9c4fb987-kzjfk       2/2     Running   0          14m
 ```
 
 部署之后整个系统的架构图如下所示：
 
 ![](./images/bookinfo.png)
+
+这个时候从外部还不能访问该服务，只能在集群内访问，进入 `ratings` 服务所在的 Pod，验证 `productpage` 服务能否正常访问：
+
+```
+$ kubectl exec -it ratings-v1-5f9699cfdf-trqj6 -- sh
+$ curl -s productpage:9080/productpage | grep "<title>"
+    <title>Simple Bookstore App</title>
+```
+
+为了能从外部访问该服务，我们需要创建一个入站网关：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+gateway.networking.istio.io/bookinfo-gateway created
+virtualservice.networking.istio.io/bookinfo created
+```
+
+这个 YAML 中包含两个部分，第一部分定义了名为 `bookinfo-gateway` 的 [网关（Gateway）](https://istio.io/latest/zh/docs/concepts/traffic-management/#gateways)：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bookinfo-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+```
+
+第二部分定义了名为 `bookinfo` 的 [虚拟服务（VirtualService）](https://istio.io/latest/zh/docs/concepts/traffic-management/#virtual-services)，并和网关关联起来：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage
+        port:
+          number: 9080
+```
+
+有了这个网关后，我们就可以在浏览器中输入 http://localhost/productpage 访问我们的在线书店了：
+
+![](./images/bookinfo-productpage.png)
+
+因为这里我们部署了三个版本的 `reviews` 服务，所以多刷新几次页面，可以看到页面上会随机展示 `reviews` 服务的不同版本的效果（可能不显示星星，也可能显示红色或黑色的星星）。
+
+### 配置请求路径
+
+https://istio.io/latest/zh/docs/tasks/traffic-management/request-routing/
 
 https://istio.io/latest/zh/docs/setup/getting-started/
 
