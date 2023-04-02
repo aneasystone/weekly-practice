@@ -228,11 +228,48 @@ Events:
   Normal   Started    4m20s  kubelet            Started container istio-proxy
 ```
 
-可以看到除了原始的 `sleep` 容器，多了一个 `istio-proxy` 容器，这就是边车代理，另外还多了一个 `istio-init` 初始化容器，它使用 `iptables` 将网络流量自动转发到边车代理，从而实现应用透明。
+可以看到除了原始的 `sleep` 容器，多了一个 `istio-proxy` 容器，这就是边车代理，另外还多了一个 `istio-init` 初始化容器，它使用 `iptables` 将网络流量自动转发到边车代理，对应用程序完全透明。
+
+另一种方法是手工注入边车代理，先将 `default` 命名空间的 `istio-injection` 标签移除：
+
+```
+$ kubectl label namespace default istio-injection-
+namespace/default unlabeled
+```
+
+同时删除 `sleep` 应用：
+
+```
+$ kubectl delete -f samples/sleep/sleep.yaml
+serviceaccount "sleep" deleted
+service "sleep" deleted
+deployment.apps "sleep" deleted
+```
+
+然后再重新部署 `sleep` 应用，并使用 `istioctl kube-inject` 命令手工注入边车代理：
+
+```
+$ istioctl kube-inject -f samples/sleep/sleep.yaml | kubectl apply -f -
+serviceaccount/sleep created
+service/sleep created
+deployment.apps/sleep created
+```
+
+默认情况下，Istio 使用集群中的默认配置模版来生成边车配置，这个默认配置模版保存在名为 `istio-sidecar-injector` 的 ConfigMap 中：
+
+```
+# 配置模版
+$ kubectl -n istio-system get configmap istio-sidecar-injector -o=jsonpath='{.data.config}'
+
+# 配置值
+$ kubectl -n istio-system get configmap istio-sidecar-injector -o=jsonpath='{.data.values}'
+```
+
+除了官方提供的默认模版，还可以通过在 Pod 中添加一个 `istio-proxy` 容器来自定义注入内容，或者通过 `inject.istio.io/templates` 注解来设置自定义模版，更多内容可以 [参考官方文档](https://istio.io/latest/zh/docs/setup/additional-setup/sidecar-injection/#customizing-injection)。
 
 ### 部署 Bookinfo 示例应用
 
-这一节我们来学习一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。首先，执行下面的命令部署 Bookinfo 示例应用：
+这一节我们来学习一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。为了方便起见，我们还是给 `default` 命名空间打上 `istio-injection=enabled` 标签开启自动注入功能，然后，执行下面的命令部署 Bookinfo 示例应用：
 
 ```
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
@@ -259,7 +296,7 @@ deployment.apps/productpage-v1 created
 * `reviews` - 书籍评论服务，它有三个不同的版本，v1 版本不包含评价信息，v2 和 v3 版本会调用 `ratings` 服务获取书籍评价，不过 v2 显示的是黑色星星，v3 显示的是红色星星；
 * `ratings` - 书籍评价服务；
 
-部署时 Istio 会对每个微服务自动注入 Envoy 边车代理，我们可以通过 `kubectl get pods` 看到，每个 Pod 里都有两个容器在运行，其中一个是真实服务，另一个就是代理服务：
+部署时 Istio 会对每个微服务自动注入 Envoy 边车代理，我们可以通过 `kubectl get pods` 命令进行确认，确保每个 Pod 里都有两个容器在运行，其中一个是真实服务，另一个是代理服务：
 
 ```
 $ kubectl get pods
