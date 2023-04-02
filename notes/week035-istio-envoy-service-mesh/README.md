@@ -427,3 +427,18 @@ $ istioctl uninstall -y --purge
     * [策略执行](https://istio.io/latest/zh/docs/tasks/policy-enforcement/)
     * [可观察性](https://istio.io/latest/zh/docs/tasks/observability/)
     * [可扩展性](https://istio.io/latest/zh/docs/tasks/extensibility/)
+
+### Kubernetes Gateway API
+
+在最早的版本中，Istio 使用 Kubernetes 提供的 [Ingress API](https://kubernetes.io/docs/concepts/services-networking/ingress/) 来进行流量管理，但是这个 API 在管理大型应用系统或非 HTTP 协议服务时存在一定的缺点和限制，Istio 在 2018 年 [推出了新的流量管理 API v1alpha3](https://istio.io/latest/zh/blog/2018/v1alpha3-routing/)，在新的 API 中定义了下面这些资源：
+
+* Gateway
+* VirtualService
+* DestinationRule
+* ServiceEntry
+
+关于这几个概念的意义，可以通过 Istio 的 [官方文档](https://istio.io/latest/zh/docs/concepts/traffic-management/) 来学习。
+
+2022 年 7 月，[Kubernetes 发布了 Gateway API 的 Beta 版本](https://kubernetes.io/blog/2022/07/13/gateway-api-graduates-to-beta/)，Istio 立即宣布了对 [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/guides/) 的支持，Istio API 也跟着升级到了 Beta 版本，并表示 Gateway API 将作为未来所有 Istio 流量管理的默认 API。
+
+目前，用户可以选择 Kubernetes Ingress、Istio classic 和 Gateway API 三种方式来管理网格中的流量，相关内容可以参考 [Kubernetes Ingress](https://istio.io/latest/zh/docs/tasks/traffic-management/ingress/ingress-control/)、[Istio Gateway](https://istio.io/latest/zh/docs/tasks/traffic-management/ingress/ingress-control/) 和 [Kubernetes Gateway API](https://istio.io/latest/zh/docs/tasks/traffic-management/ingress/gateway-api/)。
