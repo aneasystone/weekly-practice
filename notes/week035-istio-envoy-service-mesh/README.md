@@ -50,9 +50,32 @@
 
 ![](./images/istio-envoy.png)
 
-这篇笔记将以 Istio 的官方示例来学习如何使用 Istio 和 Envoy 打造一个基于服务网格的微服务架构。
+Istio 服务网格的数据平面由 Envoy 代理实现，在 [week007-envoy-quickstart](../week007-envoy-quickstart/README.md) 中我们学习过 Envoy 的基本用法，这是一个用 C++ 开发的高性能代理，用于协调和控制微服务之间的网络流量，并为这些服务透明地提供了许多 Envoy 内置的功能特性：
+
+* 动态服务发现
+* 负载均衡
+* TLS 终端
+* HTTP/2 与 gRPC 代理
+* 熔断器
+* 健康检查
+* 基于百分比流量分割的分阶段发布
+* 故障注入
+* 丰富的指标
+
+不仅如此，这些服务同时还具备了 Istio 所提供的功能特性：
+
+* 流量控制特性：通过丰富的 HTTP、gRPC、WebSocket 和 TCP 流量路由规则来执行细粒度的流量控制；
+* 网络弹性特性：重试设置、故障转移、熔断器和故障注入；
+* 安全性和身份认证特性：执行安全性策略，并强制实行通过配置 API 定义的访问控制和速率限制；
+* 基于 WebAssembly 的可插拔扩展模型，允许通过自定义策略执行和生成网格流量的遥测。
+
+Istio 服务网格的控制平面由 [Istiod](https://istio.io/latest/zh/blog/2020/istiod/) 实现，它提供了诸如服务发现（Pilot），配置（Galley），证书生成（Citadel）和可扩展性（Mixer）等功能；它通过 [Envoy API](https://www.envoyproxy.io/docs/envoy/latest/api/api) 实现了对数据平面的管理，所以 Istio 的数据平面并不仅限于 Envoy，其他符合 Envoy API 规范的代理都可以作为 Istio 的数据平面。
 
 ## 快速开始
+
+这篇笔记将以 Istio 的官方示例来学习如何使用 Istio 和 Envoy 打造一个基于服务网格的微服务架构。
+
+### 安装 Istio
 
 首先从 Istio 的 [Release 页面](https://github.com/istio/istio/releases) 找到最新版本的安装包并下载和解压：
 
@@ -269,7 +292,7 @@ $ kubectl -n istio-system get configmap istio-sidecar-injector -o=jsonpath='{.da
 
 ### 部署 Bookinfo 示例应用
 
-这一节我们来学习一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。为了方便起见，我们还是给 `default` 命名空间打上 `istio-injection=enabled` 标签开启自动注入功能，然后，执行下面的命令部署 Bookinfo 示例应用：
+这一节我们来部署一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。为了方便起见，我们还是给 `default` 命名空间打上 `istio-injection=enabled` 标签开启自动注入功能，然后，执行下面的命令部署 Bookinfo 示例应用：
 
 ```
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
