@@ -173,6 +173,12 @@ $ istioctl manifest generate --set profile=demo > demo.yaml
 
 除了 [使用 Istioctl 安装](https://istio.io/latest/zh/docs/setup/install/istioctl/)，官方还提供了很多 [其他的安装方式](https://istio.io/latest/zh/docs/setup/install/)，比如 [使用 Helm 安装](https://istio.io/latest/zh/docs/setup/install/helm/)，[虚拟机安装](https://istio.io/latest/zh/docs/setup/install/virtual-machine/) 和 [使用 Istio Operator 安装](https://istio.io/latest/zh/docs/setup/install/operator/) 等，[各个云平台](https://istio.io/latest/zh/docs/setup/platform-setup/) 也对 Istio 提供了支持。
 
+如果要卸载 Istio，可以执行 `istioctl uninstall` 命令：
+
+```
+$ istioctl uninstall -y --purge
+```
+
 ### 一个简单的例子
 
 为了充分发挥 Istio 的所有特性，网格中的每个应用服务都必须有一个边车代理，这个边车代理可以拦截应用服务的所有出入流量，这样我们就可以利用 Istio 控制平面为应用提供服务发现、限流、可观测性等功能了。
@@ -290,7 +296,7 @@ $ kubectl -n istio-system get configmap istio-sidecar-injector -o=jsonpath='{.da
 
 除了官方提供的默认模版，还可以通过在 Pod 中添加一个 `istio-proxy` 容器来自定义注入内容，或者通过 `inject.istio.io/templates` 注解来设置自定义模版，更多内容可以 [参考官方文档](https://istio.io/latest/zh/docs/setup/additional-setup/sidecar-injection/#customizing-injection)。
 
-### 部署 Bookinfo 示例应用
+## 体验 Bookinfo 示例应用
 
 这一节我们来部署一个更复杂的例子，在 `samples/bookinfo` 目录下是名为 Bookinfo 的示例应用，我们就使用这个应用来体验 Istio 的功能。为了方便起见，我们还是给 `default` 命名空间打上 `istio-injection=enabled` 标签开启自动注入功能，然后，执行下面的命令部署 Bookinfo 示例应用：
 
@@ -371,7 +377,9 @@ spec:
     - "*"
 ```
 
-第二部分定义了名为 `bookinfo` 的 [虚拟服务（VirtualService）](https://istio.io/latest/zh/docs/concepts/traffic-management/#virtual-services)，并和网关关联起来：
+注意这里使用了 `istio-ingressgateway` 作为网关，这在我们安装 Istio 的时候已经自动安装好了。
+
+第二部分定义了名为 `bookinfo` 的 [虚拟服务（Virtual Service）](https://istio.io/latest/zh/docs/concepts/traffic-management/#virtual-services)：
 
 ```
 apiVersion: networking.istio.io/v1alpha3
@@ -402,6 +410,8 @@ spec:
           number: 9080
 ```
 
+将这个虚拟服务和上面的网关关联起来，这样做的好处是，我们可以像管理网格中其他数据平面的流量一样去管理网关流量。
+
 有了这个网关后，我们就可以在浏览器中输入 http://localhost/productpage 访问我们的在线书店了：
 
 ![](./images/bookinfo-productpage.png)
@@ -410,19 +420,122 @@ spec:
 
 ### 配置请求路径
 
+由于部署了三个版本的 `reviews` 服务，所以每次访问应用页面看到的效果都不一样，如果我们想访问固定的版本，该怎么做呢？
+
+检查上面的 `bookinfo.yaml` 文件，之所以每次访问的效果不一样，是因为 `reviews` 服务的 Service 使用了 `app=reviews` 选择器，所以请求会负载到所有打了 `app=reviews` 标签的 Pod：
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviews
+  labels:
+    app: reviews
+    service: reviews
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: reviews
+```
+
+而 `reviews-v1`、`reviews-v2` 和 `reviews-v3` 三个版本的 `Deployment` 都使用了 `app=reviews` 标签：
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v1
+  labels:
+    app: reviews
+    version: v1
+spec:
+  ...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v2
+  labels:
+    app: reviews
+    version: v2
+spec:
+  ...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v3
+  labels:
+    app: reviews
+    version: v3
+spec:
+  ...
+```
+
+所以请求会负载到所有版本的 `reviews` 服务，这是 Kubernetes Service 的默认行为。不过要知道，现在所有 Pod 的流量都在我们的边车代理管控之下，我们当然可以使用 Istio 来改变请求的路径。首先，我们注意到这三个版本的 `reviews` 服务虽然 `app=reviews` 标签都一样，但是 `version` 标签是不一样的，这个特点可以用来定义 `reviews` 的 [目标规则（Destination Rules）](https://istio.io/latest/zh/docs/concepts/traffic-management/#destination-rules)：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/destination-rule-reviews.yaml
+destinationrule.networking.istio.io/reviews created
+```
+
+`destination-rule-reviews.yaml` 文件内容如下：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+```
+
+在 Istio 里，目标规则和虚拟服务一样，是一个非常重要的概念。在目标规则中可以定义负载策略，并根据标签来将应用划分成不同的服务子集（subset），在上面的例子中，我们将 `reviews` 服务划分成了 `v1`、`v2` 和 `v3` 三个服务子集。接下来再为 `reviews` 定义一个虚拟服务：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
+virtualservice.networking.istio.io/reviews created
+```
+
+`virtual-service-reviews-v3.yaml` 文件内容如下：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+```
+
+在这个虚拟服务中我们指定了 v3 服务子集，稍等片刻，再次刷新页面，可以发现每次显示的都是红色的星星，我们成功的通过 Istio 控制了服务之间的流量。
+
+### 基于匹配条件的路由
+
 https://istio.io/latest/zh/docs/tasks/traffic-management/request-routing/
 
 https://istio.io/latest/zh/docs/setup/getting-started/
-
-https://istio.io/latest/zh/docs/examples/bookinfo/
-
-### 卸载
-
-如果要卸载 Istio，可以执行 `istioctl uninstall` 命令：
-
-```
-$ istioctl uninstall -y --purge
-```
 
 ## 参考
 
