@@ -533,7 +533,100 @@ spec:
 
 ### 基于匹配条件的路由
 
-https://istio.io/latest/zh/docs/tasks/traffic-management/request-routing/
+虚拟服务如果只能指定固定的服务子集，那么和 Kubernetes Service 也就没什么区别了。之所以在 Istio 引入虚拟服务的概念，就是为了 **将客户端请求的目标地址与真实响应请求的目标工作负载进行解耦**，这使得 A/B 测试很容易实现，比如我们可以让指定用户路由到特定的服务子集：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-jason-v2-v3.yaml
+virtualservice.networking.istio.io/reviews configured
+```
+
+`virtual-service-reviews-jason-v2-v3.yaml` 文件内容如下：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+```
+
+在这个虚拟服务中，不仅定义了一个默认路由，目标是 `reviews` 的 v3 服务子集，而且还定义了一个目标是 v2 服务子集的路由，但是这个路由必须满足条件 `headers.end-user.exact = jason`，也就是 HTTP 请求头中必须包含值为 `jason` 的 `end-user` 字段，为了实现这一点，我们使用 `jason` 用户登录即可，这时看到的书籍评价就是黑色星星：
+
+![](./images/bookinfo-productpage-jason.png)
+
+退出登录后，看到的仍然是红色的星星，这样我们就实现了 A/B 测试的功能。
+
+除了将 `headers` 作为匹配条件，我们还可以使用 `uri`、`method`、`queryParams` 等参数，具体内容可参考 [HTTPMatchRequest](https://istio.io/latest/zh/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)。
+
+### 基于权重的路由
+
+在上面的例子中我们实现了指定用户的 A/B 测试，一般来说，我们的服务上线后，先通过指定的测试账号进行验证，验证没有问题后就可以开始迁移流量了，我们可以先迁移 10% 的流量到新版本：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-90-10.yaml
+virtualservice.networking.istio.io/reviews configured
+```
+
+`virtual-service-reviews-90-10.yaml` 文件内容如下：
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 90
+    - destination:
+        host: reviews
+        subset: v2
+      weight: 10
+```
+
+在这个虚拟服务中，通过 `weight` 参数指定不同服务子集的权重。如果运行一段时间后没有问题，我们可以继续迁移 20% 的流量到新版本：
+
+```
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-80-20.yaml
+virtualservice.networking.istio.io/reviews configured
+```
+
+然后继续迁移 50%，80%，直到 100% 的流量，至此服务升级就完成了，这种升级方式也被称为 [金丝雀部署](https://istio.io/latest/zh/blog/2017/0.1-canary/)。
+
+### 其他流量管理功能
+
+上面演示了如何使用 Istio 对不同版本的微服务进行路由配置，这是 Istio 流量管理的基本功能。除此之外，Istio 还提供了很多其他的 [流量管理功能](https://istio.io/latest/zh/docs/tasks/traffic-management/)：
+
+* 使用 [故障注入](https://istio.io/latest/zh/docs/tasks/traffic-management/fault-injection/) 模拟服务延迟或 HTTP Abort 故障，对应用的弹性进行测试；
+* 为特定的微服务 [设置请求超时](https://istio.io/latest/zh/docs/tasks/traffic-management/request-timeouts/)；
+* [配置熔断规则](https://istio.io/latest/zh/docs/tasks/traffic-management/circuit-breaking/)，应用程序能更好地应对来自故障、潜在峰值和其他未知网络因素影响；
+* 使用 [流量镜像](https://istio.io/latest/zh/docs/tasks/traffic-management/mirroring/) 实时地将流量副本发送到其他服务；
+* 控制服务网格的 [入口流量](https://istio.io/latest/zh/docs/tasks/traffic-management/ingress/)；
+* 控制服务网格的 [出口流量](https://istio.io/latest/zh/docs/tasks/traffic-management/egress/)；
+
+## 可观测性
+
+https://istio.io/latest/zh/docs/tasks/observability/
 
 https://istio.io/latest/zh/docs/setup/getting-started/
 
