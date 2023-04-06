@@ -626,9 +626,90 @@ virtualservice.networking.istio.io/reviews configured
 
 ## 可观测性
 
-https://istio.io/latest/zh/docs/tasks/observability/
+可观测性是服务网格的另一个重要特性，Istio 对很多开源组件提供了集成，比如使用 [Prometheus](https://istio.io/latest/zh/docs/ops/integrations/prometheus/) 收集指标，使用 [Grafana](https://istio.io/latest/zh/docs/ops/integrations/grafana/) 和 [Kiali](https://istio.io/latest/zh/docs/ops/integrations/kiali/) 对指标进行可视化，使用 [Jaeger](https://istio.io/latest/zh/docs/ops/integrations/jaeger/)、[Zipkin](https://istio.io/latest/zh/docs/ops/integrations/zipkin/)、[Apache SkyWalking](https://istio.io/latest/zh/docs/ops/integrations/skywalking/) 进行分布式追踪。
 
-https://istio.io/latest/zh/docs/setup/getting-started/
+在 `samples/addons` 目录下提供了 Prometheus、Grafana、Kiali 和 Jaeger 这几个组件的精简版本，我们通过下面的命令安装：
+
+```
+$ kubectl apply -f samples/addons
+serviceaccount/grafana created
+configmap/grafana created
+service/grafana created
+deployment.apps/grafana created
+configmap/istio-grafana-dashboards created
+configmap/istio-services-grafana-dashboards created
+deployment.apps/jaeger created
+service/tracing created
+service/zipkin created
+service/jaeger-collector created
+serviceaccount/kiali created
+configmap/kiali created
+clusterrole.rbac.authorization.k8s.io/kiali-viewer created
+clusterrole.rbac.authorization.k8s.io/kiali created
+clusterrolebinding.rbac.authorization.k8s.io/kiali created
+role.rbac.authorization.k8s.io/kiali-controlplane created
+rolebinding.rbac.authorization.k8s.io/kiali-controlplane created
+service/kiali created
+deployment.apps/kiali created
+serviceaccount/prometheus created
+configmap/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+service/prometheus created
+deployment.apps/prometheus created
+```
+
+安装完成后，使用下面的命令打开 Prometheus UI：
+
+```
+$ istioctl dashboard prometheus
+```
+
+在 Expression 对话框中输入指标名称即可查询相应的指标，比如查询 `istio_requests_total` 指标：
+
+![](./images/prometheus.png)
+
+使用下面的命令打开 Grafana UI：
+
+```
+$ istioctl dashboard grafana
+```
+
+Istio 内置了几个常用的 Grafana Dashboard 可以直接使用：
+
+![](./images/grafana.png)
+
+比如查看 Istio Control Plane Dashboard，这里显示的是控制平面 Istiod 的一些指标图：
+
+![](./images/grafana-ctl-plane-dashboard.png)
+
+要注意的是 Istio 默认的采样率为 1%，所以这时去查看 Istio Mesh Dashboard 还看不到数据，可以通过下面的脚本模拟 100 次请求：
+
+```
+$ for i in `seq 1 100`; do curl -s -o /dev/null http://localhost/productpage; done
+```
+
+使用下面的命令打开 Kiali UI：
+
+```
+$ istioctl dashboard kiali
+```
+
+选择左侧的 Graph 菜单，然后在 Namespace 下拉列表中选择 default，就可以看到 Bookinfo 示例应用的整体概览，以及各个服务之间的调用关系：
+
+![](./images/kiali.png)
+
+最后，使用下面的命令打开 Jaeger UI：
+
+```
+$ istioctl dashboard jaeger
+```
+
+从仪表盘左边面板的 `Service` 下拉列表中选择 `productpage.default`，并点击 `Find Traces` 按钮查询该服务的所有 Trace，随便点击一个 Trace，查看它的详细信息：
+
+![](./images/jaeger.png)
+
+上面对几种常见的可观测性组件做了一个大概的介绍，如果想进一步学习各个组件的高级特性，可以参考 [Istio 的官方文档](https://istio.io/latest/zh/docs/tasks/observability/) 以及各个组件的官方文档。
 
 ## 参考
 
@@ -642,8 +723,6 @@ https://istio.io/latest/zh/docs/setup/getting-started/
 * [服务网格终极指南第二版——下一代微服务开发](https://cloudnative.to/blog/service-mesh-ultimate-guide-e2/)
 * [Istio Handbook——Istio 服务网格进阶实战](http://www.zhaowenyu.com/istio-doc/)
 * [谈谈微服务架构中的基础设施：Service Mesh与Istio](https://www.zhaohuabing.com/2018/03/29/what-is-service-mesh-and-istio/)
-* [Jimmy Song 的原创博客](https://jimmysong.io/blog/)
-* [云原生社区博客](https://cloudnative.to/blog/)
 
 ## 更多
 
