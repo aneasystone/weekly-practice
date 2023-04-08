@@ -860,8 +860,6 @@ Events:  <none>
 * [API 网关 Apache APISIX 集成 Eureka 作为服务发现](https://www.apiseven.com/blog/apigateway-integration-eureka-service-discovery)
 * [API 网关 Apache APISIX 携手 CoreDNS 打开服务发现新大门](https://www.apiseven.com/blog/apisix-uses-coredns-enable-service-discovery)
 * [Nacos 在 API 网关中的服务发现实践](https://www.apiseven.com/blog/nacos-api-gateway)
-* [APISIX Blog](https://apisix.apache.org/zh/blog/)
-* [API7.ai Blog](https://www.apiseven.com/blog)
 * [SpringBoot使用Nacos进行服务注册发现与配置管理](https://cloud.tencent.com/developer/article/1650073)
 * [springcloud(十三)：注册中心 Consul 使用详解](http://www.ityouknow.com/springcloud/2018/07/20/spring-cloud-consul.html)
 * [Spring Cloud Consul 官方文档](https://docs.spring.io/spring-cloud-consul/docs/current/reference/html/)
