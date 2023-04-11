@@ -50,7 +50,7 @@ $ npm run dev
 此时 RSSHub 内置的上千个订阅源，都可以在本地访问，比如通过 `/bilibili/ranking/0/3/1` 这个地址可以订阅 B 站三天内的排行榜。这个订阅源的格式一般分为三个部分：
 
 ```
-/命名空间/路由名/路由参数
+/命名空间/路由/参数
 ```
 
 ### 新建命名空间
@@ -63,7 +63,48 @@ $ npm run dev
 $ mkdir lib/v2/apache
 ```
 
-### 新建路由
+### 注册路由
+
+第二步，我们需要在命名空间子文件夹下按照 RSSHub 的 [路由规范](https://docs.rsshub.app/joinus/script-standard.html#v2-lu-you-gui-fan) 来组织文件，一个典型的文件夹结构如下：
+
+```
+├───lib/v2
+│   ├───furstar
+│       ├─── templates
+│           ├─── description.art
+│       ├─── router.js
+│       ├─── maintainer.js
+│       ├─── radar.js
+│       └─── someOtherJs.js
+```
+
+其中，每个文件的作用如下：
+
+* `router.js` - 注册路由
+* `maintainer.js` - 提供路由维护者信息
+* `radar.js` - 为每个路由提供对应 [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar) 规则
+* `someOtherJs.js` - 一些其他的代码文件，一般用于实现路由规则
+* `templates` - 该目录下是以 `.art` 结尾的模版文件，它使用 [art-template](https://aui.github.io/art-template/) 进行排版，用于渲染自定义 HTML 内容
+
+#### 编写 `router.js` 文件
+
+其中最重要的一个文件是 `router.js`，它用于注册路由信息，我们创建该文件，内容如下：
+
+```
+module.exports = (router) => {
+    router.get('/apisix/blog', require('./apisix/blog'));
+};
+```
+
+RSSHub 使用 [@koa/router](https://github.com/koajs/router) 来定义路由，在上面的代码中，我们通过 `router.get()` 定义了一个 HTTP GET 的路由，第一个参数是路由路径，它需要符合 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 语法，第二个参数指定由哪个文件来实现路由规则。
+
+在路由路径中，我们还可以使用参数，比如上面 bilibili 的路由如下：
+
+```
+router.get('/ranking/:rid?/:day?/:arc_type?/:disableEmbed?', require('./ranking'));
+```
+
+其中 `:rid`、`:days`、`:arc_type` 和 `:disableEmbed` 都是路由的参数，每个参数后面的 `?` 表示这是一个可选参数。路由参数可以从 `ctx.params` 对象中获取。
 
 ### 编写路由规则
 
