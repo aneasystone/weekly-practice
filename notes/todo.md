@@ -1,5 +1,12 @@
 # TODO LIST
 
+## mTLS
+
+* [mTLS everywhere!](https://blog.frankel.ch/mtls-everywhere/)
+* [Mutual TLS Authentication](https://apisix.apache.org/docs/apisix/mtls/)
+* [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
+* [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
+
 ## Spring Security
 
 * [Getting started with Spring Security and Spring Boot](https://reflectoring.io/spring-security/)
@@ -48,8 +55,11 @@
 ## 实现 Spring Boot 3 应用的可观测性
 
 * [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
-* [Micrometer Documentation](https://micrometer.io/docs)
 * [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
+* [Micrometer Documentation](https://micrometer.io/docs)
+	* [Micrometer Observation](https://micrometer.io/docs/observation)
+	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
+	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
 
 ## Stable Diffusion 基础入门
 
