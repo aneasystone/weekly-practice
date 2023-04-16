@@ -1,5 +1,9 @@
 # TODO LIST
 
+## 缓存同步
+
+* [MySQL 与 Redis 缓存的同步方案](https://mp.weixin.qq.com/s/e4qJp4zcXHJQycJwq1mgzQ)
+
 ## WebAssembly
 
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
@@ -64,13 +68,6 @@
 	* [Micrometer Observation](https://micrometer.io/docs/observation)
 	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
-
-## AGC
-
-* [ChatGPT 与 Midjourney 强强联手，让先秦阿房宫重现辉煌！](https://mp.weixin.qq.com/s/oE-qQJV7K_nVx6Zq88efhw)
-* [零基础入门 Stable Diffusion - 无需显卡把 AI 绘画引擎搬进家用电脑](https://newzone.top/_posts/2022-09-05-stable_diffusion_ai_painting.html)
-* [AI绘画资料合集](https://github.com/hua1995116/awesome-ai-painting)
-* [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
 
 ## 使用 Picocli 打造一个命令行程序
 
