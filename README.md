@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK037 - [使用 Google Colab 体验 AI 绘画](./notes/week037-ai-painting-with-google-colab/README.md)
 * WEEK036 - [使用 RSSHub 为任意网址生成订阅源](./notes/week036-feed-everything-with-rsshub/README.md)
 * WEEK035 - [使用 Istio 和 Envoy 打造 Service Mesh 微服务架构](./notes/week035-istio-envoy-service-mesh/README.md)
 * WEEK034 - [实战 APISIX 服务发现](./notes/week034-apisix-service-discovery/README.md)
