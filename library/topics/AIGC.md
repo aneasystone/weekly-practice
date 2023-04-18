@@ -49,17 +49,13 @@
 * [Midjourney](https://www.midjourney.com/home/)
 * [Stability.AI](https://stability.ai/)
 * [DALL.E.2](https://openai.com/product/dall-e-2)
+* [NovelAI](https://novelai.net/)
 
 ### Stable Diffusion
 
 * [CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion) - Stable Diffusion is a latent text-to-image diffusion model
 * [Stable Diffusion Online](https://stablediffusionweb.com/)
 * [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) - Stable Diffusion web UI
-* [零基础入门 Stable Diffusion - 无需显卡把 AI 绘画引擎搬进家用电脑](https://newzone.top/_posts/2022-09-05-stable_diffusion_ai_painting.html)
-
-### Midjourney
-
-* [ChatGPT 与 Midjourney 强强联手，让先秦阿房宫重现辉煌！](https://mp.weixin.qq.com/s/oE-qQJV7K_nVx6Zq88efhw)
 
 ### 图像生成
 
