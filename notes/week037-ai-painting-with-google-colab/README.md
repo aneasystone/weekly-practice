@@ -10,9 +10,13 @@
 
 不过由于 GAN 算法包含了两个模型，稳定性较差，可能出现有趣的 **海奥维提卡现象（the helvetica scenario）**，如果 G 模型发现了一个能够骗过 D 模型的 bug，它就会开始偷懒，一直用这张图片来欺骗 D 模型，导致整个平衡的无效。在 2020 年，Jonathan Ho 等人发表论文 [《Denoising Diffusion Probabilistic Models》](https://arxiv.org/abs/2006.11239)，提出了一种新的 **扩散模型**（Diffusion Model），相比 GAN 来说，扩散模型的训练更稳定，而且能够生成更多样的样本，一时间扩散模型在 AI 圈里迅速起飞，2021 年 11 月 OpenAI 推出 DALL·E，2022 年 3 月，David Holz 推出 Midjourney，5 月 Google Brain 推出 Imagen，都是基于扩散模型实现的。
 
-Stable Diffusion
+到了 2022 年 8 月，Stability AI 开发出 Stable Diffusion 模型，相比于之前的商业产品，Stable Diffusion 是一个完全开源的模型，无论是代码还是权重参数库都对所有人开放使用，而且 Stable Diffusion 对资源的消耗大幅降低，消费级显卡就可以驱动，大大降低了 AI 绘画的门槛，普通人也可以在他们的电脑上体验 AI 绘画的乐趣。到了 10 月，游戏设计师 Jason Allen 使用 AI 绘画工具 Midjourney 生成的一幅名为《太空歌剧院》的作品在美国科罗拉多州举办的艺术博览会上获得数字艺术类冠军，引起了一波不小的争论，也让 AI 绘画再一次成为热门话题，之后各大公司和团队纷纷入局，各种 AI 绘画工具如雨后春笋般冒了出来。
+
+正因为如此，有人将 2022 年称为 AI 绘画元年。
 
 ## Google Colab 入门
+
+虽说运行 Stable Diffusion 的门槛已经被大大地降低了，但还是有一定门槛的，因为 Stable Diffusion 需要一张 [NVIDIA](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) 或 [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) 的 GPU 显卡（一般俗称为 N 卡和 A 卡），除非你是资深的游戏玩家或者深度学习的爱好者，大多数家用电脑上都不具备这个条件。
 
 https://colab.research.google.com/
 
