@@ -14,9 +14,27 @@
 
 正因为如此，有人将 2022 年称为 AI 绘画元年。
 
-## Google Colab 入门
+## 选择 GPU
 
-虽说运行 Stable Diffusion 的门槛已经被大大地降低了，但还是有一定门槛的，因为 Stable Diffusion 需要一张 [NVIDIA](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) 或 [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) 的 GPU 显卡（一般俗称为 N 卡和 A 卡），除非你是资深的游戏玩家或者深度学习的爱好者，大多数家用电脑上都不具备这个条件。
+虽说 Stable Diffusion 的门槛已经被大大降低了，但还是有一定门槛的，因为运行 Stable Diffusion 要配备一张 GPU 显卡，可以使用 [NVIDIA](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) 卡（俗称 N 卡）或 [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) 卡（俗称 A 卡），不过主流的推理框架都使用了 NVIDIA 的 [CUDA](https://developer.nvidia.com/cuda-toolkit) 工具包，所以一般都推荐使用 N 卡。GPU 显卡价格不菲，可以参考驱动之家的 [桌面显卡性能天梯图](https://www.mydrivers.com/zhuanti/tianti/gpu/) 进行选购，除非你是资深的游戏玩家或者深度学习的爱好者，大多数家用电脑上都不具备这个条件。
+
+也可以使用各大公有云厂商推出的 GPU 云服务器，比如 [阿里云](https://www.aliyun.com/product/ecs/gpu)，[腾讯云](https://cloud.tencent.com/product/gpu)，[华为云](https://www.huaweicloud.com/product/gpu.html)，[百度智能云](https://cloud.baidu.com/doc/GPU/index.html) 等，但是价格也都不便宜，比较适合中小企业，对于那些刚对深度学习感兴趣，希望尝试一些深度学习项目的小白个人用户来说，就不划算了。
+
+好在网上有很多 [白嫖 GPU 的攻略](https://cuijiahua.com/blog/2021/01/dl-basics-4.html)，国外的有 [Google Colab](https://colab.research.google.com/) 和 [Kaggle](https://www.kaggle.com/)，国内的有阿里的 [天池](https://tianchi.aliyun.com/)、百度的 [AI Studio](https://aistudio.baidu.com) 和 [趋动云](https://platform.virtaicloud.com/) 等：
+
+* [Google Colab](https://colab.research.google.com/)
+	* [Google Colab免费GPU 超详细使用教程](https://blog.csdn.net/weixin_39653948/article/details/105010730)
+	* [Google Colab免费GPU使用教程（一）](https://www.cnblogs.com/lfri/p/10471852.html)
+* [Kaggle](https://www.kaggle.com/)
+	* [Running Kaggle Kernels with a GPU](https://www.kaggle.com/code/dansbecker/running-kaggle-kernels-with-a-gpu)
+	* [Kaggle GPU使用 及 各种有用的功能](https://www.cnblogs.com/Coder-Photographer/p/15511833.html)
+	* [kaggle免费GPU资源计算](https://zhuanlan.zhihu.com/p/166151381)
+* 阿里的 [天池](https://tianchi.aliyun.com/)
+	* [小白如何用免费GPU跑天池算法大赛！](https://mp.weixin.qq.com/s/RsfWTJEqgheV6-YyCdDRSw)
+* 百度的 [AI Studio](https://aistudio.baidu.com)
+* [趋动云](https://platform.virtaicloud.com/)
+
+## Google Colab 入门
 
 https://colab.research.google.com/
 
