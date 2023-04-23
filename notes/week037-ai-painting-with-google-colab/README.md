@@ -20,23 +20,81 @@
 
 也可以使用各大公有云厂商推出的 GPU 云服务器，比如 [阿里云](https://www.aliyun.com/product/ecs/gpu)，[腾讯云](https://cloud.tencent.com/product/gpu)，[华为云](https://www.huaweicloud.com/product/gpu.html)，[百度智能云](https://cloud.baidu.com/doc/GPU/index.html) 等，但是价格也都不便宜，比较适合中小企业，对于那些刚对深度学习感兴趣，希望尝试一些深度学习项目的小白个人用户来说，就不划算了。
 
-好在网上有很多 [白嫖 GPU 的攻略](https://cuijiahua.com/blog/2021/01/dl-basics-4.html)，国外的有 [Google Colab](https://colab.research.google.com/) 和 [Kaggle](https://www.kaggle.com/)，国内的有阿里的 [天池](https://tianchi.aliyun.com/)、百度的 [AI Studio](https://aistudio.baidu.com) 和 [趋动云](https://platform.virtaicloud.com/) 等：
+好在网上有很多 [白嫖 GPU 的攻略](https://cuijiahua.com/blog/2021/01/dl-basics-4.html)，国外的有 Google Colab 和 Kaggle，它们都提供了 V100、P100、T4 等主流显卡，可以免费使用 12 个小时，超时之后会自动清理；国内的有阿里的天池，相比来说磁盘和使用时间稍短一点，不过对于新人入门来说也足够了；另外还有百度的 AI Studio 和 趋动云 等产品，它们可以通过打卡做任务等形式赚取 GPU 算力，在 GPU 不够用时不妨一试。下面是网上找的一些使用教程，供参考：
 
 * [Google Colab](https://colab.research.google.com/)
-	* [Google Colab免费GPU 超详细使用教程](https://blog.csdn.net/weixin_39653948/article/details/105010730)
-	* [Google Colab免费GPU使用教程（一）](https://www.cnblogs.com/lfri/p/10471852.html)
+	* [Google Colab 免费 GPU 超详细使用教程](https://blog.csdn.net/weixin_39653948/article/details/105010730)
+	* [Google Colab 免费 GPU 使用教程（一）](https://www.cnblogs.com/lfri/p/10471852.html)
 * [Kaggle](https://www.kaggle.com/)
 	* [Running Kaggle Kernels with a GPU](https://www.kaggle.com/code/dansbecker/running-kaggle-kernels-with-a-gpu)
-	* [Kaggle GPU使用 及 各种有用的功能](https://www.cnblogs.com/Coder-Photographer/p/15511833.html)
-	* [kaggle免费GPU资源计算](https://zhuanlan.zhihu.com/p/166151381)
-* 阿里的 [天池](https://tianchi.aliyun.com/)
-	* [小白如何用免费GPU跑天池算法大赛！](https://mp.weixin.qq.com/s/RsfWTJEqgheV6-YyCdDRSw)
-* 百度的 [AI Studio](https://aistudio.baidu.com)
+	* [Kaggle GPU 使用及各种有用的功能](https://www.cnblogs.com/Coder-Photographer/p/15511833.html)
+	* [kaggle 免费 GPU 资源计算](https://zhuanlan.zhihu.com/p/166151381)
+* [阿里天池](https://tianchi.aliyun.com/)
+	* [小白如何用免费 GPU 跑天池算法大赛！](https://mp.weixin.qq.com/s/RsfWTJEqgheV6-YyCdDRSw)
+* [百度 AI Studio](https://aistudio.baidu.com)
 * [趋动云](https://platform.virtaicloud.com/)
 
 ## Google Colab 入门
 
-https://colab.research.google.com/
+综合对比下来，[Google Colab](https://colab.research.google.com/) 的使用体验最好，Google Colab 又叫作 Colaboratory，简称 Colab，中文意思是 **合作实验室**，正如其名，它可以帮助用户在浏览器中编写和执行 Python 代码，无需任何配置就可以进行一些数据科学或机器学习的实验，借助 [Jupyter](https://jupyter.org/) 交互式笔记本，实验过程和结果也可以轻松分享给其他用户。很多开源项目都提供了 Colab 脚本，可以直接运行体验，这一节将以 Colab 为例，介绍它的基本使用方法。
+
+首先在浏览器输入 `colab.research.google.com` 访问 Colab 首页：
+
+![](./images/colab-home.png)
+
+首页上对 Colab 有个简单的介绍，还提供了一些数据科学和机器学习的入门例子和学习资源。我们通过左上角的 `文件 -> 新建笔记本` 菜单项创建一个新的笔记本：
+
+![](./images/new-notebook.png)
+
+然后点击 `修改 -> 笔记本设置` 将硬件加速器调整为 GPU：
+
+![](./images/notebook-setting.png)
+
+然后点击右上角的 `连接` 按钮，Google 会动态地为我们分配计算资源，稍等片刻，我们就相当于拥有了一台 12.7 G 内存，78.2 G 磁盘，且带 GPU 显卡的主机了：
+
+![](./images/resource-info.png)
+
+### Colab 的基本使用
+
+在这个笔记本中，我们可以编写 Markdown 文档，也可以编写和执行 Python 代码：
+
+![](./images/execute-python-code.png)
+
+甚至可以在命令前加个 `!` 来执行 Shell 命令：
+
+![](./images/execute-shell.png)
+
+这个环境里内置了很多常用的数据科学或机器学习的 Python 库，比如 numpy、pandas、matplotlib、scikit-learn、tensorflow 等：
+
+![](./images/pip-list.png)
+
+另外，由于这是一台 GPU 主机，我们还可以使用 `nvidia-smi` 来查看显卡信息：
+
+![](./images/nvidia-smi.png)
+
+可以看到，我们免费得到了一张 Tesla T4 的显卡，显存大约 15G 左右。
+
+### 测试 GPU 速度
+
+接下来，我们测试下这个 GPU 的速度。首先通过 `tf.test.gpu_device_name()` 获取 GPU 设备的名称：
+
+![](./images/gpu-device-name.png)
+
+然后编写两个方法：
+
+![](./images/gpu-vs-cpu.png)
+
+第一次执行：
+
+![](./images/gpu-vs-cpu-first-run.png)
+
+第二次执行：
+
+![](./images/gpu-vs-cpu-second-run.png)
+
+可以看到，使用 GPU 相比于 CPU 来说，速度有着 50 多倍的提升。
+
+这里是 [这一节的完整代码](https://colab.research.google.com/drive/1Q6-mAdQt1qTMcsEr7-rTA-PBR2zddVHI)。
 
 ## 在 Google Colab 里运行 Stable Diffusion
 
