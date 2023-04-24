@@ -76,7 +76,7 @@
 
 ### 测试 GPU 速度
 
-接下来，我们测试下这个 GPU 的速度。首先通过 `tf.test.gpu_device_name()` 获取 GPU 设备的名称：
+接下来，我们测试下这个 GPU 的速度。首先通过 TensorFlow 的 `tf.test.gpu_device_name()` 获取 GPU 设备的名称：
 
 ![](./images/gpu-device-name.png)
 
@@ -84,21 +84,33 @@
 
 ![](./images/gpu-vs-cpu.png)
 
-第一次执行：
+这两个方法所做的事情是一样的，只不过一个使用 CPU 来运行，另一个使用 GPU 来运行。在这个方法中，先使用 `tf.random.normal((100, 100, 100, 3))` 随机生成一个 `100*100*100*3` 的四维张量，然后使用 `tf.keras.layers.Conv2D(32, 7)(random_image_cpu)` 对这个张量计算卷积，卷积过滤器数量 `filters` 为 32，卷积窗口 `kernel_size` 为 `7*7`，最后使用 `tf.math.reduce_sum(net_cpu)` 对卷积结果求和。
+
+接下来第一次执行，并使用 `timeit` 来计时：
 
 ![](./images/gpu-vs-cpu-first-run.png)
 
-第二次执行：
+可以看到，在 GPU 上的执行速度比 CPU 上的要慢一点，这是因为 TensorFlow 第一次运行时默认会使用 cuDNN 的 autotune 机制对计算进行预热。
+
+我们再执行第二次：
 
 ![](./images/gpu-vs-cpu-second-run.png)
 
-可以看到，使用 GPU 相比于 CPU 来说，速度有着 50 多倍的提升。
+这时，在 GPU 上的执行速度明显快多了，相比于 CPU 来说，速度有着 50 多倍的提升。
 
 这里是 [这一节的完整代码](https://colab.research.google.com/drive/1Q6-mAdQt1qTMcsEr7-rTA-PBR2zddVHI)。
 
 ## 在 Google Colab 里运行 Stable Diffusion
 
-https://github.com/camenduru/stable-diffusion-webui-colab
+> 2023 年 4 月 21 日，Google Colab [官方发了一份声明](https://twitter.com/thechrisperry/status/1649189902079381505)，由于 Stable Diffusion 太火了，消耗了 Google Colab 大量的 GPU 资源，预算，现在已经被封了，只有付费用户才能运行，免费用户运行会有警告：
+>
+> ![](./images/colab-warning.png)
+
+对 Google Colab 有一定了解后，我们就可以免费使用它的 GPU 来做很多有趣的事情了，比如我想要运行 Stable Diffusion 来体验 AI 绘画。
+
+[camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) 这个项目整理了大量 Stable Diffusion 的 Colab 脚本，热门的模型和插件基本上都支持，我们随机选择一个，点击左侧的 `stable` 打开 Colab 页面执行即可：
+
+![](./images/sd-webui-colab.png)
 
 ## 参考
 
