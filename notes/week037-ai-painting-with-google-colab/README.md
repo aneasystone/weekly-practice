@@ -102,15 +102,23 @@
 
 ## 在 Google Colab 里运行 Stable Diffusion
 
-> 2023 年 4 月 21 日，Google Colab [官方发了一份声明](https://twitter.com/thechrisperry/status/1649189902079381505)，由于 Stable Diffusion 太火了，消耗了 Google Colab 大量的 GPU 资源，预算，现在已经被封了，只有付费用户才能运行，免费用户运行会有警告：
+> 2023 年 4 月 21 日，Google Colab [官方发了一份声明](https://twitter.com/thechrisperry/status/1649189902079381505)，由于 Stable Diffusion 太火了，消耗了 Google Colab 大量的 GPU 资源，导致预算不够，现在已经被封了，只有付费用户才能运行，免费用户运行会有警告：
 >
 > ![](./images/colab-warning.png)
 
 对 Google Colab 有一定了解后，我们就可以免费使用它的 GPU 来做很多有趣的事情了，比如我想要运行 Stable Diffusion 来体验 AI 绘画。
 
-[camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) 这个项目整理了大量 Stable Diffusion 的 Colab 脚本，热门的模型和插件基本上都支持，我们随机选择一个，点击左侧的 `stable` 打开 Colab 页面执行即可：
+[camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) 这个项目整理了大量 Stable Diffusion 的 Colab 脚本，基于 [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 实现了可视化 Web 页面，集成了 [Hugging Face](https://huggingface.co/) 和 [Civitai](https://civitai.com/) 上热门的模型和插件，我们随便选择一个，点击左侧的 `stable` 打开 Colab 页面执行即可：
 
 ![](./images/sd-webui-colab.png)
+
+运行成功后，在控制台中可以看到打印了几个随机生成的外网链接：
+
+![](./images/running.png)
+
+随便选择一个链接打开，进入 Stable Diffusion WebUI 页面：
+
+![](./images/webui.png)
 
 ## 参考
 
