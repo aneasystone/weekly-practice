@@ -51,17 +51,22 @@
 * [DALL.E.2](https://openai.com/product/dall-e-2)
 * [NovelAI](https://novelai.net/)
 
+### Awesome
+
+* [hua1995116/awesome-ai-painting](https://github.com/hua1995116/awesome-ai-painting) - AI绘画资料合集（包含国内外可使用平台、使用教程、参数教程、部署教程、业界新闻等等） stable diffusion tutorial、disco diffusion tutorial、 AI Platform
+* [altryne/awesome-ai-art-image-synthesis](https://github.com/altryne/awesome-ai-art-image-synthesis) - A list of awesome tools, ideas, prompt engineering tools, colabs, models, and helpers for the prompt designer playing with aiArt and image synthesis. Covers Dalle2, MidJourney, StableDiffusion, and open source tools.
+
 ### Stable Diffusion
 
 * [CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion) - Stable Diffusion is a latent text-to-image diffusion model
 * [Stable Diffusion Online](https://stablediffusionweb.com/)
 * [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) - Stable Diffusion web UI
+* [camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) - stable diffusion webui colab
 
 ### 图像生成
 
 * [Imagen: Text-to-Image Diffusion Models](https://imagen.research.google/)
 * [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
-* [hua1995116/awesome-ai-painting](https://github.com/hua1995116/awesome-ai-painting) - AI绘画资料合集（包含国内外可使用平台、使用教程、参数教程、部署教程、业界新闻等等） stable diffusion tutorial、disco diffusion tutorial、 AI Platform
 * [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
 * [Magenta](https://github.com/tensorflow/magenta) - Music and Art Generation with Machine Intelligence
 

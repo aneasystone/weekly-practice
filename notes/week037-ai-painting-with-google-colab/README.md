@@ -120,6 +120,8 @@
 
 ![](./images/webui.png)
 
+接下来，开始你的 AI 绘画之旅吧！
+
 ## 参考
 
 * [保姆级GPU白嫖攻略](https://cuijiahua.com/blog/2021/01/dl-basics-4.html)
