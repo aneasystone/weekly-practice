@@ -1,5 +1,29 @@
 # TODO LIST
 
+## 学习 Kubernetes 的准入控制
+
+* [Admission Controllers Reference](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+* [云原生策略引擎 Kyverno （上）](https://moelove.info/2022/03/02/%E4%BA%91%E5%8E%9F%E7%94%9F%E7%AD%96%E7%95%A5%E5%BC%95%E6%93%8E-Kyverno-%E4%B8%8A/)
+
+## Kubernetes 故障排查
+
+* [排障技能](https://imroc.cc/kubernetes/troubleshooting/skill/index.html)
+
+## 学习 Kubernetes 的工作负载
+
+* [StatefulSet 的使用场景](https://kuboard.cn/learning/k8s-intermediate/workload/wl-statefulset/)
+
+## Java 性能调优
+
+* [Unleash the Power of Open Source Java Profilers: Comparing VisualVM, JMC, and async-profiler](https://www.infoq.com/articles/open-source-java-profilers/)
+
+## etcd for Kubernetes
+
+* [为 Kubernetes 运行 etcd 集群](https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/configure-upgrade-etcd/)
+* [使用 etcdctl 访问 Kubernetes 数据](https://jimmysong.io/kubernetes-handbook/guide/using-etcdctl-to-access-kubernetes-data.html)
+* [Using Fio to Tell Whether Your Storage is Fast Enough for Etcd](https://www.ibm.com/cloud/blog/using-fio-to-tell-whether-your-storage-is-fast-enough-for-etcd)
+* [Hardware guidelines for administering etcd clusters](https://etcd.io/docs/v3.6/op-guide/hardware/)
+
 ## 缓存同步
 
 * [MySQL 与 Redis 缓存的同步方案](https://mp.weixin.qq.com/s/e4qJp4zcXHJQycJwq1mgzQ)
@@ -8,8 +32,13 @@
 
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
 
+### Wasm in Dapr
+
+* [second-state/dapr-wasm](https://github.com/second-state/dapr-wasm) - A template project to demonstrate how to run WebAssembly functions as sidecar microservices in dapr
+
 ## mTLS
 
+* [A Kubernetes engineer’s guide to mTLS](https://buoyant.io/mtls-guide)
 * [mTLS everywhere!](https://blog.frankel.ch/mtls-everywhere/)
 * [Mutual TLS Authentication](https://apisix.apache.org/docs/apisix/mtls/)
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)

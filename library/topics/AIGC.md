@@ -1,5 +1,11 @@
 # AIGC
 
+## 模型社区
+
+* [Hugging Face](https://huggingface.co/)
+	* [huggingface/transformers](https://github.com/huggingface/transformers) - Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.
+* [Civitai](https://civitai.com/)
+
 ## 文本类
 
 * [ChatGPT](https://chat.openai.com/)
@@ -44,6 +50,38 @@
 * [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
 * [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
 
+### LLM
+
+* [文心大模型](https://wenxin.baidu.com/)
+* [THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - ChatGLM-6B：开源双语对话语言模型 | An Open Bilingual Dialogue Language Model
+* [hwchase17/langchain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
+* [Databricks Dolly](https://github.com/databrickslabs/dolly)
+* [Baize](https://github.com/project-baize/baize-chatbot)
+* [Chinese Vicuna](https://github.com/Facico/Chinese-Vicuna) - A Chinese Instruction-following LLaMA-based Model
+* [GPT4All](https://github.com/nomic-ai/gpt4all)
+* [FastChat](https://github.com/lm-sys/FastChat)
+* [Petals](https://github.com/bigscience-workshop/petals)
+* [Mesh Transformer JAX](https://github.com/kingoflolz/mesh-transformer-jax)
+* [GPT-NeoX](https://github.com/EleutherAI/gpt-neox)
+* [JARVIS](https://github.com/microsoft/JARVIS)
+* [Open Assistant](https://github.com/LAION-AI/Open-Assistant)
+* [RWKV LM](https://github.com/BlinkDL/RWKV-LM)
+* [StableLM](https://github.com/stability-AI/stableLM)
+* [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
+* [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4) - Enhancing Vision-language Understanding with Advanced Large Language Models
+
+#### LLaMA
+
+* [facebookresearch/llama](https://github.com/facebookresearch/llama) - Inference code for LLaMA models
+* [tatsu-lab/stanford_alpaca](https://github.com/tatsu-lab/stanford_alpaca) - An Instruction-following LLaMA Model
+* [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
+* [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
+* [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
+
+#### Awesome
+
+* [List of Open Sourced Fine-Tuned Large Language Models (LLM)](https://medium.com/geekculture/list-of-open-sourced-fine-tuned-large-language-models-llm-8d95a2e0dc76)
+
 ## 图像类
 
 * [Midjourney](https://www.midjourney.com/home/)
@@ -62,6 +100,7 @@
 * [Stable Diffusion Online](https://stablediffusionweb.com/)
 * [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) - Stable Diffusion web UI
 * [camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) - stable diffusion webui colab
+* [lllyasviel/ControlNet](https://github.com/lllyasviel/ControlNet) - Let us control diffusion models!
 
 ### 图像生成
 
@@ -78,23 +117,8 @@
 ### 图片修复
 
 * [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
+* [Segment Anything](https://github.com/facebookresearch/segment-anything)
 
-## 模型
+## 其他
 
-* [Hugging Face](https://huggingface.co/)
-	* [huggingface/transformers](https://github.com/huggingface/transformers) - Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.
-* [Civitai](https://civitai.com/)
-
-### LLaMA
-
-* [facebookresearch/llama](https://github.com/facebookresearch/llama) - Inference code for LLaMA models
-* [tatsu-lab/stanford_alpaca](https://github.com/tatsu-lab/stanford_alpaca) - An Instruction-following LLaMA Model
-* [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
-* [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
-* [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
-
-### LLM
-
-* [文心大模型](https://wenxin.baidu.com/)
-* [THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - ChatGLM-6B：开源双语对话语言模型 | An Open Bilingual Dialogue Language Model
-* [hwchase17/langchain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
+* [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
