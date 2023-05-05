@@ -140,14 +140,14 @@ type: Opaque
 密码以 BASE64 形式存储，可以使用下面的命令快速得到明文密码：
 
 ```
-$ kubectl get secrets argocd-initial-admin-secret -n argocd --template={{.data.e64 -drd}} | base
+$ kubectl get secrets argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
 ```
 
 输入用户名和密码登录成功后，进入 Argo CD 的应用管理页面：
 
 ![](./images/argocd-ui.png)
 
-> 除了修改服务类型，官方还提供了两种方法暴露 API Server：一种是 [使用 > Ingress 网关](https://argo-cd.readthedocs.io/en/stable/> operator-manual/ingress/)，另一种是使用 `kubectl port-forward` 命令进> 行端口转发：
+> 除了修改服务类型，官方还提供了两种方法暴露 API Server：一种是 [使用 Ingress 网关](https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/)，另一种是使用 `kubectl port-forward` 命令进行端口转发：
 > 
 > ```
 > $ kubectl port-forward svc argocd-server -n argocd 8080:443
