@@ -11,7 +11,7 @@
 
 ## Argo CD 快速入门
 
-基于 GitOps 理念，很快诞生出了一批 **声明式的持续交付（Declarative Continuous Deployment）** 工具，比如 Weaveworks 的 [Flux CD](https://github.com/fluxcd/flux) 和 Intuit 的 [Argo CD](https://argoproj.github.io/cd/)，虽然 Weaveworks 是 GitOps 概念的提出者，但是从社区的反应来看，似乎 Argo CD 要更胜一筹。
+基于 GitOps 理念，很快诞生出了一批 **声明式的持续交付（Declarative Continuous Deployment）** 工具，比如 Weaveworks 的 [Flux CD](https://fluxcd.io/) 和 Intuit 的 [Argo CD](https://argoproj.github.io/cd/)，虽然 Weaveworks 是 GitOps 概念的提出者，但是从社区的反应来看，似乎 Argo CD 要更胜一筹。
 
 这一节我们将学习 Argo CD，学习如何通过 Git 以及声明式描述来部署 Kubernetes 资源。
 
@@ -90,7 +90,84 @@ networkpolicy.networking.k8s.io/argocd-repo-server-network-policy created
 networkpolicy.networking.k8s.io/argocd-server-network-policy created
 ```
 
-另外，还可以通过 Helm 来安装 Argo CD，这里是社区维护的 [Helm Charts](https://github.com/argoproj/argo-helm)。
+另外，还可以通过 Helm 来部署 Argo CD，这里是社区维护的 [Helm Charts](https://github.com/argoproj/argo-helm)。
+
+### 通过 Web UI 访问 Argo CD
+
+Argo CD 部署好之后，默认情况下，API Server 从集群外是无法访问的，这是因为 API Server 的服务类型是 `ClusterIP`：
+
+```
+$ kubectl get svc argocd-server -n argocd
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+argocd-server   ClusterIP   10.111.209.6   <none>        80/TCP,443/TCP               23h
+```
+
+我们可以使用 `kubectl patch` 将其改为 `NodePort` 或 `LoadBalancer`：
+
+```
+$ kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+```
+
+修改之后，Kubernetes 会为 API Server 随机分配端口：
+
+```
+$ kubectl get svc argocd-server -n argocd
+NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+argocd-server   NodePort   10.111.209.6   <none>        80:32130/TCP,443:31205/TCP   23h
+```
+
+这时我们就可以通过 `localhost:32130` 或 `localhost:31205` 来访问 API Server 了：
+
+![](./images/argocd-login.png)
+
+可以看到 API Server 需要登录才能访问，初始用户名为 `admin`，初始密码在部署时随机生成，并保存在 `argocd-initial-admin-secret` 这个 Secret 里：
+
+```
+$ kubectl get secrets argocd-initial-admin-secret -n argocd -o yaml
+apiVersion: v1
+data:
+  password: SlRyZDYtdEpOT1JGcXI3QQ==
+kind: Secret
+metadata:
+  creationTimestamp: "2023-05-04T00:14:19Z"
+  name: argocd-initial-admin-secret
+  namespace: argocd
+  resourceVersion: "17363"
+  uid: 0cce4b4a-ff9d-44b3-930d-48bc5530bef0
+type: Opaque
+```
+
+密码以 BASE64 形式存储，可以使用下面的命令快速得到明文密码：
+
+```
+$ kubectl get secrets argocd-initial-admin-secret -n argocd --template={{.data.e64 -drd}} | base
+```
+
+输入用户名和密码登录成功后，进入 Argo CD 的应用管理页面：
+
+![](./images/argocd-ui.png)
+
+> 除了修改服务类型，官方还提供了两种方法暴露 API Server：一种是 [使用 > Ingress 网关](https://argo-cd.readthedocs.io/en/stable/> operator-manual/ingress/)，另一种是使用 `kubectl port-forward` 命令进> 行端口转发：
+> 
+> ```
+> $ kubectl port-forward svc argocd-server -n argocd 8080:443
+> ```
+
+### 通过 CLI 访问 Argo CD
+
+我们也可以使用命令行客户端来访问 Argo CD，首先使用 `curl` 命令下载：
+
+```
+$ curl -LO https://github.com/argoproj/argo-cd/releases/download/v2.7.1/argocd-linux-amd64
+```
+
+然后使用 `install` 命令安装：
+
+```
+$ sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+```
+
+
 
 ### 部署应用
 
