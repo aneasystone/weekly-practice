@@ -141,6 +141,7 @@ type: Opaque
 
 ```
 $ kubectl get secrets argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
+JTrd6-tJNORFqr7A
 ```
 
 输入用户名和密码登录成功后，进入 Argo CD 的应用管理页面：
@@ -218,16 +219,144 @@ argocd-server: v2.7.1+5e54351.dirty
 
 ## 部署应用
 
-这一节将学习如何通过 Argo CD 来部署一个 Kubernetes 应用，我们有 Web UI 和 CLI 两种方式。
+这一节我们将学习如何通过 Argo CD 来部署一个 Kubernetes 应用，官方在 [argoproj/argocd-example-apps](https://github.com/argoproj/argocd-example-apps) 仓库中提供了很多示例应用可供我们直接使用，这里我们将使用其中的 [guestbook](https://github.com/argoproj/argocd-example-apps/tree/master/guestbook) 应用。
 
 ### 通过 Web UI 部署应用
 
-https://argo-cd.readthedocs.io/en/stable/getting_started/
+最简单的方法是通过 Argo CD 提供的可视化页面 Web UI 来部署应用，打开 Argo CD 的应用管理页面，点击 `+ NEW APP` 按钮，弹出新建应用的对话框：
+
+![](./images/new-app.png)
+
+对话框中的选项比较多，但是我们只需要填写红框部分的内容即可，包括：
+
+* 通用配置
+  * 应用名称：`guestbook`
+  * 项目名称：`default`
+  * 同步策略：`Manual`
+* 源配置
+  * Git 仓库地址：`https://github.com/argoproj/argocd-example-apps.git`
+  * 分支：`HEAD`
+  * 代码路径：`guestbook`
+* 目标配置
+  * 集群地址：`https://kubernetes.default.svc`
+  * 命名空间：`default`
+
+其他的选项暂时可以不用管，如果想了解具体内容可以参考官方文档 [Sync Options](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/)，填写完成后，点击 `CREATE` 按钮即可创建应用：
+
+![](./images/new-app-not-sync.png)
+
+因为刚刚填写的同步策略是手工同步，所以我们能看到应用的状态还是 `OutOfSync`，点击应用详情：
+
+![](./images/new-app-not-sync-detail.png)
+
+可以看到 Argo CD 已经从 Git 仓库的代码中解析出应用所包含的 Kubernetes 资源了，`guestbook` 应用包含了一个 Deployment 和 一个 Service，点击 `SYNC` 按钮触发同步，Deployment 和 Service（以及它们关联的资源）被成功部署到 Kubernetes 集群中：
+
+![](./images/new-app-sync.png)
+
+测试完成后，点击 `DELETE` 删除应用，该应用关联的资源将会被级联删除。
 
 ### 通过 CLI 部署应用
 
+我们还可以通过 Argo CD 提供的命令行工具来部署应用，经过上一节的步骤，我们已经登录了 API Server，我们只需要执行下面的 `argocd app create` 命令即可创建 `guestbook` 应用：
+
+```
+$ argocd app create guestbook \
+  --repo https://github.com/argoproj/argocd-example-apps.git \
+  --path guestbook \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace default
+application 'guestbook' created
+```
+
+和 Web UI 操作类似，刚创建的应用处于 `OutOfSync` 状态，我们可以使用 `argocd app get` 命令查询应用详情进行确认：
+
+```
+$ argocd app get guestbook
+Name:               argocd/guestbook
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          default
+URL:                https://localhost:32130/applications/guestbook
+Repo:               https://github.com/argoproj/argocd-example-apps.git
+Target:
+Path:               guestbook
+SyncWindow:         Sync Allowed
+Sync Policy:        <none>
+Sync Status:        OutOfSync from  (53e28ff)
+Health Status:      Missing
+
+GROUP  KIND        NAMESPACE  NAME          STATUS     HEALTH   HOOK  MESSAGE
+       Service     default    guestbook-ui  OutOfSync  Missing
+apps   Deployment  default    guestbook-ui  OutOfSync  Missing
+```
+
+接着我们执行 `argocd app sync` 命令，手工触发同步：
+
+```
+$ argocd app sync guestbook
+TIMESTAMP                  GROUP        KIND   NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE
+2023-05-06T08:22:53+08:00            Service     default          guestbook-ui  OutOfSync  Missing
+2023-05-06T08:22:53+08:00   apps  Deployment     default          guestbook-ui  OutOfSync  Missing
+2023-05-06T08:22:53+08:00            Service     default          guestbook-ui    Synced  Healthy
+2023-05-06T08:22:54+08:00            Service     default          guestbook-ui    Synced   Healthy              service/guestbook-ui created
+2023-05-06T08:22:54+08:00   apps  Deployment     default          guestbook-ui  OutOfSync  Missing              deployment.apps/guestbook-ui created
+2023-05-06T08:22:54+08:00   apps  Deployment     default          guestbook-ui    Synced  Progressing              deployment.apps/guestbook-ui created
+
+Name:               argocd/guestbook
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          default
+URL:                https://localhost:32130/applications/guestbook
+Repo:               https://github.com/argoproj/argocd-example-apps.git
+Target:
+Path:               guestbook
+SyncWindow:         Sync Allowed
+Sync Policy:        <none>
+Sync Status:        Synced to  (53e28ff)
+Health Status:      Progressing
+
+Operation:          Sync
+Sync Revision:      53e28ff20cc530b9ada2173fbbd64d48338583ba
+Phase:              Succeeded
+Start:              2023-05-06 08:22:53 +0800 CST
+Finished:           2023-05-06 08:22:54 +0800 CST
+Duration:           1s
+Message:            successfully synced (all tasks run)
+
+GROUP  KIND        NAMESPACE  NAME          STATUS  HEALTH       HOOK  MESSAGE
+       Service     default    guestbook-ui  Synced  Healthy            service/guestbook-ui created
+apps   Deployment  default    guestbook-ui  Synced  Progressing        deployment.apps/guestbook-ui created
+```
+
+等待一段时间后，应用关联资源就部署完成了：
+
+```
+$ kubectl get all
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/guestbook-ui-b848d5d9d-rtzwf   1/1     Running   0          67s
+
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/guestbook-ui   ClusterIP   10.107.51.212   <none>        80/TCP    67s
+service/kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP   30d
+
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/guestbook-ui   1/1     1            1           67s
+
+NAME                                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/guestbook-ui-b848d5d9d   1         1         1       67s
+```
+
+测试完成后，执行 `argocd app delete` 命令删除应用，该应用关联的资源将会被级联删除：
+
+```
+$ argocd app delete guestbook
+Are you sure you want to delete 'guestbook' and all its resources? [y/n] y
+application 'guestbook' deleted
+```
+
 ## 参考
 
+* [Argo CD Getting Started](https://argo-cd.readthedocs.io/en/stable/getting_started/)
 * [GitOps 介绍](https://icloudnative.io/posts/what-is-gitops/)
 * [Argo CD 入门教程](https://icloudnative.io/posts/getting-started-with-argocd/)
 * [GitOps 应用实践系列 - 综述](https://moelove.info/2021/10/19/GitOps-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-%E7%BB%BC%E8%BF%B0/)
