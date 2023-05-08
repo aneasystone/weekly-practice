@@ -13,6 +13,8 @@
 
 基于 GitOps 理念，很快诞生出了一批 **声明式的持续交付（Declarative Continuous Deployment）** 工具，比如 Weaveworks 的 [Flux CD](https://fluxcd.io/) 和 Intuit 的 [Argo CD](https://argoproj.github.io/cd/)，虽然 Weaveworks 是 GitOps 概念的提出者，但是从社区的反应来看，似乎 Argo CD 要更胜一筹。
 
+Argo 项目最初是由 [Applatix](https://www.applatix.com/) 公司于 2017 年创建，2018 年这家公司被 [Intuit](https://www.intuit.com/) 收购，Argo 项目就由 Intuit 继续维护和演进。Argo 目前包含了四个子项目：[Argo Workflows](https://argoproj.github.io/workflows)、[Argo Events](https://argoproj.github.io/events)、[Argo CD](https://argoproj.github.io/cd) 和 [Argo Rollouts](https://argoproj.github.io/rollouts/)，主要用于运行和管理 Kubernetes 上的应用程序和任务，所有的 Argo 项目都是基于 Kubernetes 控制器和自定义资源实现的，它们组合在一起，提供了创建应用程序和任务的三种模式：服务模式、工作流模式和基于事件的模式。2020 年 4 月 7 日，Argo 项目加入 CNCF 开始孵化，并于 2022 年 12 月正式毕业，成为继 Kubernetes、Prometheus 和 Envoy 之后的又一个 CNCF 毕业项目。
+
 这一节我们将学习 Argo CD，学习如何通过 Git 以及声明式描述来部署 Kubernetes 资源。
 
 ### 安装 Argo CD
@@ -268,7 +270,26 @@ $ argocd app create guestbook \
 application 'guestbook' created
 ```
 
-和 Web UI 操作类似，刚创建的应用处于 `OutOfSync` 状态，我们可以使用 `argocd app get` 命令查询应用详情进行确认：
+也可以使用 `YAML` 文件声明式地创建 Argo CD 应用：
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guestbook
+```
+
+我们创建一个 YAML 文件，包含以上内容，然后执行 `kubectl apply -f` 即可，和 Web UI 操作类似，刚创建的应用处于 `OutOfSync` 状态，我们可以使用 `argocd app get` 命令查询应用详情进行确认：
 
 ```
 $ argocd app get guestbook
@@ -361,9 +382,19 @@ application 'guestbook' deleted
 * [Argo CD 入门教程](https://icloudnative.io/posts/getting-started-with-argocd/)
 * [GitOps 应用实践系列 - 综述](https://moelove.info/2021/10/19/GitOps-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-%E7%BB%BC%E8%BF%B0/)
 * [GitOps 应用实践系列 - Argo CD 的基本介绍](https://moelove.info/2021/10/21/GitOps-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-Argo-CD-%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D/)
-* [GitOps 应用实践系列 - Flux CD 及其核心组件](https://moelove.info/2021/12/18/GitOps-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-Flux-CD-%E5%8F%8A%E5%85%B6%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/)
-* [Argo CD vs Flux CD — Right GitOps tool for your Kubernetes cluster](https://rajputvaibhav.medium.com/argo-cd-vs-flux-cd-right-gitops-tool-for-your-kubernetes-cluster-c71cff489d26)
 * [Guide To GitOps](https://www.weave.works/technologies/gitops/)
 * [The GitOps FAQ](https://www.weave.works/technologies/gitops-frequently-asked-questions/)
 * [What Is GitOps](https://www.weave.works/blog/what-is-gitops-really)
 * [The History of GitOps](https://www.weave.works/blog/the-history-of-gitops)
+* [CNCF 宣布 Argo 正式毕业](https://www.infoq.cn/article/y8a0ek2uevjxbm3qgcox)
+
+## 更多
+
+### 部署其他的应用类型
+
+Argo CD 不仅支持原生的 Kubernetes 配置清单，也支持 [Helm Chart](https://argo-cd.readthedocs.io/en/stable/user-guide/helm/)、[Kustomize](https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/) 或者 [Jsonnet](https://argo-cd.readthedocs.io/en/stable/user-guide/jsonnet/) 部署清单，甚至可以通过 [Config Management Plugins](https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/) 实现自定义配置。
+
+### Flux CD
+
+* [GitOps 应用实践系列 - Flux CD 及其核心组件](https://moelove.info/2021/12/18/GitOps-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-Flux-CD-%E5%8F%8A%E5%85%B6%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/)
+* [Argo CD vs Flux CD — Right GitOps tool for your Kubernetes cluster](https://rajputvaibhav.medium.com/argo-cd-vs-flux-cd-right-gitops-tool-for-your-kubernetes-cluster-c71cff489d26)
