@@ -44,10 +44,6 @@
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
 
-## Spring Security
-
-* [Getting started with Spring Security and Spring Boot](https://reflectoring.io/spring-security/)
-
 ## 数据库分片
 
 * [数据库分片（Database Sharding)详解](https://zhuanlan.zhihu.com/p/57185574)
