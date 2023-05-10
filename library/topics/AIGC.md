@@ -27,6 +27,10 @@
 * [reworkd/AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [哔哔终结者 BibiGPT](https://b.jimmylv.cn/)
 
+### ChatGPT 资源
+
+* [xtekky/gpt4free](https://github.com/xtekky/gpt4free) - decentralising the Ai Industry, just some language model api's...
+
 ### 写作助手
 
 * [达观助手-智能写作专家](http://www.datagrand.com/products/wps-plugin/)
@@ -49,6 +53,11 @@
 
 * [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
 * [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
+
+### 个人助手
+
+* [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
+* [Pi, your personal AI](https://heypi.com/talk)
 
 ### LLM
 
@@ -80,6 +89,7 @@
 
 #### Awesome
 
+* [开源大语言模型汇总](https://mp.weixin.qq.com/s/BQOJNwfkApiZnFveMDBQ-w)
 * [List of Open Sourced Fine-Tuned Large Language Models (LLM)](https://medium.com/geekculture/list-of-open-sourced-fine-tuned-large-language-models-llm-8d95a2e0dc76)
 
 ## 图像类
