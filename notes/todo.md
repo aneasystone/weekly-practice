@@ -46,6 +46,7 @@
 	* [Micrometer Observation](https://micrometer.io/docs/observation)
 	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
+* [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
 
 ### 使用 Picocli 打造一个命令行程序
 
@@ -58,8 +59,16 @@
 
 ## Kubernetes
 
+### 在 Kubernetes 中调度 GPU 资源
+
+* [k8s 调度 GPU](https://www.cnblogs.com/linhaifeng/p/16111733.html)
+* [docker使用GPU总结](https://www.cnblogs.com/linhaifeng/p/16108285.html)
+* [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin#quick-start)
+* [Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
+
 ### 学习 Kubernetes 的用户认证
 
+* [Using RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 * [为Kubernetes集群添加用户](https://zhuanlan.zhihu.com/p/43237959)
 * [创建用户认证授权的 kubeconfig 文件](https://jimmysong.io/kubernetes-handbook/guide/kubectl-user-authentication-authorization.html)
 
@@ -79,10 +88,25 @@
 
 ### etcd for Kubernetes
 
+* [用 Kubernetes 搭建 Etcd 集群和 WebUI](https://zhuanlan.zhihu.com/p/373016748)
 * [为 Kubernetes 运行 etcd 集群](https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/configure-upgrade-etcd/)
 * [使用 etcdctl 访问 Kubernetes 数据](https://jimmysong.io/kubernetes-handbook/guide/using-etcdctl-to-access-kubernetes-data.html)
 * [Using Fio to Tell Whether Your Storage is Fast Enough for Etcd](https://www.ibm.com/cloud/blog/using-fio-to-tell-whether-your-storage-is-fast-enough-for-etcd)
 * [Hardware guidelines for administering etcd clusters](https://etcd.io/docs/v3.6/op-guide/hardware/)
+
+### containerd 学习笔记
+
+* [Getting started with containerd](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
+* [Mapping from dockercli to crictl](https://kubernetes.io/docs/reference/tools/map-crictl-dockercli/)
+
+### 使用 KubeVela 部署应用
+
+* [KubeVela](https://kubevela.io/zh/)
+
+### 使用 KubeSphere 管理 Kubernetes
+
+* [KubeSphere 文档](https://kubesphere.io/zh/docs/v3.3)
+* [技术博客](https://kubesphere.io/zh/blogs/)
 
 ## 数据库
 
@@ -94,6 +118,8 @@
 ### 缓存同步
 
 * [MySQL 与 Redis 缓存的同步方案](https://mp.weixin.qq.com/s/e4qJp4zcXHJQycJwq1mgzQ)
+* [数据库和缓存如何保证一致性？](https://xiaolincoding.com/redis/architecture/mysql_redis_consistency.html)
+* [缓存和数据库一致性问题，看这篇就够了](https://xie.infoq.cn/article/9d733ec68b27b589c66070623)
 
 ## Linux
 
@@ -127,11 +153,6 @@
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
 
-### 开发一个 Vue 组件
-
-* [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
-* [从零到一教你基于vue开发一个组件库](https://juejin.cn/post/6844904085808742407)
-
 ### ElasticSearch 查询指南
 
 * [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
@@ -147,6 +168,10 @@
 
 * [夜莺 - All-in-one 的开源观测平台](https://github.com/ccfos/nightingale)
 
+### 实战 Litmus 云原生混沌工程
+
+* [石蕊(Litmus) 中文文档](https://github.com/litmuschaos/litmus/blob/master/translations/README-chn.md)
+
 ### Nginx
 
 * [Nginx 常用配置及和基本功能讲解](https://my.oschina.net/u/4090830/blog/8694569)
@@ -158,3 +183,14 @@
 ## 技术大会
 
 * [可观测性峰会 2023 回顾及 PPT 下载](https://github.com/cloudnativeto/academy/tree/master/observability-summit/2023)
+
+## 前端
+
+### 前端规范
+
+* [盘点那些前端项目上的规范工具](https://juejin.cn/post/7218915344131850295)
+
+### 开发一个 Vue 组件
+
+* [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
+* [从零到一教你基于vue开发一个组件库](https://juejin.cn/post/6844904085808742407)
