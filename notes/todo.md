@@ -34,6 +34,18 @@
 
 * [动态代理大揭秘，带你彻底弄清楚动态代理！](https://my.oschina.net/u/1584523/blog/5261706)
 
+### 异步
+
+* [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
+
+### Guava
+
+* [使用Google Guava快乐编程](https://mp.weixin.qq.com/s/PxiYuxTk3549ubdYta7pPw)
+
+### JVM
+
+* [深入浅出解析JVM中的Safepoint](https://mp.weixin.qq.com/s/_Khj3Qa2MZBN9718KhVp0w)
+
 ### JMX
 
 * [Calling JMX MBean Method From a Shell Script](https://www.baeldung.com/jmx-mbean-shell-access)
@@ -47,6 +59,7 @@
 	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
 * [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
+* [A Java Library’s New Approach To Observability](https://foojay.io/today/not-your-grandfathers-logs-a-java-librarys-new-approach-to-observability/)
 
 ### 使用 Picocli 打造一个命令行程序
 
@@ -56,6 +69,10 @@
 * [Picocli 2.0: Steroids上的Groovy脚本](https://picocli.info/zh/picocli-2.0-groovy-scripts-on-steroids.html)
 * [从Commons CLI迁移到Picocli](https://blog.csdn.net/Tybyqi/article/details/85787550)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
+
+### Maven
+
+* [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
 
 ## Kubernetes
 
@@ -93,6 +110,7 @@
 * [使用 etcdctl 访问 Kubernetes 数据](https://jimmysong.io/kubernetes-handbook/guide/using-etcdctl-to-access-kubernetes-data.html)
 * [Using Fio to Tell Whether Your Storage is Fast Enough for Etcd](https://www.ibm.com/cloud/blog/using-fio-to-tell-whether-your-storage-is-fast-enough-for-etcd)
 * [Hardware guidelines for administering etcd clusters](https://etcd.io/docs/v3.6/op-guide/hardware/)
+* [etcd：增加30%的写入性能](https://www.cnblogs.com/charlieroro/p/17379469.html)
 
 ### containerd 学习笔记
 
@@ -108,7 +126,19 @@
 * [KubeSphere 文档](https://kubesphere.io/zh/docs/v3.3)
 * [技术博客](https://kubesphere.io/zh/blogs/)
 
+### 深入 Istio
+
+* [MoE 系列 - 如何使用 Golang 扩展 Envoy [一]](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-1/)
+* [MoE 系列 [二] - Golang 扩展从 Envoy 接收配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-2/)
+* [MoE 系列 [三] - 使用 Istio 动态更新 Go 扩展配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-3/)
+* [MoE 系列 [四] - Go 扩展的异步模式](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-4/)
+* [MoE 系列 [五] - Envoy Go 扩展之内存安全](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-5/)
+
 ## 数据库
+
+### 索引
+
+* [MySQL 索引之道](https://juejin.cn/post/7161964571853815822)
 
 ### 数据库分片
 
@@ -120,6 +150,11 @@
 * [MySQL 与 Redis 缓存的同步方案](https://mp.weixin.qq.com/s/e4qJp4zcXHJQycJwq1mgzQ)
 * [数据库和缓存如何保证一致性？](https://xiaolincoding.com/redis/architecture/mysql_redis_consistency.html)
 * [缓存和数据库一致性问题，看这篇就够了](https://xie.infoq.cn/article/9d733ec68b27b589c66070623)
+
+### Redis
+
+* [Redis夺命11连问](https://mp.weixin.qq.com/s/i3WxTDrfLiqC8H2MhzXCUw)
+* [High availability with Redis Sentinel](https://redis.io/docs/management/sentinel/)
 
 ## Linux
 

@@ -12,6 +12,7 @@
 * [Claude AI](https://www.anthropic.com/claude-in-slack)
 * [Bard](https://bard.google.com/)
 * [Notion AI](https://www.notion.so/product/ai)
+* [HuggingChat](https://huggingface.co/chat/)
 
 ### ChatGPT 教程
 
@@ -27,6 +28,7 @@
 * [reworkd/AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [哔哔终结者 BibiGPT](https://b.jimmylv.cn/)
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
+* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 
 ### ChatGPT 资源
 
@@ -64,7 +66,6 @@
 
 * [文心大模型](https://wenxin.baidu.com/)
 * [THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - ChatGLM-6B：开源双语对话语言模型 | An Open Bilingual Dialogue Language Model
-* [hwchase17/langchain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
 * [Databricks Dolly](https://github.com/databrickslabs/dolly)
 * [Baize](https://github.com/project-baize/baize-chatbot)
 * [Chinese Vicuna](https://github.com/Facico/Chinese-Vicuna) - A Chinese Instruction-following LLaMA-based Model
@@ -81,6 +82,16 @@
 * [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4) - Enhancing Vision-language Understanding with Advanced Large Language Models
 * [OpenLMLab/MOSS](https://github.com/OpenLMLab/MOSS) - An open-source tool-augmented conversational language model from Fudan University
 
+#### Web UI
+
+* [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
+* [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
+
+#### LangChain
+
+* [hwchase17/langchain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
+* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
+
 #### LLaMA
 
 * [facebookresearch/llama](https://github.com/facebookresearch/llama) - Inference code for LLaMA models
@@ -89,10 +100,20 @@
 * [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
 * [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
 
+#### DeepSpeed
+
+* [microsoft/DeepSpeed](https://github.com/microsoft/DeepSpeed) - DeepSpeed is a deep learning optimization library that makes distributed training and inference easy, efficient, and effective.
+* [DeepSpeed-Chat](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat)
+	* [DeepSpeed-Chat：最强ChatGPT训练框架，一键完成RLHF训练！](https://mp.weixin.qq.com/s/uuquavhwNg1P9AaIMXOE_A)
+
 #### Awesome
 
 * [开源大语言模型汇总](https://mp.weixin.qq.com/s/BQOJNwfkApiZnFveMDBQ-w)
 * [List of Open Sourced Fine-Tuned Large Language Models (LLM)](https://medium.com/geekculture/list-of-open-sourced-fine-tuned-large-language-models-llm-8d95a2e0dc76)
+* [ChatGPT的朋友们：大语言模型经典论文汇总](https://mp.weixin.qq.com/s/HnC5qiOAngwDtPpq2BF2qg)
+* [GPT/AIGC/LLM/NLP/ChatGPT 学习](https://gofurther.feishu.cn/docx/Enofdl25BotoVrxth8ec4rNBn5c)
+* [如何训练自己的ChatGPT](https://mp.weixin.qq.com/s/iPTsaHE9GqKMBSXn3D-SiA)
+* [大语言模型调研汇总](https://zhuanlan.zhihu.com/p/614766286)
 
 ## 图像类
 
@@ -105,6 +126,7 @@
 
 * [hua1995116/awesome-ai-painting](https://github.com/hua1995116/awesome-ai-painting) - AI绘画资料合集（包含国内外可使用平台、使用教程、参数教程、部署教程、业界新闻等等） stable diffusion tutorial、disco diffusion tutorial、 AI Platform
 * [altryne/awesome-ai-art-image-synthesis](https://github.com/altryne/awesome-ai-art-image-synthesis) - A list of awesome tools, ideas, prompt engineering tools, colabs, models, and helpers for the prompt designer playing with aiArt and image synthesis. Covers Dalle2, MidJourney, StableDiffusion, and open source tools.
+* [硬核解读Stable Diffusion](https://mp.weixin.qq.com/s/yaH1uKBvouaKo0KgxfedmQ)
 
 ### Stable Diffusion
 
@@ -130,6 +152,14 @@
 
 * [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
 * [Segment Anything](https://github.com/facebookresearch/segment-anything)
+	* [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
+
+## 提示工程
+
+* [Learning Prompt](https://learningprompt.wiki/)
+* [prompt-engineering/understand-prompt](https://github.com/prompt-engineering/understand-prompt) - 理解 Prompt：基于编程、绘画、写作的 AI 探索与总结
+* [willwulfken/MidJourney-Styles-and-Keywords-Reference](https://github.com/willwulfken/MidJourney-Styles-and-Keywords-Reference) - A reference containing Styles and Keywords that you can use with MidJourney AI. There are also pages showing resolution comparison, image weights, and much more!
+* [Moonvy/OpenPromptStudio](https://github.com/Moonvy/OpenPromptStudio) - AIGC 提示词可视化编辑器 | OPS | Open Prompt Studio
 
 ## 其他
 
