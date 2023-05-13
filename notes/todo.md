@@ -8,15 +8,18 @@
 
 ### 学习 JUnit
 
+* [Creating a Test Suite With JUnit](https://www.baeldung.com/java-junit-test-suite)
 * [Best Practices for Unit Testing in Java](https://www.baeldung.com/java-unit-testing-best-practices)
+* [Pitfalls on Testing with Spring Boot](https://www.baeldung.com/spring-boot-testing-pitfalls)
 
-### Java 性能调优
+### 问题诊断
 
+* [Create and Detect Memory Leaks in Java](https://www.baeldung.com/java-create-detect-memory-leaks)
+* [Can a Java Application Use More Memory Than the Heap Size?](https://www.baeldung.com/java-memory-beyond-heap)
+* [长连接 Netty 服务内存泄漏，看我如何一步步捉 “虫” 解决](https://my.oschina.net/u/4090830/blog/8685855)
 * [Unleash the Power of Open Source Java Profilers: Comparing VisualVM, JMC, and async-profiler](https://www.infoq.com/articles/open-source-java-profilers/)
-
-### Java 排错技巧
-
 * [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
+* [Possible Root Causes for High CPU Usage in Java](https://www.baeldung.com/java-high-cpu-usage-causes)
 
 ### Spring Boot 启动优化
 
@@ -37,6 +40,7 @@
 ### 异步
 
 * [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
+* [Is CompletableFuture Non-blocking?](https://www.baeldung.com/java-completablefuture-non-blocking)
 
 ### Guava
 
@@ -48,6 +52,7 @@
 
 ### JMX
 
+* [External Debugging With JMXTerm](https://www.baeldung.com/java-jmxterm-external-debugging)
 * [Calling JMX MBean Method From a Shell Script](https://www.baeldung.com/jmx-mbean-shell-access)
 
 ### 实现 Spring Boot 3 应用的可观测性
@@ -73,6 +78,10 @@
 ### Maven
 
 * [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
+
+### 虚拟线程
+
+* [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
 
 ## Kubernetes
 

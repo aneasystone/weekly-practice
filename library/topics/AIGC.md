@@ -24,11 +24,22 @@
 * [Visual ChatGPT](https://github.com/microsoft/visual-chatgpt) - Official repo for the paper: Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
 * [ChatGPT Shortcut](https://github.com/rockbenben/ChatGPT-Shortcut) - 让生产力加倍的 ChatGPT 快捷指令，按照领域和功能分区，可对提示词进行标签筛选、关键词搜索和一键复制。
 * [josStorer/chatGPTBox](https://github.com/josStorer/chatGPTBox) - Integrating ChatGPT into your browser deeply, everything you need is here
-* [lm-sys/FastChat](https://github.com/lm-sys/FastChat) - The release repo for "Vicuna: An Open Chatbot Impressing GPT-4"
 * [reworkd/AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [哔哔终结者 BibiGPT](https://b.jimmylv.cn/)
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
 * [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
+* [k8sgpt-ai/k8sgpt](https://github.com/k8sgpt-ai/k8sgpt) - Giving Kubernetes Superpowers to everyone
+* [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
+* [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) - Reverse engineered API of Microsoft's Bing Chat AI
+* [gd3kr/BlenderGPT](https://github.com/gd3kr/BlenderGPT) - Use commands in English to control Blender with OpenAI's GPT-4
+* [ingyamilmolinar/doctorgpt](https://github.com/ingyamilmolinar/doctorgpt) - DoctorGPT brings GPT into production for application log error diagnosing!
+* [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
+* [yakGPT/yakGPT](https://github.com/yakGPT/yakGPT) - Locally running, hands-free ChatGPT UI
+
+#### MiniGPT
+
+* [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4) - Enhancing Vision-language Understanding with Advanced Large Language Models
+* [MiniGPT-4，开源了！](https://cuijiahua.com/blog/2023/04/ai-32.html)
 
 ### ChatGPT 资源
 
@@ -48,9 +59,20 @@
 * [EssayKillerBrain/EssayKiller_V2](https://github.com/EssayKillerBrain/EssayKiller_V2) - 基于开源GPT2.0的初代创作型人工智能 | 可扩展、可进化
 * [binary-husky/chatgpt_academic](https://github.com/binary-husky/chatgpt_academic) - 科研工作专用ChatGPT拓展，特别优化学术Paper润色体验，支持自定义快捷按钮，支持自定义函数插件，支持markdown代码块表格显示，Tex公式双显示，新增Python/C++项目剖析/自译解功能，PDF/LaTex论文翻译/总结功能，兼容ChatGLM等本地模型
 
-### 代码生成
+### 代码辅助
 
+* [GitHub Copilot](https://github.com/features/copilot) - Your AI pair programmer
+* [Amazon CodeWhisperer](https://aws.amazon.com/cn/codewhisperer/)
+* [Codeium](https://codeium.com/)
+* [Tabnine](https://www.tabnine.com/) - AI assistant for software developers
+* [AlphaCode](https://alphacode.deepmind.com/)
+* [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
+* [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
+* [StarCoder](https://github.com/bigcode-project/starcoder)
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
+* [appleboy/CodeGPT](https://github.com/appleboy/CodeGPT) - A CLI written in Go language that writes git commit messages or do a code review brief for you using ChatGPT AI (gpt-4, gpt-3.5-turbo model) and automatically installs a git prepare-commit-msg hook.
+* [sqlchat/sqlchat](https://github.com/sqlchat/sqlchat) - Chat-based SQL Client and Editor for the next decade
+* [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
 
 ### 文档助手
 
@@ -70,7 +92,6 @@
 * [Baize](https://github.com/project-baize/baize-chatbot)
 * [Chinese Vicuna](https://github.com/Facico/Chinese-Vicuna) - A Chinese Instruction-following LLaMA-based Model
 * [GPT4All](https://github.com/nomic-ai/gpt4all)
-* [FastChat](https://github.com/lm-sys/FastChat)
 * [Petals](https://github.com/bigscience-workshop/petals)
 * [Mesh Transformer JAX](https://github.com/kingoflolz/mesh-transformer-jax)
 * [GPT-NeoX](https://github.com/EleutherAI/gpt-neox)
@@ -79,13 +100,18 @@
 * [RWKV LM](https://github.com/BlinkDL/RWKV-LM)
 * [StableLM](https://github.com/stability-AI/stableLM)
 * [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
-* [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4) - Enhancing Vision-language Understanding with Advanced Large Language Models
 * [OpenLMLab/MOSS](https://github.com/OpenLMLab/MOSS) - An open-source tool-augmented conversational language model from Fudan University
+* [Web LLM](https://mlc.ai/web-llm/)
 
 #### Web UI
 
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
+
+#### Vicuna
+
+* [Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality](https://lmsys.org/blog/2023-03-30-vicuna/)
+* [FastChat](https://github.com/lm-sys/FastChat) - An open platform for training, serving, and evaluating large languages. Release repo for Vicuna and FastChat-T5.
 
 #### LangChain
 
@@ -99,6 +125,7 @@
 * [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
 * [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
 * [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
+* [SCIR-HI/Huatuo-Llama-Med-Chinese](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 华驼模型仓库，基于中文医学知识的LLaMA模型指令微调
 
 #### DeepSpeed
 
@@ -114,6 +141,10 @@
 * [GPT/AIGC/LLM/NLP/ChatGPT 学习](https://gofurther.feishu.cn/docx/Enofdl25BotoVrxth8ec4rNBn5c)
 * [如何训练自己的ChatGPT](https://mp.weixin.qq.com/s/iPTsaHE9GqKMBSXn3D-SiA)
 * [大语言模型调研汇总](https://zhuanlan.zhihu.com/p/614766286)
+* [ChatGPT 火了，一大批开源平替也来了](https://my.oschina.net/oscpyaqxylk/blog/8671170)
+* [可能是最全的开源 LLM （大语言模型）整理](https://my.oschina.net/oscpyaqxylk/blog/8727824)
+* [保姆教程 | 用GPU云主机搭建AI大语言模型并用Flask封装成API，实现用户与模型对话](https://developer.jdcloud.com/article/2904)
+* [两条命令搞定 ChatGPT API 的调用问题，有手就会！](https://blog.didispace.com/openai-proxy-aliyunfc/)
 
 ## 图像类
 
@@ -135,6 +166,12 @@
 * [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) - Stable Diffusion web UI
 * [camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) - stable diffusion webui colab
 * [lllyasviel/ControlNet](https://github.com/lllyasviel/ControlNet) - Let us control diffusion models!
+
+#### 文章
+
+* [AI杀疯了，NovelAI开源教程](https://cuijiahua.com/blog/2022/10/ai-29.html)
+* [【AI绘画】AI又进化了，革命性突破](https://cuijiahua.com/blog/2023/02/ai-30.html)
+* [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
 
 ### 图像生成
 
