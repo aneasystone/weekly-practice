@@ -4,6 +4,34 @@
 
 ## 入门示例
 
+我们先从一个简单的例子开始，这里我直接使用了 [week004-creating-spring-project](../week004-creating-spring-project/README.md) 中的 Hello World 示例。为了让这个示例程序开启 Spring Security 功能，我们在 `pom.xml` 文件中引入 `spring-boot-starter-security` 依赖即可：
+
+```
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+启动程序，会在控制台日志中看到类似下面这样的信息：
+
+```
+2023-05-15 06:52:52.418  INFO 8596 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: eeb386a9-e16a-4b9b-bbc6-c054c8d263b0
+```
+
+这个是由 Spring Security 随机生成的密码。访问 `/hello` 页面，可以看到出现了一个登录页面：
+
+![](./images/login.png)
+
+输入用户名（默认为 `user`）和密码（控制台日志）登录成功后我们才能正常访问页面。默认的用户名和密码可以使用下面的配置进行修改：
+
+```
+spring.security.user.name=admin
+spring.security.user.password=123456
+```
+
 ## 认证和授权
 
 ## 安全防护
