@@ -34,6 +34,47 @@ spring.security.user.password=123456
 
 ## 认证和授权
 
+应用程序的安全性归根结底包括了两个问题：**认证（Authentication）** 和 **授权（Authorization）**，认证解决的是 *你是谁？* 的问题，而授权负责解决 *你被允许做什么？*，授权也被称为 **访问控制（Access Control）**。
+
+### 认证和 `AuthenticationManager` 接口
+
+在 Spring Security 中，处理认证的核心是 `AuthenticationManager` 接口：
+
+```
+public interface AuthenticationManager {
+
+	Authentication authenticate(Authentication authentication) throws AuthenticationException;
+}
+```
+
+这个接口只有一个 `authenticate()` 方法，它的返回有三种情况：
+
+* 如果认证成功，则返回认证成功后的 `Authentication`（通常带有 `authenticated=true`）；
+* 如果认证失败，则抛出 `AuthenticationException` 异常；
+* 如果无法判断，则返回 `null`；
+
+`AuthenticationManager` 接口最常用的一个实现是 `ProviderManager` 类，它包含了一系列的 `AuthenticationProvider` 实例：
+
+```
+public class ProviderManager implements AuthenticationManager {
+
+	private List<AuthenticationProvider> providers;
+}
+```
+
+`AuthenticationProvider` 有点像 `AuthenticationManager`，但它有一个额外的方法 `boolean supports(Class<?> authentication)` ，允许调用者查询它是否支持给定的 `Authentication` 类型：
+
+```
+public interface AuthenticationProvider {
+
+	Authentication authenticate(Authentication authentication) throws AuthenticationException;
+
+	boolean supports(Class<?> authentication);
+}
+```
+
+Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认证的。
+
 ## 安全防护
 
 ## Spring Security 测试
