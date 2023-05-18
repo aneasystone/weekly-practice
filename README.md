@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK039 - [读源码剖析 Spring Security 的实现原理](./notes/week039-dive-into-spring-security-sources/README.md)
 * WEEK038 - [基于 Argo CD 的 GitOps 实践笔记](./notes/week038-gitops-with-argocd/README.md)
 * WEEK037 - [使用 Google Colab 体验 AI 绘画](./notes/week037-ai-painting-with-google-colab/README.md)
 * WEEK036 - [使用 RSSHub 为任意网址生成订阅源](./notes/week036-feed-everything-with-rsshub/README.md)
