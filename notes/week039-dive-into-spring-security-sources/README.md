@@ -8,8 +8,8 @@
 
 ```
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter-security</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
 ```
 
@@ -56,39 +56,39 @@ logging.level.org.springframework.boot.web.servlet.ServletContextInitializerBean
 
 ```
 2023-05-18 07:08:14.805 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Added existing Filter initializer bean 'webMvcMetricsFilter'; order=-2147483647, 
-	resource=class path resource [org/springframework/boot/actuate/autoconfigure/metrics/web/servlet/WebMvcMetricsAutoConfiguration.class]
+    Added existing Filter initializer bean 'webMvcMetricsFilter'; order=-2147483647, 
+    resource=class path resource [org/springframework/boot/actuate/autoconfigure/metrics/web/servlet/WebMvcMetricsAutoConfiguration.class]
 2023-05-18 07:08:14.806 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Added existing Filter initializer bean 'securityFilterChainRegistration'; order=-100, 
-	resource=class path resource [org/springframework/boot/autoconfigure/security/servlet/SecurityFilterAutoConfiguration.class]
+    Added existing Filter initializer bean 'securityFilterChainRegistration'; order=-100, 
+    resource=class path resource [org/springframework/boot/autoconfigure/security/servlet/SecurityFilterAutoConfiguration.class]
 2023-05-18 07:08:14.808 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Added existing Servlet initializer bean 'dispatcherServletRegistration'; order=2147483647, 
-	resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/DispatcherServletAutoConfiguration$DispatcherServletRegistrationConfiguration.class]
+    Added existing Servlet initializer bean 'dispatcherServletRegistration'; order=2147483647, 
+    resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/DispatcherServletAutoConfiguration$DispatcherServletRegistrationConfiguration.class]
 2023-05-18 07:08:14.810 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Added existing Filter initializer bean 'errorPageSecurityFilter'; order=2147483647, 
-	resource=class path resource [org/springframework/boot/autoconfigure/security/servlet/SpringBootWebSecurityConfiguration$ErrorPageSecurityFilterConfiguration.class]
+    Added existing Filter initializer bean 'errorPageSecurityFilter'; order=2147483647, 
+    resource=class path resource [org/springframework/boot/autoconfigure/security/servlet/SpringBootWebSecurityConfiguration$ErrorPageSecurityFilterConfiguration.class]
 2023-05-18 07:08:14.813 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Added existing ServletContextInitializer initializer bean 'servletEndpointRegistrar'; order=2147483647, 
-	resource=class path resource [org/springframework/boot/actuate/autoconfigure/endpoint/web/ServletEndpointManagementContextConfiguration$WebMvcServletEndpointManagementContextConfiguration.class]
+    Added existing ServletContextInitializer initializer bean 'servletEndpointRegistrar'; order=2147483647, 
+    resource=class path resource [org/springframework/boot/actuate/autoconfigure/endpoint/web/ServletEndpointManagementContextConfiguration$WebMvcServletEndpointManagementContextConfiguration.class]
 2023-05-18 07:08:14.828 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Created Filter initializer for bean 'characterEncodingFilter'; order=-2147483648, 
-	resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/HttpEncodingAutoConfiguration.class]    
+    Created Filter initializer for bean 'characterEncodingFilter'; order=-2147483648, 
+    resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/HttpEncodingAutoConfiguration.class]    
 2023-05-18 07:08:14.831 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Created Filter initializer for bean 'formContentFilter'; order=-9900, 
-	resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration.class]
+    Created Filter initializer for bean 'formContentFilter'; order=-9900, 
+    resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration.class]
 2023-05-18 07:08:14.834 TRACE 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Created Filter initializer for bean 'requestContextFilter'; order=-105, 
-	resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class]
+    Created Filter initializer for bean 'requestContextFilter'; order=-105, 
+    resource=class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class]
 2023-05-18 07:08:14.842 DEBUG 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Mapping filters: 
-		filterRegistrationBean urls=[/*] order=-2147483647, 
-		springSecurityFilterChain urls=[/*] order=-100, 
-		filterRegistrationBean urls=[/*] order=2147483647, 
-		characterEncodingFilter urls=[/*] order=-2147483648, 
-		formContentFilter urls=[/*] order=-9900, 
-		requestContextFilter urls=[/*] order=-105
+    Mapping filters: 
+        filterRegistrationBean urls=[/*] order=-2147483647, 
+        springSecurityFilterChain urls=[/*] order=-100, 
+        filterRegistrationBean urls=[/*] order=2147483647, 
+        characterEncodingFilter urls=[/*] order=-2147483648, 
+        formContentFilter urls=[/*] order=-9900, 
+        requestContextFilter urls=[/*] order=-105
 2023-05-18 07:08:14.844 DEBUG 10020 --- [           main] o.s.b.w.s.ServletContextInitializerBeans : 
-	Mapping servlets: dispatcherServlet urls=[/] 
+    Mapping servlets: dispatcherServlet urls=[/] 
 ```
 
 这里显示了应用开启的所有 `Filter` 以及对应的自动配置类，可以看到 Spring Security 自动注入了两个 `FilterRegistrationBean`：
@@ -96,16 +96,18 @@ logging.level.org.springframework.boot.web.servlet.ServletContextInitializerBean
 * 来自配置类 `SecurityFilterAutoConfiguration` 的 `securityFilterChainRegistration`
 * 来自配置类 `ErrorPageSecurityFilterConfiguration` 的 `errorPageSecurityFilter`
 
+#### DelegatingFilterProxy
+
 注意这里显示的并非 `Filter` 的名字，而是 `FilterRegistrationBean` 的名字，这是一种 `RegistrationBean`，它实现了 `ServletContextInitializer` 接口，用于在程序启动时，将 `Filter` 或 `Servlet` 注入到 `ServletContext` 中：
 
 ```
 public abstract class RegistrationBean implements ServletContextInitializer, Ordered {
 
-	@Override
-	public final void onStartup(ServletContext servletContext) throws ServletException {
-		...
-		register(description, servletContext);
-	}
+    @Override
+    public final void onStartup(ServletContext servletContext) throws ServletException {
+        ...
+        register(description, servletContext);
+    }
 
 }
 ```
@@ -116,12 +118,12 @@ public abstract class RegistrationBean implements ServletContextInitializer, Ord
 @Bean
 @ConditionalOnBean(name = DEFAULT_FILTER_NAME)
 public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
-		SecurityProperties securityProperties) {
-	DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean(
-			DEFAULT_FILTER_NAME);
-	registration.setOrder(securityProperties.getFilter().getOrder());
-	registration.setDispatcherTypes(getDispatcherTypes(securityProperties));
-	return registration;
+        SecurityProperties securityProperties) {
+    DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean(
+            DEFAULT_FILTER_NAME);
+    registration.setOrder(securityProperties.getFilter().getOrder());
+    registration.setDispatcherTypes(getDispatcherTypes(securityProperties));
+    return registration;
 }
 ```
 
@@ -129,11 +131,11 @@ public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 
 ```
 public class DelegatingFilterProxyRegistrationBean extends AbstractFilterRegistrationBean<DelegatingFilterProxy> {
-	...
+    ...
 }
 ```
 
-这是一个非常重要的 `Filter`，它充当着 Servlet 容器和 Spring 上下文之间的桥梁，由于 Servlet 容器有着它自己的标准，在注入 `Filter` 时并不知道 Spring Bean 的存在，所以我们可以通过 `DelegatingFilterProxy` 来实现 `Bean Filter` 的延迟加载：
+这是一个非常重要的 `Servlet Filter`，它充当着 Servlet 容器和 Spring 上下文之间的桥梁，由于 Servlet 容器有着它自己的标准，在注入 `Filter` 时并不知道 Spring Bean 的存在，所以我们可以通过 `DelegatingFilterProxy` 来实现 `Bean Filter` 的延迟加载：
 
 ![](./images/delegatingfilterproxy.png)
 
@@ -142,34 +144,36 @@ public class DelegatingFilterProxyRegistrationBean extends AbstractFilterRegistr
 ```
 public class DelegatingFilterProxy extends GenericFilterBean {
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-		// Lazily initialize the delegate if necessary.
-		Filter delegateToUse = this.delegate;
-		if (delegateToUse == null) {
-			synchronized (this.delegateMonitor) {
-				delegateToUse = this.delegate;
-				if (delegateToUse == null) {
-					WebApplicationContext wac = findWebApplicationContext();
-					if (wac == null) {
-						throw new IllegalStateException("No WebApplicationContext found: " +
-								"no ContextLoaderListener or DispatcherServlet registered?");
-					}
-					delegateToUse = initDelegate(wac);
-				}
-				this.delegate = delegateToUse;
-			}
-		}
+        // Lazily initialize the delegate if necessary.
+        Filter delegateToUse = this.delegate;
+        if (delegateToUse == null) {
+            synchronized (this.delegateMonitor) {
+                delegateToUse = this.delegate;
+                if (delegateToUse == null) {
+                    WebApplicationContext wac = findWebApplicationContext();
+                    if (wac == null) {
+                        throw new IllegalStateException("No WebApplicationContext found: " +
+                                "no ContextLoaderListener or DispatcherServlet registered?");
+                    }
+                    delegateToUse = initDelegate(wac);
+                }
+                this.delegate = delegateToUse;
+            }
+        }
 
-		// Let the delegate perform the actual doFilter operation.
-		invokeDelegate(delegateToUse, request, response, filterChain);
-	}
+        // Let the delegate perform the actual doFilter operation.
+        invokeDelegate(delegateToUse, request, response, filterChain);
+    }
 }
 ```
 
 这段代码很容易理解，首先判断代理的 `Bean Filter` 是否存在，如果不存在则根据 `findWebApplicationContext()` 找到 Web 应用上下文，然后从上下文中获取 `Bean Filter` 并初始化，最后再调用该 `Bean Filter`。
+
+#### FilterChainProxy
 
 那么接下来的问题是，这个 `DelegatingFilterProxy` 代理的 `Bean Filter` 是什么呢？我们从上面定义 `DelegatingFilterProxyRegistrationBean` 的地方可以看出，代理的 `Bean Filter` 叫做 `DEFAULT_FILTER_NAME`，查看它的定义就知道，实际上就是 `springSecurityFilterChain`：
 
@@ -182,82 +186,75 @@ public static final String DEFAULT_FILTER_NAME = "springSecurityFilterChain";
 ```
 public class WebSecurityConfiguration {
 
-	@Bean(name = AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME)
-	public Filter springSecurityFilterChain() throws Exception {
-		boolean hasConfigurers = this.webSecurityConfigurers != null && !this.webSecurityConfigurers.isEmpty();
-		boolean hasFilterChain = !this.securityFilterChains.isEmpty();
-		Assert.state(!(hasConfigurers && hasFilterChain),
-				"Found WebSecurityConfigurerAdapter as well as SecurityFilterChain. Please select just one.");
-		if (!hasConfigurers && !hasFilterChain) {
-			WebSecurityConfigurerAdapter adapter = this.objectObjectPostProcessor
-					.postProcess(new WebSecurityConfigurerAdapter() {
-					});
-			this.webSecurity.apply(adapter);
-		}
-		for (SecurityFilterChain securityFilterChain : this.securityFilterChains) {
-			this.webSecurity.addSecurityFilterChainBuilder(() -> securityFilterChain);
-			for (Filter filter : securityFilterChain.getFilters()) {
-				if (filter instanceof FilterSecurityInterceptor) {
-					this.webSecurity.securityInterceptor((FilterSecurityInterceptor) filter);
-					break;
-				}
-			}
-		}
-		for (WebSecurityCustomizer customizer : this.webSecurityCustomizers) {
-			customizer.customize(this.webSecurity);
-		}
-		return this.webSecurity.build();
-	}
+    @Bean(name = AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME)
+    public Filter springSecurityFilterChain() throws Exception {
+        boolean hasConfigurers = this.webSecurityConfigurers != null && !this.webSecurityConfigurers.isEmpty();
+        boolean hasFilterChain = !this.securityFilterChains.isEmpty();
+        Assert.state(!(hasConfigurers && hasFilterChain),
+                "Found WebSecurityConfigurerAdapter as well as SecurityFilterChain. Please select just one.");
+        if (!hasConfigurers && !hasFilterChain) {
+            WebSecurityConfigurerAdapter adapter = this.objectObjectPostProcessor
+                    .postProcess(new WebSecurityConfigurerAdapter() {
+                    });
+            this.webSecurity.apply(adapter);
+        }
+        for (SecurityFilterChain securityFilterChain : this.securityFilterChains) {
+            this.webSecurity.addSecurityFilterChainBuilder(() -> securityFilterChain);
+            for (Filter filter : securityFilterChain.getFilters()) {
+                if (filter instanceof FilterSecurityInterceptor) {
+                    this.webSecurity.securityInterceptor((FilterSecurityInterceptor) filter);
+                    break;
+                }
+            }
+        }
+        for (WebSecurityCustomizer customizer : this.webSecurityCustomizers) {
+            customizer.customize(this.webSecurity);
+        }
+        return this.webSecurity.build();
+    }
 }
 ```
 
-很显然，`springSecurityFilterChain` 是通过 `this.webSecurity.build()` 构建的，进一步深入到 `webSecurity` 的源码我们就可以发现它的类型是 `FilterChainProxy`：
+很显然，`springSecurityFilterChain` 经过一系列的安全配置，最后通过 `this.webSecurity.build()` 构建出来的，进一步深入到 `webSecurity` 的源码我们就可以发现它的类型是 `FilterChainProxy`：
 
 ```
 @Override
 protected Filter performBuild() throws Exception {
 
-	int chainSize = this.ignoredRequests.size() + this.securityFilterChainBuilders.size();
-	List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
-	List<RequestMatcherEntry<List<WebInvocationPrivilegeEvaluator>>> requestMatcherPrivilegeEvaluatorsEntries = new ArrayList<>();
-	for (RequestMatcher ignoredRequest : this.ignoredRequests) {
-		WebSecurity.this.logger.warn("You are asking Spring Security to ignore " + ignoredRequest
-				+ ". This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.");
-		SecurityFilterChain securityFilterChain = new DefaultSecurityFilterChain(ignoredRequest);
-		securityFilterChains.add(securityFilterChain);
-		requestMatcherPrivilegeEvaluatorsEntries
-				.add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
-	}
-	for (SecurityBuilder<? extends SecurityFilterChain> securityFilterChainBuilder : this.securityFilterChainBuilders) {
-		SecurityFilterChain securityFilterChain = securityFilterChainBuilder.build();
-		securityFilterChains.add(securityFilterChain);
-		requestMatcherPrivilegeEvaluatorsEntries
-				.add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
-	}
-	if (this.privilegeEvaluator == null) {
-		this.privilegeEvaluator = new RequestMatcherDelegatingWebInvocationPrivilegeEvaluator(
-				requestMatcherPrivilegeEvaluatorsEntries);
-	}
-	FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
-	if (this.httpFirewall != null) {
-		filterChainProxy.setFirewall(this.httpFirewall);
-	}
-	if (this.requestRejectedHandler != null) {
-		filterChainProxy.setRequestRejectedHandler(this.requestRejectedHandler);
-	}
-	filterChainProxy.afterPropertiesSet();
+    int chainSize = this.ignoredRequests.size() + this.securityFilterChainBuilders.size();
+    List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
+    List<RequestMatcherEntry<List<WebInvocationPrivilegeEvaluator>>> requestMatcherPrivilegeEvaluatorsEntries = new ArrayList<>();
+    for (RequestMatcher ignoredRequest : this.ignoredRequests) {
+        WebSecurity.this.logger.warn("You are asking Spring Security to ignore " + ignoredRequest
+                + ". This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.");
+        SecurityFilterChain securityFilterChain = new DefaultSecurityFilterChain(ignoredRequest);
+        securityFilterChains.add(securityFilterChain);
+        requestMatcherPrivilegeEvaluatorsEntries
+                .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
+    }
+    for (SecurityBuilder<? extends SecurityFilterChain> securityFilterChainBuilder : this.securityFilterChainBuilders) {
+        SecurityFilterChain securityFilterChain = securityFilterChainBuilder.build();
+        securityFilterChains.add(securityFilterChain);
+        requestMatcherPrivilegeEvaluatorsEntries
+                .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
+    }
+    if (this.privilegeEvaluator == null) {
+        this.privilegeEvaluator = new RequestMatcherDelegatingWebInvocationPrivilegeEvaluator(
+                requestMatcherPrivilegeEvaluatorsEntries);
+    }
+    FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
+    if (this.httpFirewall != null) {
+        filterChainProxy.setFirewall(this.httpFirewall);
+    }
+    if (this.requestRejectedHandler != null) {
+        filterChainProxy.setRequestRejectedHandler(this.requestRejectedHandler);
+    }
+    filterChainProxy.afterPropertiesSet();
 
-	Filter result = filterChainProxy;
-	if (this.debugEnabled) {
-		this.logger.warn("\n\n" + "********************************************************************\n"
-				+ "**********        Security debugging is enabled.       *************\n"
-				+ "**********    This may include sensitive information.  *************\n"
-				+ "**********      Do not use in a production system!     *************\n"
-				+ "********************************************************************\n\n");
-		result = new DebugFilter(filterChainProxy);
-	}
-	this.postBuildAction.run();
-	return result;
+    Filter result = filterChainProxy;
+
+    this.postBuildAction.run();
+    return result;
 }
 ```
 
@@ -273,32 +270,48 @@ protected Filter performBuild() throws Exception {
 
 ![](./images/securityfilterchains.png)
 
+#### Security Filters
+
 通过上面的梳理，我们大概清楚了 Spring Security 是如何注入它自己的 `Security Filters` 过滤器链的，这是 Spring Security 的基础，后面的认证和授权功能都是基于这个来实现的。仔细观察我们的程序输出的日志，可以看到 Spring Security 自带了一个默认的过滤器链 `DefaultSecurityFilterChain`，它注入了很多 `Security Filters`：
 
 ```
 2023-05-17 08:16:18.173  INFO 3936 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [
-		org.springframework.security.web.session.DisableEncodeUrlFilter@1d6751e3, 
-		org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2d258eff, 
-		org.springframework.security.web.context.SecurityContextPersistenceFilter@202898d7, 
-		org.springframework.security.web.header.HeaderWriterFilter@2c26ba07, 
-		org.springframework.web.filter.CorsFilter@64502326, 
-		org.springframework.security.web.csrf.CsrfFilter@52d3fafd, 
-		org.springframework.security.web.authentication.logout.LogoutFilter@235c997d, 
-		org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@5d5c41e5, 
-		org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@50b93353, 
-		org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@6dca31eb, 
-		org.springframework.security.web.authentication.www.BasicAuthenticationFilter@22825e1e, 
-		org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2c719bd4, 
-		org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@53aa38be, 
-		org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4a058df8, 
-		org.springframework.security.web.session.SessionManagementFilter@42ea7565, 
-		org.springframework.security.web.access.ExceptionTranslationFilter@77cb452c, 
-		org.springframework.security.web.access.intercept.FilterSecurityInterceptor@8054fe2]
+        org.springframework.security.web.session.DisableEncodeUrlFilter@1d6751e3, 
+        org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2d258eff, 
+        org.springframework.security.web.context.SecurityContextPersistenceFilter@202898d7, 
+        org.springframework.security.web.header.HeaderWriterFilter@2c26ba07, 
+        org.springframework.web.filter.CorsFilter@64502326, 
+        org.springframework.security.web.csrf.CsrfFilter@52d3fafd, 
+        org.springframework.security.web.authentication.logout.LogoutFilter@235c997d, 
+        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@5d5c41e5, 
+        org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@50b93353, 
+        org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@6dca31eb, 
+        org.springframework.security.web.authentication.www.BasicAuthenticationFilter@22825e1e, 
+        org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2c719bd4, 
+        org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@53aa38be, 
+        org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4a058df8, 
+        org.springframework.security.web.session.SessionManagementFilter@42ea7565, 
+        org.springframework.security.web.access.ExceptionTranslationFilter@77cb452c, 
+        org.springframework.security.web.access.intercept.FilterSecurityInterceptor@8054fe2]
 ```
 
 > 在某些低版本中，可能会显示 `DefaultSecurityFilterChain: Will not secure any request` 这样的日志，这可能是 [Spring Security 的 BUG](https://github.com/spring-projects/spring-security/issues/10909)，升级到最新版本即可。
 
-应用程序的安全性归根结底包括了两个问题：**认证（Authentication）** 和 **授权（Authorization）**，认证解决的是 *你是谁？* 的问题，而授权负责解决 *你被允许做什么？*，授权也被称为 **访问控制（Access Control）**。
+在上面的日志中，有几个 `Security Filters` 比较重要：
+
+* `CsrfFilter`：默认开启对所有接口的 CSRF 防护，关于 CSRF 的详细信息，可以参考 [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)；
+* `LogoutFilter`：当用户退出应用时被调用，它通过注册的 `LogoutHandler` 删除会话并清理 `SecurityContext`，然后通过 `LogoutSuccessHandler` 将页面重定向到 `/login?logout`；
+* `UsernamePasswordAuthenticationFilter`：实现基于用户名和密码的安全认证；
+* `DefaultLoginPageGeneratingFilter`：用于生成 `/login` 登录页面；
+* `DefaultLogoutPageGeneratingFilter`：用于生成 `/login?logout` 登出页面；
+* `BasicAuthenticationFilter`：实现 Basic 安全认证；
+* `AnonymousAuthenticationFilter`：如果 `SecurityContext` 中没有 `Authentication` 对象时，它自动创建一个匿名用户 `anonymousUser`，角色为 `ROLE_ANONYMOUS`；
+* `ExceptionTranslationFilter`：用于处理过滤器链中抛出的 `AuthenticationException` 和 `AccessDeniedException` 异常，`AuthenticationException` 异常由 `AuthenticationEntryPoint` 来处理，`AccessDeniedException` 异常由 `AccessDeniedHandler` 来处理；
+* `FilterSecurityInterceptor`：这是 Spring Security 的最后一个 `Security Filters`，它从 `SecurityContext` 中获取 `Authentication` 对象，然后对请求的资源做权限判断；
+
+### Authentication
+
+有了 `Security Filters`，我们就可以实现各种 Spring Security 的相关功能了。应用程序的安全性归根结底包括了两个问题：**认证（Authentication）** 和 **授权（Authorization）**，认证解决的是 *你是谁？* 的问题，而授权负责解决 *你被允许做什么？*，授权也被称为 **访问控制（Access Control）**。这一节将深入学习 Spring Security 是如何实现认证的。
 
 ### 认证和 `AuthenticationManager` 接口
 
@@ -307,7 +320,7 @@ protected Filter performBuild() throws Exception {
 ```
 public interface AuthenticationManager {
 
-	Authentication authenticate(Authentication authentication) throws AuthenticationException;
+    Authentication authenticate(Authentication authentication) throws AuthenticationException;
 }
 ```
 
@@ -322,7 +335,7 @@ public interface AuthenticationManager {
 ```
 public class ProviderManager implements AuthenticationManager {
 
-	private List<AuthenticationProvider> providers;
+    private List<AuthenticationProvider> providers;
 }
 ```
 
@@ -331,15 +344,15 @@ public class ProviderManager implements AuthenticationManager {
 ```
 public interface AuthenticationProvider {
 
-	Authentication authenticate(Authentication authentication) throws AuthenticationException;
+    Authentication authenticate(Authentication authentication) throws AuthenticationException;
 
-	boolean supports(Class<?> authentication);
+    boolean supports(Class<?> authentication);
 }
 ```
 
 Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认证的。
 
-## 安全防护
+## 自定义 Security Filters
 
 ## Spring Security 测试
 
@@ -350,3 +363,10 @@ Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认�
 * [【Topical Guides】Spring Security Architecture](https://spring.io/guides/topicals/spring-security-architecture/)
 * [【Tutorials】Spring Security and Angular](https://spring.io/guides/tutorials/spring-security-and-angular-js/)
 * [Spring Security Tutorial 《Spring Security 教程》](https://waylau.gitbooks.io/spring-security-tutorial/content/)
+
+## 更多
+
+### Spring Security 的安全防护
+
+* [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)
+* [Configuring CORS with Spring Boot and Spring Security](https://reflectoring.io/spring-cors/)
