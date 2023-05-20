@@ -38,7 +38,7 @@ spring.security.user.password=123456
 * 认证（Authentication）
 * 授权（Authorization）
 
-## Spring Security 的基础 `Servlet Filters`
+## `Servlet Filters`：Spring Security 的基础
 
 我们知道，在 Spring MVC 框架中，`DispatcherServlet` 负责对用户的 Web 请求进行分发和处理，在请求到达 `DispatcherServlet` 之前，会经过一系列的 `Servlet Filters`，这被称之为过滤器，主要作用是拦截请求并对请求做一些前置或后置处理。这些过滤器串在一起，形成一个过滤器链（`FilterChain`）：
 
@@ -96,7 +96,7 @@ logging.level.org.springframework.boot.web.servlet.ServletContextInitializerBean
 
 ### `DelegatingFilterProxy`：Servlet Filter 与 Spring Bean 的桥梁
 
-注意这里显示的并非 `Filter` 的名字，而是 `FilterRegistrationBean` 的名字，这是一种 `RegistrationBean`，它实现了 `ServletContextInitializer` 接口，用于在程序启动时，将 `Filter` 或 `Servlet` 注入到 `ServletContext` 中：
+注意上面显示的并非 `Filter` 的名字，而是 `FilterRegistrationBean` 的名字，这是一种 `RegistrationBean`，它实现了 `ServletContextInitializer` 接口，用于在程序启动时，将 `Filter` 或 `Servlet` 注入到 `ServletContext` 中：
 
 ```
 public abstract class RegistrationBean implements ServletContextInitializer, Ordered {
@@ -216,43 +216,47 @@ public class WebSecurityConfiguration {
 很显然，`springSecurityFilterChain` 经过一系列的安全配置，最后通过 `this.webSecurity.build()` 构建出来的，进一步深入到 `webSecurity` 的源码我们就可以发现它的类型是 `FilterChainProxy`：
 
 ```
-@Override
-protected Filter performBuild() throws Exception {
+public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter, WebSecurity>
+        implements SecurityBuilder<Filter>, ApplicationContextAware, ServletContextAware {
 
-    int chainSize = this.ignoredRequests.size() + this.securityFilterChainBuilders.size();
-    List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
-    List<RequestMatcherEntry<List<WebInvocationPrivilegeEvaluator>>> requestMatcherPrivilegeEvaluatorsEntries = new ArrayList<>();
-    for (RequestMatcher ignoredRequest : this.ignoredRequests) {
-        WebSecurity.this.logger.warn("You are asking Spring Security to ignore " + ignoredRequest
-                + ". This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.");
-        SecurityFilterChain securityFilterChain = new DefaultSecurityFilterChain(ignoredRequest);
-        securityFilterChains.add(securityFilterChain);
-        requestMatcherPrivilegeEvaluatorsEntries
-                .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
-    }
-    for (SecurityBuilder<? extends SecurityFilterChain> securityFilterChainBuilder : this.securityFilterChainBuilders) {
-        SecurityFilterChain securityFilterChain = securityFilterChainBuilder.build();
-        securityFilterChains.add(securityFilterChain);
-        requestMatcherPrivilegeEvaluatorsEntries
-                .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
-    }
-    if (this.privilegeEvaluator == null) {
-        this.privilegeEvaluator = new RequestMatcherDelegatingWebInvocationPrivilegeEvaluator(
-                requestMatcherPrivilegeEvaluatorsEntries);
-    }
-    FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
-    if (this.httpFirewall != null) {
-        filterChainProxy.setFirewall(this.httpFirewall);
-    }
-    if (this.requestRejectedHandler != null) {
-        filterChainProxy.setRequestRejectedHandler(this.requestRejectedHandler);
-    }
-    filterChainProxy.afterPropertiesSet();
+    @Override
+    protected Filter performBuild() throws Exception {
 
-    Filter result = filterChainProxy;
+        int chainSize = this.ignoredRequests.size() + this.securityFilterChainBuilders.size();
+        List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
+        List<RequestMatcherEntry<List<WebInvocationPrivilegeEvaluator>>> requestMatcherPrivilegeEvaluatorsEntries = new ArrayList<>();
+        for (RequestMatcher ignoredRequest : this.ignoredRequests) {
+            WebSecurity.this.logger.warn("You are asking Spring Security to ignore " + ignoredRequest
+                    + ". This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.");
+            SecurityFilterChain securityFilterChain = new DefaultSecurityFilterChain(ignoredRequest);
+            securityFilterChains.add(securityFilterChain);
+            requestMatcherPrivilegeEvaluatorsEntries
+                    .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
+        }
+        for (SecurityBuilder<? extends SecurityFilterChain> securityFilterChainBuilder : this.securityFilterChainBuilders) {
+            SecurityFilterChain securityFilterChain = securityFilterChainBuilder.build();
+            securityFilterChains.add(securityFilterChain);
+            requestMatcherPrivilegeEvaluatorsEntries
+                    .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
+        }
+        if (this.privilegeEvaluator == null) {
+            this.privilegeEvaluator = new RequestMatcherDelegatingWebInvocationPrivilegeEvaluator(
+                    requestMatcherPrivilegeEvaluatorsEntries);
+        }
+        FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
+        if (this.httpFirewall != null) {
+            filterChainProxy.setFirewall(this.httpFirewall);
+        }
+        if (this.requestRejectedHandler != null) {
+            filterChainProxy.setRequestRejectedHandler(this.requestRejectedHandler);
+        }
+        filterChainProxy.afterPropertiesSet();
 
-    this.postBuildAction.run();
-    return result;
+        Filter result = filterChainProxy;
+
+        this.postBuildAction.run();
+        return result;
+    }
 }
 ```
 
@@ -273,34 +277,43 @@ protected Filter performBuild() throws Exception {
 上面讲到，`FilterChainProxy` 是通过 `webSecurity` 构建的，一个 `FilterChainProxy` 里包含一个或多个 `SecurityFilterChain`，那么 `SecurityFilterChain` 是由谁构建的呢？答案是 `httpSecurity`。我们可以在 `SecurityFilterChainConfiguration` 配置类中看到 `SecurityFilterChain` 的构建过程：
 
 ```
-@Bean
-@Order(SecurityProperties.BASIC_AUTH_ORDER)
-SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    http.authorizeRequests().anyRequest().authenticated();
-    http.formLogin();
-    http.httpBasic();
-    return http.build();
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnDefaultWebSecurity
+static class SecurityFilterChainConfiguration {
+
+    @Bean
+    @Order(SecurityProperties.BASIC_AUTH_ORDER)
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests().anyRequest().authenticated();
+        http.formLogin();
+        http.httpBasic();
+        return http.build();
+    }
 }
 ```
 
 深入到 `http.build()` 的源码，可以看到过滤器链的默认实现为 `DefaultSecurityFilterChain`：
 
 ```
-@SuppressWarnings("unchecked")
-@Override
-protected DefaultSecurityFilterChain performBuild() {
-    ExpressionUrlAuthorizationConfigurer<?> expressionConfigurer = getConfigurer(
-            ExpressionUrlAuthorizationConfigurer.class);
-    AuthorizeHttpRequestsConfigurer<?> httpConfigurer = getConfigurer(AuthorizeHttpRequestsConfigurer.class);
-    boolean oneConfigurerPresent = expressionConfigurer == null ^ httpConfigurer == null;
-    Assert.state((expressionConfigurer == null && httpConfigurer == null) || oneConfigurerPresent,
-            "authorizeHttpRequests cannot be used in conjunction with authorizeRequests. Please select just one.");
-    this.filters.sort(OrderComparator.INSTANCE);
-    List<Filter> sortedFilters = new ArrayList<>(this.filters.size());
-    for (Filter filter : this.filters) {
-        sortedFilters.add(((OrderedFilter) filter).filter);
+public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<DefaultSecurityFilterChain, HttpSecurity>
+        implements SecurityBuilder<DefaultSecurityFilterChain>, HttpSecurityBuilder<HttpSecurity> {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected DefaultSecurityFilterChain performBuild() {
+        ExpressionUrlAuthorizationConfigurer<?> expressionConfigurer = getConfigurer(
+                ExpressionUrlAuthorizationConfigurer.class);
+        AuthorizeHttpRequestsConfigurer<?> httpConfigurer = getConfigurer(AuthorizeHttpRequestsConfigurer.class);
+        boolean oneConfigurerPresent = expressionConfigurer == null ^ httpConfigurer == null;
+        Assert.state((expressionConfigurer == null && httpConfigurer == null) || oneConfigurerPresent,
+                "authorizeHttpRequests cannot be used in conjunction with authorizeRequests. Please select just one.");
+        this.filters.sort(OrderComparator.INSTANCE);
+        List<Filter> sortedFilters = new ArrayList<>(this.filters.size());
+        for (Filter filter : this.filters) {
+            sortedFilters.add(((OrderedFilter) filter).filter);
+        }
+        return new DefaultSecurityFilterChain(this.requestMatcher, sortedFilters);
     }
-    return new DefaultSecurityFilterChain(this.requestMatcher, sortedFilters);
 }
 ```
 
@@ -411,6 +424,26 @@ org.springframework.security.access.AccessDeniedException: Access is denied
 
 ![](./images/redirect-login.png)
 
+接下来，浏览器开始访问重定向后的 `/login` 页面，这时请求又会再一次经历一系列的 `Security Filters`，和上面的 `/hello` 请求不一样的是，`/login` 请求经过 `DefaultLoginPageGeneratingFilter` 时，会生成上面我们看到的登录页面并结束整个调用链：
+
+```
+public class DefaultLoginPageGeneratingFilter extends GenericFilterBean {
+        private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        boolean loginError = isErrorPage(request);
+        boolean logoutSuccess = isLogoutSuccess(request);
+        if (isLoginUrlRequest(request) || loginError || logoutSuccess) {
+            String loginPageHtml = generateLoginPageHtml(request, loginError, logoutSuccess);
+            response.setContentType("text/html;charset=UTF-8");
+            response.setContentLength(loginPageHtml.getBytes(StandardCharsets.UTF_8).length);
+            response.getWriter().write(loginPageHtml);
+            return;
+        }
+        chain.doFilter(request, response);
+    }
+}
+```
+
 ### 剖析认证流程
 
 https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/form.html
@@ -463,6 +496,7 @@ Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认�
 * [【Topical Guides】Spring Security Architecture](https://spring.io/guides/topicals/spring-security-architecture/)
 * [【Tutorials】Spring Security and Angular](https://spring.io/guides/tutorials/spring-security-and-angular-js/)
 * [Spring Security Tutorial 《Spring Security 教程》](https://waylau.gitbooks.io/spring-security-tutorial/content/)
+* [Spring Security 从入门到进阶](https://luoluocaihong.gitbooks.io/springsecurity/content/)
 
 ## 更多
 
