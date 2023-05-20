@@ -32,15 +32,13 @@ spring.security.user.name=admin
 spring.security.user.password=123456
 ```
 
-## Spring Security 核心组件
-
 为了后续更好地对 Spring Security 进行配置，理解 Spring Security 的实现原理，我们需要进一步学习 Spring Security 的三大核心组件：
 
 * 过滤器（Servlet Filters）
 * 认证（Authentication）
 * 授权（Authorization）
 
-### Servlet Filters
+## Spring Security 的基础 `Servlet Filters`
 
 我们知道，在 Spring MVC 框架中，`DispatcherServlet` 负责对用户的 Web 请求进行分发和处理，在请求到达 `DispatcherServlet` 之前，会经过一系列的 `Servlet Filters`，这被称之为过滤器，主要作用是拦截请求并对请求做一些前置或后置处理。这些过滤器串在一起，形成一个过滤器链（`FilterChain`）：
 
@@ -96,7 +94,7 @@ logging.level.org.springframework.boot.web.servlet.ServletContextInitializerBean
 * 来自配置类 `SecurityFilterAutoConfiguration` 的 `securityFilterChainRegistration`
 * 来自配置类 `ErrorPageSecurityFilterConfiguration` 的 `errorPageSecurityFilter`
 
-#### DelegatingFilterProxy
+### `DelegatingFilterProxy`：Servlet Filter 与 Spring Bean 的桥梁
 
 注意这里显示的并非 `Filter` 的名字，而是 `FilterRegistrationBean` 的名字，这是一种 `RegistrationBean`，它实现了 `ServletContextInitializer` 接口，用于在程序启动时，将 `Filter` 或 `Servlet` 注入到 `ServletContext` 中：
 
@@ -173,7 +171,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 这段代码很容易理解，首先判断代理的 `Bean Filter` 是否存在，如果不存在则根据 `findWebApplicationContext()` 找到 Web 应用上下文，然后从上下文中获取 `Bean Filter` 并初始化，最后再调用该 `Bean Filter`。
 
-#### FilterChainProxy
+### `FilterChainProxy`：Spring Security 的统一入口
 
 那么接下来的问题是，这个 `DelegatingFilterProxy` 代理的 `Bean Filter` 是什么呢？我们从上面定义 `DelegatingFilterProxyRegistrationBean` 的地方可以看出，代理的 `Bean Filter` 叫做 `DEFAULT_FILTER_NAME`，查看它的定义就知道，实际上就是 `springSecurityFilterChain`：
 
@@ -270,9 +268,45 @@ protected Filter performBuild() throws Exception {
 
 ![](./images/securityfilterchains.png)
 
-#### Security Filters
+### 构建 `SecurityFilterChain`
 
-通过上面的梳理，我们大概清楚了 Spring Security 是如何注入它自己的 `Security Filters` 过滤器链的，这是 Spring Security 的基础，后面的认证和授权功能都是基于这个来实现的。仔细观察我们的程序输出的日志，可以看到 Spring Security 自带了一个默认的过滤器链 `DefaultSecurityFilterChain`，它注入了很多 `Security Filters`：
+上面讲到，`FilterChainProxy` 是通过 `webSecurity` 构建的，一个 `FilterChainProxy` 里包含一个或多个 `SecurityFilterChain`，那么 `SecurityFilterChain` 是由谁构建的呢？答案是 `httpSecurity`。我们可以在 `SecurityFilterChainConfiguration` 配置类中看到 `SecurityFilterChain` 的构建过程：
+
+```
+@Bean
+@Order(SecurityProperties.BASIC_AUTH_ORDER)
+SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeRequests().anyRequest().authenticated();
+    http.formLogin();
+    http.httpBasic();
+    return http.build();
+}
+```
+
+深入到 `http.build()` 的源码，可以看到过滤器链的默认实现为 `DefaultSecurityFilterChain`：
+
+```
+@SuppressWarnings("unchecked")
+@Override
+protected DefaultSecurityFilterChain performBuild() {
+    ExpressionUrlAuthorizationConfigurer<?> expressionConfigurer = getConfigurer(
+            ExpressionUrlAuthorizationConfigurer.class);
+    AuthorizeHttpRequestsConfigurer<?> httpConfigurer = getConfigurer(AuthorizeHttpRequestsConfigurer.class);
+    boolean oneConfigurerPresent = expressionConfigurer == null ^ httpConfigurer == null;
+    Assert.state((expressionConfigurer == null && httpConfigurer == null) || oneConfigurerPresent,
+            "authorizeHttpRequests cannot be used in conjunction with authorizeRequests. Please select just one.");
+    this.filters.sort(OrderComparator.INSTANCE);
+    List<Filter> sortedFilters = new ArrayList<>(this.filters.size());
+    for (Filter filter : this.filters) {
+        sortedFilters.add(((OrderedFilter) filter).filter);
+    }
+    return new DefaultSecurityFilterChain(this.requestMatcher, sortedFilters);
+}
+```
+
+### 一撇 `Security Filters`
+
+通过上面的梳理，我们大概清楚了 Spring Security 是如何注入它自己的 `Security Filters` 过滤器链的，这是 Spring Security 的基础，后面的认证和授权功能都是基于这个来实现的。仔细观察我们的程序输出的日志，可以看到 Spring Security 默认的过滤器链 `DefaultSecurityFilterChain`，它注入了很多 `Security Filters`：
 
 ```
 2023-05-17 08:16:18.173  INFO 3936 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [
@@ -309,11 +343,77 @@ protected Filter performBuild() throws Exception {
 * `ExceptionTranslationFilter`：用于处理过滤器链中抛出的 `AuthenticationException` 和 `AccessDeniedException` 异常，`AuthenticationException` 异常由 `AuthenticationEntryPoint` 来处理，`AccessDeniedException` 异常由 `AccessDeniedHandler` 来处理；
 * `FilterSecurityInterceptor`：这是 Spring Security 的最后一个 `Security Filters`，它从 `SecurityContext` 中获取 `Authentication` 对象，然后对请求的资源做权限判断；
 
-### Authentication
+## 认证和授权
 
-有了 `Security Filters`，我们就可以实现各种 Spring Security 的相关功能了。应用程序的安全性归根结底包括了两个问题：**认证（Authentication）** 和 **授权（Authorization）**，认证解决的是 *你是谁？* 的问题，而授权负责解决 *你被允许做什么？*，授权也被称为 **访问控制（Access Control）**。这一节将深入学习 Spring Security 是如何实现认证的。
+有了 `Security Filters`，我们就可以实现各种 Spring Security 的相关功能了。应用程序的安全性归根结底包括了两个主要问题：**认证（Authentication）** 和 **授权（Authorization）**。认证解决的是 *你是谁？* 的问题，而授权负责解决 *你被允许做什么？*，授权也被称为 **访问控制（Access Control）**。这一节将深入学习 Spring Security 是如何实现认证和授权的。
 
-### 认证和 `AuthenticationManager` 接口
+### 跳转到 `/login` 页面
+
+让我们回到第一节的例子，当访问 `/hello` 时，可以看到浏览器自动跳转到了 `/login` 登录页面，那么 Spring Security 是如何实现的呢？为了一探究竟，我们可以将 Spring Security 的日志级别调到 `TRACE`：
+
+```
+logging.level.org.springframework.security=TRACE
+```
+
+这样我们就能完整地看到这个请求经过 `Security Filters` 的处理过程：
+
+```
+2023-05-20 09:37:38.558 DEBUG 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /hello
+2023-05-20 09:37:38.559 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking DisableEncodeUrlFilter (1/17)
+2023-05-20 09:37:38.559 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking WebAsyncManagerIntegrationFilter (2/17)
+2023-05-20 09:37:38.560 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking SecurityContextPersistenceFilter (3/17)
+2023-05-20 09:37:38.561 TRACE 6632 --- [nio-8080-exec-9] w.c.HttpSessionSecurityContextRepository : No HttpSession currently exists
+2023-05-20 09:37:38.561 TRACE 6632 --- [nio-8080-exec-9] w.c.HttpSessionSecurityContextRepository : Created SecurityContextImpl [Null authentication]
+2023-05-20 09:37:38.562 DEBUG 6632 --- [nio-8080-exec-9] s.s.w.c.SecurityContextPersistenceFilter : Set SecurityContextHolder to empty SecurityContext
+2023-05-20 09:37:38.562 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking HeaderWriterFilter (4/17)
+2023-05-20 09:37:38.562 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking CorsFilter (5/17)
+2023-05-20 09:37:38.566 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking CsrfFilter (6/17)
+2023-05-20 09:37:38.567 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.csrf.CsrfFilter         : Did not protect against CSRF since request did not match CsrfNotRequired [TRACE, HEAD, GET, OPTIONS]
+2023-05-20 09:37:38.568 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking LogoutFilter (7/17)
+2023-05-20 09:37:38.571 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.logout.LogoutFilter            : Did not match request to Ant [pattern='/logout', POST]        
+2023-05-20 09:37:38.573 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking UsernamePasswordAuthenticationFilter (8/17)
+2023-05-20 09:37:38.574 TRACE 6632 --- [nio-8080-exec-9] w.a.UsernamePasswordAuthenticationFilter : Did not match request to Ant [pattern='/login', POST]
+2023-05-20 09:37:38.576 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking DefaultLoginPageGeneratingFilter (9/17)
+2023-05-20 09:37:38.578 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking DefaultLogoutPageGeneratingFilter (10/17)
+2023-05-20 09:37:38.582 TRACE 6632 --- [nio-8080-exec-9] .w.a.u.DefaultLogoutPageGeneratingFilter : Did not render default logout page since request did not match [Ant [pattern='/logout', GET]]
+2023-05-20 09:37:38.583 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking BasicAuthenticationFilter (11/17)
+2023-05-20 09:37:38.584 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.www.BasicAuthenticationFilter  : Did not process authentication request since failed to find username and password in Basic Authorization header
+2023-05-20 09:37:38.587 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking RequestCacheAwareFilter (12/17)
+2023-05-20 09:37:38.588 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.s.HttpSessionRequestCache        : No saved request
+2023-05-20 09:37:38.590 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking SecurityContextHolderAwareRequestFilter (13/17)      
+2023-05-20 09:37:38.591 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking AnonymousAuthenticationFilter (14/17)
+2023-05-20 09:37:38.592 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to AnonymousAuthenticationToken [Principal=anonymousUser, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=127.0.0.1, SessionId=null], Granted Authorities=[ROLE_ANONYMOUS]]
+2023-05-20 09:37:38.593 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking SessionManagementFilter (15/17)
+2023-05-20 09:37:38.593 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking ExceptionTranslationFilter (16/17)
+2023-05-20 09:37:38.594 TRACE 6632 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Invoking FilterSecurityInterceptor (17/17)
+2023-05-20 09:37:38.596 TRACE 6632 --- [nio-8080-exec-9] edFilterInvocationSecurityMetadataSource : Did not match request to EndpointRequestMatcher includes=[health], excludes=[], includeLinks=false - [permitAll] (1/2)
+2023-05-20 09:37:38.610 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.i.FilterSecurityInterceptor    : Did not re-authenticate AnonymousAuthenticationToken [Principal=anonymousUser, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=127.0.0.1, SessionId=null], Granted Authorities=[ROLE_ANONYMOUS]] before authorizing
+2023-05-20 09:37:38.619 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.i.FilterSecurityInterceptor    : Authorizing filter invocation [GET /hello] with attributes [authenticated]
+2023-05-20 09:37:38.626 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.expression.WebExpressionVoter  : Voted to deny authorization
+2023-05-20 09:37:38.632 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.i.FilterSecurityInterceptor    : Failed to authorize filter invocation [GET /hello] with attributes [authenticated] using AffirmativeBased [DecisionVoters=[org.springframework.security.web.access.expression.WebExpressionVoter@f613067], AllowIfAllAbstainDecisions=false]
+2023-05-20 09:37:38.640 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.a.ExceptionTranslationFilter     : Sending AnonymousAuthenticationToken [Principal=anonymousUser, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=127.0.0.1, SessionId=null], Granted Authorities=[ROLE_ANONYMOUS]] 
+to authentication entry point since access is denied
+
+org.springframework.security.access.AccessDeniedException: Access is denied
+        at org.springframework.security.access.vote.AffirmativeBased.decide(AffirmativeBased.java:73) ~[spring-security-core-5.7.8.jar:5.7.8]
+
+2023-05-20 09:37:38.691 DEBUG 6632 --- [nio-8080-exec-9] o.s.s.w.s.HttpSessionRequestCache        : Saved request http://localhost:8080/hello to session
+2023-05-20 09:37:38.693 DEBUG 6632 --- [nio-8080-exec-9] s.w.a.DelegatingAuthenticationEntryPoint : Trying to match using And [Not [RequestHeaderRequestMatcher [expectedHeaderName=X-Requested-With, expectedHeaderValue=XMLHttpRequest]], MediaTypeRequestMatcher [contentNegotiationStrategy=org.springframework.web.accept.HeaderContentNegotiationStrategy@4b95451, matchingMediaTypes=[application/xhtml+xml, image/*, text/html, text/plain], useEquals=false, ignoredMediaTypes=[*/*]]]       
+2023-05-20 09:37:38.701 DEBUG 6632 --- [nio-8080-exec-9] s.w.a.DelegatingAuthenticationEntryPoint : Match found! Executing org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint@168ad26f
+2023-05-20 09:37:38.709 DEBUG 6632 --- [nio-8080-exec-9] o.s.s.web.DefaultRedirectStrategy        : Redirecting to http://localhost:8080/login
+2023-05-20 09:37:38.712 TRACE 6632 --- [nio-8080-exec-9] o.s.s.w.header.writers.HstsHeaderWriter  : Not injecting HSTS header since it did not match request to [Is Secure]
+2023-05-20 09:37:38.720 DEBUG 6632 --- [nio-8080-exec-9] w.c.HttpSessionSecurityContextRepository : Did not store empty SecurityContext
+2023-05-20 09:37:38.730 DEBUG 6632 --- [nio-8080-exec-9] w.c.HttpSessionSecurityContextRepository : Did not store empty SecurityContext
+2023-05-20 09:37:38.731 DEBUG 6632 --- [nio-8080-exec-9] s.s.w.c.SecurityContextPersistenceFilter : Cleared SecurityContextHolder to complete request
+```
+
+这个过程中有两点比较重要：第一点是经过 `AnonymousAuthenticationFilter` 时，将当前用户设置为 `anonymousUser`，角色为 `ROLE_ANONYMOUS`；第二点是经过 `FilterSecurityInterceptor` 时，校验当前用户是否有访问 `/hello` 页面的权限，在上面的 `defaultSecurityFilterChain` 中，可以看到 `http.authorizeRequests().anyRequest().authenticated()` 这样的代码，这说明 Spring Security 默认对所有的页面都开启了鉴权，所以会抛出 `AccessDeniedException` 异常，而这个异常被 `ExceptionTranslationFilter` 拦截，并将这个异常交给 `LoginUrlAuthenticationEntryPoint` 处理，从而重定向到 `/login` 页面，整个过程的示意图如下：
+
+![](./images/redirect-login.png)
+
+### 剖析认证流程
+
+https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/form.html
 
 在 Spring Security 中，处理认证的核心是 `AuthenticationManager` 接口：
 
@@ -368,5 +468,6 @@ Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认�
 
 ### Spring Security 的安全防护
 
+* [Protection Against Exploits](https://docs.spring.io/spring-security/reference/features/exploits/index.html)
 * [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)
 * [Configuring CORS with Spring Boot and Spring Security](https://reflectoring.io/spring-cors/)
