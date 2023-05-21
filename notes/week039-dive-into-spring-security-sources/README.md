@@ -188,8 +188,6 @@ public class WebSecurityConfiguration {
     public Filter springSecurityFilterChain() throws Exception {
         boolean hasConfigurers = this.webSecurityConfigurers != null && !this.webSecurityConfigurers.isEmpty();
         boolean hasFilterChain = !this.securityFilterChains.isEmpty();
-        Assert.state(!(hasConfigurers && hasFilterChain),
-                "Found WebSecurityConfigurerAdapter as well as SecurityFilterChain. Please select just one.");
         if (!hasConfigurers && !hasFilterChain) {
             WebSecurityConfigurerAdapter adapter = this.objectObjectPostProcessor
                     .postProcess(new WebSecurityConfigurerAdapter() {
@@ -226,8 +224,6 @@ public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter,
         List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
         List<RequestMatcherEntry<List<WebInvocationPrivilegeEvaluator>>> requestMatcherPrivilegeEvaluatorsEntries = new ArrayList<>();
         for (RequestMatcher ignoredRequest : this.ignoredRequests) {
-            WebSecurity.this.logger.warn("You are asking Spring Security to ignore " + ignoredRequest
-                    + ". This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.");
             SecurityFilterChain securityFilterChain = new DefaultSecurityFilterChain(ignoredRequest);
             securityFilterChains.add(securityFilterChain);
             requestMatcherPrivilegeEvaluatorsEntries
@@ -239,10 +235,7 @@ public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter,
             requestMatcherPrivilegeEvaluatorsEntries
                     .add(getRequestMatcherPrivilegeEvaluatorsEntry(securityFilterChain));
         }
-        if (this.privilegeEvaluator == null) {
-            this.privilegeEvaluator = new RequestMatcherDelegatingWebInvocationPrivilegeEvaluator(
-                    requestMatcherPrivilegeEvaluatorsEntries);
-        }
+
         FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
         if (this.httpFirewall != null) {
             filterChainProxy.setFirewall(this.httpFirewall);
@@ -301,12 +294,7 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
     @SuppressWarnings("unchecked")
     @Override
     protected DefaultSecurityFilterChain performBuild() {
-        ExpressionUrlAuthorizationConfigurer<?> expressionConfigurer = getConfigurer(
-                ExpressionUrlAuthorizationConfigurer.class);
-        AuthorizeHttpRequestsConfigurer<?> httpConfigurer = getConfigurer(AuthorizeHttpRequestsConfigurer.class);
-        boolean oneConfigurerPresent = expressionConfigurer == null ^ httpConfigurer == null;
-        Assert.state((expressionConfigurer == null && httpConfigurer == null) || oneConfigurerPresent,
-                "authorizeHttpRequests cannot be used in conjunction with authorizeRequests. Please select just one.");
+
         this.filters.sort(OrderComparator.INSTANCE);
         List<Filter> sortedFilters = new ArrayList<>(this.filters.size());
         for (Filter filter : this.filters) {
@@ -432,14 +420,14 @@ class HttpSecurityConfiguration {
 其中有几个 `Security Filters` 比较重要，是实现认证和授权的基础：
 
 * `CsrfFilter`：默认开启对所有接口的 CSRF 防护，关于 CSRF 的详细信息，可以参考 [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)；
-* `LogoutFilter`：当用户退出应用时被调用，它通过注册的 `LogoutHandler` 删除会话并清理 `SecurityContext`，然后通过 `LogoutSuccessHandler` 将页面重定向到 `/login?logout`；
-* `UsernamePasswordAuthenticationFilter`：实现基于用户名和密码的安全认证；
 * `DefaultLoginPageGeneratingFilter`：用于生成 `/login` 登录页面；
 * `DefaultLogoutPageGeneratingFilter`：用于生成 `/login?logout` 登出页面；
-* `BasicAuthenticationFilter`：实现 Basic 安全认证；
+* `LogoutFilter`：当用户退出应用时被调用，它通过注册的 `LogoutHandler` 删除会话并清理 `SecurityContext`，然后通过 `LogoutSuccessHandler` 将页面重定向到 `/login?logout`；
+* `UsernamePasswordAuthenticationFilter`：实现基于用户名和密码的安全认证，当认证失败，抛出 `AuthenticationException` 异常；
+* `BasicAuthenticationFilter`：实现 Basic 安全认证，当认证失败，抛出 `AuthenticationException` 异常；
 * `AnonymousAuthenticationFilter`：如果 `SecurityContext` 中没有 `Authentication` 对象时，它自动创建一个匿名用户 `anonymousUser`，角色为 `ROLE_ANONYMOUS`；
+* `FilterSecurityInterceptor`：这是 Spring Security 的最后一个 `Security Filters`，它从 `SecurityContext` 中获取 `Authentication` 对象，然后对请求的资源做权限判断，当授权失败，抛出 `AccessDeniedException` 异常；
 * `ExceptionTranslationFilter`：用于处理过滤器链中抛出的 `AuthenticationException` 和 `AccessDeniedException` 异常，`AuthenticationException` 异常由 `AuthenticationEntryPoint` 来处理，`AccessDeniedException` 异常由 `AccessDeniedHandler` 来处理；
-* `FilterSecurityInterceptor`：这是 Spring Security 的最后一个 `Security Filters`，它从 `SecurityContext` 中获取 `Authentication` 对象，然后对请求的资源做权限判断；
 
 ## 认证和授权
 
@@ -513,7 +501,8 @@ org.springframework.security.access.AccessDeniedException: Access is denied
 
 ```
 public class DefaultLoginPageGeneratingFilter extends GenericFilterBean {
-        private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+
+    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         boolean loginError = isErrorPage(request);
         boolean logoutSuccess = isLogoutSuccess(request);
@@ -529,11 +518,33 @@ public class DefaultLoginPageGeneratingFilter extends GenericFilterBean {
 }
 ```
 
-### 剖析认证流程
+### `AuthenticationManager`：剖析认证流程
 
-https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/form.html
+接下来，输入用户名和密码并提交，请求会再一次经历 `Security Filters`，这一次，请求在 `UsernamePasswordAuthenticationFilter` 这里被拦截下来，并开始了用户名和密码的认证过程：
 
-在 Spring Security 中，处理认证的核心是 `AuthenticationManager` 接口：
+```
+public class UsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
+        if (this.postOnly && !request.getMethod().equals("POST")) {
+            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+        }
+        String username = obtainUsername(request);
+        username = (username != null) ? username.trim() : "";
+        String password = obtainPassword(request);
+        password = (password != null) ? password : "";
+        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(username,
+                password);
+        // Allow subclasses to set the "details" property
+        setDetails(request, authRequest);
+        return this.getAuthenticationManager().authenticate(authRequest);
+    }
+}
+```
+
+这里将遇到 Spring Security 中处理认证的核心接口：`AuthenticationManager`：
 
 ```
 public interface AuthenticationManager {
@@ -542,13 +553,13 @@ public interface AuthenticationManager {
 }
 ```
 
-这个接口只有一个 `authenticate()` 方法，它的返回有三种情况：
+这个接口只有一个 `authenticate()` 方法，它的入参是一个未认证的 `Authentication`，从 `UsernamePasswordAuthenticationFilter` 的代码中可以看到使用了 `UsernamePasswordAuthenticationToken`，它的返回有三种情况：
 
 * 如果认证成功，则返回认证成功后的 `Authentication`（通常带有 `authenticated=true`）；
 * 如果认证失败，则抛出 `AuthenticationException` 异常；
 * 如果无法判断，则返回 `null`；
 
-`AuthenticationManager` 接口最常用的一个实现是 `ProviderManager` 类，它包含了一系列的 `AuthenticationProvider` 实例：
+`AuthenticationManager` 接口最常用的一个实现是 `ProviderManager` 类，它包含了一个或多个 `AuthenticationProvider` 实例：
 
 ```
 public class ProviderManager implements AuthenticationManager {
@@ -557,7 +568,7 @@ public class ProviderManager implements AuthenticationManager {
 }
 ```
 
-`AuthenticationProvider` 有点像 `AuthenticationManager`，但它有一个额外的方法 `boolean supports(Class<?> authentication)` ，允许调用者查询它是否支持给定的 `Authentication` 类型：
+`AuthenticationProvider` 有点像 `AuthenticationManager`，但它有一个额外的方法 `boolean supports(Class<?> authentication)`：
 
 ```
 public interface AuthenticationProvider {
@@ -568,18 +579,115 @@ public interface AuthenticationProvider {
 }
 ```
 
-Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认证的。
+Spring Security 会遍历列表中所有的 `AuthenticationProvider`，并通过 `supports()` 方法来选取合适的 `AuthenticationProvider` 实例来实现认证，从上文中我们知道，`UsernamePasswordAuthenticationFilter` 在认证时使用的 `Authentication` 类型为 `UsernamePasswordAuthenticationToken`，对于这个 `Authentication`，默认使用的 `AuthenticationProvider` 是 `DaoAuthenticationProvider`，它继承自抽象类 `AbstractUserDetailsAuthenticationProvider`：
 
-## 自定义 Security Filters
+```
+public abstract class AbstractUserDetailsAuthenticationProvider
+        implements AuthenticationProvider, InitializingBean, MessageSourceAware {
 
-## Spring Security 测试
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+
+        String username = determineUsername(authentication);
+        UserDetails user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
+        
+        this.preAuthenticationChecks.check(user);
+        additionalAuthenticationChecks(user, (UsernamePasswordAuthenticationToken) authentication);
+        this.postAuthenticationChecks.check(user);
+        
+        Object principalToReturn = user;
+        if (this.forcePrincipalAsString) {
+            principalToReturn = user.getUsername();
+        }
+        return createSuccessAuthentication(principalToReturn, authentication, user);
+    }
+}
+```
+
+其中，最关键的代码有两行，第一行是通过 `retrieveUser()` 方法获取 `UserDetails`：
+
+```
+public class DaoAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
+
+    @Override
+    protected final UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication)
+            throws AuthenticationException {
+        
+        UserDetails loadedUser = this.getUserDetailsService().loadUserByUsername(username);
+        return loadedUser;
+    }
+}
+```
+
+进入 `retrieveUser()` 方法内部，可以看到它是通过 `UserDetailsService` 的 `loadUserByUsername()` 方法来获取 `UserDetails` 的，而这个 `UserDetailsService` 默认实现是 `InMemoryUserDetailsManager`：
+
+```
+public class InMemoryUserDetailsManager implements UserDetailsManager, UserDetailsPasswordService {
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserDetails user = this.users.get(username.toLowerCase());
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        return new User(user.getUsername(), user.getPassword(), user.isEnabled(), user.isAccountNonExpired(),
+                user.isCredentialsNonExpired(), user.isAccountNonLocked(), user.getAuthorities());
+    }
+}
+```
+
+它的实现非常简单，就是从 `users` 这个 Map 中直接获取 `UserDetails`，那么 `users` 这个 Map 又是从哪来的呢？ 答案就是我们在配置文件中配置的 `spring.security.user`，我们可以从自动配置类 `UserDetailsServiceAutoConfiguration` 中找到 `InMemoryUserDetailsManager` 的初始化代码：
+
+```
+public class UserDetailsServiceAutoConfiguration {
+
+    @Bean
+    @Lazy
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager(SecurityProperties properties,
+            ObjectProvider<PasswordEncoder> passwordEncoder) {
+        SecurityProperties.User user = properties.getUser();
+        List<String> roles = user.getRoles();
+        return new InMemoryUserDetailsManager(User.withUsername(user.getName())
+            .password(getOrDeducePassword(user, passwordEncoder.getIfAvailable()))
+            .roles(StringUtils.toStringArray(roles))
+            .build());
+    }
+}
+```
+
+另一行关键代码是通过 `additionalAuthenticationChecks()` 方法对 `UserDetails` 和 `UsernamePasswordAuthenticationToken` 进行校验，一般来说，就是验证密码是否正确：
+
+```
+public class DaoAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
+
+    @Override
+    protected void additionalAuthenticationChecks(UserDetails userDetails,
+            UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+        
+        String presentedPassword = authentication.getCredentials().toString();
+        if (!this.passwordEncoder.matches(presentedPassword, userDetails.getPassword())) {
+            this.logger.debug("Failed to authenticate since password does not match stored value");
+            throw new BadCredentialsException(this.messages
+                    .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+        }
+    }
+}
+```
+
+一旦用户名和密码都验证通过，就调用 `createSuccessAuthentication()` 方法创建并返回一个认证成功后的 `Authentication`，然后经过一系列的后处理，整个认证的流程如下所示：
+
+![](./images/usernamepasswordauthenticationfilter.png)
+
+其中，`SecurityContextHolder` 将认证成功后的 `Authentication` 保存到安全上下文中供后续 `Filter` 使用；`AuthenticationSuccessHandler` 用于定义一些认证成功后的自定义逻辑，默认实现为 `SimpleUrlAuthenticationSuccessHandler`，它返回一个重定向，将浏览器转到登录之前用户访问的页面。
+
+> 在我的测试中，`SimpleUrlAuthenticationSuccessHandler` 貌似并没有触发，新版本的逻辑有变动？
+
+### 剖析授权流程
 
 ## 参考
 
 * [Spring Security Documentation](https://docs.spring.io/spring-security/reference/index.html)
 * [Getting started with Spring Security and Spring Boot](https://reflectoring.io/spring-security/)
-* [【Topical Guides】Spring Security Architecture](https://spring.io/guides/topicals/spring-security-architecture/)
-* [【Tutorials】Spring Security and Angular](https://spring.io/guides/tutorials/spring-security-and-angular-js/)
 * [Spring Security Tutorial 《Spring Security 教程》](https://waylau.gitbooks.io/spring-security-tutorial/content/)
 * [Spring Security 从入门到进阶](https://luoluocaihong.gitbooks.io/springsecurity/content/)
 
@@ -590,3 +698,12 @@ Spring Security 就是由这一系列的 `AuthenticationProvider` 来实现认�
 * [Protection Against Exploits](https://docs.spring.io/spring-security/reference/features/exploits/index.html)
 * [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)
 * [Configuring CORS with Spring Boot and Spring Security](https://reflectoring.io/spring-cors/)
+
+### Spring Security 自定义配置
+
+* [Java Configuration](https://docs.spring.io/spring-security/reference/servlet/configuration/java.html)
+* [A Custom Spring SecurityConfigurer](https://www.baeldung.com/spring-security-custom-configurer)
+
+### Spring Security 单元测试
+
+* [Testing](https://docs.spring.io/spring-security/reference/servlet/test/index.html)
