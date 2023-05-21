@@ -317,9 +317,95 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 }
 ```
 
-### 一撇 `Security Filters`
+### 构建 `Security Filters`
 
-通过上面的梳理，我们大概清楚了 Spring Security 是如何注入它自己的 `Security Filters` 过滤器链的，这是 Spring Security 的基础，后面的认证和授权功能都是基于这个来实现的。仔细观察我们的程序输出的日志，可以看到 Spring Security 默认的过滤器链 `DefaultSecurityFilterChain`，它注入了很多 `Security Filters`：
+通过上面的梳理，我们大概清楚了 `SecurityFilterChain` 的构建过程，接下来，我们继续看 `Security Filters` 的构建过程。我们知道，一个`SecurityFilterChain` 中包含了多个 `Security Filters`，那么这些 `Security Filters` 是从哪里来的呢？
+
+在 `HttpSecurity` 的代码里可以找到这么几个方法：
+
+* `public HttpSecurity addFilter(Filter filter)`
+* `public HttpSecurity addFilterBefore(Filter filter, Class<? extends Filter> beforeFilter)`
+* `public HttpSecurity addFilterAfter(Filter filter, Class<? extends Filter> afterFilter)`
+* `public HttpSecurity addFilterAt(Filter filter, Class<? extends Filter> atFilter)`
+
+我们不妨在 `addFilter` 方法内下个断点，然后以调试模式启动程序，每次触发断点时，我们将对应的 `Filter` 记录下来，并通过堆栈找到该 `Filter` 是从何处添加的：
+
+| 序号 | Filter | 来源 |
+| --- | ------ | --- |
+| 1 | WebAsyncManagerIntegrationFilter | HttpSecurityConfiguration.httpSecurity() |
+| 2 | CsrfFilter | CsrfConfigurer.configure() |
+| 3 | ExceptionTranslationFilter | ExceptionHandlingConfigurer.configure() |
+| 4 | HeaderWriterFilter | HeadersConfigurer.configure() |
+| 5 | SessionManagementFilter | SessionManagementConfigurer.configure() |
+| 6 | DisableEncodeUrlFilter | SessionManagementConfigurer.configure() |
+| 7 | SecurityContextPersistenceFilter | SecurityContextConfigurer.configure() |
+| 8 | RequestCacheAwareFilter | RequestCacheConfigurer.configure() |
+| 9 | AnonymousAuthenticationFilter | AnonymousConfigurer.configure() |
+| 10 | SecurityContextHolderAwareRequestFilter | ServletApiConfigurer.configure() |
+| 11 | DefaultLoginPageGeneratingFilter | DefaultLoginPageConfigurer.configure() |
+| 12 | DefaultLogoutPageGeneratingFilter | DefaultLoginPageConfigurer.configure() |
+| 13 | LogoutFilter | LogoutConfigurer.configure() |
+| 14 | FilterSecurityInterceptor | AbstractInterceptUrlConfigurer.configure() |
+| 15 | UsernamePasswordAuthenticationFilter | AbstractAuthenticationFilterConfigurer.configure() |
+| 16 | BasicAuthenticationFilter | HttpBasicConfigurer.configure() |
+
+除了第一个 `WebAsyncManagerIntegrationFilter` 是在创建 `HttpSecurity` 的时候直接添加的，其他的 `Filter` 都是通过 `XXXConfigurer` 这样的配置器添加的。我们继续深挖下去可以发现，生成这些配置器的地方有两个，第一个地方是在 `HttpSecurityConfiguration` 配置类中创建 `HttpSecurity` 时，如下所示：
+
+```
+class HttpSecurityConfiguration {
+
+    @Bean(HTTPSECURITY_BEAN_NAME)
+    @Scope("prototype")
+    HttpSecurity httpSecurity() throws Exception {
+        WebSecurityConfigurerAdapter.LazyPasswordEncoder passwordEncoder = new WebSecurityConfigurerAdapter.LazyPasswordEncoder(
+                this.context);
+        AuthenticationManagerBuilder authenticationBuilder = new WebSecurityConfigurerAdapter.DefaultPasswordEncoderAuthenticationManagerBuilder(
+                this.objectPostProcessor, passwordEncoder);
+        authenticationBuilder.parentAuthenticationManager(authenticationManager());
+        authenticationBuilder.authenticationEventPublisher(getAuthenticationEventPublisher());
+        HttpSecurity http = new HttpSecurity(this.objectPostProcessor, authenticationBuilder, createSharedObjects());
+        // @formatter:off
+        http
+            .csrf(withDefaults())
+            .addFilter(new WebAsyncManagerIntegrationFilter())
+            .exceptionHandling(withDefaults())
+            .headers(withDefaults())
+            .sessionManagement(withDefaults())
+            .securityContext(withDefaults())
+            .requestCache(withDefaults())
+            .anonymous(withDefaults())
+            .servletApi(withDefaults())
+            .apply(new DefaultLoginPageConfigurer<>());
+        http.logout(withDefaults());
+        // @formatter:on
+        applyDefaultConfigurers(http);
+        return http;
+    }
+}
+```
+
+另外一个地方则是在上面的 `SecurityFilterChainConfiguration` 配置类中使用 `http.build()` 构建 `SecurityFilterChain` 之前（参见上面 `defaultSecurityFilterChain` 的代码），至此，我们大概理清了所有的 `Security Filters` 是如何创建的，下面再以表格的形式重新整理下：
+
+| 序号 | Filter | 来源 | `httpSecurity` 配置 |
+| --- | ------ | --- | -------------------- |
+| 1 | WebAsyncManagerIntegrationFilter | HttpSecurityConfiguration.httpSecurity() | http.addFilter(new WebAsyncManagerIntegrationFilter()) |
+| 2 | CsrfFilter | CsrfConfigurer.configure() | http.csrf(withDefaults()) |
+| 3 | ExceptionTranslationFilter | ExceptionHandlingConfigurer.configure() | http.exceptionHandling(withDefaults()) |
+| 4 | HeaderWriterFilter | HeadersConfigurer.configure() | http.headers(withDefaults()) |
+| 5 | SessionManagementFilter | SessionManagementConfigurer.configure() | http.sessionManagement(withDefaults()) |
+| 6 | DisableEncodeUrlFilter | SessionManagementConfigurer.configure() | http.sessionManagement(withDefaults()) |
+| 7 | SecurityContextPersistenceFilter | SecurityContextConfigurer.configure() | http.securityContext(withDefaults()) |
+| 8 | RequestCacheAwareFilter | RequestCacheConfigurer.configure() | http.requestCache(withDefaults()) |
+| 9 | AnonymousAuthenticationFilter | AnonymousConfigurer.configure() | http.anonymous(withDefaults()) |
+| 10 | SecurityContextHolderAwareRequestFilter | ServletApiConfigurer.configure() | http.servletApi(withDefaults()) |
+| 11 | DefaultLoginPageGeneratingFilter | DefaultLoginPageConfigurer.configure() | http.apply(new DefaultLoginPageConfigurer<>()) |
+| 12 | DefaultLogoutPageGeneratingFilter | DefaultLoginPageConfigurer.configure() | http.apply(new DefaultLoginPageConfigurer<>()) |
+| 13 | LogoutFilter | LogoutConfigurer.configure() | http.logout(withDefaults()) |
+| 14 | FilterSecurityInterceptor | AbstractInterceptUrlConfigurer.configure() | http.authorizeRequests().anyRequest().authenticated() |
+| 15 | UsernamePasswordAuthenticationFilter | AbstractAuthenticationFilterConfigurer.configure() | http.formLogin() |
+| 16 | BasicAuthenticationFilter | HttpBasicConfigurer.configure() | http.httpBasic() |
+
+其实，如果仔细观察我们的程序输出的日志，也可以看到 Spring Security 默认的过滤器链为 `DefaultSecurityFilterChain`，以及它注入的所有 `Security Filters`：
 
 ```
 2023-05-17 08:16:18.173  INFO 3936 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [
@@ -327,7 +413,6 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
         org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2d258eff, 
         org.springframework.security.web.context.SecurityContextPersistenceFilter@202898d7, 
         org.springframework.security.web.header.HeaderWriterFilter@2c26ba07, 
-        org.springframework.web.filter.CorsFilter@64502326, 
         org.springframework.security.web.csrf.CsrfFilter@52d3fafd, 
         org.springframework.security.web.authentication.logout.LogoutFilter@235c997d, 
         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@5d5c41e5, 
@@ -344,7 +429,7 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 
 > 在某些低版本中，可能会显示 `DefaultSecurityFilterChain: Will not secure any request` 这样的日志，这可能是 [Spring Security 的 BUG](https://github.com/spring-projects/spring-security/issues/10909)，升级到最新版本即可。
 
-在上面的日志中，有几个 `Security Filters` 比较重要：
+其中有几个 `Security Filters` 比较重要，是实现认证和授权的基础：
 
 * `CsrfFilter`：默认开启对所有接口的 CSRF 防护，关于 CSRF 的详细信息，可以参考 [Configuring CSRF/XSRF with Spring Security](https://reflectoring.io/spring-csrf/)；
 * `LogoutFilter`：当用户退出应用时被调用，它通过注册的 `LogoutHandler` 删除会话并清理 `SecurityContext`，然后通过 `LogoutSuccessHandler` 将页面重定向到 `/login?logout`；
