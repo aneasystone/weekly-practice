@@ -375,7 +375,7 @@ class HttpSecurityConfiguration {
 另外一个地方则是在上面的 `SecurityFilterChainConfiguration` 配置类中使用 `http.build()` 构建 `SecurityFilterChain` 之前（参见上面 `defaultSecurityFilterChain` 的代码），至此，我们大概理清了所有的 `Security Filters` 是如何创建的，下面再以表格的形式重新整理下：
 
 | 序号 | Filter | `httpSecurity` 配置 |
-| --- | ------ | --- | -------------------- |
+| --- | ------ | -------------------- |
 | 1 | WebAsyncManagerIntegrationFilter | http.addFilter(new WebAsyncManagerIntegrationFilter()) |
 | 2 | CsrfFilter | http.csrf(withDefaults()) |
 | 3 | ExceptionTranslationFilter | http.exceptionHandling(withDefaults()) |
