@@ -374,24 +374,24 @@ class HttpSecurityConfiguration {
 
 另外一个地方则是在上面的 `SecurityFilterChainConfiguration` 配置类中使用 `http.build()` 构建 `SecurityFilterChain` 之前（参见上面 `defaultSecurityFilterChain` 的代码），至此，我们大概理清了所有的 `Security Filters` 是如何创建的，下面再以表格的形式重新整理下：
 
-| 序号 | Filter | 来源 | `httpSecurity` 配置 |
+| 序号 | Filter | `httpSecurity` 配置 |
 | --- | ------ | --- | -------------------- |
-| 1 | WebAsyncManagerIntegrationFilter | HttpSecurityConfiguration.httpSecurity() | http.addFilter(new WebAsyncManagerIntegrationFilter()) |
-| 2 | CsrfFilter | CsrfConfigurer.configure() | http.csrf(withDefaults()) |
-| 3 | ExceptionTranslationFilter | ExceptionHandlingConfigurer.configure() | http.exceptionHandling(withDefaults()) |
-| 4 | HeaderWriterFilter | HeadersConfigurer.configure() | http.headers(withDefaults()) |
-| 5 | SessionManagementFilter | SessionManagementConfigurer.configure() | http.sessionManagement(withDefaults()) |
-| 6 | DisableEncodeUrlFilter | SessionManagementConfigurer.configure() | http.sessionManagement(withDefaults()) |
-| 7 | SecurityContextPersistenceFilter | SecurityContextConfigurer.configure() | http.securityContext(withDefaults()) |
-| 8 | RequestCacheAwareFilter | RequestCacheConfigurer.configure() | http.requestCache(withDefaults()) |
-| 9 | AnonymousAuthenticationFilter | AnonymousConfigurer.configure() | http.anonymous(withDefaults()) |
-| 10 | SecurityContextHolderAwareRequestFilter | ServletApiConfigurer.configure() | http.servletApi(withDefaults()) |
-| 11 | DefaultLoginPageGeneratingFilter | DefaultLoginPageConfigurer.configure() | http.apply(new DefaultLoginPageConfigurer<>()) |
-| 12 | DefaultLogoutPageGeneratingFilter | DefaultLoginPageConfigurer.configure() | http.apply(new DefaultLoginPageConfigurer<>()) |
-| 13 | LogoutFilter | LogoutConfigurer.configure() | http.logout(withDefaults()) |
-| 14 | FilterSecurityInterceptor | AbstractInterceptUrlConfigurer.configure() | http.authorizeRequests().anyRequest().authenticated() |
-| 15 | UsernamePasswordAuthenticationFilter | AbstractAuthenticationFilterConfigurer.configure() | http.formLogin() |
-| 16 | BasicAuthenticationFilter | HttpBasicConfigurer.configure() | http.httpBasic() |
+| 1 | WebAsyncManagerIntegrationFilter | http.addFilter(new WebAsyncManagerIntegrationFilter()) |
+| 2 | CsrfFilter | http.csrf(withDefaults()) |
+| 3 | ExceptionTranslationFilter | http.exceptionHandling(withDefaults()) |
+| 4 | HeaderWriterFilter | http.headers(withDefaults()) |
+| 5 | SessionManagementFilter | http.sessionManagement(withDefaults()) |
+| 6 | DisableEncodeUrlFilter | http.sessionManagement(withDefaults()) |
+| 7 | SecurityContextPersistenceFilter | http.securityContext(withDefaults()) |
+| 8 | RequestCacheAwareFilter | http.requestCache(withDefaults()) |
+| 9 | AnonymousAuthenticationFilter | http.anonymous(withDefaults()) |
+| 10 | SecurityContextHolderAwareRequestFilter | http.servletApi(withDefaults()) |
+| 11 | DefaultLoginPageGeneratingFilter | http.apply(new DefaultLoginPageConfigurer<>()) |
+| 12 | DefaultLogoutPageGeneratingFilter | http.apply(new DefaultLoginPageConfigurer<>()) |
+| 13 | LogoutFilter | http.logout(withDefaults()) |
+| 14 | FilterSecurityInterceptor | http.authorizeRequests().anyRequest().authenticated() |
+| 15 | UsernamePasswordAuthenticationFilter | http.formLogin() |
+| 16 | BasicAuthenticationFilter | http.httpBasic() |
 
 其实，如果仔细观察我们的程序输出的日志，也可以看到 Spring Security 默认的过滤器链为 `DefaultSecurityFilterChain`，以及它注入的所有 `Security Filters`：
 
@@ -682,7 +682,131 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 
 > 在我的测试中，`SimpleUrlAuthenticationSuccessHandler` 貌似并没有触发，新版本的逻辑有变动？
 
-### 剖析授权流程
+### `AccessDecisionManager`：剖析授权流程
+
+其实，在上面分析重定向 `/login` 页面的流程时已经大致了解了实现授权的逻辑，请求经过 `FilterSecurityInterceptor` 时，校验当前用户是否有访问页面的权限，如果没有，则会抛出 `AccessDeniedException` 异常。`FilterSecurityInterceptor` 的核心代码如下：
+
+```
+public class FilterSecurityInterceptor extends AbstractSecurityInterceptor implements Filter {
+    
+    public void invoke(FilterInvocation filterInvocation) throws IOException, ServletException {
+
+        InterceptorStatusToken token = super.beforeInvocation(filterInvocation);
+        try {
+            filterInvocation.getChain().doFilter(filterInvocation.getRequest(), filterInvocation.getResponse());
+        }
+        finally {
+            super.finallyInvocation(token);
+        }
+        super.afterInvocation(token, null);
+    }
+}
+```
+
+可以看到，主要逻辑就包含在 `beforeInvocation()`、`finallyInvocation()` 和 `afterInvocation()` 这三个方法中，而对授权相关的部分则位于 `beforeInvocation()` 方法中：
+
+```
+public abstract class AbstractSecurityInterceptor
+        implements InitializingBean, ApplicationEventPublisherAware, MessageSourceAware {
+
+    protected InterceptorStatusToken beforeInvocation(Object object) {
+        
+        Collection<ConfigAttribute> attributes = this.obtainSecurityMetadataSource().getAttributes(object);
+        
+        Authentication authenticated = authenticateIfRequired();
+        
+        // Attempt authorization
+        attemptAuthorization(object, attributes, authenticated);
+        
+        if (this.publishAuthorizationSuccess) {
+            publishEvent(new AuthorizedEvent(object, attributes, authenticated));
+        }
+
+        return new InterceptorStatusToken(SecurityContextHolder.getContext(), false, attributes, object);
+    }
+
+    private void attemptAuthorization(Object object, Collection<ConfigAttribute> attributes,
+            Authentication authenticated) {
+        try {
+            this.accessDecisionManager.decide(authenticated, object, attributes);
+        }
+        catch (AccessDeniedException ex) {
+            publishEvent(new AuthorizationFailureEvent(object, attributes, authenticated, ex));
+            throw ex;
+        }
+    }
+}
+```
+
+在这里，我们遇到了 Spring Security 实现授权的核心接口：`AccessDecisionManager`，Spring Security 就是通过该接口的 `decide()` 方法来决定用户是否有访问某个资源的权限。`AccessDecisionManager` 接口的默认实现为 `AffirmativeBased`，可以从 `AbstractInterceptUrlConfigurer` 中找到它的踪影：
+
+```
+public abstract class AbstractInterceptUrlConfigurer<C extends AbstractInterceptUrlConfigurer<C, H>, H extends HttpSecurityBuilder<H>>
+        extends AbstractHttpConfigurer<C, H> {
+    
+    private AccessDecisionManager createDefaultAccessDecisionManager(H http) {
+        AffirmativeBased result = new AffirmativeBased(getDecisionVoters(http));
+        return postProcess(result);
+    }
+}
+```
+
+`AffirmativeBased` 实例中包含一个或多个 `AccessDecisionVoter`，它通过遍历所有的 `AccessDecisionVoter` 依次投票决定授权是否允许，只要有一个 `AccessDecisionVoter` 拒绝，则抛出 `AccessDeniedException` 异常：
+
+```
+public class AffirmativeBased extends AbstractAccessDecisionManager {
+
+    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void decide(Authentication authentication, Object object, Collection<ConfigAttribute> configAttributes)
+            throws AccessDeniedException {
+        int deny = 0;
+        for (AccessDecisionVoter voter : getDecisionVoters()) {
+            int result = voter.vote(authentication, object, configAttributes);
+            switch (result) {
+            case AccessDecisionVoter.ACCESS_GRANTED:
+                return;
+            case AccessDecisionVoter.ACCESS_DENIED:
+                deny++;
+                break;
+            default:
+                break;
+            }
+        }
+        if (deny > 0) {
+            throw new AccessDeniedException(
+                    this.messages.getMessage("AbstractAccessDecisionManager.accessDenied", "Access is denied"));
+        }
+        // To get this far, every AccessDecisionVoter abstained
+        checkAllowIfAllAbstainDecisions();
+    }
+}
+```
+
+默认情况下，`AffirmativeBased` 实例中只有一个 `AccessDecisionVoter`，那就是 `WebExpressionVoter`：
+
+```
+public class WebExpressionVoter implements AccessDecisionVoter<FilterInvocation> {
+
+    @Override
+	public int vote(Authentication authentication, FilterInvocation filterInvocation,
+			Collection<ConfigAttribute> attributes) {
+		
+		WebExpressionConfigAttribute webExpressionConfigAttribute = findConfigAttribute(attributes);
+		
+		EvaluationContext ctx = webExpressionConfigAttribute.postProcess(
+				this.expressionHandler.createEvaluationContext(authentication, filterInvocation), filterInvocation);
+
+		boolean granted = ExpressionUtils.evaluateAsBoolean(webExpressionConfigAttribute.getAuthorizeExpression(), ctx);
+		if (granted) {
+			return ACCESS_GRANTED;
+		}
+		return ACCESS_DENIED;
+	}
+}
+```
+
+`WebExpressionVoter` 将授权转换为 `SpEL` 表达式，检查授权是否通过，就是看执行 `SpEL` 表达式的结果是否为 `true`，这里的细节还有很多，详细内容还是参考 [官方文档](https://docs.spring.io/spring-security/reference/servlet/authorization/architecture.html) 吧。
 
 ## 参考
 
@@ -690,6 +814,8 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 * [Getting started with Spring Security and Spring Boot](https://reflectoring.io/spring-security/)
 * [Spring Security Tutorial 《Spring Security 教程》](https://waylau.gitbooks.io/spring-security-tutorial/content/)
 * [Spring Security 从入门到进阶](https://luoluocaihong.gitbooks.io/springsecurity/content/)
+* [Spring Security 认证流程](https://zhuanlan.zhihu.com/p/365513384)
+* [Spring Security 鉴权流程](https://zhuanlan.zhihu.com/p/365515214)
 
 ## 更多
 

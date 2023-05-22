@@ -10,13 +10,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class DemoConfiguration {
 	
-	// @Bean
-    // @Order(SecurityProperties.BASIC_AUTH_ORDER - 10)
-    // SecurityFilterChain demoSecurityFilterChain(HttpSecurity http) throws Exception {
-	// 	http.antMatcher("/index");
-    //     http.authorizeRequests().antMatchers("/index").permitAll();
-    //     http.formLogin();
-    //     http.httpBasic();
-    //     return http.build();
-    // }
+	@Bean
+    @Order(SecurityProperties.BASIC_AUTH_ORDER - 10)
+    SecurityFilterChain demoSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests(request -> request
+            .antMatchers("/index").permitAll()
+            .antMatchers("/admin").hasRole("ADMIN")
+            .anyRequest().authenticated());
+        http.formLogin();
+        http.httpBasic();
+        return http.build();
+    }
 }
