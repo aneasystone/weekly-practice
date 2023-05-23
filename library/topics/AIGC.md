@@ -1,5 +1,7 @@
 # AIGC
 
+* [未来百科 | 为发现全球优质AI工具产品而生](https://nav.6aiq.com/)
+
 ## 模型社区
 
 * [Hugging Face](https://huggingface.co/)
@@ -197,6 +199,7 @@
 * [prompt-engineering/understand-prompt](https://github.com/prompt-engineering/understand-prompt) - 理解 Prompt：基于编程、绘画、写作的 AI 探索与总结
 * [willwulfken/MidJourney-Styles-and-Keywords-Reference](https://github.com/willwulfken/MidJourney-Styles-and-Keywords-Reference) - A reference containing Styles and Keywords that you can use with MidJourney AI. There are also pages showing resolution comparison, image weights, and much more!
 * [Moonvy/OpenPromptStudio](https://github.com/Moonvy/OpenPromptStudio) - AIGC 提示词可视化编辑器 | OPS | Open Prompt Studio
+* [ChatGPT Shortcut](https://www.aishort.top/) - 让生产力加倍的 ChatGPT 快捷指令
 
 ## 其他
 
