@@ -8,7 +8,24 @@
 
 ## OpenAI API 快速入门
 
-https://platform.openai.com/docs/api-reference
+OpenAI 提供了很多和 AI 相关的接口，如下：
+
+* [Models](https://platform.openai.com/docs/api-reference/models) - 用于列出所有可用的模型；
+* [Completions](https://platform.openai.com/docs/api-reference/completions) - 给定一个提示语，让 AI 生成后续内容；
+* [Chat](https://platform.openai.com/docs/api-reference/chat) - 给定一系列对话内容，让 AI 生成对应的回复，使用这个接口就可以实现类似 ChatGPT 的功能；
+* [Edits](https://platform.openai.com/docs/api-reference/edits) - 给定一个提示语和一条指令，AI 将对提示语进行相应的修改，比如常见的语法纠错场景； 
+* [Images](https://platform.openai.com/docs/api-reference/images) - 用于根据提示语生成图片，或对图片进行编辑，可以实现类似于 [Stable Diffusion](https://github.com/CompVis/stable-diffusion) 或 [Midjourney](https://www.midjourney.com/home/) 这样的 AI 绘画应用，这个接口使用的是 OpenAI 的图片生成模型 [DALL·E](https://platform.openai.com/docs/models/dall-e)；
+* [Embeddings](https://platform.openai.com/docs/api-reference/embeddings) - 用于获取一个给定文本的向量表示，我们可以将结果保存到一个向量数据库中，一般用于搜索、推荐、分类、聚类等任务；
+* [Audio](https://platform.openai.com/docs/api-reference/audio) - 提供了语音转文本的功能，使用了 OpenAI 的 [Whisper](https://openai.com/research/whisper) 模型；
+* [Files](https://platform.openai.com/docs/api-reference/files) - 文件管理类接口，便于用户上传自己的文件进行 Fine-tuning；
+* [Fine-tunes](https://platform.openai.com/docs/api-reference/fine-tunes) - 用于管理你的 Fine-tuning 任务，详细内容可参考 [Fine-tuning 教程](https://platform.openai.com/docs/guides/fine-tuning)；
+* [Moderations](https://platform.openai.com/docs/api-reference/moderations) - 用于判断给定的提示语是否违反 OpenAI 的内容政策，一般用来做；
+
+关于 API 的详细内容可以参考官方的 [API reference](https://platform.openai.com/docs/api-reference) 和 [Documentation](https://platform.openai.com/docs/introduction)。
+
+https://platform.openai.com/docs/guides/completion
+
+> 如果你无法访问 OpenAI 的接口，或者没有 OpenAI 的 API Keys，网上也有很多免费的方法，比如 [chatanywhere/GPT_API_free](https://github.com/chatanywhere/GPT_API_free)。
 
 ### 使用 OpenAI API 实现翻译功能
 
