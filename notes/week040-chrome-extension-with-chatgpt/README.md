@@ -31,7 +31,7 @@ OpenAI 提供了很多和 AI 相关的接口，如下：
 Authorization: Bearer OPENAI_API_KEY
 ```
 
-下面是直接使用 curl 调用 `Completions` 接口的示例：
+下面是直接使用 curl 调用 `Chat` 接口的示例：
 
 ```
 $ curl https://api.openai.com/v1/chat/completions \
@@ -96,7 +96,7 @@ console.log(response.data);
 ```
 const response = await openai.createCompletion({
     "model": "text-davinci-003",
-    "prompt": "你好",
+    "prompt": "你好！",
     "max_tokens": 100,
     "temperature": 0
 }, {
@@ -108,7 +108,41 @@ const response = await openai.createCompletion({
 
 ### 使用 OpenAI API 实现翻译功能
 
-如果想实现翻译功能，使用 `Completions` 接口即可。
+从上面的例子可以看出，OpenAI 提供的 `Completions` 或 `Chat` 只是一套用于对话任务的接口，并没有提供翻译接口，但由于它的对话已经初步具备 AGI 的能力，所以我们可以通过特定的提示语让它实现我们想要的功能。官方的 Examples 页面有一个 [English to other languages](https://platform.openai.com/examples/default-translate) 的例子，展示了如何通过提示语技术将英语翻译成法语、西班牙语和日语，我们只需要稍微修改下提示语，就可以实现英译中的功能：
+
+```
+async function translate(text) {
+
+    const prompt = `Translate this into Simplified Chinese:\n\n${text}\n\n`
+    
+    const openai = createOpenAiClient();
+    const response = await openai.createCompletion({
+        "model": "text-davinci-003",
+        "prompt": prompt,
+        "max_tokens": 100,
+        "temperature": 0
+    }, createAxiosOptions());
+    return response.data.choices[0].text
+}
+```
+
+上面我们使用了 `Translate this into Simplified Chinese:` 这样的提示语，这个提示语既简单又直白，但是翻译效果却非常的不错，我们随便将一段官方文档丢给它：
+
+```
+console.log(await translate("The OpenAI API can be applied to virtually any task that involves understanding or generating natural language, code, or images."));
+
+OpenAI API 可以应用于几乎任何涉及理解或生成自然语言、代码或图像的任务。
+```
+
+看上去，翻译的效果不亚于 Google 翻译，而且更神奇的是，由于这里的提示语并没有明确输入的文本是什么，也就意味着，我们可以将其他任何语言丢给它：
+
+```
+console.log(await translate("どの部屋が利用可能ですか？"));
+
+这些房间可以用吗？
+```
+
+这样我们就得到了一个通用中文翻译接口。
 
 ## Chrome 插件快速入门
 
