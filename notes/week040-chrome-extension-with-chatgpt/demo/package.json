@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "https-proxy-agent": "^7.0.0",
+    "openai": "^3.2.1"
+  }
+}

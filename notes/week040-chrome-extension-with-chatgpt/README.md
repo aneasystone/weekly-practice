@@ -19,15 +19,96 @@ OpenAI 提供了很多和 AI 相关的接口，如下：
 * [Audio](https://platform.openai.com/docs/api-reference/audio) - 提供了语音转文本的功能，使用了 OpenAI 的 [Whisper](https://openai.com/research/whisper) 模型；
 * [Files](https://platform.openai.com/docs/api-reference/files) - 文件管理类接口，便于用户上传自己的文件进行 Fine-tuning；
 * [Fine-tunes](https://platform.openai.com/docs/api-reference/fine-tunes) - 用于管理你的 Fine-tuning 任务，详细内容可参考 [Fine-tuning 教程](https://platform.openai.com/docs/guides/fine-tuning)；
-* [Moderations](https://platform.openai.com/docs/api-reference/moderations) - 用于判断给定的提示语是否违反 OpenAI 的内容政策，一般用来做；
+* [Moderations](https://platform.openai.com/docs/api-reference/moderations) - 用于判断给定的提示语是否违反 OpenAI 的内容政策；
 
 关于 API 的详细内容可以参考官方的 [API reference](https://platform.openai.com/docs/api-reference) 和 [Documentation](https://platform.openai.com/docs/introduction)。
 
-https://platform.openai.com/docs/guides/completion
+其中，`Completions`、`Chat` 和 `Edits` 这三个接口都可以用于对话任务，`Completions` 主要解决的是补全问题，也就是说用户给出一段话，模型可以按照提示语续写后面的内容；`Chat` 用于处理聊天任务，它显式的定义了 `system`、`user` 和 `assistant` 三个角色，方便维护对话的语境信息和多轮对话的历史记录；`Edit` 主要用于对用户的输入进行修改和纠正。
+
+要调用 OpenAI 的 API 接口，必须先创建你的 [API Keys](https://platform.openai.com/account/api-keys)，然后请求时像下面这样带上 `Authorization` 头即可：
+
+```
+Authorization: Bearer OPENAI_API_KEY
+```
+
+下面是直接使用 curl 调用 `Completions` 接口的示例：
+
+```
+$ curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+     "model": "gpt-3.5-turbo",
+     "messages": [{"role": "user", "content": "你好！"}],
+     "temperature": 0.7
+   }'
+```
+
+我们可以得到类似下面的回复：
+
+```
+{
+  "id": "chatcmpl-7LgiOhYPcGGwoBcEPQmQ2LaO2pObn",
+  "object": "chat.completion",
+  "created": 1685403440,
+  "model": "gpt-3.5-turbo-0301",
+  "usage": {
+    "prompt_tokens": 11,
+    "completion_tokens": 18,
+    "total_tokens": 29
+  },
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "你好！有什么我可以为您效劳的吗？"
+      },
+      "finish_reason": "stop",
+      "index": 0
+    }
+  ]
+}
+```
 
 > 如果你无法访问 OpenAI 的接口，或者没有 OpenAI 的 API Keys，网上也有很多免费的方法，比如 [chatanywhere/GPT_API_free](https://github.com/chatanywhere/GPT_API_free)。
 
+OpenAI 官方提供了 Python 和 Node.js 的 SDK 方便我们在代码中调用 OpenAI 接口，下面是使用 Node.js 调用 `Completions` 的示例：
+
+```
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+const response = await openai.createCompletion({
+    "model": "text-davinci-003",
+    "prompt": "你好！",
+    "max_tokens": 100,
+    "temperature": 0
+});
+console.log(response.data);
+```
+
+由于 SDK 底层使用了 axios 库发请求，所以我们还可以对 axios 进行配置，比如像下面这样设置代理：
+
+```
+const response = await openai.createCompletion({
+    "model": "text-davinci-003",
+    "prompt": "你好",
+    "max_tokens": 100,
+    "temperature": 0
+}, {
+    proxy: false,
+    httpAgent: new HttpsProxyAgent(process.env.HTTP_PROXY),
+    httpsAgent: new HttpsProxyAgent(process.env.HTTP_PROXY)
+});
+```
+
 ### 使用 OpenAI API 实现翻译功能
+
+如果想实现翻译功能，使用 `Completions` 接口即可。
 
 ## Chrome 插件快速入门
 
