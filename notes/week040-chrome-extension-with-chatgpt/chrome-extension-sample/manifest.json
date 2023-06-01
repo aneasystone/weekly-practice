@@ -1,0 +1,9 @@
+{
+  "name": "Chrome Extension Sample",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "Chrome Extension Sample",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

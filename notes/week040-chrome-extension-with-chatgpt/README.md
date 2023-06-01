@@ -146,12 +146,74 @@ console.log(await translate("どの部屋が利用可能ですか？"));
 
 ## Chrome 插件快速入门
 
+我在很久以前写过一篇关于 Chrome 插件的博客，[我的第一个 Chrome 扩展：Search-faster](https://www.aneasystone.com/archives/2015/06/my-first-chrome-extension-search-faster.html)，不过当时 Chrome 扩展还是 V2 版本，现在 Chrome 扩展已经发展到 V3 版本了，并且 V2 版本不再支持，于是我决定将 [Chrome 扩展的开发文档](https://developer.chrome.com/docs/extensions/) 重温一遍。
+
 ### 一个简单的例子
+
+每个 Chrome 插件都需要有一个 `manifest.json` 清单文件，我们创建一个空目录，并在该目录下创建一个最简单的 `manifest.json` 文件：
+
+```
+{
+  "name": "Chrome Extension Sample",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "Chrome Extension Sample"
+}
+```
+
+这时，一个最简单的 Chrome 插件其实就已经准备好了。我们打开 Chrome 的 **管理扩展程序** 页面 `chrome://extensions/`，启用开发者模式，然后点击 “加载已解压的扩展程序”，选择刚刚创建的那个目录就可以加载我们编写的插件了：
+
+![](./images/chrome-extension-sample.png)
+
+只不过这个插件还没什么用，如果要添加实用的功能，还得添加这些比较重要的字段：
+
+* `background`：背景页通常是 Javascript 脚本，在扩展进程中一直保持运行，它有时也被称为 **后台脚本**，它是一个集中式的事件处理器，用于处理各种扩展事件，它不能访问页面上的 DOM，但是可以和 `content_scripts` 和 `action` 之间进行通信；在 V2 版本中，`background` 可以定义为 `scripts` 或 `page`，但是在 V3 版本中已经废弃，V3 版本中统一定义为 `service_worker`；
+* `content_scripts`：内容脚本可以让我们在 Web 页面上运行我们自定义的 Javascript 脚本，通过它我们可以访问或操作 Web 页面上的 DOM 元素，从而实现和 Web 页面的交互；内容脚本运行在一个独立的上下文环境中，类似于沙盒技术，这样不仅可以确保安全性，而且不会导致页面上的脚本冲突；
+* `action`：在 V2 版本中，Chrome 扩展有 `browser_action` 和 `page_action` 两种表现形式，但是在 V3 版本中，它们被统一合并到 `action` 字段中了；用于当用户点击浏览器右上角的扩展图标时弹出一个 popup 页面或触发某些动作；
+* `options_page`：当你的扩展参数比较多时，可以制作一个单独的选项页面对你的扩展进行配置；
+
+接下来，我们在 `manifest.json` 文件中加上 `action` 字段：
+
+```
+  "action": {
+    "default_popup": "popup.html"
+  }
+```
+
+然后，编写一个简单的 `popup.html` 页面，比如直接使用 `iframe` 嵌入我的博客：
+
+```
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <iframe src="https://www.aneasystone.com" frameborder="0" style="width: 400px;height:580px;"></iframe>
+    </body>
+</html>
+```
+
+修改完成后，点击扩展上的刷新按钮，将会重新加载扩展：
+
+![](./images/chrome-extension-sample-reload.png)
+
+这样当我们点击扩展图标时，就能弹出我的博客页面了：
+
+![](./images/chrome-extension-sample-popup.png)
+
+如果我们把页面换成 ChatGPT 的页面，那么一个 ChatGPT 的 Chrome 插件就做好了：
+
+![](./images/chrome-extension-chatgpt.png)
+
+> `"use strict";`
 
 ### 实现划词翻译功能
 
 ## 参考
 
+* [OpenAI API reference](https://platform.openai.com/docs/api-reference)
+* [OpenAI Documentation](https://platform.openai.com/docs/introduction)
 * [Documentation for Chrome extensions developers](https://developer.chrome.com/docs/extensions/)
 * [有手就行，从零开始的V3版本Chrome创意插件开发攻略](https://juejin.cn/post/7121653349669142565)
 * [GoogleChrome/chrome-extensions-samples](https://github.com/GoogleChrome/chrome-extensions-samples) - Chrome Extensions Samples
