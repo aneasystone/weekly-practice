@@ -206,9 +206,114 @@ console.log(await translate("どの部屋が利用可能ですか？"));
 
 ![](./images/chrome-extension-chatgpt.png)
 
-> `"use strict";`
+> 在嵌入 ChatGPT 页面时发现，每次打开扩展都会跳转到登录页面，后来参考 [kazuki-sf/ChatGPT_Extension](https://github.com/kazuki-sf/ChatGPT_Extension) 这里的做法解决了：在 `manifest.json` 中添加 `content_scripts` 字段，内容脚本非常简单，只需要一句 `"use strict";` 即可。
+
+> 注意并不是所有的页面都可以通过 `iframe` 嵌入，比如当我们嵌入 Google 时就会报错：**www.google.com 拒绝了我们的连接请求**，这是因为 Google 在响应头中添加了 `X-Frame-Options: SAMEORIGIN` 这样的选项，不允许被嵌入在非同源的 `iframe` 中。
 
 ### 实现划词翻译功能
+
+我们现在已经学习了如何使用 OpenAI 接口实现翻译功能，也学习了 Chrome 扩展的基本知识，接下来就可以实现划词翻译功能了。
+
+首先我们需要监听用户在页面上的划词动作以及所划的词是什么，这可以通过监听鼠标的 `onmouseup` 事件来实现。根据前面一节的学习我们知道，内容脚本可以让我们在 Web 页面上运行我们自定义的 Javascript 脚本，从而实现和 Web 页面的交互，所以我们在 `manifest.json` 中添加 `content_scripts` 字段：
+
+```
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["content_script.js"]
+    }
+  ]
+```
+
+`content_script.js` 文件的内容很简单：
+
+```
+window.onmouseup = function (e) {
+
+    // 非左键，不处理
+    if (e.button != 0) {
+        return;
+    }
+    
+    // 未选中文本，不处理
+    let text = window.getSelection().toString().trim()
+    if (!text) {
+        return;
+    }
+
+    // 翻译选中文本
+    let translateText = translate(text)
+
+    // 在鼠标位置显示翻译结果
+    show(e.pageX, e.pageY, text, translateText)
+}
+```
+
+可以看到实现划词翻译的整体脉络已经非常清晰了，后续的工作就是调用 OpenAI 的接口翻译文本，以及在鼠标位置将翻译结果显示出来。先看看如何实现翻译文本：
+
+```
+async function translate(text) {
+    const prompt = `Translate this into Simplified Chinese:\n\n${text}\n\n`
+    const body = {
+        "model": "text-davinci-003",
+        "prompt": prompt,
+        "max_tokens": 100,
+        "temperature": 0
+    }
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + OPENAI_API_KEY,
+        },
+        body: JSON.stringify(body),
+    }
+    const response = await fetch('https://api.openai.com/v1/completions', options)
+    const json = await response.json()
+    return json.choices[0].text
+}
+```
+
+这里直接使用我们之前所用的提示语，只不过将发请求的 `axios` 换成了 `fetch`，`fetch` 是浏览器自带的发请求的 API，但是不能在 Node.js 环境中使用。
+
+接下来我们需要将翻译后的文本显示出来：
+
+```
+function show(x, y, text, translateText) {
+    let container = document.createElement('div')
+    container.innerHTML = `
+    <header>翻译<span class="close">X</span></header>
+    <main>
+      <div class="source">
+        <div class="title">原文</div>
+        <div class="content">${text}</div>
+      </div>
+      <div class="dest">
+        <div class="title">简体中文</div>
+        <div class="content">${translateText}</div>
+      </div>
+    </main>
+    `
+    container.classList.add('translate-panel')
+    container.classList.add('show')
+    container.style.left = x + 'px'
+    container.style.top = y + 'px'
+    document.body.appendChild(container)
+
+    let close = container.querySelector('.close')
+    close.onclick = () => {
+        container.classList.remove('show')
+    }
+}
+```
+
+我们先通过 `document.createElement()` 创建一个 `div` 元素，然后将其 `innerHTML` 赋值为提前准备好的一段 HTML 模版，并将原文和翻译后的中文放在里面，接着使用 `container.classList.add()` 和 `container.style` 设置它的样式以及显示位置，最后通过 `document.body.appendChild()` 将这个 `div` 元素添加到当前页面中。实现之后的效果如下图所示：
+
+![](./images/chrome-extension-translate.png)
+
+至此，一个简单的划词翻译 Chrome 插件就开发好了，开发过程中参考了 [CaTmmao/chrome-extension-translate](https://github.com/CaTmmao/chrome-extension-translate) 的部分实现，在此表示感谢。
+
+当然这个扩展还有很多需要优化的地方，比如 OpenAI 的 API Keys 是写死在代码里的，可以做一个选项页对其进行配置；另外在选择文本时要等待一段时间才显示出翻译的文本，中间没有任何提示，这里的交互也可以优化一下；还可以为扩展添加右键菜单，进行一些其他操作；有兴趣的朋友可以自己继续尝试改进。
 
 ## 参考
 
@@ -218,4 +323,3 @@ console.log(await translate("どの部屋が利用可能ですか？"));
 * [有手就行，从零开始的V3版本Chrome创意插件开发攻略](https://juejin.cn/post/7121653349669142565)
 * [GoogleChrome/chrome-extensions-samples](https://github.com/GoogleChrome/chrome-extensions-samples) - Chrome Extensions Samples
 * [openai-translator/openai-translator](https://github.com/openai-translator/openai-translator) - 基于 ChatGPT API 的划词翻译浏览器插件和跨平台桌面端应用
-* [CaTmmao/chrome-extension-translate](https://github.com/CaTmmao/chrome-extension-translate) - 谷歌插件划词翻译

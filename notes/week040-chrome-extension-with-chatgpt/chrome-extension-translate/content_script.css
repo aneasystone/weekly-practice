@@ -1,0 +1,66 @@
+.translate-panel {
+    width: 280px;
+    box-shadow: 1px 1px 8px 2px rgba(0, 0, 0, .2);
+    border-radius: 8px;
+    transform: scale(0.6);
+    z-index: 1000;
+    background: #fff;
+    position: absolute;
+    top: 10px;
+    opacity: 0;
+    transition: all .2s;
+}
+
+.translate-panel.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.translate-panel header {
+    background: #eee;
+    padding: 10px;
+    font-size: 12px;
+    color: #666;
+    position: relative;
+}
+
+.translate-panel header .close {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+}
+
+.translate-panel main {
+    padding: 0 10px;
+    margin-bottom: 0;
+}
+
+.translate-panel main .source {
+    border-bottom: 1px #eee solid;
+    padding-bottom: 10px;
+}
+
+.translate-panel main .dest {
+    padding-bottom: 10px;
+}
+
+.translate-panel .title,
+.translate-panel .content {
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.translate-panel .title {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+}
+
+.translate-panel .content {
+    color: #666;
+    font-size: 13px;
+    margin-top: 6px;
+    overflow: hidden;
+}
