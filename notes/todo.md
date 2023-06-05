@@ -143,11 +143,6 @@
 * [Hardware guidelines for administering etcd clusters](https://etcd.io/docs/v3.6/op-guide/hardware/)
 * [etcd：增加30%的写入性能](https://www.cnblogs.com/charlieroro/p/17379469.html)
 
-### containerd 学习笔记
-
-* [Getting started with containerd](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
-* [Mapping from dockercli to crictl](https://kubernetes.io/docs/reference/tools/map-crictl-dockercli/)
-
 ### 使用 KubeVela 部署应用
 
 * [KubeVela](https://kubevela.io/zh/)
