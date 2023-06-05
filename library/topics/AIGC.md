@@ -18,6 +18,7 @@
 
 ### ChatGPT 教程
 
+* [openai/openai-cookbook](https://github.com/openai/openai-cookbook) - Examples and guides for using the OpenAI API
 * [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
 * [为Kubernetes集群部署一个ChatGPT机器人](https://mp.weixin.qq.com/s/g6hAY-mEC5CKP-ygwL82Gw)
 
@@ -37,6 +38,7 @@
 * [ingyamilmolinar/doctorgpt](https://github.com/ingyamilmolinar/doctorgpt) - DoctorGPT brings GPT into production for application log error diagnosing!
 * [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
 * [yakGPT/yakGPT](https://github.com/yakGPT/yakGPT) - Locally running, hands-free ChatGPT UI
+* [csunny/DB-GPT](https://github.com/csunny/DB-GPT) - Interact your data and environment using the local GPT, no data leaks, 100% privately, 100% security
 
 #### MiniGPT
 
