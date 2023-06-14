@@ -1,6 +1,12 @@
 # WEEK041 - 容器运行时 containerd 学习笔记
 
-https://containerd.io/
+2016 年 12 月，Docker 公司宣布将 [containerd](https://containerd.io/) 项目从 Docker Engine 中分离出来，形成一个独立的开源项目，并捐赠给 CNCF 基金会，旨在打造一个符合工业标准的容器运行时。Docker 公司之所以做出这样的决定，是因为当时在容器编排的市场上 Docker 面临着 Kubernetes 的极大挑战，将 containerd 分离，是为了方便开展 Docker Swarm 项目，不过结果大家都知道，Docker Swarm 在 Kubernetes 面前以惨败收场。
+
+从 Docker 1.11 开始，当我们执行 `docker run` 命令时，整个流程大致如下：
+
+![](./images/docker-to-containerd.png)
+
+http://www.dockerinfo.net/4038.html
 
 ## 参考
 
