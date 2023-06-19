@@ -119,7 +119,7 @@ layer-sha256:9f05b0cc5f6e8010689a6331bad9ca02c62caa226b7501a64d50dcca0847dcdb:  
 layer-sha256:4c5efdb87c4a2350cc1c2781a80a4d3e895447007d9d8eac1e743bf80dd75c84:    exists  
 layer-sha256:c8794a7158bff7f518985e76c590029ccc6b4c0f6e66e82952c3476c095225c9:    exists  
 layer-sha256:8de2a93581dcb1cc62dd7b6e1620bc8095befe0acb9161d5f053a9719e145678:    exists  
-elapsed: 2.8 s                                                                    total:   0.0 B (0.0 B/s)                                         
+elapsed: 2.8 s                                                                    total:   0.0 B (0.0 B/s)
 unpacking linux/amd64 sha256:2d194184b067db3598771b4cf326cfe6ad5051937ba1132b8b7d4b0184e0d0a6...
 done: 23.567287ms	
 
