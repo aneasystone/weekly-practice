@@ -214,19 +214,17 @@ Commercial support is available at
 
 #### 安装 CNI 插件
 
-https://blog.frognew.com/2021/04/relearning-container-03.html
+正如上一节所示，默认情况下 containerd 创建的容器只有 lo 网络，无法从容器外部访问，如果希望将容器内的网络端口暴露出来，我们还需要安装 [CNI 插件](https://github.com/containernetworking/plugins)。和 CRI 一样，[CNI](https://github.com/containernetworking/cni/) 也是一套规范接口，全称为 Container Network Interface，即容器网络接口，它提供了一种将容器网络插件化的解决方案。CNI 涉及两个基本概念：容器和网络，它的接口也是围绕着这两个基本概念进行设计的，主要有两个：`ADD` 负责将容器加入网络，`DEL` 负责将容器从网络中删除，有兴趣的同学可以阅读 [CNI Specification](https://github.com/containernetworking/cni/blob/main/SPEC.md) 了解更具体的信息。
 
-https://blog.51cto.com/flyfish225/5367096
+> 在 [week032-docker-network-in-action](../week032-docker-network-in-action/README.md) 这篇笔记中，我们曾经学习过 Docker 的 CNM 网络模型，它和 CNI 相比要复杂一些。CNM 和 CNI 是目前最流行的两种容器网络方案，关于他俩的区别，可以参考 [docker的网络-Container network interface(CNI)与Container network model(CNM)](https://xuxinkun.github.io/2016/07/22/cni-cnm/)。
 
-https://bigpigeon.org/post/containerd-tutorial-two/
-
-https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
-
-https://github.com/containernetworking/plugins/releases
+官方提供了很多 CNI 接口的实现，比如 `bridge`、`ipvlan`、`macvlan` 等，这些都被称为 CNI 插件，此外，很多开源的容器网络项目，比如 `calico`、`flannel`、`weave` 等也实现了 CNI 插件。其实，CNI 插件就是一堆的可执行文件，我们可以从 [CNI 插件的 Releases 页面](https://github.com/containernetworking/plugins/releases) 下载最新版本：
 
 ```
 $ curl -LO https://github.com/containernetworking/plugins/releases/download/v1.3.0/cni-plugins-linux-amd64-v1.3.0.tgz
 ```
+
+然后将其解压到 `/opt/cni/bin` 目录（这是 CNI 插件的默认目录）：
 
 ```
 $ mkdir -p /opt/cni/bin
@@ -252,6 +250,25 @@ $ tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz
 ./host-local
 ```
 
+https://github.com/containernetworking/cni/tree/main#how-do-i-use-cni
+
+https://xuxinkun.github.io/2016/07/22/cni-cnm/
+
+https://blog.frognew.com/2021/04/relearning-container-03.html
+
+https://blog.51cto.com/flyfish225/5367096
+
+https://bigpigeon.org/post/containerd-tutorial-two/
+
+https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
+
+
+> 除了通过 CNI 插件开放容器网络功能，我们也可以以主机网络模式启动容器：
+> 
+> ```
+> $ ctr run --net-host docker.io/library/nginx:alpine nginx
+> ```
+
 ### 操作 containerd
 
 https://github.com/containerd/containerd/blob/main/docs/getting-started.md
@@ -274,3 +291,4 @@ https://github.com/containerd/containerd/blob/main/docs/getting-started.md
 * [Mapping from dockercli to crictl](https://kubernetes.io/docs/reference/tools/map-crictl-dockercli/)
 * [Container 命令ctr、crictl 命令使用说明](https://www.akiraka.net/kubernetes/1139.html)
 * [Containerd shim 原理深入解读](https://icloudnative.io/posts/shim-shiminey-shim-shiminey/)
+* [从零开始入门 K8s：理解 CNI 和 CNI 插件](https://www.infoq.cn/article/6mdfWWGHzAdihiq9lDST)
