@@ -452,17 +452,89 @@ $ curl 10.22.0.9:80
 > $ ctr run --net-host docker.io/library/nginx:alpine nginx
 > ```
 
-### 操作 containerd
+### 使用 ctr 操作 containerd
 
-https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+经过上面的步骤，containerd 服务已经在我们的系统中安装和配置好了，接下来我们将学习命令行工具 `ctr` 对 containerd 进行操作，ctr 是 containerd 部署包中内置的命令行工具，功能比较简单，一般用于 containerd 的调试，其实在上面的安装步骤中已经多次使用过它，这一节对 ctr 做个简单的总结。
 
-#### 使用 ctr 操作 containerd
+#### `ctr image` 命令
 
-https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
+| 命令 | 含义 |
+| --- | --- |
+| `ctr image list` | 查看镜像列表 |
+| `ctr image list -q` | 查看镜像列表，只显示镜像名称 |
+| `ctr image pull docker.io/library/nginx:alpine` | 拉取镜像，注意镜像名称的前缀不能少 |
+| `ctr image pull --platform linux/amd64 docker.io/library/nginx:alpine` | 拉取指定平台的镜像 |
+| `ctr image pull --all-platforms docker.io/library/nginx:alpine` | 拉取所有平台的镜像 |
+| `ctr image tag docker.io/library/nginx:alpine 192.168.1.109:5000/nginx:alpine` | 给镜像打标签 |
+| `ctr image push 192.168.1.109:5000/nginx:alpine` | 推送镜像 |
+| `ctr image push --user username:password 192.168.1.109:5000/nginx:alpine` | 推送镜像到带认证的镜像仓库 |
+| `ctr image rm 192.168.1.109:5000/nginx:alpine` | 删除镜像 |
+| `ctr image export nginx.tar docker.io/library/nginx:alpine` | 导出镜像 |
+| `ctr image import hello.tar` | 导入镜像 |
+| `ctr image import --platform linux/amd64 hello.tar` | 导入指定平台的镜像，如果导出的镜像文件只包含一个平台，导入时可能会报错 `ctr: content digest sha256:xxx: not found`，必须带上 `--platform` 这个参数 |
+| `ctr image mount docker.io/library/nginx:alpine ./nginx` | 将镜像挂载到主机目录 |
+| `ctr image unmount ./nginx` | 将镜像从主机目录卸载 |
 
-#### 使用 nerdctl 操作 containerd
+#### `ctr container` 命令
 
-#### 使用 crictl 操作 containerd
+| 命令 | 含义 |
+| --- | --- |
+| `ctr container list` | 查看容器列表 |
+| `ctr container list -q` | 查看容器列表，只显示容器名称 |
+| `ctr container create docker.io/library/nginx:alpine nginx` | 创建容器 |
+| `ctr container info nginx` | 查看容器详情，类似于 `docker inspect` |
+| `ctr container rm nginx` | 删除容器 |
+
+#### `ctr task` 命令
+
+| 命令 | 含义 |
+| --- | --- |
+| `ctr task list` | 查看任务列表，使用 `ctr container create` 创建容器时并没有运行，它只是一个静态的容器，包含了容器运行所需的资源和配置数据 |
+| `ctr task start nginx` | 启动容器 |
+| `ctr task exec -t --exec-id nginx nginx sh` | 进入容器进行操作，注意 `--exec-id` 参数随便写，只要唯一就行 |
+| `ctr task metrics nginx` | 查看容器的 CPU 和内存使用情况 |
+| `ctr task ps nginx` | 查看容器中的进程对应宿主机中的 PID |
+| `ctr task pause nginx` | 暂停容器，暂停后容器状态变成 `PAUSED` |
+| `ctr task resume nginx` | 恢复容器继续运行 |
+| `ctr task kill nginx` | 停止容器，停止后容器状态变成 `STOPPED` |
+| `ctr task rm nginx` | 删除任务 |
+
+#### `ctr run` 命令
+
+| 命令 | 含义 |
+| --- | --- |
+| `ctr run docker.io/library/nginx:alpine nginx` | 创建容器并运行，相当于 `ctr container create` + `ctr task start` |
+| `ctr run --rm docker.io/library/nginx:alpine nginx` | 退出容器时自动删除容器 |
+| `ctr run -d docker.io/library/nginx:alpine nginx` | 运行容器，运行之后从终端退出（detach）但容器不停止 |
+| `ctr run --mount type=bind,src=/root/test,dst=/test,options=rbind:rw docker.io/library/nginx:alpine nginx` | 挂载本地目录或文件到容器 |
+| `ctr run --env USER=root docker.io/library/nginx:alpine nginx` | 为容器设置环境变量 |
+| `ctr run --null-io docker.io/library/nginx:alpine nginx` | 运行容器，并将控制台输出重定向到 /dev/null |
+| `ctr run --log-uri file:///var/log/nginx.log docker.io/library/nginx:alpine nginx` | 运行容器，并将控制台输出写到文件中 |
+| `ctr run --net-host docker.io/library/nginx:alpine nginx` | 使用主机网络运行容器 |
+| `ctr run --with-ns=network:/var/run/netns/nginx docker.io/library/nginx:alpine nginx` | 使用指定命名空间文件运行容器 |
+
+#### 命名空间
+
+| 命令 | 含义 |
+| --- | --- |
+| `ctr ns list` | 查看命名空间列表 |
+| `ctr ns create test` | 创建命名空间 |
+| `ctr ns rm test` | 删除命名空间 |
+| `ctr -n test image list` | 查看特定命名空间下的镜像列表 |
+| `ctr -n test container list` | 查看特定命名空间下的容器列表 |
+
+containerd 通过命名空间进行资源隔离，当没有指定命名空间时，默认使用 default 命名空间，Docker 和 Kubernetes 都可以基于 containerd 来管理容器，Docker 使用的是 `moby` 命名空间，Kubernetes 使用的是 `k8s.io` 命名空间，所以如果想查看 Kubernetes 运行的容器，可以通过 `ctr -n k8s.io container list` 查看。
+
+除了上面的一些常用命令，还有一些不常用的命令，比如 `plugins`、`content`、`leases`、`snapshots`、`leases`、`shim` 等，这里就不一一介绍了，感兴趣的同学可以使用 `ctr` 或 `ctr help` 获取更多的帮助信息。
+
+虽然使用 ctr 可以进行大部分 containerd 的日常操作，但是这些操作偏底层，对用户很不友好，比如不支持镜像构建，网络配置非常繁琐，所以 ctr 一般是供开发人员测试 containerd 用的；如果希望找一款更简单的命令行工具，可以使用 [nerdctl](https://github.com/containerd/nerdctl)，它的操作和 Docker 非常类似，对 Docker 用户来说会感觉非常亲近，nerdctl 相对于 ctr 来说，有着以下几点区别：
+
+* nerdctl 支持使用 `Dockerfile` 构建镜像；
+* nerdctl 支持使用 `docker-compose.yaml` 定义和管理多个容器；
+* nerdctl 支持在容器内运行 systemd；
+* nerdctl 支持使用 CNI 插件来配置容器网络；
+
+除了 ctr 和 nerdctl，我们还可以使用 [crictl](https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md) 来操作 containerd，crictl 是 Kubernetes 提供的 CRI 客户端工具，由于 containerd 实现了 CRI 接口，所以 crictl 也可以充当 containerd 的客户端。此外，官方还提供了一份教程可以让我们 [实现自己的 containerd 客户端](https://github.com/containerd/containerd/blob/main/docs/getting-started.md#implementing-your-own-containerd-client)。
 
 ## 参考
 
@@ -523,7 +595,3 @@ $ ctr run --with-ns=network:/var/run/netns/nginx docker.io/library/nginx:alpine 
 $ mkdir -p /etc/containerd
 $ containerd config default > /etc/containerd/config.toml
 ```
-
-### 实现自己的 containerd 客户端
-
-* [Implementing your own containerd client](https://github.com/containerd/containerd/blob/main/docs/getting-started.md#implementing-your-own-containerd-client)
