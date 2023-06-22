@@ -250,20 +250,151 @@ $ tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz
 ./host-local
 ```
 
-https://github.com/containernetworking/cni/tree/main#how-do-i-use-cni
+可以看到目录中包含了很多插件，这些插件按功能可以分成三大类：Main、IPAM 和 Meta：
 
-https://xuxinkun.github.io/2016/07/22/cni-cnm/
+* Main：负责创建网络接口，支持 `bridge`、`ipvlan`、`macvlan`、`ptp`、`host-device` 和 `vlan` 等类型的网络；
+* IPAM：负责 IP 地址的分配，支持 `dhcp`、`host-local` 和 `static` 三种分配方式；
+* Meta：包含一些其他配置插件，比如 `tuning` 用于配置网络接口的 sysctl 参数，`portmap` 用于主机和容器之间的端口映射，`bandwidth` 用于限流等等。
 
-https://blog.frognew.com/2021/04/relearning-container-03.html
+CNI 插件是通过 JSON 格式的文件进行配置的，我们首先创建 CNI 插件的配置目录 `/etc/cni/net.d`：
 
-https://blog.51cto.com/flyfish225/5367096
+```
+$ mkdir -p /etc/cni/net.d
+```
 
-https://bigpigeon.org/post/containerd-tutorial-two/
+然后在这个目录下新建一个配置文件：
 
-https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
+```
+$ vi /etc/cni/net.d/10-mynet.conf
+{
+	"cniVersion": "0.2.0",
+	"name": "mynet",
+	"type": "bridge",
+	"bridge": "cni0",
+	"isGateway": true,
+	"ipMasq": true,
+	"ipam": {
+		"type": "host-local",
+		"subnet": "10.22.0.0/16",
+		"routes": [
+			{ "dst": "0.0.0.0/0" }
+		]
+	}
+}
+```
 
+其中 `"name": "mynet"` 表示网络的名称，`"type": "bridge"` 表示创建的是一个网桥网络，`"bridge": "cni0"` 表示创建网桥的名称，`isGateway` 表示为网桥分配 IP 地址，`ipMasq` 表示开启 IP Masquerade 功能，关于 `bridge` 插件的更多配置，可以参考 [bridge plugin 文档](https://www.cni.dev/plugins/current/main/bridge/)。
 
-> 除了通过 CNI 插件开放容器网络功能，我们也可以以主机网络模式启动容器：
+下面的 `ipam` 部分是 IP 地址分配的相关配置，`"type": "host-local"` 表示将使用 `host-local` 插件来分配 IP，这是一种简单的本地 IP 地址分配方式，它会从一个地址范围内来选择分配 IP，关于 `host-local` 插件的更多配置，可以参考 [host-local 文档](https://www.cni.dev/plugins/current/ipam/host-local/)。
+
+除了网桥网络，我们再新建一个 `loopback` 网络的配置文件：
+
+```
+$ vi /etc/cni/net.d/99-loopback.conf
+{
+	"cniVersion": "0.2.0",
+	"name": "lo",
+	"type": "loopback"
+}
+```
+
+CNI 项目中内置了一些简单的 Shell 脚本用于测试 CNI 插件的功能：
+
+```
+$ git clone https://github.com/containernetworking/cni.git
+$ cd cni/scripts/
+$ ls
+docker-run.sh  exec-plugins.sh  priv-net-run.sh  release.sh
+```
+
+其中 `exec-plugins.sh` 脚本用于执行 CNI 插件，创建网络，并将某个容器加入该网络：
+
+```
+$ ./exec-plugins.sh 
+Usage: ./exec-plugins.sh add|del CONTAINER-ID NETNS-PATH
+  Adds or deletes the container specified by NETNS-PATH to the networks
+  specified in $NETCONFPATH directory
+```
+
+该脚本有三个参数，第一个参数为 `add` 或 `del` 表示将容器添加到网络或将容器从网络中删除，第二个参数 `CONTAINER-ID` 表示容器 ID，一般没什么要求，保证唯一即可，第三个参数 `NETNS-PATH` 表示这个容器进程的网络命名空间位置，一般位于 `/proc/${PID}/ns/net`，所以，想要将上面运行的 nginx 容器加入网络中，我们需要知道这个容器进程的 PID，这个可以通过 `ctr task list` 得到：
+
+```
+$ ctr task ls
+TASK     PID      STATUS    
+nginx    20350    RUNNING
+```
+
+然后执行下面的命令：
+
+```
+$ CNI_PATH=/opt/cni/bin ./exec-plugins.sh add nginx /proc/20350/ns/net
+```
+
+前面的 `CNI_PATH=/opt/cni/bin` 是必不可少的，告诉脚本从这里执行 CNI 插件，执行之后，我们可以在主机上执行 `ip addr` 进行确认：
+
+```
+$ ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 08:00:27:7f:8e:9a brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global noprefixroute dynamic enp0s3
+       valid_lft 72476sec preferred_lft 72476sec
+    inet6 fe80::e0ae:69af:54a5:f8d0/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 72:87:b6:07:19:07 brd ff:ff:ff:ff:ff:ff
+    inet 10.22.0.1/16 brd 10.22.255.255 scope global cni0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::7087:b6ff:fe07:1907/64 scope link 
+       valid_lft forever preferred_lft forever
+11: vethc5e583fc@if4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default 
+    link/ether 92:5c:c3:6a:a0:56 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::905c:c3ff:fe6a:a056/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+可以看出主机上多了一个名为 `cni0` 的网桥设备，这个就对应我们创建的网络，执行 `ip route` 也可以看到主机上多了一条到 cni0 的路由：
+
+```
+$ ip route
+default via 10.0.2.2 dev enp0s3 proto dhcp metric 100 
+10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15 metric 100 
+10.22.0.0/16 dev cni0 proto kernel scope link src 10.22.0.1
+```
+
+另外，我们还能看到一个 veth 设备，在 [week032-docker-network-in-action](../week032-docker-network-in-action/README.md) 这篇笔记中我们已经学习过 veth 是一种虚拟的以太网隧道，其实就是一根网线，网线一头插在主机的 `cni0` 网桥上，另一头则插在容器里。我们可以进到容器里面进一步确认：
+
+```
+$ ctr task exec -t --exec-id nginx nginx sh
+/ # ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+4: eth0@if11: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue state UP 
+    link/ether 0a:c2:11:63:ea:8c brd ff:ff:ff:ff:ff:ff
+    inet 10.22.0.9/16 brd 10.22.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::8c2:11ff:fe63:ea8c/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+容器除了 `lo` 网卡之外，多了一张 `eth0` 网卡，它的 IP 地址是 10.22.0.9，这个正是我们在 `10-mynet.conf` 配置文件中定义的范围。这时，我们就可以在主机上通过这个 IP 来访问容器内部了：
+
+```
+$ curl 10.22.0.9:80
+```
+
+> `exec-plugins.sh` 脚本会遍历 `/etc/cni/net.d/` 目录下的所有配置来创建网络接口，我们也可以使用 [cnitool](https://github.com/containernetworking/cni/tree/main/cnitool) 来创建特定的网络接口。
+
+> 通过将容器添加到指定网络，可以让容器具备和外界通信的能力，除了这种方式之外，我们也可以直接以主机网络模式启动容器：
 > 
 > ```
 > $ ctr run --net-host docker.io/library/nginx:alpine nginx
@@ -274,6 +405,8 @@ https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
 https://github.com/containerd/containerd/blob/main/docs/getting-started.md
 
 #### 使用 ctr 操作 containerd
+
+https://mdnice.com/writing/fefebebf42314d458df4cf6fc8dbdec0
 
 #### 使用 nerdctl 操作 containerd
 
@@ -292,3 +425,40 @@ https://github.com/containerd/containerd/blob/main/docs/getting-started.md
 * [Container 命令ctr、crictl 命令使用说明](https://www.akiraka.net/kubernetes/1139.html)
 * [Containerd shim 原理深入解读](https://icloudnative.io/posts/shim-shiminey-shim-shiminey/)
 * [从零开始入门 K8s：理解 CNI 和 CNI 插件](https://www.infoq.cn/article/6mdfWWGHzAdihiq9lDST)
+* [重学容器03: 使用CNI为Containerd容器添加网络能力](https://blog.frognew.com/2021/04/relearning-container-03.html)
+* [使用CNI为Containerd创建网络接口](https://bigpigeon.org/post/containerd-tutorial-two/)
+
+## 更多
+
+### 使用 `ctr run --with-ns` 让容器在启动时加入已存在命名空间
+
+上面我们是通过往容器进程的网络命名空间中增加网络接口来实现的，我们也可以先创建网络命名空间：
+
+```
+$ ip netns add nginx
+```
+
+这个网络命名空间的文件位置位于 `/var/run/netns/nginx`：
+
+```
+$ ls /var/run/netns
+nginx
+```
+
+然后在这个网络命名空间中配置网络接口，可以执行 `exec-plugins.sh` 脚本：
+
+```
+$ CNI_PATH=/opt/cni/bin ./exec-plugins.sh add nginx /var/run/netns/nginx
+```
+
+或执行 `cnitool` 命令：
+
+```
+$ CNI_PATH=/opt/cni/bin cnitool add mynet /var/run/netns/nginx
+```
+
+`ctr run` 命令在启动容器的时候可以使用 `--with-ns` 参数让容器在启动时候加入到一个已存在的命名空间，所以可以通过这个参数加入到上面配置好的网络命名空间中：
+
+```
+$ ctr run --with-ns=network:/var/run/netns/nginx docker.io/library/nginx:alpine nginx
+```
