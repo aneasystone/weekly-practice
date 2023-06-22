@@ -101,6 +101,58 @@ Server:
   UUID: 9eb2cbd4-8c1d-4321-839b-a8a4fc498de8
 ```
 
+#### 以 systemd 方式启动 containerd
+
+官方已经为我们准备好了 [containerd.service](https://raw.githubusercontent.com/containerd/containerd/main/containerd.service) 文件，我们只需要将其下载下来，放在 systemd 的配置目录下即可：
+
+```
+$ mkdir -p /usr/local/lib/systemd/system/
+$ curl -L https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -o /usr/local/lib/systemd/system/containerd.service
+```
+
+containerd.service 文件内容如下：
+
+```
+[Unit]
+Description=containerd container runtime
+Documentation=https://containerd.io
+After=network.target local-fs.target
+
+[Service]
+#uncomment to enable the experimental sbservice (sandboxed) version of containerd/cri integration
+#Environment="ENABLE_CRI_SANDBOXES=sandboxed"
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/local/bin/containerd
+
+Type=notify
+Delegate=yes
+KillMode=process
+Restart=always
+RestartSec=5
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+LimitNOFILE=infinity
+# Comment TasksMax if your systemd version does not supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+OOMScoreAdjust=-999
+
+[Install]
+WantedBy=multi-user.target
+```
+
+其中有两个配置很重要，`Delegate=yes` 表示允许 containerd 管理自己创建容器的 cgroups，否则 systemd 会将进程移到自己的 cgroups 中，导致 containerd 无法正确获取容器的资源使用情况；默认情况下，systemd 在停止或重启服务时会在进程的 cgroup 中查找并杀死所有子进程，`KillMode=process` 表示让 systemd 只杀死主进程，这样可以确保升级或重启 containerd 时不影响现有的容器。
+
+然后我们使用 systemd 守护进程的方式启动 containerd 服务：
+
+```
+$ systemctl enable --now containerd
+```
+
+这样当系统重启后，containerd 服务也会自动启动了。
+
 #### 安装 runc
 
 安装好 containerd 之后，我们就可以使用 ctr 执行一些基本操作了，比如使用 `ctr image pull` 下载镜像：
@@ -121,7 +173,7 @@ layer-sha256:c8794a7158bff7f518985e76c590029ccc6b4c0f6e66e82952c3476c095225c9:  
 layer-sha256:8de2a93581dcb1cc62dd7b6e1620bc8095befe0acb9161d5f053a9719e145678:    exists  
 elapsed: 2.8 s                                                                    total:   0.0 B (0.0 B/s)
 unpacking linux/amd64 sha256:2d194184b067db3598771b4cf326cfe6ad5051937ba1132b8b7d4b0184e0d0a6...
-done: 23.567287ms	
+done: 23.567287ms    
 
 ```
 
@@ -132,9 +184,9 @@ done: 23.567287ms
 ```
 $ ctr run docker.io/library/nginx:alpine nginx
 ctr: failed to create shim task: 
-	OCI runtime create failed: 
-		unable to retrieve OCI runtime error (open /run/containerd/io.containerd.runtime.v2.task/default/nginx/log.json: no such file or directory):
-			exec: "runc": executable file not found in $PATH: unknown
+    OCI runtime create failed: 
+        unable to retrieve OCI runtime error (open /run/containerd/io.containerd.runtime.v2.task/default/nginx/log.json: no such file or directory):
+            exec: "runc": executable file not found in $PATH: unknown
 ```
 
 正如前文所述，这是因为 containerd 依赖 OCI runtime 来进行容器管理，containerd 默认的 OCI runtime 是 runc，我们还没有安装它。runc 的安装也非常简单，直接从其项目的 [Releases 页面](https://github.com/opencontainers/runc/releases) 下载最新版本：
@@ -267,19 +319,19 @@ $ mkdir -p /etc/cni/net.d
 ```
 $ vi /etc/cni/net.d/10-mynet.conf
 {
-	"cniVersion": "0.2.0",
-	"name": "mynet",
-	"type": "bridge",
-	"bridge": "cni0",
-	"isGateway": true,
-	"ipMasq": true,
-	"ipam": {
-		"type": "host-local",
-		"subnet": "10.22.0.0/16",
-		"routes": [
-			{ "dst": "0.0.0.0/0" }
-		]
-	}
+    "cniVersion": "0.2.0",
+    "name": "mynet",
+    "type": "bridge",
+    "bridge": "cni0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "subnet": "10.22.0.0/16",
+        "routes": [
+            { "dst": "0.0.0.0/0" }
+        ]
+    }
 }
 ```
 
@@ -292,9 +344,9 @@ $ vi /etc/cni/net.d/10-mynet.conf
 ```
 $ vi /etc/cni/net.d/99-loopback.conf
 {
-	"cniVersion": "0.2.0",
-	"name": "lo",
-	"type": "loopback"
+    "cniVersion": "0.2.0",
+    "name": "lo",
+    "type": "loopback"
 }
 ```
 
@@ -462,3 +514,16 @@ $ CNI_PATH=/opt/cni/bin cnitool add mynet /var/run/netns/nginx
 ```
 $ ctr run --with-ns=network:/var/run/netns/nginx docker.io/library/nginx:alpine nginx
 ```
+
+### containerd 的配置文件
+
+使用 `containerd config default` 命令生成默认配置文件：
+
+```
+$ mkdir -p /etc/containerd
+$ containerd config default > /etc/containerd/config.toml
+```
+
+### 实现自己的 containerd 客户端
+
+* [Implementing your own containerd client](https://github.com/containerd/containerd/blob/main/docs/getting-started.md#implementing-your-own-containerd-client)
