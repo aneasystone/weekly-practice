@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK042 - [基于 LangChain 打造的本地知识库助手](./notes/week042-langchain-doc-qa/README.md)
 * WEEK041 - [容器运行时 containerd 学习笔记](./notes/week041-containerd-notes/README.md)
 * WEEK040 - [基于 ChatGPT 实现一个划词翻译 Chrome 插件](./notes/week040-chrome-extension-with-chatgpt/README.md)
 * WEEK039 - [读源码剖析 Spring Security 的实现原理](./notes/week039-dive-into-spring-security-sources/README.md)
