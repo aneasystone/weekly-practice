@@ -1,5 +1,25 @@
 # WEEK042 - 基于 LangChain 打造的本地知识库助手
 
+基于不同的提示语，可以让 ChatGPT 实现各种不同的功能，比如在 [week040-chrome-extension-with-chatgpt](../week040-chrome-extension-with-chatgpt/README.md) 这篇文章中，我基于 ChatGPT 实现了一个翻译助手，OpenAI 官方的 [Examples 页面](https://platform.openai.com/examples) 也列出了提示语的更多示例，展示了 ChatGPT 在问答、翻译、文本总结、代码生成、推理等各方面的能力。
+
+尽管 ChatGPT 的表现非常亮眼，但是它也有其局限性，由于它是基于互联网上公开的资料训练的，所以它只能回答公开领域的知识的问题，比如你问它是谁发明了空调，第一个登月的人是谁，它都能回答得头头是道，但是对于一些私有领域的知识，比如你问它张三家的宠物狗叫什么名字，它就鞭长莫及了。
+
+## Embedding 简介
+
+打造私有领域的知识库助手对于企业和个人来说是一个非常重要的应用场景，可以实现个性化定制化的问答效果，要实现这个功能，一般有两种不同的方式：Embedding 和 Fine tuning。
+
+* [Pinecone](https://www.pinecone.io/) - Long-term Memory for AI
+* [向量数据库是如何工作的？](https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg)
+* [矢量数据库和嵌入是当前人工智能领域的热门话题](https://twitter-thread.com/t/ZH/1655626066331938818)
+* [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
+* [Embedding技术在推荐场景实践](https://mp.weixin.qq.com/s/O26ibGHXxhYOMknleI7yrA)
+
+## 构建本地知识库
+
+## 实现本地知识库助手
+
+## 基于 LangChain 实现本地知识库助手
+
 https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 
 ## 参考
@@ -25,14 +45,6 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [WritingGPT: 基于ChatGPT和AutoGPT打造个人写作团队](https://mp.weixin.qq.com/s/RJC4pEIsmcebqGJw8AOQig)
 * [DB-GPT](https://github.com/csunny/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
-
-### 向量数据库
-
-* [Pinecone](https://www.pinecone.io/) - Long-term Memory for AI
-* [向量数据库是如何工作的？](https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg)
-* [矢量数据库和嵌入是当前人工智能领域的热门话题](https://twitter-thread.com/t/ZH/1655626066331938818)
-* [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
-* [Embedding技术在推荐场景实践](https://mp.weixin.qq.com/s/O26ibGHXxhYOMknleI7yrA)
 
 ### 可视化
 
