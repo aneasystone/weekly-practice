@@ -8,11 +8,15 @@
 
 打造私有领域的知识库助手对于企业和个人来说是一个非常重要的应用场景，可以实现个性化定制化的问答效果，要实现这个功能，一般有两种不同的方式：[Fine tuning](https://platform.openai.com/docs/guides/fine-tuning) 和 [Embedding](https://platform.openai.com/docs/guides/embeddings)。Fine tuning 又被称为微调，它可以在不改动预训练模型的基础上，对特定任务进一步训练，以适应特定数据和要求。[OpenAI Cookbook](https://github.com/openai/openai-cookbook) 中有一个 [基于 Fine tuning 实现 QA 的例子](https://github.com/openai/openai-cookbook/blob/main/examples/fine-tuned_qa)，不过官方已经不推荐使用这种方式来做知识问答任务，因为 Fine tuning 更适合于学习新任务或新模式，而不是接受新信息，比如我们可以使用 Fine tuning 让模型按特定的语气或风格来回答问题，或者让模型按固定的格式来回答问题；相对应的，Embedding 更适合知识问答任务，我们可以使用语义搜索来快速找到相关的文档，然后将文档组合成固定的提示语，从而让模型来生成特定问题的答案。这种做法比 Fine tuning 速度更快，而且不需要训练，使用上也更灵活。
 
-https://zhuanlan.zhihu.com/p/609359999
+Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以追溯到 1986 年 Hinton 的论文 [《Learning distributed representations of concepts》](http://www.cs.toronto.edu/~hinton/absps/families.pdf)，他在论文中提出了分布式表示（Distributed Representation）的概念，这个概念后来被人们称为词向量或词嵌入（Word Embedding），使用它可以将单词表示成一个数字向量，同时可以保证相关或相似的词在距离上很接近。Embedding 技术发展到今天，已经可以将任意对象向量化，包括文本、图像甚至音视频，在搜索和推荐等业务中有着广泛的应用。
 
-## 构建本地知识库
+知道了 Embedding 技术，我们就可以理解如何使用 Embedding 实现本地知识问答了，整个处理流程如下图所示：
 
-## 实现本地知识库助手
+![](./images/qa-with-embedding.png)
+
+### 构建本地知识库
+
+### 实现本地知识问答助手
 
 ## 基于 LangChain 实现本地知识库助手
 
