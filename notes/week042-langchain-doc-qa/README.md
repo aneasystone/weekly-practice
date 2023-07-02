@@ -16,6 +16,38 @@ Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以�
 
 ### 构建本地知识库
 
+假设我们有一个本地知识库，这可能是某个产品的使用手册，或者某个公司的内部文档，又或者是你自己的一些私人资料，我们希望 ChatGPT 能够回答关于这些本地知识的问题。根据上面的流程图，我们首先需要对我们的知识库进行 Embedding 处理，将知识库中的所有文档向量化，这里其实涉及三个问题，第一个问题是如何计算每个文档的向量？
+
+对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型，这里有一个常用的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)，其中 `text-embedding-ada-002` 是 OpenAI 目前提供的效果最好的 Embedding 模型，OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口就可以使用该模型，生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口：
+
+```
+import os
+import openai
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+text_string = "sample text"
+model_id = "text-embedding-ada-002"
+
+embedding = openai.Embedding.create(input=text_string, model=model_id)['data'][0]['embedding']
+print(embedding)
+```
+
+输出的是一个长度为 1536 的数组，也可以说是一个 1536 维的向量：
+
+```
+[
+    -0.0022714741062372923, 
+	0.009765749797224998, 
+	-0.018565727397799492,
+	...
+	 0.0037550802808254957, 
+	 -0.004177606198936701
+]
+```
+
+第二个问题是向量如何存储？
+
 ### 实现本地知识问答助手
 
 ## 基于 LangChain 实现本地知识库助手
@@ -25,6 +57,7 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 ## 参考
 
 * [快速了解 OpenAI 的 fine-tune 和 Embedding 能力](https://zhuanlan.zhihu.com/p/609359047)
+* [基于开源embedding模型的中文向量效果测试](https://github.com/JovenChu/embedding_model_test)
 * [Question-answering-using-embeddings-based-search](https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb)
 * [推荐LangChain学习过程中的一些资料](https://mp.weixin.qq.com/s/4DjoDeneBWW0DrkUmRMD4w)
 * [LangChain 的中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
