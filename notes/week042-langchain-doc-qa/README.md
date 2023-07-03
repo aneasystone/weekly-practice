@@ -6,7 +6,9 @@
 
 ## Fine tuning vs. Embedding
 
-打造私有领域的知识库助手对于企业和个人来说是一个非常重要的应用场景，可以实现个性化定制化的问答效果，要实现这个功能，一般有两种不同的方式：[Fine tuning](https://platform.openai.com/docs/guides/fine-tuning) 和 [Embedding](https://platform.openai.com/docs/guides/embeddings)。Fine tuning 又被称为微调，它可以在不改动预训练模型的基础上，对特定任务进一步训练，以适应特定数据和要求。[OpenAI Cookbook](https://github.com/openai/openai-cookbook) 中有一个 [基于 Fine tuning 实现 QA 的例子](https://github.com/openai/openai-cookbook/blob/main/examples/fine-tuned_qa)，不过官方已经不推荐使用这种方式来做知识问答任务，因为 Fine tuning 更适合于学习新任务或新模式，而不是接受新信息，比如我们可以使用 Fine tuning 让模型按特定的语气或风格来回答问题，或者让模型按固定的格式来回答问题；相对应的，Embedding 更适合知识问答任务，我们可以使用语义搜索来快速找到相关的文档，然后将文档组合成固定的提示语，从而让模型来生成特定问题的答案。这种做法比 Fine tuning 速度更快，而且不需要训练，使用上也更灵活。
+打造私有领域的知识库助手对于企业和个人来说是一个非常重要的应用场景，可以实现个性化定制化的问答效果，要实现这个功能，一般有两种不同的方式：[Fine tuning](https://platform.openai.com/docs/guides/fine-tuning) 和 [Embedding](https://platform.openai.com/docs/guides/embeddings)。Fine tuning 又被称为微调，它可以在不改动预训练模型的基础上，对特定任务进一步训练，以适应特定数据和要求。[OpenAI Cookbook](https://github.com/openai/openai-cookbook) 中有一个 [基于 Fine tuning 实现 QA 的例子](https://github.com/openai/openai-cookbook/blob/main/examples/fine-tuned_qa)，不过官方已经不推荐使用这种方式来做知识问答任务，因为 Fine tuning 更适合于学习新任务或新模式，而不是接受新信息，比如我们可以使用 Fine tuning 让模型按特定的语气或风格来回答问题，或者让模型按固定的格式来回答问题。
+
+相对应的，Embedding 更适合知识问答任务，而且 Embedding 技术还顺便解决了大模型的一个问题，那就是上下文限制，比如 OpenAI 的 GPT-3.5 模型，它的限制在 4k - 16k 个 token，就算是 GPT-4 模型，最多也只支持 32k 个 token，所以，如果你的知识库内容长度超出了限制，我们就不能直接让 ChatGPT 对其进行总结并回答问题。通过 Embedding 技术，我们可以使用语义搜索来快速找到相关的文档，然后只将相关的文档内容注入到大模型的上下文窗口中，让模型来生成特定问题的答案，从而解决大模型的限制问题。这种做法比 Fine tuning 速度更快，而且不需要训练，使用上也更灵活。
 
 Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以追溯到 1986 年 Hinton 的论文 [《Learning distributed representations of concepts》](http://www.cs.toronto.edu/~hinton/absps/families.pdf)，他在论文中提出了分布式表示（Distributed Representation）的概念，这个概念后来被人们称为词向量或词嵌入（Word Embedding），使用它可以将单词表示成一个数字向量，同时可以保证相关或相似的词在距离上很接近。Embedding 技术发展到今天，已经可以将任意对象向量化，包括文本、图像甚至音视频，在搜索和推荐等业务中有着广泛的应用。
 
@@ -18,7 +20,7 @@ Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以�
 
 假设我们有一个本地知识库，这可能是某个产品的使用手册，或者某个公司的内部文档，又或者是你自己的一些私人资料，我们希望 ChatGPT 能够回答关于这些本地知识的问题。根据上面的流程图，我们首先需要对我们的知识库进行 Embedding 处理，将知识库中的所有文档向量化，这里其实涉及三个问题，第一个问题是如何计算每个文档的向量？
 
-对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型，这里有一个常用的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)，其中 `text-embedding-ada-002` 是 OpenAI 目前提供的效果最好的 Embedding 模型，OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口就可以使用该模型，生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口：
+对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型，这里有一个常用的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)，其中 `text-embedding-ada-002` 是 OpenAI 目前提供的效果最好的第二代 Embedding 模型，相比于第一代的 `davinci`、`curie` 和 `babbage` 等模型，效果更好，价格更便宜，OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口就可以使用该模型，生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口：
 
 ```
 import os
@@ -46,7 +48,9 @@ print(embedding)
 ]
 ```
 
-第二个问题是向量如何存储？
+第二个问题是计算出来的向量该如何存储？实际上，自从大模型兴起之后，Embedding 和向量数据库就变成了当前 AI 领域炙手可热的话题，一时间，涌出了很多专注于向量数据库的公司或项目，比如 [Pinecone](https://www.pinecone.io/)、[Weaviate](https://weaviate.io/)、[Qdrant](https://qdrant.tech/)、[Chroma](https://docs.trychroma.com/)、[Milvus](https://milvus.io/) 等，很多老牌数据库厂商也纷纷加入向量数据库的阵营，比如 [ElasticSearch](https://www.elastic.co/cn/elasticsearch/)、[Cassandra](https://cassandra.apache.org/_/index.html)、[Postgres](https://www.postgresql.org/)、[Redis](https://redis.io/)、[Mongo](https://www.mongodb.com/) 等。
+
+https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg
 
 ### 实现本地知识问答助手
 
@@ -83,8 +87,6 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 
 ### Embedding
 
-* [Pinecone](https://www.pinecone.io/) - Long-term Memory for AI
-* [向量数据库是如何工作的？](https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg)
 * [矢量数据库和嵌入是当前人工智能领域的热门话题](https://twitter-thread.com/t/ZH/1655626066331938818)
 * [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
 * [Embedding技术在推荐场景实践](https://mp.weixin.qq.com/s/O26ibGHXxhYOMknleI7yrA)
