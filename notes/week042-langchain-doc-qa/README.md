@@ -50,9 +50,20 @@ print(embedding)
 
 第二个问题是计算出来的向量该如何存储？实际上，自从大模型兴起之后，Embedding 和向量数据库就变成了当前 AI 领域炙手可热的话题，一时间，涌出了很多专注于向量数据库的公司或项目，比如 [Pinecone](https://www.pinecone.io/)、[Weaviate](https://weaviate.io/)、[Qdrant](https://qdrant.tech/)、[Chroma](https://docs.trychroma.com/)、[Milvus](https://milvus.io/) 等，很多老牌数据库厂商也纷纷加入向量数据库的阵营，比如 [ElasticSearch](https://www.elastic.co/cn/elasticsearch/)、[Cassandra](https://cassandra.apache.org/_/index.html)、[Postgres](https://www.postgresql.org/)、[Redis](https://redis.io/)、[Mongo](https://www.mongodb.com/) 等。
 
-https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg
+我们这里使用 Qdrant 作为示例，首先通过 Docker 在本地启动 Qdrant 服务：
+
+```
+$ docker run -p 6333:6333 -v $(pwd)/data:/qdrant/storage qdrant/qdrant
+```
 
 ### 实现本地知识问答助手
+
+```
+已知我们有上下文：文本块 1，文本块 2，文本块 3。
+现在有用户的问题：他们对 xyz 说了什么？
+请根据给定的上下文，如实回答用户的问题。
+如果你不能回答，那么如实告诉用户“我无法回答这个问题”。
+```
 
 ## 基于 LangChain 实现本地知识库助手
 
@@ -62,6 +73,8 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 
 * [快速了解 OpenAI 的 fine-tune 和 Embedding 能力](https://zhuanlan.zhihu.com/p/609359047)
 * [基于开源embedding模型的中文向量效果测试](https://github.com/JovenChu/embedding_model_test)
+* [向量数据库是如何工作的？](https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg)
+* [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
 * [Question-answering-using-embeddings-based-search](https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb)
 * [推荐LangChain学习过程中的一些资料](https://mp.weixin.qq.com/s/4DjoDeneBWW0DrkUmRMD4w)
 * [LangChain 的中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
@@ -78,18 +91,13 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 * [Fast GPT](https://fastgpt.run/) - 三分钟搭建 AI 知识库
 * [Quivr](https://github.com/StanGirard/quivr) - Your Second Brain, Empowered by Generative AI
 * [Local Mind](https://github.com/nigulasikk/local-mind) - 一个本地文件问答应用
+* [document.ai](https://github.com/GanymedeNil/document.ai) - 基于向量数据库与GPT3.5的通用本地知识库方案
 * [LlamaIndex：面向QA系统的全新文档摘要索引](https://mp.weixin.qq.com/s/blDKylt4FyZfeSIV6M1d2g)
 * [pdf.ai](https://pdf.ai/) - Chat with any document
 * [langchain-ChatGLM](https://github.com/imClumsyPanda/langchain-ChatGLM) - 基于本地知识库的 ChatGLM 等大语言模型应用实现
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [WritingGPT: 基于ChatGPT和AutoGPT打造个人写作团队](https://mp.weixin.qq.com/s/RJC4pEIsmcebqGJw8AOQig)
 * [DB-GPT](https://github.com/csunny/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
-
-### Embedding
-
-* [矢量数据库和嵌入是当前人工智能领域的热门话题](https://twitter-thread.com/t/ZH/1655626066331938818)
-* [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
-* [Embedding技术在推荐场景实践](https://mp.weixin.qq.com/s/O26ibGHXxhYOMknleI7yrA)
 
 ### 可视化
 
