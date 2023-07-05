@@ -13,18 +13,16 @@ def create_kb(kb_name):
 	)
 
 def init_kb(kb_name, kb_file):
-	id = 1
 	with open(kb_file, 'r', encoding='utf-8') as f:
-		for line in tqdm.tqdm(f.readlines()):
+		for index, line in enumerate(tqdm.tqdm(f.readlines())):
 			embedding = to_embedding(line)
 			client.upsert(
 				collection_name=kb_name,
 				wait=True,
 				points=[
-					PointStruct(id=id, vector=embedding, payload={"text": line}),
+					PointStruct(id=index+1, vector=embedding, payload={"text": line}),
 				],
 			)
-			id += 1
 
 if __name__ == '__main__':
 	create_kb('kb')

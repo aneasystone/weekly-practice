@@ -18,7 +18,12 @@ Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以�
 
 ### 构建本地知识库
 
-假设我们有一个本地知识库，这可能是某个产品的使用手册，或者某个公司的内部文档，又或者是你自己的一些私人资料，我们希望 ChatGPT 能够回答关于这些本地知识的问题。根据上面的流程图，我们首先需要对我们的知识库进行 Embedding 处理，将知识库中的所有文档向量化，这里其实涉及三个问题，第一个问题是如何计算每个文档的向量？
+假设我们有一个本地知识库，这可能是某个产品的使用手册，或者某个公司的内部文档，又或者是你自己的一些私人资料，我们希望 ChatGPT 能够回答关于这些本地知识的问题。根据上面的流程图，我们首先需要对我们的知识库进行 Embedding 处理，将知识库中的所有文档向量化，这里其实涉及两个问题：
+
+1. 如何计算每个文档的向量？
+2. 如何存储每个文档的向量？
+
+#### 如何计算文档的向量？
 
 对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型，这里有一个常用的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)，其中 `text-embedding-ada-002` 是 OpenAI 目前提供的效果最好的第二代 Embedding 模型，相比于第一代的 `davinci`、`curie` 和 `babbage` 等模型，效果更好，价格更便宜，OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口就可以使用该模型，生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口：
 
@@ -40,13 +45,15 @@ print(embedding)
 ```
 [
     -0.0022714741062372923, 
-	0.009765749797224998, 
-	-0.018565727397799492,
-	...
-	 0.0037550802808254957, 
-	 -0.004177606198936701
+    0.009765749797224998, 
+    -0.018565727397799492,
+    ...
+     0.0037550802808254957, 
+     -0.004177606198936701
 ]
 ```
+
+#### 如何存储文档的向量？
 
 第二个问题是计算出来的向量该如何存储？实际上，自从大模型兴起之后，Embedding 和向量数据库就变成了当前 AI 领域炙手可热的话题，一时间，涌出了很多专注于向量数据库的公司或项目，比如 [Pinecone](https://www.pinecone.io/)、[Weaviate](https://weaviate.io/)、[Qdrant](https://qdrant.tech/)、[Chroma](https://docs.trychroma.com/)、[Milvus](https://milvus.io/) 等，很多老牌数据库厂商也纷纷加入向量数据库的阵营，比如 [ElasticSearch](https://www.elastic.co/cn/elasticsearch/)、[Cassandra](https://cassandra.apache.org/_/index.html)、[Postgres](https://www.postgresql.org/)、[Redis](https://redis.io/)、[Mongo](https://www.mongodb.com/) 等。
 
@@ -56,7 +63,59 @@ print(embedding)
 $ docker run -p 6333:6333 -v $(pwd)/data:/qdrant/storage qdrant/qdrant
 ```
 
+然后通过下面的代码创建一个名为 `kb` 的向量库：
+
+```
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams
+
+client = QdrantClient("127.0.0.1", port=6333)
+client.recreate_collection(
+    collection_name='kb',
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+)
+```
+
+注意我们指定向量维度为 1536，这是 OpenAI Embedding 输出的维度，另外指定距离为 `COSINE`，它决定如何度量向量之间的相似度，这个我们后面再讲。
+
+作为示例，我们将一个文件 `kb.txt` 作为本地知识库，文件中的每一行代表一条知识，比如：
+
+```
+小红的好朋友叫小明，他们是同班同学。
+小明家有一条宠物狗，叫毛毛，这是他爸从北京带回来的。
+小红家也有一条宠物狗，叫大白，非常听话。
+小华是小明的幼儿园同学，从小就欺负他。
+```
+
+然后我们读取该知识库文件，依次计算每一行的向量，并将其保存在 `kb` 库中：
+
+```
+with open('kb.txt', 'r', encoding='utf-8') as f:
+    for index, line in enumerate(tqdm.tqdm(f.readlines())):
+        embedding = to_embedding(line)
+        client.upsert(
+            collection_name='kb',
+            wait=True,
+            points=[
+                PointStruct(id=index+1, vector=embedding, payload={"text": line}),
+            ],
+        )
+```
+
+在保存向量时，可以通过 payload 带上一些元数据，比如这里将原始的文本内容和向量一起保存，这样可以方便后面检索时知道向量和原始文本的对应关系。
+
+至此我们的本地知识库就初始化好了。
+
 ### 实现本地知识问答助手
+
+构建好知识库之后，我们就可以基于知识库实现本地知识库助手了。接下来要解决的问题也有两个：
+
+1. 如何从知识库中检索出和问题最相关的文档？
+2. 如何让 ChatGPT 回答关于知识库的问题？
+
+#### 如何检索知识？
+
+#### 如何向 ChatGPT 提问？
 
 ```
 已知我们有上下文：文本块 1，文本块 2，文本块 3。
