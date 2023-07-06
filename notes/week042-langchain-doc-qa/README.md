@@ -119,6 +119,31 @@ with open('kb.txt', 'r', encoding='utf-8') as f:
 
 我们上面已经介绍过 Embedding 技术，通过 Embedding 技术可以将任何事物表示成一个向量，而且最牛的地方是，它可以保证相关或相似的事物在距离上很接近，或者说有着相似的语义，这就给我们提供了一种新的检索方式：语义搜索（Semantic Search）。
 
+所以想要搜索出和用户问题最相关的文档，我们可以先将用户问题通过 Embedding 转换为向量，然后在上面构建好的知识库中搜索和问题向量最接近的向量及对应的文档即可。那么怎么计算两个向量之间的距离呢？其实我们在上面创建库时已经使用过 `COSINE`，除了 `COSINE`，Qdrant 还支持使用 `EUCLID` 或 `DOT` 等方法：
+
+* `COSINE` - 余弦相似度，计算两个向量之间的夹角，夹角越小，向量之间越相似；
+* `EUCLID` - 欧几里得距离，计算两个向量之间的直线距离，距离越近，向量之间越相似；这种度量方法简单直接，在 2 维或 3 维等低维空间表现得很好，但是在高维空间，每个向量之间的欧几里得距离都很靠近，无法起到度量相似性的作用；
+* `DOT` - 点积相似度，点积是两个向量的长度与它们夹角余弦的积，点积越大，向量之间就越相似。
+
+在机器学习和数据挖掘中还有很多度量距离的方法：
+
+* 闵可夫斯基距离
+* 曼哈顿距离
+* 切比雪夫距离
+* 马氏距离
+* 皮尔逊相关系数
+* 汉明距离
+* 杰卡德相似系数
+* 编辑距离
+* DTW 距离
+* KL 散度
+
+不过这些度量方法在语义搜索中用的不多，感兴趣的同学可以进一步了解之。
+
+在语义搜索中，用的最多的是余弦相似度。当计算出用户问题的向量之后，我们就可以遍历知识库中的所有向量，依次计算每个向量和问题向量之间的距离，然后按距离排序，取距离最近的几条数据，就能得到和用户问题最相似的文档了。
+
+不过很显然这里存在一个问题，如果知识库中的向量比较多，这种暴力检索的方法就会非常耗时。为了加快检索向量库的速度，人们提出了很多种 ANN（Approximate Nearest Neighbor，相似最近邻）算法，算法的基本思路是通过对全局向量空间进行分割，将其分割成很多小的子空间，在搜索的时候，通过某种方式，快速锁定在某一个或某几个子空间，然后在这些子空间里做遍历。可以粗略地将这些子空间认为是向量数据库的索引。常见的 ANN 算法可以分为三大类：基于树的方法、基于哈希的方法、基于矢量量化的方法，比如 Annoy、KD 树、LSH（局部敏感哈希）、PQ（乘积量化）、HNSW 等。
+
 #### 如何向 ChatGPT 提问？
 
 ```
@@ -138,6 +163,7 @@ https://langchain-langchain.vercel.app/docs/get_started/introduction.html
 * [基于开源embedding模型的中文向量效果测试](https://github.com/JovenChu/embedding_model_test)
 * [向量数据库是如何工作的？](https://mp.weixin.qq.com/s/rwFkl4My9GQYOkJEWwk3bg)
 * [浅谈 Semantic Search](https://mp.weixin.qq.com/s/ymlGAhS40ImoaAZviq5lZw)
+* [图像检索：再叙ANN Search](https://yongyuan.name/blog/ann-search.html)
 * [Question-answering-using-embeddings-based-search](https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb)
 * [推荐LangChain学习过程中的一些资料](https://mp.weixin.qq.com/s/4DjoDeneBWW0DrkUmRMD4w)
 * [LangChain 的中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
