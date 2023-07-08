@@ -15,6 +15,7 @@ def search(kb_name, vector, limit):
 def query(question):
     vector = to_embedding(question)
     search_results = search('kb', vector, 3)
+    print(search_results)
     return completion(question, search_results)
     
 if __name__ == '__main__':

@@ -25,7 +25,7 @@ Embedding 也被称为嵌入，它是一种数据表征的方式，最早可以�
 
 #### 如何计算文档的向量？
 
-对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型，这里有一个常用的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)，其中 `text-embedding-ada-002` 是 OpenAI 目前提供的效果最好的第二代 Embedding 模型，相比于第一代的 `davinci`、`curie` 和 `babbage` 等模型，效果更好，价格更便宜，OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口就可以使用该模型，生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口：
+对此，前辈大佬们提出了很多种不同的解决方案，比如 Word2vec、GloVe、FastText、ELMo、BERT、GPT 等等，不过这些都是干巴巴的论文和算法，对我们这种普通用户来说，可以直接使用一些训练好的模型。开源项目 [Sentence-Transformers](https://www.sbert.net/index.html) 是一个很好的选择，它封装了 [大量可用的预训练模型](https://huggingface.co/sentence-transformers)；另外开源项目 [Towhee](https://towhee.io/) 不仅支持大量的 Embedding 模型，而且还提供了其他常用的 AI 流水线的实现，这里是它支持的 [Embedding 模型列表](https://towhee.io/tasks/detail/pipeline/sentence-similarity)；不过在本地跑 Embedding 模型对机器有一定的门槛要求，我们也可以直接使用一些公开的 Embedding 服务，比如 OpenAI 提供的 [/v1/embeddings](https://platform.openai.com/docs/api-reference/embeddings/create) 接口，它使用的 `text-embedding-ada-002` 模型是 OpenAI 目前提供的效果最好的第二代 Embedding 模型，相比于第一代的 `davinci`、`curie` 和 `babbage` 等模型，效果更好，价格更便宜。我们这里就直接使用该接口生成任意文本的向量。使用 OpenAI 的 Python SDK 调用该接口如下：
 
 ```
 import os
@@ -144,13 +144,56 @@ with open('kb.txt', 'r', encoding='utf-8') as f:
 
 不过很显然这里存在一个问题，如果知识库中的向量比较多，这种暴力检索的方法就会非常耗时。为了加快检索向量库的速度，人们提出了很多种 ANN（Approximate Nearest Neighbor，相似最近邻）算法，算法的基本思路是通过对全局向量空间进行分割，将其分割成很多小的子空间，在搜索的时候，通过某种方式，快速锁定在某一个或某几个子空间，然后在这些子空间里做遍历。可以粗略地将这些子空间认为是向量数据库的索引。常见的 ANN 算法可以分为三大类：基于树的方法、基于哈希的方法、基于矢量量化的方法，比如 Annoy、KD 树、LSH（局部敏感哈希）、PQ（乘积量化）、HNSW 等。
 
-#### 如何向 ChatGPT 提问？
+Qdrant 针对负载数据和向量数据使用了不同的 [索引策略](https://qdrant.tech/documentation/concepts/indexing/)，其中对向量数据的索引使用的就是 HNSW 算法。通过 `client.search()` 搜索和问题向量最接近的 N 个向量：
 
 ```
-已知我们有上下文：文本块 1，文本块 2，文本块 3。
-现在有用户的问题：他们对 xyz 说了什么？
-请根据给定的上下文，如实回答用户的问题。
-如果你不能回答，那么如实告诉用户“我无法回答这个问题”。
+question = '小明家的宠物狗叫什么名字？'
+search_results = client.search(
+    collection_name='kb',
+    query_vector=to_embedding(question),
+    limit=3,
+    search_params={"exact": False, "hnsw_ef": 128}
+)
+```
+
+搜索出来的结果类似于下面这样，不仅包含了和问题最接近的文档，而且还有对应的相似度得分：
+
+```
+[
+    ScoredPoint(id=2, version=1, score=0.91996545, payload={'text': '小明家有一条宠物狗，叫毛毛，这是他爸从北京带回来的。\n'}, vector=None), 
+    ScoredPoint(id=3, version=2, score=0.8796822, payload={'text': '小红家也有一条宠物狗，叫大白，非常听话。\n'}, vector=None), 
+    ScoredPoint(id=1, version=0, score=0.869504, payload={'text': '小红的好朋友叫小明，他们是同班同学。\n'}, vector=None)
+]
+```
+
+#### 如何向 ChatGPT 提问？
+
+经过上面的三步，我们的本地知识库助手其实就已经完成 90% 了，下面是最后一步，我们需要将搜出来的文档和用户问题重新组装并丢给 ChatGPT，下面是一个简单的 Prompt 模板：
+
+```
+你是一个知识库助手，你将根据我提供的知识库内容来回答问题
+已知有知识库内容如下：
+1. xxx
+2. xxx
+3. xxx
+请根据知识库回答以下问题：qqq
+```
+
+组装好 Prompt 之后，通过 `openai.ChatCompletion.create()` 调用 ChatGPT 接口：
+
+```
+completion = openai.ChatCompletion.create(
+    temperature=0.7,
+    model="gpt-3.5-turbo",
+    messages=format_prompt(question, search_results),
+)
+print(completion.choices[0].message.content)
+```
+
+得到 ChatGPT 的回复：
+
+```
+小明家的宠物狗叫毛毛。
 ```
 
 ## 基于 LangChain 实现本地知识库助手
