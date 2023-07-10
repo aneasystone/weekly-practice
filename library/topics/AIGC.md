@@ -7,6 +7,7 @@
 * [Hugging Face](https://huggingface.co/)
 	* [huggingface/transformers](https://github.com/huggingface/transformers) - Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.
 * [Civitai](https://civitai.com/)
+* [魔搭社区 ModelScope](https://modelscope.cn/home)
 
 ## 文本类
 

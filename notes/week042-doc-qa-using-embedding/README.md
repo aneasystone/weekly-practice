@@ -173,10 +173,10 @@ search_results = client.search(
 ```
 你是一个知识库助手，你将根据我提供的知识库内容来回答问题
 已知有知识库内容如下：
-1. xxx
-2. xxx
-3. xxx
-请根据知识库回答以下问题：qqq
+1. 小明家有一条宠物狗，叫毛毛，这是他爸从北京带回来的。
+2. 小红家也有一条宠物狗，叫大白，非常听话。
+3. 小红的好朋友叫小明，他们是同班同学。
+请根据知识库回答以下问题：小明家的宠物狗叫什么名字？
 ```
 
 组装好 Prompt 之后，通过 `openai.ChatCompletion.create()` 调用 ChatGPT 接口：
@@ -216,14 +216,27 @@ print(completion.choices[0].message.content)
 
 * [Fast GPT](https://fastgpt.run/) - 三分钟搭建 AI 知识库
 * [Quivr](https://github.com/StanGirard/quivr) - Your Second Brain, Empowered by Generative AI
+* [PrivateGPT](https://github.com/imartinez/privateGPT) - Interact privately with your documents using the power of GPT, 100% privately, no data leaks
 * [Local Mind](https://github.com/nigulasikk/local-mind) - 一个本地文件问答应用
 * [document.ai](https://github.com/GanymedeNil/document.ai) - 基于向量数据库与GPT3.5的通用本地知识库方案
-* [LlamaIndex](https://mp.weixin.qq.com/s/blDKylt4FyZfeSIV6M1d2g) - 面向QA系统的全新文档摘要索引
+* [motifland/markprompt](https://github.com/motifland/markprompt) - Enterprise-grade AI chatbots for your website and docs
+* [mmz-001/knowledge_gpt](https://github.com/mmz-001/knowledge_gpt) - Accurate answers and instant citations for your documents.
+* [mukulpatnaik/researchgpt](https://github.com/mukulpatnaik/researchgpt) - A LLM based research assistant that allows you to have a conversation with a research paper
+* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation, chat with your documents
 * [pdf.ai](https://pdf.ai/) - Chat with any document
-* [langchain-ChatGLM](https://github.com/imClumsyPanda/langchain-ChatGLM) - 基于本地知识库的 ChatGLM 等大语言模型应用实现
 * [WritingGPT](https://mp.weixin.qq.com/s/RJC4pEIsmcebqGJw8AOQig) - 基于ChatGPT和AutoGPT打造个人写作团队
 * [DB-GPT](https://github.com/csunny/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
 * [让 OpenAI 更 Open，在 ChatGPT 里自由接入数据源](https://soulteary.com/2023/05/19/make-openai-more-open-and-freely-access-data-sources-in-chatgpt.html)
+
+### 大模型开发框架
+
+* [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT)
+* [BabyAGI](https://github.com/yoheinakajima/babyagi)
+* [Haystack](https://github.com/deepset-ai/haystack)
+* [Open-Assistant](https://github.com/LAION-AI/Open-Assistant)
+* [LlamaIndex](https://github.com/jerryjliu/llama_index)
+    * [LlamaIndex](https://mp.weixin.qq.com/s/blDKylt4FyZfeSIV6M1d2g) - 面向QA系统的全新文档摘要索引
+* [LangChain](https://github.com/hwchase17/langchain)
 
 ### 基于 LangChain 实现本地知识库助手
 
@@ -240,6 +253,7 @@ print(completion.choices[0].message.content)
 * [hwchase17/chat-langchain](https://github.com/hwchase17/chat-langchain) - 基于文档的 QA 问答
 * [hwchase17/notion-qa](https://github.com/hwchase17/notion-qa) - 基于 Notion 的 QA 问答
 * [hwchase17/chat-your-data](https://github.com/hwchase17/chat-your-data)
+* [imClumsyPanda/langchain-ChatGLM](https://github.com/imClumsyPanda/langchain-ChatGLM) - 基于本地知识库的 ChatGLM 等大语言模型应用实现
 
 #### LangChain 教程
 
@@ -248,13 +262,12 @@ print(completion.choices[0].message.content)
 * [A Comprehensive Guide to LangChain](https://nathankjer.com/introduction-to-langchain/)
 * [Build a GitHub Support Bot with GPT3, LangChain, and Python](https://dagster.io/blog/chatgpt-langchain)
 * [LangChain and LlamaIndex Projects Lab Book: Hooking Large Language Models Up to the Real World](https://leanpub.com/langchain)
+* [Re-implementing LangChain in 100 lines of code](https://blog.scottlogic.com/2023/05/04/langchain-mini.html)
+* [LangChain + Vectara: better together](https://blog.langchain.dev/langchain-vectara-better-together/)
 
 #### LangChain 可视化
 
 * [FlowiseAI/Flowise](https://github.com/FlowiseAI/Flowise) - Drag & drop UI to build your customized LLM flow using LangchainJS
 * [logspace-ai/langflow](https://github.com/logspace-ai/langflow) - LangFlow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
-
-### Auto-GPT
-
-* [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT)
-* [BabyAGI](https://github.com/yoheinakajima/babyagi)
+* [向量脉络 VectorVein](https://github.com/AndersonBY/vector-vein)
+* [ChatFlow](https://github.com/prompt-engineering/chat-flow)

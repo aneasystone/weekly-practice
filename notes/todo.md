@@ -2,24 +2,9 @@
 
 ## 大模型
 
-### 实战 LangChain 
-
-* [Re-implementing LangChain in 100 lines of code](https://blog.scottlogic.com/2023/05/04/langchain-mini.html)
-
 ### 实战 LLaMA
 
 * [ChatGPT平替模型：LLaMA](https://zhuanlan.zhihu.com/p/614118339)
-
-### 打造自己的文档助手
-
-* [GanymedeNil/document.ai](https://github.com/GanymedeNil/document.ai) - 基于向量数据库与GPT3.5的通用本地知识库方案
-* [motifland/markprompt](https://github.com/motifland/markprompt) - Enterprise-grade AI chatbots for your website and docs
-* [mmz-001/knowledge_gpt](https://github.com/mmz-001/knowledge_gpt) - Accurate answers and instant citations for your documents.
-* [mukulpatnaik/researchgpt](https://github.com/mukulpatnaik/researchgpt) - A LLM based research assistant that allows you to have a conversation with a research paper
-* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation, chat with your documents
-* [jerryjliu/llama_index](https://github.com/jerryjliu/llama_index) - LlamaIndex (GPT Index) is a data framework for your LLM applications
-* [imartinez/privateGPT](https://github.com/imartinez/privateGPT) - Interact privately with your documents using the power of GPT, 100% privately, no data leaks
-* [c121914yu/FastGPT](https://github.com/c121914yu/FastGPT) - A platform that uses the OpenAI API to quickly build an AI knowledge base, supporting many-to-many relationships.
 
 ## Java
 
@@ -100,6 +85,12 @@
 
 * [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
 
+### Maven Archtype
+
+* [Guide to Creating Archetypes](https://maven.apache.org/guides/mini/guide-creating-archetypes.html)
+* [Maven Archetype Plugin](https://maven.apache.org/archetype/maven-archetype-plugin/)
+* [Maven Archetype 多 Module 自定义代码脚手架](https://www.cnblogs.com/ilovejaney/p/15802243.html)
+
 ### 虚拟线程
 
 * [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
@@ -113,6 +104,7 @@
 * [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin#quick-start)
 * [Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
 * [Monitoring NVIDIA GPU Usage in Kubernetes with Prometheus](https://blog.kubecost.com/blog/nvidia-gpu-usage/)
+* [Kubernetes 教程：在 Containerd 容器中使用 GPU](https://icloudnative.io/posts/add-nvidia-gpu-support-to-k8s-with-containerd/)
 
 ### 学习 Kubernetes 的用户认证
 
@@ -151,6 +143,11 @@
 
 * [KubeSphere 文档](https://kubesphere.io/zh/docs/v3.3)
 * [技术博客](https://kubesphere.io/zh/blogs/)
+
+### 自动伸缩
+
+* [如何使用 Kubernetes 实现应用程序的弹性伸缩](https://mp.weixin.qq.com/s/aVrAOnX4mwTYAX6KcmORYg)
+* [使用 KEDA 自动伸缩 Kubernetes 应用](https://mp.weixin.qq.com/s/y0pIC70DYcaOUD7wMvCn1Q)
 
 ### 深入 Istio
 
