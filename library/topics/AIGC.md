@@ -89,9 +89,16 @@
 * [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
 * [Pi, your personal AI](https://heypi.com/talk)
 
+### 国内大模型
+
+* [文心大模型](https://wenxin.baidu.com/) - 百度
+* [通义大模型](https://tongyi.aliyun.com/) - 阿里
+* [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
+* [悟道](https://flagopen.baai.ac.cn/) - 北京智源人工智能研究院
+* [天河天元大模型](https://www.tj.gov.cn/sy/tjxw/202305/t20230520_6244902.html) - 国家超算天津中心
+
 ### LLM
 
-* [文心大模型](https://wenxin.baidu.com/)
 * [THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - ChatGLM-6B：开源双语对话语言模型 | An Open Bilingual Dialogue Language Model
 * [Databricks Dolly](https://github.com/databrickslabs/dolly)
 * [Baize](https://github.com/project-baize/baize-chatbot)

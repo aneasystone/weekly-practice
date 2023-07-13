@@ -24,6 +24,10 @@
 
 * [Open-Assistant](https://github.com/LAION-AI/Open-Assistant)
 
+## BentoML
+
+* [BentoML](https://github.com/bentoml/BentoML)
+
 ## 参考
 
 ### LangChain 参考资料
@@ -62,3 +66,8 @@
 
 * [LlamaIndex](https://github.com/jerryjliu/llama_index)
 * [面向QA系统的全新文档摘要索引](https://mp.weixin.qq.com/s/blDKylt4FyZfeSIV6M1d2g)
+
+### 其他
+
+* [Prem](https://github.com/premAI-io/prem-app/) - Self Sovereign AI Infrastructure
+* [生成式AI的应用路线图](https://github.com/SeedV/generative-ai-roadmap)

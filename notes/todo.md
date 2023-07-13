@@ -162,6 +162,7 @@
 ### 索引
 
 * [MySQL 索引之道](https://juejin.cn/post/7161964571853815822)
+* [1.5万字+30张图盘点索引常见的11个知识点](https://www.cnblogs.com/zzyang/p/17440187.html)
 
 ### 数据库分片
 
@@ -188,6 +189,12 @@
 ### Linux Shell 技巧总结
 
 * [Shell test 单中括号[] 双中括号[[]] 的区别](https://www.cnblogs.com/zeweiwu/p/5485711.html)
+
+### Linux 诊断
+
+* [[肝] linux系统分析之工具大全(观测，性能分析等)](https://zhuanlan.zhihu.com/p/526432016)
+* [Linux Performance](https://www.brendangregg.com/linuxperf.html)
+* [Linux Performance Analysis in 60,000 Milliseconds](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
 
 ## 其他
 
