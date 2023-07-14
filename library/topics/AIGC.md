@@ -28,10 +28,8 @@
 * [Visual ChatGPT](https://github.com/microsoft/visual-chatgpt) - Official repo for the paper: Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
 * [ChatGPT Shortcut](https://github.com/rockbenben/ChatGPT-Shortcut) - 让生产力加倍的 ChatGPT 快捷指令，按照领域和功能分区，可对提示词进行标签筛选、关键词搜索和一键复制。
 * [josStorer/chatGPTBox](https://github.com/josStorer/chatGPTBox) - Integrating ChatGPT into your browser deeply, everything you need is here
-* [reworkd/AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [哔哔终结者 BibiGPT](https://b.jimmylv.cn/)
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
-* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [k8sgpt-ai/k8sgpt](https://github.com/k8sgpt-ai/k8sgpt) - Giving Kubernetes Superpowers to everyone
 * [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
 * [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) - Reverse engineered API of Microsoft's Bing Chat AI
@@ -94,13 +92,65 @@
 * [文心大模型](https://wenxin.baidu.com/) - 百度
 * [通义大模型](https://tongyi.aliyun.com/) - 阿里
 * [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
+* [星火认知大模型](https://xinghuo.xfyun.cn/) - 科大讯飞
+* [言犀](https://yanxi.jd.com/) - 京东
+* [混元大模型](https://ai.qq.com/) - 腾讯
+* [玉言](https://fuxi.163.com/) - 网易伏羲
+* 子曰 - 网易有道
+* [MiniMax](https://api.minimax.chat/)
 * [悟道](https://flagopen.baai.ac.cn/) - 北京智源人工智能研究院
+* [封神榜大模型](https://github.com/IDEA-CCNL/Fengshenbang-LM) - IDEA研究院
+* [源1.0](https://air.inspur.com/home) - 浪潮
+* [孟子大模型](https://www.langboat.com/portal/mengzi-model) - 澜舟科技
+* [曹植大语言模型](http://www.datagrand.com/products/aigc/) - 达观数据
+* [日日新](https://www.sensecore.cn/solution/damoxing) - 商汤科技
+	* [商量 SenseChat](https://chat.sensetime.com/wb/#/)
+* [从容大模型](https://maas.cloudwalk.com/web/#/login) - 云从科技
+* [360智脑](https://ai.360.cn/)
+* [序列猴子](https://openapi.moyin.com/index) - 出门问问
+* [ChatGLM](https://chatglm.cn/) - [智谱AI](https://www.zhipuai.cn/)
+	* [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - 开源双语对话语言模型
 * [天河天元大模型](https://www.tj.gov.cn/sy/tjxw/202305/t20230520_6244902.html) - 国家超算天津中心
+* [MOSS](https://github.com/OpenLMLab/MOSS) - 复旦大学
+* [天工](https://tiangong.kunlun.com/) - 昆仑万维
+* [DriveGPT 雪湖·海若](https://drivegpt.haomoai.com/) - 毫末智行
+* [竹间智能](https://www.emotibot.com/)
+* MathGPT - 学而思
+* 知海图AI - 知乎
+* [小冰](https://www.xiaoice.com/)
+* [写作猫](https://xiezuocat.com/) - 秘塔网络
+
+### 国外大模型
+
+* [GPT-4](https://openai.com/gpt-4) - OpenAI
+* [LLaMa](https://github.com/facebookresearch/llama) - Facebook
+* [Alpaca](https://github.com/tatsu-lab/stanford_alpaca) - Stanford University
+* [Claude](https://www.anthropic.com/index/introducing-claude) - Anthropic
+* [Dolly](https://github.com/databrickslabs/dolly) - Databricks
+* [LaMDA](https://blog.google/technology/ai/lamda/) - Google
+* [PaLM 2](https://ai.google/discover/palm2/) - Google
+* [PaLM-E](https://palm-e.github.io/) - Google
+* [T5](https://github.com/google-research/text-to-text-transfer-transformer) - Google
+* [Imagen](https://imagen.research.google/) - Google
+* [FLAN](https://github.com/google-research/FLAN) - Google
+* [GPT-J](https://www.eleuther.ai/artifacts/gpt-j) - EleutherAI
+* [Vicuna](https://lmsys.org/blog/2023-03-30-vicuna/) - LMSYS ORG
+* [StableLM](https://github.com/stability-AI/stableLM) - Stability AI
+
+### 大模型应用开发框架
+
+* [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
+	* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
+* [LlamaIndex](https://github.com/jerryjliu/llama_index) - LlamaIndex (GPT Index) is a data framework for your LLM applications
+* [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
+* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
+* [BabyAGI](https://github.com/yoheinakajima/babyagi)
+* [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
+* [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
+* [BentoML](https://github.com/bentoml/BentoML) - Build Production-Grade AI Applications
 
 ### LLM
 
-* [THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - ChatGLM-6B：开源双语对话语言模型 | An Open Bilingual Dialogue Language Model
-* [Databricks Dolly](https://github.com/databrickslabs/dolly)
 * [Baize](https://github.com/project-baize/baize-chatbot)
 * [Chinese Vicuna](https://github.com/Facico/Chinese-Vicuna) - A Chinese Instruction-following LLaMA-based Model
 * [GPT4All](https://github.com/nomic-ai/gpt4all)
@@ -108,11 +158,8 @@
 * [Mesh Transformer JAX](https://github.com/kingoflolz/mesh-transformer-jax)
 * [GPT-NeoX](https://github.com/EleutherAI/gpt-neox)
 * [JARVIS](https://github.com/microsoft/JARVIS)
-* [Open Assistant](https://github.com/LAION-AI/Open-Assistant)
 * [RWKV LM](https://github.com/BlinkDL/RWKV-LM)
-* [StableLM](https://github.com/stability-AI/stableLM)
 * [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
-* [OpenLMLab/MOSS](https://github.com/OpenLMLab/MOSS) - An open-source tool-augmented conversational language model from Fudan University
 * [Web LLM](https://mlc.ai/web-llm/)
 
 #### Web UI
@@ -124,11 +171,6 @@
 
 * [Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality](https://lmsys.org/blog/2023-03-30-vicuna/)
 * [FastChat](https://github.com/lm-sys/FastChat) - An open platform for training, serving, and evaluating large languages. Release repo for Vicuna and FastChat-T5.
-
-#### LangChain
-
-* [hwchase17/langchain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
-* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
 
 #### LLaMA
 

@@ -12,6 +12,10 @@
 
 * [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT)
 
+## AgentGPT
+
+* [AgentGPT](https://github.com/reworkd/AgentGPT)
+
 ## BabyAGI
 
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
