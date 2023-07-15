@@ -84,6 +84,7 @@
 ### Maven
 
 * [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
+* [Introduction to the Dependency Mechanism](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html)
 
 ### Maven Archtype
 
@@ -121,6 +122,11 @@
 
 * [排障技能](https://imroc.cc/kubernetes/troubleshooting/skill/index.html)
 * [监控、日志和调试](https://kubernetes.io/zh-cn/docs/tasks/debug/)
+
+### 小技巧
+
+* [How to Get the YAML of a Deployed Kubernetes Object](https://www.baeldung.com/ops/kubernetes-yaml-deployed-object)
+* [JSONPath Support](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
 
 ### 学习 Kubernetes 的工作负载
 
@@ -179,6 +185,7 @@
 
 * [Redis夺命11连问](https://mp.weixin.qq.com/s/i3WxTDrfLiqC8H2MhzXCUw)
 * [High availability with Redis Sentinel](https://redis.io/docs/management/sentinel/)
+* [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
 
 ## Linux
 
@@ -192,11 +199,18 @@
 
 ### Linux 诊断
 
+* [关于Linux中使用USE(使用率/饱和度/错误)方法分析系统性能的一些笔记](https://developer.aliyun.com/article/1031234)
 * [[肝] linux系统分析之工具大全(观测，性能分析等)](https://zhuanlan.zhihu.com/p/526432016)
 * [Linux Performance](https://www.brendangregg.com/linuxperf.html)
 * [Linux Performance Analysis in 60,000 Milliseconds](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
 
+### 网络
+
+* [一张图感受真实的 TCP 状态转移](https://segmentfault.com/a/1190000043834899)
+
 ## 其他
+
+* [Decoding small QR codes by hand](https://blog.qartis.com/decoding-small-qr-codes-by-hand/)
 
 ### WebAssembly
 
@@ -244,6 +258,10 @@
 ### 算法
 
 * [Building a Bloom filter](https://luminousmen.com/post/building-a-bloom-filter)
+
+### 作图技巧
+
+* [手把手教你用代码画架构图](https://www.cnblogs.com/jingdongkeji/p/17401831.html)
 
 ## 技术大会
 

@@ -22,6 +22,7 @@
 * [openai/openai-cookbook](https://github.com/openai/openai-cookbook) - Examples and guides for using the OpenAI API
 * [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
 * [为Kubernetes集群部署一个ChatGPT机器人](https://mp.weixin.qq.com/s/g6hAY-mEC5CKP-ygwL82Gw)
+* [Licoy/ChatGPT-Midjourney](https://github.com/Licoy/ChatGPT-Midjourney) - 一键拥有你自己的 ChatGPT+Midjourney 网页服务
 
 ### ChatGPT 应用
 
@@ -47,6 +48,8 @@
 ### ChatGPT 资源
 
 * [xtekky/gpt4free](https://github.com/xtekky/gpt4free) - decentralising the Ai Industry, just some language model api's...
+* [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) - Reverse engineered ChatGPT API
+* [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
 
 ### 写作助手
 
@@ -98,7 +101,7 @@
 * [玉言](https://fuxi.163.com/) - 网易伏羲
 * 子曰 - 网易有道
 * [MiniMax](https://api.minimax.chat/)
-* [悟道](https://flagopen.baai.ac.cn/) - 北京智源人工智能研究院
+* [悟道·天鹰（Aquila）](https://github.com/FlagAI-Open/FlagAI/tree/master/examples/Aquila) - 北京智源人工智能研究院
 * [封神榜大模型](https://github.com/IDEA-CCNL/Fengshenbang-LM) - IDEA研究院
 * [源1.0](https://air.inspur.com/home) - 浪潮
 * [孟子大模型](https://www.langboat.com/portal/mengzi-model) - 澜舟科技
@@ -115,10 +118,21 @@
 * [天工](https://tiangong.kunlun.com/) - 昆仑万维
 * [DriveGPT 雪湖·海若](https://drivegpt.haomoai.com/) - 毫末智行
 * [竹间智能](https://www.emotibot.com/)
-* MathGPT - 学而思
 * 知海图AI - 知乎
 * [小冰](https://www.xiaoice.com/)
 * [写作猫](https://xiezuocat.com/) - 秘塔网络
+* [Baichuan](https://github.com/baichuan-inc/Baichuan-13B) - 百川智能
+* [TigerBot](https://github.com/TigerResearch/TigerBot) - 虎博网络
+* [书生·浦语 InternLM](https://github.com/InternLM/InternLM) - 上海人工智能实验室
+* [EduChat](https://github.com/icalk-nlp/EduChat) - 华东师范大学
+* [Linly](https://github.com/CVI-SZU/Linly) - 深圳大学计算机视觉研究所
+
+#### 领域大模型
+
+* 学而思 MathGPT - 教育
+* 彭博社 [BloombergGPT](https://arxiv.org/abs/2303.17564) - 金融
+* 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
+* [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
 
 ### 国外大模型
 
@@ -137,7 +151,7 @@
 * [Vicuna](https://lmsys.org/blog/2023-03-30-vicuna/) - LMSYS ORG
 * [StableLM](https://github.com/stability-AI/stableLM) - Stability AI
 
-### 大模型应用开发框架
+### 大模型应用开发
 
 * [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
 	* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
@@ -148,6 +162,11 @@
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
 * [BentoML](https://github.com/bentoml/BentoML) - Build Production-Grade AI Applications
+* [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
+
+### 模型推理
+
+* [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
 
 ### LLM
 
@@ -164,6 +183,7 @@
 
 #### Web UI
 
+* [Streamlit](https://github.com/streamlit/streamlit) - A faster way to build and share data apps.
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
 
@@ -179,7 +199,6 @@
 * [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
 * [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
 * [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
-* [SCIR-HI/Huatuo-Llama-Med-Chinese](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 华驼模型仓库，基于中文医学知识的LLaMA模型指令微调
 
 #### DeepSpeed
 
@@ -189,6 +208,7 @@
 
 #### Awesome
 
+* [awesome-pretrained-chinese-nlp-models](https://github.com/lonePatient/awesome-pretrained-chinese-nlp-models) - 高质量中文预训练模型集合
 * [开源大语言模型汇总](https://mp.weixin.qq.com/s/BQOJNwfkApiZnFveMDBQ-w)
 * [List of Open Sourced Fine-Tuned Large Language Models (LLM)](https://medium.com/geekculture/list-of-open-sourced-fine-tuned-large-language-models-llm-8d95a2e0dc76)
 * [ChatGPT的朋友们：大语言模型经典论文汇总](https://mp.weixin.qq.com/s/HnC5qiOAngwDtPpq2BF2qg)
@@ -204,6 +224,7 @@
 
 * [Midjourney](https://www.midjourney.com/home/)
 * [Stability.AI](https://stability.ai/)
+	* [StableStudio](https://github.com/Stability-AI/StableStudio)
 * [DALL.E.2](https://openai.com/product/dall-e-2)
 * [NovelAI](https://novelai.net/)
 
@@ -248,10 +269,13 @@
 ## 提示工程
 
 * [Learning Prompt](https://learningprompt.wiki/)
+	* [thinkingjimmy/Learning-Prompt](https://github.com/thinkingjimmy/Learning-Prompt) - 免费 Prompt Engineering 教程
 * [prompt-engineering/understand-prompt](https://github.com/prompt-engineering/understand-prompt) - 理解 Prompt：基于编程、绘画、写作的 AI 探索与总结
 * [willwulfken/MidJourney-Styles-and-Keywords-Reference](https://github.com/willwulfken/MidJourney-Styles-and-Keywords-Reference) - A reference containing Styles and Keywords that you can use with MidJourney AI. There are also pages showing resolution comparison, image weights, and much more!
 * [Moonvy/OpenPromptStudio](https://github.com/Moonvy/OpenPromptStudio) - AIGC 提示词可视化编辑器 | OPS | Open Prompt Studio
 * [ChatGPT Shortcut](https://www.aishort.top/) - 让生产力加倍的 ChatGPT 快捷指令
+* [mattnigh/ChatGPT3-Free-Prompt-List](https://github.com/mattnigh/ChatGPT3-Free-Prompt-List) - A free guide for learning to create ChatGPT3 Prompts
+* [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
 
 ## 其他
 
