@@ -1,6 +1,7 @@
 # AIGC
 
 * [未来百科 | 为发现全球优质AI工具产品而生](https://nav.6aiq.com/)
+* [AI 工具集导航](https://ai.nancheng.fun/)
 
 ## 模型社区
 
@@ -23,6 +24,7 @@
 * [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
 * [为Kubernetes集群部署一个ChatGPT机器人](https://mp.weixin.qq.com/s/g6hAY-mEC5CKP-ygwL82Gw)
 * [Licoy/ChatGPT-Midjourney](https://github.com/Licoy/ChatGPT-Midjourney) - 一键拥有你自己的 ChatGPT+Midjourney 网页服务
+* [Ice-Hazymoon/openai-scf-proxy](https://github.com/Ice-Hazymoon/openai-scf-proxy) - 使用腾讯云函数一分钟搭建 OpenAI 免翻墙代理
 
 ### ChatGPT 应用
 
@@ -89,6 +91,8 @@
 
 * [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
 * [Pi, your personal AI](https://heypi.com/talk)
+* [Forefront](https://www.forefront.ai/) - Your AI assistant for work
+* [AIBus](https://albus.org/) - Albus is an AI app that explores any topic you like from different perspectives
 
 ### 国内大模型
 

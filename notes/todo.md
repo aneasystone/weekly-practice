@@ -52,6 +52,10 @@
 
 * [使用Google Guava快乐编程](https://mp.weixin.qq.com/s/PxiYuxTk3549ubdYta7pPw)
 
+### gRPC
+
+* [ProtoBuf 教程](https://www.wdbyte.com/tool/protobuf/)
+
 ### JVM
 
 * [深入浅出解析JVM中的Safepoint](https://mp.weixin.qq.com/s/_Khj3Qa2MZBN9718KhVp0w)
@@ -231,6 +235,10 @@
 * [Mutual TLS Authentication](https://apisix.apache.org/docs/apisix/mtls/)
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
+
+### 网关
+
+* [微服务架构下网关的技术选型](https://www.jianshu.com/p/97324f7f3134)
 
 ### ElasticSearch 查询指南
 
