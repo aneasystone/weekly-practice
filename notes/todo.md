@@ -100,6 +100,11 @@
 
 * [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
 
+## Docker
+
+* [使用 Go 和 Linux Kernel 技术探究容器化原理](https://cloud.tencent.com/developer/article/2018443)
+* [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
+
 ## Kubernetes
 
 ### 在 Kubernetes 中调度 GPU 资源
@@ -119,6 +124,7 @@
 
 ### 学习 Kubernetes 的准入控制
 
+* [理清 Kubernetes 中的准入控制（Admission Controller)](https://moelove.info/2021/11/30/%E7%90%86%E6%B8%85-Kubernetes-%E4%B8%AD%E7%9A%84%E5%87%86%E5%85%A5%E6%8E%A7%E5%88%B6Admission-Controller/)
 * [Admission Controllers Reference](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 * [云原生策略引擎 Kyverno （上）](https://moelove.info/2022/03/02/%E4%BA%91%E5%8E%9F%E7%94%9F%E7%AD%96%E7%95%A5%E5%BC%95%E6%93%8E-Kyverno-%E4%B8%8A/)
 
@@ -158,6 +164,7 @@
 
 * [如何使用 Kubernetes 实现应用程序的弹性伸缩](https://mp.weixin.qq.com/s/aVrAOnX4mwTYAX6KcmORYg)
 * [使用 KEDA 自动伸缩 Kubernetes 应用](https://mp.weixin.qq.com/s/y0pIC70DYcaOUD7wMvCn1Q)
+* [应用现代化中的弹性伸缩](https://www.kubesphere.io/zh/blogs/building-resilient-and-scalable-systems/)
 
 ### 深入 Istio
 
@@ -187,10 +194,12 @@
 
 ### Redis
 
+* [如何从0到1构建一个稳定、高性能的Redis集群](https://mp.weixin.qq.com/s/oYENEJHgnYhC7mWCBe5Ofw)
 * [细说 redis 十种数据类型及底层原理](https://mp.weixin.qq.com/s/x9yrYOmQqKPyjd4n4FhRfQ)
 * [Redis夺命11连问](https://mp.weixin.qq.com/s/i3WxTDrfLiqC8H2MhzXCUw)
 * [High availability with Redis Sentinel](https://redis.io/docs/management/sentinel/)
 * [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
+* [一次访问Redis延时高问题排查与总结](https://mp.weixin.qq.com/s/f3dQIC4DBhWibyXQKBXrzg)
 
 ## Linux
 
@@ -208,6 +217,8 @@
 * [[肝] linux系统分析之工具大全(观测，性能分析等)](https://zhuanlan.zhihu.com/p/526432016)
 * [Linux Performance](https://www.brendangregg.com/linuxperf.html)
 * [Linux Performance Analysis in 60,000 Milliseconds](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
+* [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（上册）](https://blog.csdn.net/l569590478/article/details/128665558)
+* [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
 
 ### 网络
 
@@ -250,6 +261,7 @@
 
 ### Go 学习笔记
 
+* [songcser/gingo](https://github.com/songcser/gingo) - 基于 gin 框架为核心的脚手架，使用本项目可以快速完成业务逻辑开发。
 * [Go-CRUD-demo](https://github.com/Conqueror712/Go-CRUD-demo) - Gin + Gorm + MySQL + Navicat
 
 ### 监控告警
@@ -271,12 +283,22 @@
 ### 作图技巧
 
 * [手把手教你用代码画架构图](https://www.cnblogs.com/jingdongkeji/p/17401831.html)
+* [一文搞懂架构（业务架构、数据架构、技术架构...）](https://mp.weixin.qq.com/s/P8ZaML92CYTsEvokrGnH4g)
+
+### 设计模式
+
+* [软件开发中设计模式究竟是什么？](https://www.zhihu.com/question/566566788/answer/3013946497)
+* [设计模式详解之工厂模式](https://xie.infoq.cn/article/4b8e7ce446d58c79337a476c3)
+* [设计模式详解之策略模式](https://xie.infoq.cn/article/0f0f1b453827b2c5ccb624ade)
+* [聊一聊模板方法模式](https://mp.weixin.qq.com/s/6sSmc-8w5lpnB16N-UC13A)
 
 ## 技术大会
 
 * [可观测性峰会 2023 回顾及 PPT 下载](https://github.com/cloudnativeto/academy/tree/master/observability-summit/2023)
 
 ## 前端
+
+* [Vue3.0 完全教程](https://zhuanlan.zhihu.com/p/482851017)
 
 ### 前端规范
 
@@ -286,3 +308,4 @@
 
 * [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
 * [从零到一教你基于vue开发一个组件库](https://juejin.cn/post/6844904085808742407)
+* [远程组件实践](https://zhuanlan.zhihu.com/p/617722122)

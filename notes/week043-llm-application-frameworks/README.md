@@ -20,6 +20,10 @@
 
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 
+## SuperAGI
+
+* [SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
+
 ## Haystack
 
 * [Haystack](https://github.com/deepset-ai/haystack)

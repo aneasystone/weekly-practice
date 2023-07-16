@@ -180,6 +180,7 @@
 
 * [chat2db/Chat2DB](https://github.com/chat2db/Chat2DB) - 智能的通用数据库SQL客户端和报表工具
 * [csunny/DB-GPT](https://github.com/csunny/DB-GPT) - Interact your data and environment using the local GPT, no data leaks, 100% privately, 100% security
+* [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
 
 ### 个人助手
 
@@ -208,6 +209,7 @@
 * [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
+* [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
 * [BentoML](https://github.com/bentoml/BentoML) - Build Production-Grade AI Applications
@@ -235,6 +237,7 @@
 * [Streamlit](https://github.com/streamlit/streamlit) - A faster way to build and share data apps.
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
+* [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
 
 ### Awesome
 
@@ -295,6 +298,7 @@
 * [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
 * [Segment Anything](https://github.com/facebookresearch/segment-anything)
 	* [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
+* [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
 
 ## 提示工程
 
@@ -331,3 +335,5 @@
 * [Audiocraft](https://github.com/facebookresearch/audiocraft) - Audiocraft is a PyTorch library for deep learning research on audio generation
 	* [MusicGen](https://ai.honu.io/papers/musicgen/) - Simple and Controllable Music Generation
 	* [MusicGen](https://huggingface.co/spaces/facebook/MusicGen)
+* [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
+* [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
