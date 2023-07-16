@@ -187,6 +187,7 @@
 
 ### Redis
 
+* [细说 redis 十种数据类型及底层原理](https://mp.weixin.qq.com/s/x9yrYOmQqKPyjd4n4FhRfQ)
 * [Redis夺命11连问](https://mp.weixin.qq.com/s/i3WxTDrfLiqC8H2MhzXCUw)
 * [High availability with Redis Sentinel](https://redis.io/docs/management/sentinel/)
 * [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
