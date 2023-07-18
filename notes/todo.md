@@ -213,6 +213,7 @@
 
 ### Linux 诊断
 
+* [Linux性能优化实战](https://juconcurrent.com/books-jksj-11-20/)
 * [关于Linux中使用USE(使用率/饱和度/错误)方法分析系统性能的一些笔记](https://developer.aliyun.com/article/1031234)
 * [[肝] linux系统分析之工具大全(观测，性能分析等)](https://zhuanlan.zhihu.com/p/526432016)
 * [Linux Performance](https://www.brendangregg.com/linuxperf.html)
@@ -251,6 +252,8 @@
 ### 网关
 
 * [微服务架构下网关的技术选型](https://www.jianshu.com/p/97324f7f3134)
+* [Active Health Check strategies with Spring Cloud Gateway](https://spring.io/blog/2023/07/05/active-health-check-strategies-with-spring-cloud-gateway)
+* [Evaluating Apache APISIX vs. Spring Cloud Gateway](https://blog.frankel.ch/spring-cloud-gateway-apache-apisix/)
 
 ### ElasticSearch 查询指南
 
@@ -258,6 +261,16 @@
 * [Search your data](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-your-data.html)
 * [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Aggregations](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html)
+
+### ElasticSearch 优化
+
+* [Elasticsearch核心应用场景-日志优化实践](https://cloud.tencent.com/developer/article/2302427)
+* [干货 | Elasticsearch 8.X 性能优化实战](https://elastic.blog.csdn.net/article/details/130437128)
+* [得物社区亿级ES数据搜索性能调优实践](https://my.oschina.net/u/5783135/blog/8821399)
+
+### 消息队列
+
+* [引入RabbitMQ后，如何保证全链路数据100%不丢失？](https://cloud.tencent.com/developer/article/1919835)
 
 ### Go 学习笔记
 

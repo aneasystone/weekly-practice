@@ -190,6 +190,10 @@
 * [AIBus](https://albus.org/) - Albus is an AI app that explores any topic you like from different perspectives
 * [liou666/polyglot](https://github.com/liou666/polyglot) - 跨平台AI语言练习应用
 
+### 投资助手
+
+* [StockAI.Trade](https://stockai.trade/) - 基于ChatGPT的AI选股工具
+
 ### 部署教程
 
 * [基于 Azure OpenAI 免费注册使用 ChatGPT 教程](https://mp.weixin.qq.com/s/fVGqRTEPIsREnKTTmLSg-Q)
@@ -288,6 +292,10 @@
 * [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
 * [Magenta](https://github.com/tensorflow/magenta) - Music and Art Generation with Machine Intelligence
 
+#### 二维码
+
+* [MewXAI星月熊](https://qr.mewx.art/) - 使用AI让你的二维码独一无二
+
 ### 风格转换
 
 * [lllyasviel/style2paints](https://github.com/lllyasviel/style2paints) - Style2paints V4 is the current best AI driven lineart colorization tool.
@@ -318,7 +326,7 @@
 * [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
 * [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/advanced-prompt-engineering)
 
-### 开源项目
+### 应用产品
 
 * [Open Prompt Studio](https://moonvy.com/apps/ops/) - AIGC 提示词可视化编辑器
 	* [Moonvy/OpenPromptStudio](https://github.com/Moonvy/OpenPromptStudio)
@@ -326,6 +334,7 @@
 	* [rockbenben/ChatGPT-Shortcut](https://github.com/rockbenben/ChatGPT-Shortcut)
 * [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
+* [Knit](https://promptknit.com/) - A better playground for prompt designers
 
 ## 其他
 
