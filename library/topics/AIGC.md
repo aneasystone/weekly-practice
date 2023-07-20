@@ -263,6 +263,8 @@
 	* [StableStudio](https://github.com/Stability-AI/StableStudio)
 * [DALL.E.2](https://openai.com/product/dall-e-2)
 * [NovelAI](https://novelai.net/)
+* [Adobe Firefly](https://www.adobe.com/sensei/generative-ai/firefly.html)
+* [Openjourney](https://openjourney.art/)
 
 ### Awesome
 

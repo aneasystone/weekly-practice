@@ -2,7 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
-* WEEK043 - [基于大模型的应用开发框架学习笔记](./notes/week043-llm-application-frameworks/README.md)
+* WEEK043 - [大模型应用开发框架 LangChain 学习笔记](./notes/week043-llm-application-frameworks-langchain/README.md)
 * WEEK042 - [使用 Embedding 技术打造本地知识库助手](./notes/week042-doc-qa-using-embedding/README.md)
 * WEEK041 - [容器运行时 containerd 学习笔记](./notes/week041-containerd-notes/README.md)
 * WEEK040 - [基于 ChatGPT 实现一个划词翻译 Chrome 插件](./notes/week040-chrome-extension-with-chatgpt/README.md)
