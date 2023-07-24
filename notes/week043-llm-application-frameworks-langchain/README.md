@@ -18,10 +18,68 @@ LangChain 在 GitHub 上有着异乎寻常的热度，截止目前为止，星�
 LangChain 提供了 [Python](https://python.langchain.com/docs) 和 [JavaScript](https://js.langchain.com/docs) 两个版本的 SDK，这里我主要使用 Python 版本的，在我写这篇笔记的时候，最新的版本为 [0.0.238](https://pypi.org/project/langchain/0.0.238/)，使用下面的命令安装：
 
 ```
-pip install langchain==0.0.238
+$ pip install langchain==0.0.238
 ```
 
 > 注意：Python 版本需要在 3.8.1 及以上，如果低于这个版本，只能安装 [langchain==0.0.27](https://pypi.org/project/langchain/0.0.27/)。
+
+另外要注意的是，这个命令只会安装 LangChain 的基础包，这或许并没有什么用，因为 LangChain 最有价值的地方在于它能和各种各样的语言模型、数据存储、外部工具等进行交互，比如如果我们需要使用 OpenAI，则需要手动安装：
+
+```
+$ pip install openai
+```
+
+也可以在安装 LangChain 时指定安装可选依赖包：
+
+```
+$ pip install langchain[openai]==0.0.238
+```
+
+或者使用下面的命令一次性安装所有的可选依赖包（不过很多依赖可能会用不上）：
+
+```
+$ pip install langchain[all]==0.0.238
+```
+
+LangChain 支持的可选依赖包有：
+
+```
+llms = ["anthropic", "clarifai", "cohere", "openai", "openllm", "openlm", "nlpcloud", "huggingface_hub", "manifest-ml", "torch", "transformers"]
+qdrant = ["qdrant-client"]
+openai = ["openai", "tiktoken"]
+text_helpers = ["chardet"]
+clarifai = ["clarifai"]
+cohere = ["cohere"]
+docarray = ["docarray"]
+embeddings = ["sentence-transformers"]
+javascript = ["esprima"]
+azure = [ ... ]
+all = [ ... ]
+```
+
+可以在项目的 [pyproject.toml](https://github.com/hwchase17/langchain/blob/master/libs/langchain/pyproject.toml) 文件中查看依赖包详情。
+
+### 入门示例
+
+我们首先从一个简单的例子开始：
+
+```
+from langchain.llms import OpenAI
+
+llm = OpenAI(temperature=0.9)
+response = llm.predict("给水果店取一个名字")
+print(response)
+
+# 果舞时光
+```
+
+LangChain 集成了许多流行的语言模型，并提供了一套统一的接口方便开发者直接使用，比如在上面的例子中，我们引入了 OpenAI 这个 LLM，然后调用 `llm.predict()` 方法让语言模型完成后续内容的生成。如果用户想使用其他语言模型，只需要将上面的 OpenAI 换成其他的即可，比如流行的 Anthropic 的 [Claude 2](https://www.anthropic.com/index/claude-2)，或者 Google 的 [PaLM 2](https://ai.google/discover/palm2/) 等，[这里](https://github.com/langchain-ai/langchain/tree/master/libs/langchain/langchain/llms) 可以找到 LangChain 目前支持的所有语言模型接口。
+
+回到上面的例子，`llm.predict()` 方法实际上调用的是 OpenAI 的 [Completions](https://platform.openai.com/docs/api-reference/completions) 接口，这个接口的作用是给定一个提示语，让 AI 生成后续内容；我们知道，除了 Completions，OpenAI 还提供了一个 [Chat](https://platform.openai.com/docs/api-reference/chat) 接口，也可以用于生成后续内容，而且比 Completions 更强大，可以给定一系列对话内容，让 AI 生成后续的回复，从而实现类似 ChatGPT 的聊天功能。
+
+> 官方推荐使用 Chat 替换 Completions 接口，在后续的 OpenAI 版本中，Completions 接口可能会被弃用。
+
+https://python.langchain.com/docs/get_started/quickstart.html
 
 ### 翻译助手
 
@@ -41,6 +99,8 @@ pip install langchain==0.0.238
 
 * [LangChain 完整指南：使用大语言模型构建强大的应用程序](https://zhuanlan.zhihu.com/p/620529542)
 * [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
+* [LangChain初学者入门指南](https://mp.weixin.qq.com/s/F4QokLPrimFS1LRjXDbwQQ)
+* [LangChain：Model as a Service粘合剂，被ChatGPT插件干掉了吗？](https://36kr.com/p/2203231346847113)
 
 ### LangChain 官方资料
 
