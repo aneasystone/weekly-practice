@@ -59,7 +59,7 @@ all = [ ... ]
 
 可以在项目的 [pyproject.toml](https://github.com/hwchase17/langchain/blob/master/libs/langchain/pyproject.toml) 文件中查看依赖包详情。
 
-### 入门示例
+### 入门示例：`LLMs` vs. `ChatModels`
 
 我们首先从一个简单的例子开始：
 
@@ -79,13 +79,122 @@ LangChain 集成了许多流行的语言模型，并提供了一套统一的接�
 
 > 官方推荐使用 Chat 替换 Completions 接口，在后续的 OpenAI 版本中，Completions 接口可能会被弃用。
 
+因此，LangChain 也提供 Chat 接口：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage
+
+chat = ChatOpenAI(temperature=0.9)
+response = chat.predict_messages([
+    HumanMessage(content="窗前明月光，下一句是什么？"),
+])
+print(response.content)
+
+# 疑是地上霜。
+```
+
+和上面的 `llm.predict()` 方法比起来，`chat.predict_messages()` 方法可以接受一个数组，这也意味着 Chat 接口可以带上下文信息，实现聊天的效果：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
+
+chat = ChatOpenAI(temperature=0.9)
+response = chat.predict_messages([
+    SystemMessage(content="你是一个诗词助手，帮助用户回答诗词方面的问题"),	
+    HumanMessage(content="窗前明月光，下一句是什么？"),
+    AIMessage(content="疑是地上霜。"),
+    HumanMessage(content="这是谁的诗？"),
+])
+print(response.content)
+
+# 这是李白的《静夜思》。
+```
+
+另外，Chat 接口也提供了一个 `chat.predict()` 方法，可以实现和 `llm.predict()` 一样的效果：
+
+```
+from langchain.chat_models import ChatOpenAI
+
+chat = ChatOpenAI(temperature=0.9)
+response = chat.predict("给水果店取一个名字")
+print(response)
+
+# 果香居
+```
+
+### 实现翻译助手：`PromptTemplate`
+
+在 [week040-chrome-extension-with-chatgpt](../week040-chrome-extension-with-chatgpt/README.md) 这篇笔记中，我们通过提示语技术实现了一个非常简单的划词翻译 Chrome 插件，其中的翻译功能我们也可以使用 LangChain 来完成，当然，使用 `LLMs` 和 `ChatModels` 都可以。
+
+使用 `LLMs` 实现翻译助手：
+
+```
+from langchain.llms import OpenAI
+
+llm = OpenAI(temperature=0.9)
+response = llm.predict("将下面的句子翻译成英文：今天的天气真不错")
+print(response)
+
+# The weather is really nice today.
+```
+
+使用 `ChatModels` 实现翻译助手：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage
+
+chat = ChatOpenAI(temperature=0.9)
+response = chat.predict_messages([
+    SystemMessage(content="你是一个翻译助手，可以将中文翻译成英文。"),
+    HumanMessage(content="今天的天气真不错"),
+])
+print(response.content)
+
+# The weather is really nice today.
+```
+
+观察上面的代码可以发现，输入参数都具备一个固定的模式，为此，LangChain 提供了一个 `PromptTemplate` 类来方便我们构造提示语模板：
+
+```
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+
+prompt = PromptTemplate.from_template("将下面的句子翻译成英文：{sentence}")
+text = prompt.format(sentence="今天的天气真不错")
+
+llm = OpenAI(temperature=0.9)
+response = llm.predict(text)
+print(response)
+
+# Today's weather is really great.
+```
+
+> 其实 `PromptTemplate` 默认实现就是 Python 的 [f-strings](https://peps.python.org/pep-0498/)，只不过它提供了一种抽象，还可以支持其他的模板实现，比如 [jinja2 模板引擎](https://palletsprojects.com/p/jinja/)。
+
+对于 `ChatModels`，LangChain 也提供了相应的 `ChatPromptTemplate`，只不过使用起来要稍微繁琐一点：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
+system_message_prompt = SystemMessagePromptTemplate.from_template("你是一个翻译助手，可以将{input_language}翻译成{output_language}。")
+human_message_prompt = HumanMessagePromptTemplate.from_template("{text}")
+chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+messages = chat_prompt.format_messages(input_language="中文", output_language="英文", text="今天的天气真不错")
+
+chat = ChatOpenAI(temperature=0.9)
+response = chat.predict_messages(messages)
+print(response.content)
+
+# The weather today is really good.
+```
+
+### 实现知识库助手
+
 https://python.langchain.com/docs/get_started/quickstart.html
-
-### 翻译助手
-
-### 知识库助手
-
-* [LangChain Python 文档](https://python.langchain.com/docs)
 
 ## LangChain vs. LlamaIndex
 
