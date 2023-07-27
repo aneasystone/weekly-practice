@@ -44,7 +44,7 @@ $ pip install langchain[all]==0.0.238
 LangChain 支持的可选依赖包有：
 
 ```
-llms = ["anthropic", "clarifai", "cohere", "openai", "openllm", "openlm", "nlpcloud", "huggingface_hub", "manifest-ml", "torch", "transformers"]
+llms = ["anthropic", "clarifai", "cohere", "openai", "openllm", "openlm", "nlpcloud", "huggingface_hub", ... ]
 qdrant = ["qdrant-client"]
 openai = ["openai", "tiktoken"]
 text_helpers = ["chardet"]
@@ -180,7 +180,8 @@ print(response)
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
-system_message_prompt = SystemMessagePromptTemplate.from_template("你是一个翻译助手，可以将{input_language}翻译成{output_language}。")
+system_message_prompt = SystemMessagePromptTemplate.from_template(
+    "你是一个翻译助手，可以将{input_language}翻译成{output_language}。")
 human_message_prompt = HumanMessagePromptTemplate.from_template("{text}")
 chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
 messages = chat_prompt.format_messages(input_language="中文", output_language="英文", text="今天的天气真不错")
@@ -192,7 +193,19 @@ print(response.content)
 # The weather today is really good.
 ```
 
-### 实现知识库助手
+### 实现知识库助手：`Data connection`
+
+在 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中，我们通过 OpenAI 的 Embedding 接口和开源向量数据库 Qdrant 实现了一个非常简单的知识库助手。在上面的介绍中我们提到，LangChain 的一大特点就是数据感知，可以将语言模型和其他来源的数据进行连接，所以知识库助手正是 LangChain 最常见的用例之一，这一节我们就使用 LangChain 来重新实现它。
+
+LangChain 将实现知识库助手的过程拆分成了几个模块，可以自由组合使用，这几个模块是：
+
+* [Document loaders](https://python.langchain.com/docs/modules/data_connection/document_loaders/) - 用于从不同的来源加载文档；
+* [Document transformers](https://python.langchain.com/docs/modules/data_connection/document_transformers/) - 对文档进行处理，比如转换为不同的格式，对大文档分片，去除冗余文档，等等；
+* [Text embedding models](https://python.langchain.com/docs/modules/data_connection/text_embedding/) - 通过 Embedding 模型将文本转换为向量；
+* [Vector stores](https://python.langchain.com/docs/modules/data_connection/vectorstores/) - 将文档保存到向量数据库，或从向量数据库中检索文档；
+* [Retrievers](https://python.langchain.com/docs/modules/data_connection/retrievers/) - 用于检索文档，这是比向量数据库更高一级的抽象，不仅仅限于从向量数据库中检索，可以扩充更多的检索来源；
+
+![](./images/data-connection.jpg)
 
 https://python.langchain.com/docs/get_started/quickstart.html
 
