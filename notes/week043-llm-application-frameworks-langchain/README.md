@@ -207,6 +207,20 @@ LangChain 将实现知识库助手的过程拆分成了几个模块，可以自�
 
 ![](./images/data-connection.jpg)
 
+#### 读取文档
+
+`TextLoader` 是最简单的读取文档的方法，它可以处理大多数的纯文本，比如 `txt` 或 `md` 文件： 
+
+```
+from langchain.document_loaders import TextLoader
+
+loader = TextLoader("./kb.txt")
+raw_documents = loader.load()
+print(raw_documents)
+```
+
+LangChain 还提供了一些其他格式的文档读取方法，比如 [JSON](https://python.langchain.com/docs/modules/data_connection/document_loaders/json)、[HTML](https://python.langchain.com/docs/modules/data_connection/document_loaders/html)、[CSV](https://python.langchain.com/docs/modules/data_connection/document_loaders/csv)、[Word](https://python.langchain.com/docs/integrations/document_loaders/microsoft_word)、[PPT](https://python.langchain.com/docs/integrations/document_loaders/microsoft_powerpoint)、[PDF](https://python.langchain.com/docs/modules/data_connection/document_loaders/pdf) 等，也可以加载其他来源的文档，比如通过 [URLLoader](https://python.langchain.com/docs/integrations/document_loaders/url) 抓取网页内容，通过 [WikipediaLoader](https://python.langchain.com/docs/integrations/document_loaders/wikipedia) 获取维基百科的内容等，还可以使用 [DirectoryLoader](https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory) 同时读取整个目录的文档。
+
 https://python.langchain.com/docs/get_started/quickstart.html
 
 ## LangChain vs. LlamaIndex
