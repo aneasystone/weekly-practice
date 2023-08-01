@@ -221,6 +221,32 @@ print(raw_documents)
 
 LangChain 还提供了一些其他格式的文档读取方法，比如 [JSON](https://python.langchain.com/docs/modules/data_connection/document_loaders/json)、[HTML](https://python.langchain.com/docs/modules/data_connection/document_loaders/html)、[CSV](https://python.langchain.com/docs/modules/data_connection/document_loaders/csv)、[Word](https://python.langchain.com/docs/integrations/document_loaders/microsoft_word)、[PPT](https://python.langchain.com/docs/integrations/document_loaders/microsoft_powerpoint)、[PDF](https://python.langchain.com/docs/modules/data_connection/document_loaders/pdf) 等，也可以加载其他来源的文档，比如通过 [URLLoader](https://python.langchain.com/docs/integrations/document_loaders/url) 抓取网页内容，通过 [WikipediaLoader](https://python.langchain.com/docs/integrations/document_loaders/wikipedia) 获取维基百科的内容等，还可以使用 [DirectoryLoader](https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory) 同时读取整个目录的文档。
 
+#### 文档分割
+
+使用 `TextLoader` 加载得到的是原始文档，有时候我们还需要对原始文档进行处理，最常见的一种处理方式是文档分割。由于大模型的输入存在上下文窗口的限制，所以我们不能直接将一个几百兆的文档丢给大模型，而是将大文档分割成一个个小分片，然后通过 Embedding 技术查询与用户问题最相关的几个分片丢给大模型。
+
+最简单的文档分割器是 [CharacterTextSplitter](https://python.langchain.com/docs/modules/data_connection/document_transformers/text_splitters/character_text_splitter)，它默认使用分隔符 `\n\n` 来分割文档，我们也可以修改为使用 `\n` 来分割：
+
+```
+from langchain.text_splitter import CharacterTextSplitter
+text_splitter = CharacterTextSplitter(        
+    separator = "\n",
+    chunk_size = 0,
+    chunk_overlap  = 0,
+    length_function = len,
+)
+documents = text_splitter.split_documents(raw_documents)
+print(documents)
+```
+
+`CharacterTextSplitter` 可以通过 `chunk_size` 参数控制每个分片的大小，默认情况下分片大小为 4000，这也意味着如果有长度不足 4000 的分片会递归地和其他分片合并成一个分片；由于我这里的测试文档比较小，总共都没有 4000，所以按 `\n` 分割完，每个分片又会被合并成一个大分片了，所以我这里将 `chunk_size` 设置为 0，这样就不会自动合并。
+
+另一个需要注意的是，这里的分片大小是根据 `length_function` 来计算的，默认使用的是 `len()` 函数，也就是根据字符的长度来分割；但是大模型的上下文窗口限制一般是通过 token 来计算的，这和长度有一些细微的区别，所以如果要确保分割后的分片能准确的适配大模型，我们就需要 [通过 token 来分割文档](https://python.langchain.com/docs/modules/data_connection/document_transformers/text_splitters/split_by_token)，比如 OpenAI 的 [tiktoken](https://github.com/openai/tiktoken)，Hugging Face 的 [GPT2TokenizerFast](https://huggingface.co/Ransaka/gpt2-tokenizer-fast) 等。[OpenAI 的这篇文档](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) 介绍了什么是 token 以及如何计算它，感兴趣的同学可以参考之。
+
+不过在一般情况下，如果对上下文窗口的控制不需要那么严格，按长度分割也就足够了。
+
+#### Embedding 与 向量库
+
 https://python.langchain.com/docs/get_started/quickstart.html
 
 ## LangChain vs. LlamaIndex
