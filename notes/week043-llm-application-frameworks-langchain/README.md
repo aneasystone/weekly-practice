@@ -245,17 +245,54 @@ print(documents)
 
 不过在一般情况下，如果对上下文窗口的控制不需要那么严格，按长度分割也就足够了。
 
-#### Embedding 与 向量库
+#### Embedding 与向量库
 
-https://python.langchain.com/docs/get_started/quickstart.html
+有了分割后的文档分片，接下来，我们就可以对每个分片计算 Embedding 了：
 
-## LangChain vs. LlamaIndex
+```
+from langchain.embeddings.openai import OpenAIEmbeddings
 
-* [LlamaIndex](https://github.com/jerryjliu/llama_index)
+embeddings = OpenAIEmbeddings()
+doc_result = embeddings.embed_documents(['你好', '再见'])
+print(doc_result)
+```
+
+这里我们使用的是 OpenAI 的 Embedding 接口，除此之外，LangChain 还集成了很多 [其他的 Embedding 接口](https://python.langchain.com/docs/integrations/text_embedding/)，比如 Cohere、SentenceTransformer 等。不过一般情况下我们不会像上面这样单独计算 Embedding，而是和向量数据库结合使用：
+
+```
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Qdrant
+
+qdrant = Qdrant.from_documents(
+    documents,
+    OpenAIEmbeddings(),
+    url="127.0.0.1:6333",
+    prefer_grpc=False,
+    collection_name="my_documents",
+)
+```
+
+这里我们仍然使用 [Qdrant](https://qdrant.tech/) 来做向量数据库，`Qdrant.from_documents()` 方法会自动根据文档列表计算 Embedding 并存储到 Qdrant 中。除了 Qdrant，LangChain 也集成了很多 [其他的向量数据库](https://python.langchain.com/docs/integrations/vectorstores/)，比如 Chroma、FAISS、Milvus、PGVector 等。
+
+再接下来，我们通过 `qdrant.similarity_search()` 方法从向量数据库中搜索出和用户问题最接近的文本片段：
+
+```
+query = "小明家的宠物狗叫什么名字？"
+found_docs = qdrant.similarity_search(query)
+print(found_docs)
+```
+
+后面的步骤就和 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中一样，准备一段提示词模板，向 ChatGPT 提问就可以了。
+
+## LangChain 的精髓：Chain
+
+通过上面的快速开始，我们学习了 LangChain 的基本用法，从几个例子下来，或许有人觉得 LangChain 也没什么特别的，只是一个集成了大量的 LLM、Embedding、向量库的 SDK 而已，我一开始也是这样的感觉，直到学习 Chain 这个概念的时候，才明白这时才算是真正地进入 LangChain 的大门。
+
+https://python.langchain.com/docs/modules/chains/
 
 ## 基于 Agent 的应用开发
 
-## 可视化
+## LangChain 的可视化
 
 ## 参考
 
