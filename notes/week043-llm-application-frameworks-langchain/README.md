@@ -288,6 +288,30 @@ print(found_docs)
 
 通过上面的快速开始，我们学习了 LangChain 的基本用法，从几个例子下来，或许有人觉得 LangChain 也没什么特别的，只是一个集成了大量的 LLM、Embedding、向量库的 SDK 而已，我一开始也是这样的感觉，直到学习 Chain 这个概念的时候，才明白这时才算是真正地进入 LangChain 的大门。
 
+### LLMChain
+
+`LLMChain` 是 LangChain 中最基础的 Chain，它接受两个参数：一个是 LLM，另一个是提供给 LLM 的 Prompt 模板：
+
+```
+from langchain import PromptTemplate, OpenAI, LLMChain
+
+llm = OpenAI(temperature=0.9)
+prompt = PromptTemplate.from_template("将下面的句子翻译成英文：{sentence}")
+
+llm_chain = LLMChain(
+    llm = llm, 
+    prompt = prompt
+)
+result = llm_chain("今天的天气真不错")
+print(result['text'])
+```
+
+其中，LLM 参数同时支持 `LLMs` 和 `ChatModels`，运行效果和上面的入门示例是一样的。
+
+在 LangChain 中，Chain 的特别之处在于，它的每一个参数都被称为 **Component**，Chain 由一系列的 Component 组合在一起以完成特定任务，Component 也可以是另一个 Chain，通过封装和组合，形成一个更复杂的调用链，从而创建出更强大的应用程序。
+
+### ConversationChain
+
 https://python.langchain.com/docs/modules/chains/
 
 ## 基于 Agent 的应用开发
