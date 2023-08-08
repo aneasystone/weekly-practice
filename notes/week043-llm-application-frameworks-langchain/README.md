@@ -310,6 +310,83 @@ print(result['text'])
 
 在 LangChain 中，Chain 的特别之处在于，它的每一个参数都被称为 **Component**，Chain 由一系列的 Component 组合在一起以完成特定任务，Component 也可以是另一个 Chain，通过封装和组合，形成一个更复杂的调用链，从而创建出更强大的应用程序。
 
+上面的例子中，有一点值得注意的是，我们在 Prompt 中定义了一个占位符 `{sentence}`，但是在调用 Chain 的时候并没有明确指定该占位符的值，LangChain 是怎么知道要将我们的输入替换掉这个占位符的呢？实际上，每个 Chain 里都包含了两个很重要的属性：`input_keys` 和 `output_keys`，用于表示这个 Chain 的输入和输出，我们查看 `LLMChain` 的源码，它的 `input_keys` 实现如下：
+
+```
+    @property
+    def input_keys(self) -> List[str]:
+        return self.prompt.input_variables
+```
+
+所以 `LLMChain` 的入参就是 Prompt 的 `input_variables`，也就是 `sentence` 参数。而 `PromptTemplate.from_template()` 其实是 `PromptTemplate` 的简写，下面这行代码：
+
+```
+prompt = PromptTemplate.from_template("将下面的句子翻译成英文：{sentence}")
+```
+
+等价于下面这行代码：
+
+```
+prompt = PromptTemplate(
+    input_variables=['sentence'],
+    template = "将下面的句子翻译成英文：{sentence}"
+)
+```
+
+而下面这行代码：
+
+```
+result = llm_chain("今天的天气真不错")
+```
+
+又等价于下面这行代码：
+
+```
+result = llm_chain({'sentence': "今天的天气真不错"})
+```
+
+如果我们在 Prompt 中定义了多个参数，那么在调用的时候就得明确指定参数了：
+
+```
+from langchain import PromptTemplate, OpenAI, LLMChain
+
+llm = OpenAI(temperature=0.9)
+prompt = PromptTemplate(
+    input_variables=['lang', 'sentence'],
+    template = "将下面的句子翻译成{lang}：{sentence}"
+)
+
+llm_chain = LLMChain(
+    llm = llm, 
+    prompt = prompt
+)
+result = llm_chain({"lang": "日语", "sentence": "今天的天气真不错"})
+print(result['text'])
+
+# 今日の天気は本当に良いです。
+```
+
+我们从 LangChain 的源码中可以更深入的看下 `Chain` 的类定义，如下：
+
+```
+class Chain(BaseModel, ABC):
+
+    def __call__(
+        self,
+        inputs: Union[Dict[str, Any], Any],
+        return_only_outputs: bool = False,
+        callbacks: Callbacks = None,
+        ...
+    ) -> Dict[str, Any]:
+        ...
+```
+
+这说明 Chain 的本质其实就是根据一个 Dict 输入，得到一个 Dict 输出而已。只不过 Chain 为我们还提供了三个特性：
+
+* **Stateful**: 内置 Memory 记忆功能，使得每个 Chain 都是有状态的；
+* **Observable**: 支持向 Chain 传入 Callbacks 回调执行额外功能，从而实现可观测性，如日志、监控等；
+* **Composable**: 具备高度的可组合性，我们可以将 Chain 和其他的组件，或者其他的 Chain 进行组合；
+
 ### ConversationChain
 
 https://python.langchain.com/docs/modules/chains/
