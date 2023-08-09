@@ -288,7 +288,7 @@ print(found_docs)
 
 通过上面的快速开始，我们学习了 LangChain 的基本用法，从几个例子下来，或许有人觉得 LangChain 也没什么特别的，只是一个集成了大量的 LLM、Embedding、向量库的 SDK 而已，我一开始也是这样的感觉，直到学习 Chain 这个概念的时候，才明白这时才算是真正地进入 LangChain 的大门。
 
-### LLMChain
+### 从 `LLMChain` 开始
 
 `LLMChain` 是 LangChain 中最基础的 Chain，它接受两个参数：一个是 LLM，另一个是提供给 LLM 的 Prompt 模板：
 
@@ -318,7 +318,7 @@ print(result['text'])
         return self.prompt.input_variables
 ```
 
-所以 `LLMChain` 的入参就是 Prompt 的 `input_variables`，也就是 `sentence` 参数。而 `PromptTemplate.from_template()` 其实是 `PromptTemplate` 的简写，下面这行代码：
+所以 `LLMChain` 的入参就是 Prompt 的 `input_variables`，而 `PromptTemplate.from_template()` 其实是 `PromptTemplate` 的简写，下面这行代码：
 
 ```
 prompt = PromptTemplate.from_template("将下面的句子翻译成英文：{sentence}")
@@ -333,19 +333,21 @@ prompt = PromptTemplate(
 )
 ```
 
+所以 `LLMChain` 的入参也就是 `sentence` 参数。
+
 而下面这行代码：
 
 ```
 result = llm_chain("今天的天气真不错")
 ```
 
-又等价于下面这行代码：
+是下面这行代码的简写：
 
 ```
 result = llm_chain({'sentence': "今天的天气真不错"})
 ```
 
-如果我们在 Prompt 中定义了多个参数，那么在调用的时候就得明确指定参数了：
+当参数比较简单时，LangChain 会自动将传入的参数转换成它需要的 Dict 形式，一旦我们在 Prompt 中定义了多个参数，那么这种简写就不行了，就得在调用的时候明确指定参数：
 
 ```
 from langchain import PromptTemplate, OpenAI, LLMChain
@@ -387,7 +389,108 @@ class Chain(BaseModel, ABC):
 * **Observable**: 支持向 Chain 传入 Callbacks 回调执行额外功能，从而实现可观测性，如日志、监控等；
 * **Composable**: 具备高度的可组合性，我们可以将 Chain 和其他的组件，或者其他的 Chain 进行组合；
 
-### ConversationChain
+### 使用 Memory 实现记忆功能
+
+Chain 的第一个特征就是有状态，也就是说，它能够记住会话的历史，这是通过 [Memory](https://python.langchain.com/docs/modules/memory/) 模块来实现的，最简单的 Memory 是 `ConversationBufferMemory`，它通过一个内存变量保存会话记忆。
+
+在使用 Memory 时，我们的 Prompt 需要做一些调整，我们要在 Prompt 中加上历史会话的内容，比如下面这样：
+
+```
+template = """
+下面是一段人类和人工智能之间的友好对话。
+
+当前对话内容：
+{history}
+Human: {input}
+AI:"""
+prompt = PromptTemplate(input_variables=["history", "input"], template=template)
+```
+
+其中 `{history}` 这个占位符的内容就由 Memory 来负责填充，我们只需要将 Memory 设置到 `LLMChain` 中，这个填充操作将由框架自动完成：
+
+```
+llm = OpenAI(temperature=0.9)
+memory = ConversationBufferMemory()
+
+llm_chain = LLMChain(
+    llm = llm, 
+    prompt = prompt,
+    memory = memory
+)
+
+result = llm_chain("窗前明月光，下一句是什么？")
+print(result['text'])
+
+result = llm_chain("这是谁的诗？")
+print(result['text'])
+```
+
+对于 `ChatModels`，我们可以使用 `ChatPromptTemplate` 来构造 Prompt：
+
+```
+prompt = ChatPromptTemplate(
+    messages=[
+        SystemMessagePromptTemplate.from_template("你是一个聊天助手，和人类进行聊天。"),
+        MessagesPlaceholder(variable_name="history"),
+        HumanMessagePromptTemplate.from_template("{input}")
+    ]
+)
+```
+
+占位符填充的基本逻辑是一样的，不过在初始化 Memory 的时候记得指定 `return_messages=True`，让 Memory 使用 Message 列表来填充占位符，而不是默认的字符串：
+
+```
+chat = ChatOpenAI(temperature=0.9)
+memory = ConversationBufferMemory(return_messages=True)
+
+llm_chain = LLMChain(
+    llm = chat, 
+    prompt = prompt,
+    memory = memory
+)
+
+result = llm_chain("窗前明月光，下一句是什么？")
+print(result['text'])
+
+result = llm_chain("这是谁的诗？")
+print(result['text'])
+```
+
+为了简化 Prompt 的写法，LangChain 基于 `LLMChain` 实现了 `ConversationChain`，使用起来更简单：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
+
+chat = ChatOpenAI(temperature=0.9)
+memory = ConversationBufferMemory()
+
+conversation = ConversationChain(
+    llm = chat,
+    memory = memory
+)
+
+result = conversation.run("窗前明月光，下一句是什么？")
+print(result)
+
+result = conversation.run("这是谁的诗？")
+print(result)
+```
+
+除了 `ConversationBufferMemory`，LangChain 还提供了很多其他的 Memory 实现：
+
+* ConversationBufferWindowMemory - 基于内存的记忆，只保留最近 K 次会话；
+* ConversationTokenBufferMemory - 基于内存的记忆，根据 token 数来限制保留最近的会话；
+* ConversationEntityMemory - 从会话中提取实体，并在记忆中构建关于实体的知识；
+* ConversationKGMemory - 基于知识图来重建记忆；
+* ConversationSummaryMemory - 对历史会话进行总结，减小记忆大小；
+* ConversationSummaryBufferMemory - 既保留最近 K 次会话，也对历史会话进行总结；
+* VectorStoreRetrieverMemory - 通过向量数据库保存记忆；
+
+这些 Memory 在长对话场景，或需要对记忆进行持久化时非常有用。内置的 Memory 大多数都是基于内存实现的，LangChain 还[集成了很多第三方的库](https://python.langchain.com/docs/integrations/memory/)，可以实现记忆的持久化，比如 Sqlite、Mongo、Postgre 等。
+
+### Callbacks
 
 https://python.langchain.com/docs/modules/chains/
 
