@@ -490,9 +490,23 @@ print(result)
 
 这些 Memory 在长对话场景，或需要对记忆进行持久化时非常有用。内置的 Memory 大多数都是基于内存实现的，LangChain 还[集成了很多第三方的库](https://python.langchain.com/docs/integrations/memory/)，可以实现记忆的持久化，比如 Sqlite、Mongo、Postgre 等。
 
-### Callbacks
+### 再聊文档问答：`RetrievalQA`
 
-https://python.langchain.com/docs/modules/chains/
+```
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
+
+qa = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever=qdrant.as_retriever())
+query = "小明家的宠物狗比小红家的大几岁？"
+result = qa.run(query)
+print(result)
+
+# 毛毛比大白大两岁，毛毛今年3岁，大白今年1岁。
+```
+
+https://python.langchain.com/docs/modules/chains/document/
+
+https://python.langchain.com/docs/modules/callbacks/
 
 ## 基于 Agent 的应用开发
 
