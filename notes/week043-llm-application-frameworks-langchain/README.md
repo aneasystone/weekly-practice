@@ -492,6 +492,8 @@ print(result)
 
 ### 再聊文档问答：`RetrievalQA`
 
+在上面的实现知识库助手一节，我们学习了各种加载文档的方式，以及如何对大文档进行分片，并使用 OpenAI 计算文档的 Embedding，最后保存到向量数据库 Qdrant 中。一旦文档库准备就绪，接下来就可以对它进行问答了，LangChain 也贴心地提供了很多关于文档问答的 Chain 方便我们使用，比如下面最常用的 `RetrievalQA`：
+
 ```
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
@@ -503,6 +505,24 @@ print(result)
 
 # 毛毛比大白大两岁，毛毛今年3岁，大白今年1岁。
 ```
+
+`RetrievalQA` 充分体现了 Chain 的可组合性，它实际上是一个复合 Chain，真正实现文档问答的 Chain 是它内部封装的 `CombineDocumentsChain`，`RetrievalQA` 的作用是通过 `Retrievers` 获取和用户问题相关的文档，然后丢给内部的 `CombineDocumentsChain` 来处理，而 `CombineDocumentsChain` 又是一个复合 Chain，它会将用户问题和相关文档组合成提示语，丢到内部的 `LLMChain` 处理最终得到输出。
+
+#### `StuffDocumentsChain`
+
+![](./images/stuff-documents.jpg)
+
+#### `RefineDocumentsChain`
+
+![](./images/refine-documents.jpg)
+
+#### `MapReduceDocumentsChain`
+
+![](./images/map-reduce-documents.jpg)
+
+#### `MapRerankDocumentsChain`
+
+![](./images/map-rerank-documents.jpg)
 
 https://python.langchain.com/docs/modules/chains/document/
 
