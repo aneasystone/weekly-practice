@@ -614,13 +614,77 @@ Helpful Answer:
 
 从输出的结果我们不仅可以看到各个 Chain 的调用链路，而且还可以看到 `StuffDocumentsChain` 所使用的提示语，以及 `retriever` 检索出来的内容，这对我们调试 Chain 非常有帮助。
 
-#### Callbacks
+另外，[Callbacks](https://python.langchain.com/docs/modules/callbacks/) 是 LangChain 提供的另一种调试机制，它提供了比 `verbose=True` 更好的扩展性，用户可以基于这个机制实现自定义的监控或日志功能。LangChain 内置了很多的 Callbacks，这些 Callbacks 都实现自 `CallbackHandler` 接口，比如最常用的 `StdOutCallbackHandler`，它将日志打印到控制台，参数 `verbose=True` 就是通过它实现的；或者 `FileCallbackHandler` 可以将日志记录到文件中；LangChain 还 [集成了很多第三方工具](https://python.langchain.com/docs/integrations/callbacks/)，比如 `StreamlitCallbackHandler` 可以将日志以交互形式输出到 Streamlit 应用中。
 
-https://python.langchain.com/docs/modules/callbacks/
+用户如果要实现自己的 Callbacks，可以直接继承基类 `BaseCallbackHandler` 即可，下面是一个简单的例子：
 
-#### LangChain 的可视化
+```
+class MyCustomHandler(BaseCallbackHandler):
 
-https://github.com/FlowiseAI/Flowise
+    def on_llm_start(
+        self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
+    ) -> Any:
+        """Run when LLM starts running."""
+        print(f"on_llm_start: {serialized} {prompts}")
+
+    def on_llm_end(self, response: LLMResult, **kwargs: Any) -> Any:
+        """Run when LLM ends running."""
+        print(f"on_llm_end: {response}")
+
+    def on_llm_error(
+        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
+    ) -> Any:
+        """Run when LLM errors."""
+        print(f"on_llm_error: {error}")
+
+    def on_chain_start(
+        self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
+    ) -> Any:
+        """Run when chain starts running."""
+        print(f"on_chain_start: {serialized} {inputs}")
+
+    def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> Any:
+        """Run when chain ends running."""
+        print(f"on_chain_end: {outputs}")
+
+    def on_chain_error(
+        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
+    ) -> Any:
+        """Run when chain errors."""
+        print(f"on_chain_error: {error}")
+
+    def on_text(self, text: str, **kwargs: Any) -> Any:
+        """Run on arbitrary text."""
+        print(f"on_text: {text}")
+```
+
+在这个例子中，我们对 LLM 和 Chain 进行了监控，我们需要将这个 Callback 分别传递到 LLM 和 Chain 中：
+
+```
+callback = MyCustomHandler()
+
+llm = OpenAI(temperature=0.9, callbacks=[callback])
+prompt = PromptTemplate.from_template("将下面的句子翻译成英文：{sentence}")
+
+llm_chain = LLMChain(
+    llm = llm, 
+    prompt = prompt,
+    callbacks=[callback]
+)
+result = llm_chain("今天的天气真不错")
+print(result['text'])
+```
+
+LangChain 会在调用 LLM 和 Chain 开始和结束的时候回调我们的 Callback，输出结果大致如下：
+
+```
+on_chain_start: <...略>
+on_text: Prompt after formatting:
+将下面的句子翻译成英文：今天的天气真不错
+on_llm_start: <...略>
+on_llm_end: <...略>
+on_chain_end: {'text': '\n\nThe weather today is really nice.'}
+```
 
 ## 从 Chain 到 Agent
 
