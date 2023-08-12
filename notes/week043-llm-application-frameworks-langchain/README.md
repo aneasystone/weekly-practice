@@ -386,8 +386,8 @@ class Chain(BaseModel, ABC):
 这说明 Chain 的本质其实就是根据一个 Dict 输入，得到一个 Dict 输出而已。只不过 Chain 为我们还提供了三个特性：
 
 * **Stateful**: 内置 Memory 记忆功能，使得每个 Chain 都是有状态的；
-* **Observable**: 支持向 Chain 传入 Callbacks 回调执行额外功能，从而实现可观测性，如日志、监控等；
 * **Composable**: 具备高度的可组合性，我们可以将 Chain 和其他的组件，或者其他的 Chain 进行组合；
+* **Observable**: 支持向 Chain 传入 Callbacks 回调执行额外功能，从而实现可观测性，如日志、监控等；
 
 ### 使用 Memory 实现记忆功能
 
@@ -508,29 +508,62 @@ print(result)
 
 `RetrievalQA` 充分体现了 Chain 的可组合性，它实际上是一个复合 Chain，真正实现文档问答的 Chain 是它内部封装的 `CombineDocumentsChain`，`RetrievalQA` 的作用是通过 `Retrievers` 获取和用户问题相关的文档，然后丢给内部的 `CombineDocumentsChain` 来处理，而 `CombineDocumentsChain` 又是一个复合 Chain，它会将用户问题和相关文档组合成提示语，丢到内部的 `LLMChain` 处理最终得到输出。
 
+但总的来说，实现文档问答最核心的还是 `RetrievalQA` 内部使用的 `CombineDocumentsChain`，实际上除了 **文档问答**，针对文档的使用场景还有 **生成文档摘要**，**提取文档信息**，等等，这些利用大模型处理文档的场景中，最难解决的问题是如何对大文档进行拆分和组合，而解决方案也是多种多样的，LangChain 提供的 `CombineDocumentsChain` 是一个抽象类，根据不同的解决方案它包含了四个实现类：
+
+* [StuffDocumentsChain](https://python.langchain.com/docs/modules/chains/document/stuff)
+* [RefineDocumentsChain](https://python.langchain.com/docs/modules/chains/document/refine)
+* [MapReduceDocumentsChain](https://python.langchain.com/docs/modules/chains/document/map_reduce)
+* [MapRerankDocumentsChain](https://python.langchain.com/docs/modules/chains/document/map_rerank)
+
 #### `StuffDocumentsChain`
+
+`StuffDocumentsChain` 是最简单的文档处理 Chain，单词 `stuff` 的意思是 `填充`，正如它的名字所示，`StuffDocumentsChain` 将所有的文档内容连同用户的问题一起全部填充进 Prompt，然后丢给大模型。这种 Chain 在处理比较小的文档时非常有用。在上面的例子中，我们通过 `RetrievalQA.from_chain_type(chain_type="stuff")` 生成了 `RetrievalQA`，内部就是使用了 `StuffDocumentsChain`。它的示意图如下所示：
 
 ![](./images/stuff-documents.jpg)
 
 #### `RefineDocumentsChain`
 
+`refine` 的含义是 `提炼`，`RefineDocumentsChain` 表示从分片的文档中一步一步的提炼出用户问题的答案，这个 Chain 在处理大文档时非常有用，可以保证每一步的提炼都不超出大模型的上下文限制。比如我们有一个很大的 PDF 文件，我们要生成它的文档摘要，我们可以先生成第一个分片的摘要，然后将第一个分片的摘要和第二个分片丢给大模型生成前两个分片的摘要，再将前两个分片的摘要和第三个分片丢给大模型生成前三个分片的摘要，依次类推，通过不断地对大模型的答案进行更新，最终生成全部分片的摘要。整个提炼的过程如下：
+
 ![](./images/refine-documents.jpg)
 
+`RefineDocumentsChain` 相比于 `StuffDocumentsChain`，会产生更多的大模型调用，而且对于有些场景，它的效果可能很差，比如当文档中经常出现相互交叉的引用时，或者需要从多个文档中获取非常详细的信息时。
+
 #### `MapReduceDocumentsChain`
+
+`MapReduceDocumentsChain` 和 `RefineDocumentsChain` 一样，都适合处理一些大文档，它的处理过程可以分为两步：`Map` 和 `Reduce`。比如我们有一个很大的 PDF 文件，我们要生成它的文档摘要，我们可以先将文档分成小的分片，让大模型挨个生成每个分片的摘要，这一步称为 `Map`；然后再将每个分片的摘要合起来生成汇总的摘要，这一步称为 `Reduce`；如果所有分片的摘要合起来超过了大模型的限制，那么我们需要对合起来的摘要再次分片，然后再次递归地执行 `Map` 和 `Reduce` 这个过程：
 
 ![](./images/map-reduce-documents.jpg)
 
 #### `MapRerankDocumentsChain`
 
+`MapRerankDocumentsChain` 一般适合于大文档的问答场景，它的第一步和 `MapReduceDocumentsChain` 类似，都是遍历所有的文档分片，挨个向大模型提问，只不过它的 Prompt 有一点特殊，它不仅要求大模型针对用户的问题给出一个答案，而且还要求大模型为其答案的确定性给出一个分数；得到每个答案的分数后，`MapRerankDocumentsChain` 的第二步就可以按分数排序，给出分数最高的答案：
+
 ![](./images/map-rerank-documents.jpg)
 
-https://python.langchain.com/docs/modules/chains/document/
+### 对 Chain 进行调试
+
+https://python.langchain.com/docs/modules/chains/how_to/debugging
+
+#### Callbacks
 
 https://python.langchain.com/docs/modules/callbacks/
 
-## 基于 Agent 的应用开发
+#### LangChain 的可视化
 
-## LangChain 的可视化
+https://github.com/FlowiseAI/Flowise
+
+## 从 Chain 到 Agent
+
+### 更多的 Chain
+
+https://github.com/hwchase17/langchain-hub
+
+### 基于 Agent 的应用开发
+
+https://python.langchain.com/docs/modules/chains/how_to/openai_functions
+
+https://python.langchain.com/docs/modules/agents/
 
 ## 参考
 
