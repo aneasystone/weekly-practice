@@ -543,7 +543,76 @@ print(result)
 
 ### 对 Chain 进行调试
 
-https://python.langchain.com/docs/modules/chains/how_to/debugging
+当 LangChain 的输出结果有问题时，开发者就需要 [对 Chain 进行调试](https://python.langchain.com/docs/modules/chains/how_to/debugging)，特别是当组合的 Chain 非常多时，LangChain 的输出结果往往非常不可控。最简单的方法是在 Chain 上加上 `verbose=True` 参数，这时 LangChain 会将执行的中间步骤打印出来，比如上面的 *使用 Memory 实现记忆功能* 一节中的例子，加上调试信息后，第一次输出结果如下：
+
+```
+> Entering new LLMChain chain...
+Prompt after formatting:
+System: 你是一个聊天助手，和人类进行聊天。
+Human: 窗前明月光，下一句是什么？
+
+> Finished chain.
+疑是地上霜。
+```
+
+第二次的输出结果如下：
+
+```
+> Entering new LLMChain chain...
+Prompt after formatting:
+System: 你是一个聊天助手，和人类进行聊天。
+Human: 窗前明月光，下一句是什么？
+AI: 疑是地上霜。
+Human: 这是谁的诗？
+
+> Finished chain.
+这是《静夜思》的开头，是中国唐代诗人李白创作的。
+```
+
+可以很方便的看出 Memory 模块确实起作用了，它将历史会话自动拼接在 Prompt 中了。
+
+当一个 Chain 组合了其他 Chain 的时候，比如上面的 `RetrievalQA`，这时我们不仅要给 Chain 加上 `verbose=True` 参数，注意还要通过 `chain_type_kwargs` 为内部的 Chain 也加上该参数：
+
+```
+qa = RetrievalQA.from_chain_type(
+    llm=OpenAI(), 
+    chain_type="stuff", 
+    retriever=qdrant.as_retriever(), 
+    verbose=True, 
+    chain_type_kwargs={'verbose': True})
+```
+
+输出来的结果类似下面这样：
+
+```
+> Entering new RetrievalQA chain...
+
+> Entering new StuffDocumentsChain chain...
+
+> Entering new LLMChain chain...
+Prompt after formatting:
+Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+小明家有一条宠物狗，叫毛毛，这是他爸从北京带回来的，它今年3岁了。
+
+小红家也有一条宠物狗，叫大白，非常听话，它今年才1岁呢。
+
+小红的好朋友叫小明，他们是同班同学。
+
+小华是小明的幼儿园同学，从小就欺负他。
+
+Question: 小明家的宠物狗比小红家的大几岁？
+Helpful Answer:
+
+> Finished chain.
+
+> Finished chain.
+
+> Finished chain.
+ 毛毛比大白大2岁。
+```
+
+从输出的结果我们不仅可以看到各个 Chain 的调用链路，而且还可以看到 `StuffDocumentsChain` 所使用的提示语，以及 `retriever` 检索出来的内容，这对我们调试 Chain 非常有帮助。
 
 #### Callbacks
 
