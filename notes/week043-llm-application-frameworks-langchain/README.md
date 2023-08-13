@@ -286,7 +286,7 @@ print(found_docs)
 
 ## LangChain 的精髓：Chain
 
-通过上面的快速开始，我们学习了 LangChain 的基本用法，从几个例子下来，或许有人觉得 LangChain 也没什么特别的，只是一个集成了大量的 LLM、Embedding、向量库的 SDK 而已，我一开始也是这样的感觉，直到学习 Chain 这个概念的时候，才明白这时才算是真正地进入 LangChain 的大门。
+通过上面的快速开始，我们学习了 LangChain 的基本用法，从几个例子下来，或许有人觉得 LangChain 也没什么特别的，只是一个集成了大量的 LLM、Embedding、向量库的 SDK 而已，我一开始也是这样的感觉，直到学习 [Chain](https://python.langchain.com/docs/modules/chains/) 这个概念的时候，才明白这时才算是真正地进入 LangChain 的大门。
 
 ### 从 `LLMChain` 开始
 
@@ -688,13 +688,31 @@ on_chain_end: {'text': '\n\nThe weather today is really nice.'}
 
 ## 从 Chain 到 Agent
 
-### 更多的 Chain
+通过上一节的学习，我们掌握了 Chain 的基本概念和用法，对 Chain 的三大特性也有了一个大概的认识，关于 Chain 还有很多高级主题等着我们去探索，比如 [Chain 的异步调用](https://python.langchain.com/docs/modules/chains/how_to/async_chain)，[实现自定义的 Chain](https://python.langchain.com/docs/modules/chains/how_to/custom_chain)，[Chain 的序列化和反序列化](https://python.langchain.com/docs/modules/chains/how_to/serialization)，[从 LangChainHub 加载 Chain](https://python.langchain.com/docs/modules/chains/how_to/from_hub)，等等。
 
-https://github.com/hwchase17/langchain-hub
+此外，除了上一节学习的 `LLMChain`、`ConversationChain`、`RetrievalQA` 以及各种 `CombineDocumentsChain`，LangChain 还提供了很多其他的 Chain 供用户使用，其中有四个是最基础的： 
 
-### 基于 Agent 的应用开发
+* [LLMChain](https://python.langchain.com/docs/modules/chains/foundational/llm_chain) - 这个 Chain 在前面已经学习过，它主要是围绕着大模型添加一些额外的功能，比如 `ConversationChain` 和 `CombineDocumentsChain` 都是基于 `LLMChain` 实现的；
+* [TransformChain](https://python.langchain.com/docs/modules/chains/foundational/transformation) - 这个 Chain 主要用于参数转换，这在对多个 Chain 进行组合时会很有用，我们可以使用 `TransformChain` 将上一个 Chain 的输出参数转换为下一个 Chain 的输入参数；
+* [SequentialChain](https://python.langchain.com/docs/modules/chains/foundational/sequential_chains) - 可以将多个 Chain 组合起来并按照顺序分别执行；
+* [RouterChain](https://python.langchain.com/docs/modules/chains/foundational/router) - 这是一种很特别的 Chain，当你有多个 Chain 且不知道该使用哪个 Chain 处理用户请求时，可以使用它；首先，你给每个 Chain 取一个名字，然后给它们分别写一段描述，然后让大模型来决定该使用哪个 Chain 处理用户请求，这就被称之为 **路由（route）**；
 
-https://python.langchain.com/docs/modules/chains/how_to/openai_functions
+在这四个基础 Chain 中，`RouterChain` 是最复杂的一个，而且它一般不单独使用，而是和 `MultiPromptChain` 或 `MultiRetrievalQAChain` 一起使用，类似于下面这样：
+
+```
+chain = MultiPromptChain(
+    router_chain=router_chain,
+    destination_chains=destination_chains,
+    default_chain=default_chain,
+    verbose=True,
+)
+```
+
+在 `MultiPromptChain` 中，我们给定了多个目标 Chains，然后使用 `RouterChain` 来选取一个最适合处理用户请求的 Chain，如果不存在，则使用一个默认的 Chain，这种思路为我们打开了一扇解决问题的新大门，如果我们让大模型选择的不是 Chain，而是一个函数，或是一个外部接口，那么我们就可以通过大模型做出更多的动作，完成更多的任务，这不就是 OpenAI 的 [Function Calling](https://openai.com/blog/function-calling-and-other-api-updates) 功能吗？
+
+实际上，LangChain 也提供了 `create_structured_output_chain()` 和 `create_openai_fn_chain()` 等方法来创建 [OpenAI Functions Chain](https://python.langchain.com/docs/modules/chains/how_to/openai_functions)，只不过 OpenAI 的 Function Calling 归根结底仍然只是一个 LLMChain，它只能返回要使用的函数和参数，并没有真正地调用它，如果要将大模型的输出和函数执行真正联系起来，这就得 [Agents](https://python.langchain.com/docs/modules/agents/) 出马了。
+
+### LangChain Agent 入门
 
 https://python.langchain.com/docs/modules/agents/
 
