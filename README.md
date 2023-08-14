@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK044 - [大模型应用开发框架 LangChain 学习笔记（二）](./notes/week044-llm-application-frameworks-langchain-2/README.md)
 * WEEK043 - [大模型应用开发框架 LangChain 学习笔记](./notes/week043-llm-application-frameworks-langchain/README.md)
 * WEEK042 - [使用 Embedding 技术打造本地知识库助手](./notes/week042-doc-qa-using-embedding/README.md)
 * WEEK041 - [容器运行时 containerd 学习笔记](./notes/week041-containerd-notes/README.md)
