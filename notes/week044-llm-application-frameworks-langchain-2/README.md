@@ -1,6 +1,24 @@
 # WEEK044 - 大模型应用开发框架 LangChain 学习笔记（二）
 
-### LangChain Agent 入门
+在 [上一篇笔记](../week043-llm-application-frameworks-langchain/README.md) 中，我们学习了 LangChain 中的一些基础概念：使用 `LLMs` 和 `ChatModels` 实现基本的聊天功能，使用 `PromptTemplate` 组装提示语，使用 `Document loaders`、`Document transformers`、`Text embedding models`、`Vector stores` 和 `Retrievers` 实现文档问答；然后，我们又学习了 LangChain 的精髓 Chain，以及 Chain 的三大特性：使用 `Memory` 实现 Chain 的记忆功能，使用 `RetrievalQA` 组合多个 Chain 再次实现文档问答，使用 `Callbacks` 对 Chain 进行调试；最后，我们学习了四个基础 Chain：`LLMChain`、`TransformChain`、`SequentialChain` 和 `RouterChain`，使用这四个 Chain 可以组装出更复杂的流程，其中 `RouterChain` 和 `MultiPromptChain` 为我们提出了一种新的思路，使用大模型来决策 Chain 的调用链路，可以动态地解决用户问题；更进一步我们想到，大模型不仅可以动态地选择调用 Chain，也可以动态地选择调用外部的函数，而且使用一些提示语技巧，可以让大模型变成一个推理引擎，这便是 [Agents](https://python.langchain.com/docs/modules/agents/)。
+
+## OpenAI 的插件和 Function Calling 功能
+
+https://zhuanlan.zhihu.com/p/618170820
+
+https://zhuanlan.zhihu.com/p/636975719
+
+6 月 13 日 OpenAI 在 Chat Completions API 中添加了新的函数调用（Function Calling）能力，帮助开发者通过 API 方式实现类似于 ChatGPT 插件的数据交互能力。
+
+https://openai.com/blog/chatgpt-plugins
+
+https://openai.com/blog/function-calling-and-other-api-updates
+
+https://python.langchain.com/docs/modules/chains/how_to/openai_functions
+
+https://juejin.cn/post/7247059220142948407
+
+## LangChain Agent 入门
 
 我们知道，大模型虽然擅长推理，但是却不擅长算术和计数，比如问它单词 `hello` 是由几个字母组成的，它就有可能胡编乱造，我们可以自定义一个函数 `get_word_length()` 帮助大模型来回答关于单词长度的问题：
 
@@ -57,7 +75,7 @@ while next_action != AgentFinish:
 return next_action
 ```
 
-### LangChain Agent 进阶
+## LangChain Agent 进阶
 
 https://python.langchain.com/docs/modules/agents/agent_types/
 
