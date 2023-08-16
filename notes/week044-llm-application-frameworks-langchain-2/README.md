@@ -2,15 +2,28 @@
 
 在 [上一篇笔记](../week043-llm-application-frameworks-langchain/README.md) 中，我们学习了 LangChain 中的一些基础概念：使用 `LLMs` 和 `ChatModels` 实现基本的聊天功能，使用 `PromptTemplate` 组装提示语，使用 `Document loaders`、`Document transformers`、`Text embedding models`、`Vector stores` 和 `Retrievers` 实现文档问答；然后，我们又学习了 LangChain 的精髓 Chain，以及 Chain 的三大特性：使用 `Memory` 实现 Chain 的记忆功能，使用 `RetrievalQA` 组合多个 Chain 再次实现文档问答，使用 `Callbacks` 对 Chain 进行调试；最后，我们学习了四个基础 Chain：`LLMChain`、`TransformChain`、`SequentialChain` 和 `RouterChain`，使用这四个 Chain 可以组装出更复杂的流程，其中 `RouterChain` 和 `MultiPromptChain` 为我们提出了一种新的思路，使用大模型来决策 Chain 的调用链路，可以动态地解决用户问题；更进一步我们想到，大模型不仅可以动态地选择调用 Chain，也可以动态地选择调用外部的函数，而且使用一些提示语技巧，可以让大模型变成一个推理引擎，这便是 [Agents](https://python.langchain.com/docs/modules/agents/)。
 
-## OpenAI 的插件和 Function Calling 功能
+## OpenAI 的插件功能
+
+在学习 LangChain 的 Agents 之前，我们先来学习一下 OpenAI 的插件功能，这可以让我们对 Agents 的基本概念和工作原理有一个更深入的了解。
+
+### ChatGPT Plugins
+
+2023 年 3 月 23 日，OpenAI 重磅推出 [ChatGPT Plugins](https://openai.com/blog/chatgpt-plugins) 功能，引起了全球用户的热议。众所周知，GPT 3.5 是使用 2021 年之前的历史数据训练出来的大模型，所以它无法回答关于最新新闻和事件的问题，比如你问它今天是星期几，它只能让你自己去查日历：
+
+![](./images/day-of-the-week.png)
+
+不仅如此，ChatGPT 在处理数学问题时也表现不佳，而且在回答问题时可能会捏造事实，胡说八道；另一方面，虽然 ChatGPT 非常强大，但它终究只是一个聊天机器，如果要让它成为真正的私人助理，它还得帮助用户去做一些事情，解放用户的双手。引入插件功能后，就使得 ChatGPT 具备了这两个重要的能力：
+
+* 访问互联网：可以实时检索最新的信息以回答用户问题；
+* 执行任务：可以了解用户的意图，代替用户去执行任务；
+
+### Function Calling
 
 https://zhuanlan.zhihu.com/p/618170820
 
 https://zhuanlan.zhihu.com/p/636975719
 
 6 月 13 日 OpenAI 在 Chat Completions API 中添加了新的函数调用（Function Calling）能力，帮助开发者通过 API 方式实现类似于 ChatGPT 插件的数据交互能力。
-
-https://openai.com/blog/chatgpt-plugins
 
 https://openai.com/blog/function-calling-and-other-api-updates
 
@@ -81,6 +94,7 @@ https://python.langchain.com/docs/modules/agents/agent_types/
 
 ## 参考
 
+* [70款ChatGPT插件评测：惊艳的开发过程与宏大的商业化愿景](https://zhuanlan.zhihu.com/p/629337429)
 * [LangChain 完整指南：使用大语言模型构建强大的应用程序](https://zhuanlan.zhihu.com/p/620529542)
 * [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
 * [LangChain初学者入门指南](https://mp.weixin.qq.com/s/F4QokLPrimFS1LRjXDbwQQ)
