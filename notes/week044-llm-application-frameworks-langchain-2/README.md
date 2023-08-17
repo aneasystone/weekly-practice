@@ -14,8 +14,48 @@
 
 不仅如此，ChatGPT 在处理数学问题时也表现不佳，而且在回答问题时可能会捏造事实，胡说八道；另一方面，虽然 ChatGPT 非常强大，但它终究只是一个聊天机器，如果要让它成为真正的私人助理，它还得帮助用户去做一些事情，解放用户的双手。引入插件功能后，就使得 ChatGPT 具备了这两个重要的能力：
 
-* 访问互联网：可以实时检索最新的信息以回答用户问题；
-* 执行任务：可以了解用户的意图，代替用户去执行任务；
+* 访问互联网：可以实时检索最新的信息以回答用户问题，比如调用搜索引擎接口，获取和用户问题相关的新闻和事件；也可以访问用户的私有数据，比如公司内部的文档，个人笔记等，这样通过插件也可以实现文档问答；
+* 执行任务：可以了解用户的意图，代替用户去执行任务，比如调用一些三方服务的接口订机票订酒店等；
+
+体验插件功能需要有 ChatGPT Plus 账号，
+
+#### 开发自己的插件
+
+目前 ChatGPT 的插件功能仍然处于 beta 版本，OpenAI 还没有完全开放插件的开发功能，如果想要体验开发 ChatGPT 插件的流程，需要先 [加入等待列表](https://openai.com/waitlist/plugins)。
+
+开发插件的步骤大致如下：
+
+1. 准备一个清单文件 `.well-known/ai-plugin.json` 放在你的域名下，清单文件中包含了插件的名称、描述、认证信息、接口信息等；
+2. 在 ChatGPT 的插件中心选择 `Develop your own plugin`，并填上你的插件地址；
+3. 开启新会话时，先选择并激活你的插件，然后就可以聊天了；如果 ChatGPT 认为用户问题需要调用你的插件（取决于插件和接口的描述），就会调用你在插件中定义的接口；
+
+其中第一步应该是开发者最为关心的部分，官网提供了一个入门示例供我们参考，这个示例是一个简单的 [TODO List 插件](https://github.com/openai/plugins-quickstart)，可以让 ChatGPT 访问并操作我们的 TODO List 服务，我们就以这个例子来学习如何开发一个 ChatGPT 插件。
+
+https://platform.openai.com/docs/plugins/getting-started
+
+```
+{
+    "schema_version": "v1",
+    "name_for_human": "TODO List",
+    "name_for_model": "todo",
+    "description_for_human": "Manage your TODO list. You can add, remove and view your TODOs.",
+    "description_for_model": "Help the user with managing a TODO list. You can add, remove and view your TODOs.",
+    "auth": {
+        "type": "none"
+    },
+    "api": {
+        "type": "openapi",
+        "url": "http://localhost:3333/openapi.yaml"
+    },
+    "logo_url": "http://localhost:3333/logo.png",
+    "contact_email": "support@example.com",
+    "legal_info_url": "http://www.example.com/legal"
+}
+```
+
+除了入门示例，官网还提供了一些其他的 [插件示例](https://platform.openai.com/docs/plugins/examples)，其中 [Chatgpt Retrieval Plugin](https://github.com/openai/chatgpt-retrieval-plugin/) 是一个完整而复杂的例子，对我们开发真实的插件非常有参考价值。
+
+当然，还有很多插件的内容没有介绍，比如 [插件的最佳实践](https://platform.openai.com/docs/plugins/getting-started/best-practices)，[用户认证](https://platform.openai.com/docs/plugins/authentication) 等，更多信息可以参考 [OpenAI 的插件手册](https://platform.openai.com/docs/plugins/introduction)。
 
 ### Function Calling
 
