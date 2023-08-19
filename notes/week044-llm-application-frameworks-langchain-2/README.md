@@ -29,6 +29,8 @@
 
 ![](./images/wolfram-detail.png)
 
+结合插件功能，ChatGPT 不再是一个简单的聊天对话框了，它有了一个真正的生态环境，网上有这样一个比喻，**如果说 ChatGPT 是 AI 时代的 iPhone，那么插件就是 ChatGPT 的 App Store**，我觉得这个比喻非常贴切。通过插件机制，ChatGPT 可以连接成千上万的第三方应用，向各个行业渗透，带给我们无限的想象力。
+
 #### 开发自己的插件
 
 目前 ChatGPT 的插件功能仍然处于 beta 版本，OpenAI 还没有完全开放插件的开发功能，如果想要体验开发 ChatGPT 插件的流程，需要先 [加入等待列表](https://openai.com/waitlist/plugins)。
@@ -110,13 +112,13 @@ components:
 
 ### Function Calling
 
-https://zhuanlan.zhihu.com/p/618170820
+尽管 ChatGPT 的插件功能非常强大，但是它只能在 ChatGPT 页面中使用，这可能是出于 OpenAI 的私心，OpenAI 的野心很大，它对 ChatGPT 的定位，就是希望将其做成整个互联网的入口，其他的应用都对接到 ChatGPT 的生态中来。不过很显然，这种脑洞大开的想法有点太过超前了，其他的互联网厂商也不傻，谁都知道流量入口的重要性，怎么会轻易将自己的应用入口交给其他人呢？对于其他的互联网厂商来说，他们更希望将 ChatGPT 的能力（包括插件能力）集成到自己的应用中来。
+
+2023 年 6 月 13 日，这种想法变成了可能，这一天，OpenAI 对 GPT 模型进行了一项重大更新，推出了 [Function Calling](https://openai.com/blog/function-calling-and-other-api-updates) 功能，在 Chat Completions API 中添加了新的函数调用能力，帮助开发者通过 API 的方式实现类似于 ChatGPT 插件的数据交互能力。
+
+> 在 [week040-chrome-extension-with-chatgpt](../week040-chrome-extension-with-chatgpt/README.md) 这篇笔记中，我们已经学习过 OpenAI 的 Chat Completions API，感兴趣的同学可以复习下。
 
 https://zhuanlan.zhihu.com/p/636975719
-
-6 月 13 日 OpenAI 在 Chat Completions API 中添加了新的函数调用（Function Calling）能力，帮助开发者通过 API 方式实现类似于 ChatGPT 插件的数据交互能力。
-
-https://openai.com/blog/function-calling-and-other-api-updates
 
 https://python.langchain.com/docs/modules/chains/how_to/openai_functions
 
