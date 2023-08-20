@@ -118,11 +118,210 @@ components:
 
 > 在 [week040-chrome-extension-with-chatgpt](../week040-chrome-extension-with-chatgpt/README.md) 这篇笔记中，我们已经学习过 OpenAI 的 Chat Completions API，感兴趣的同学可以复习下。
 
-https://zhuanlan.zhihu.com/p/636975719
+#### 使用 Function Calling 回答日期问题
 
-https://python.langchain.com/docs/modules/chains/how_to/openai_functions
+更新后的 Chat Completions API 中添加了一个 `functions` 参数，用于定义可用的函数，就像在 ChatGPT 中开启插件一样，这里的函数就相当于插件，对于每一个函数，我们需要定义它的名称、描述以及参数信息，如下：
 
-https://juejin.cn/post/7247059220142948407
+```
+completion = openai.ChatCompletion.create(
+    temperature=0.7,
+    model="gpt-3.5-turbo",
+    messages=[
+        {'role': 'user', 'content': "今天是星期几？"},
+    ],
+    functions=[
+        {
+            "name": "get_current_date",
+            "description": "获取今天的日期信息，包括几月几号和星期几",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+			}
+        }
+    ],
+    function_call="auto",
+)
+print(completion)
+```
+
+在上面的例子中，我们定义了一个名为 `get_current_date()` 的函数，用于获取今天的日期和星期信息，这个函数我们要提前实现好：
+
+```
+def get_current_date(args):
+    import datetime
+    today = datetime.date.today()
+    weekday = today.weekday()
+    weeekdays = ['一','二','三','四','五','六','日']
+    return '今天是' + str(today) + ', ' + '星期' + weeekdays[weekday]
+```
+
+当 GPT 无法回答关于日期的问题时，就会自动地选择调用这个函数来进一步获取信息，Chat Completions API 的响应结果如下：
+
+```
+{
+  "id": "chatcmpl-7pQO7iJ3WeggIYZ5CnLc88ZxMgMMV",
+  "object": "chat.completion",
+  "created": 1692490519,
+  "model": "gpt-3.5-turbo-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "function_call": {
+          "name": "get_current_date",
+          "arguments": "{}"
+        }
+      },
+      "finish_reason": "function_call"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 63,
+    "completion_tokens": 8,
+    "total_tokens": 71
+  }
+}
+```
+
+可以看到接口返回的 `message.content` 是空，反而多了一个 `function_call` 字段，这就说明 GPT 无法回答我们的问题，希望调用某个外部函数。为了方便我们调用外部函数，GPT 非常贴心地将函数名和参数都准备好了，我们只需要使用 `globals().get()` 拿到函数，再使用 `json.loads()` 拿到参数，然后直接调用即可：
+
+```
+function_call = completion.choices[0].message.function_call
+function = globals().get(function_call.name)
+args = json.loads(function_call.arguments)
+result = function(args)
+print(result)
+```
+
+拿到函数调用的结果之后，我们再一次调用 Chat Completions API，这一次我们将函数调用的结果一起放在 `messages` 中，注意将它的 `role` 设置为 `function`：
+
+```
+completion = openai.ChatCompletion.create(
+    temperature=0.7,
+    model="gpt-3.5-turbo",
+    messages=[
+        {'role': 'user', 'content': "今天是星期几？"},
+        {'role': 'function', 'name': 'get_current_date', 'content': "今天是2023-08-20, 星期日"},
+    ],
+)
+print(completion)
+```
+
+这样 GPT 就能成功回答我们的问题了：
+
+```
+{
+  "id": "chatcmpl-7pQklbWnMyVFvK73YbWXMybVsOTJe",
+  "object": "chat.completion",
+  "created": 1692491923,
+  "model": "gpt-3.5-turbo-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "今天是星期日。"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 83,
+    "completion_tokens": 8,
+    "total_tokens": 91
+  }
+}
+```
+
+#### 多轮 Function Calling
+
+有时候，只靠一个函数解决不了用户的问题，比如用户问 `明天合肥的天气怎么样？`，那么 GPT 首先需要知道明天的日期，然后再根据日期查询合肥的天气，所以我们要定义两个函数：
+
+```
+functions = [
+    {
+        "name": "get_current_date",
+        "description": "获取今天的日期信息，包括几月几号和星期几",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    },
+    {
+        "name": "get_weather_info",
+        "description": "获取某个城市某一天的天气信息",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "城市名",
+                },
+                "date": {
+                    "type": "string",
+                    "description": "日期，格式为 yyyy-MM-dd",
+                },
+            },
+            "required": ["city", "date"],
+        }
+    }
+]
+```
+
+第一次调用 Chat Completions API 时，传入用户的问题：
+
+```
+messages=[
+    {'role': 'user', 'content': "明天合肥的天气怎么样？"},
+],
+```
+
+接口返回了一个 `function_call`，希望我们去调用 `get_current_date()` 函数：
+
+```
+"function_call": {
+    "name": "get_current_date",
+    "arguments": "{}"
+}
+```
+
+然后我们调用 `get_current_date()` 函数得到今天的日期，再次调用 Chat Completions API 时，传入函数的调用结果：
+
+```
+messages=[
+    {'role': 'user', 'content': "明天合肥的天气怎么样？"},
+    {'role': 'function', 'name': 'get_current_date', 'content': "今天是2023-08-20, 星期日"},
+],
+```
+
+接口再次返回了一个 `function_call`，希望我们去调用 `get_weather_info()` 函数：
+
+```
+"function_call": {
+    "name": "get_weather_info",
+    "arguments": "{\n  \"city\": \"合肥\",\n  \"date\": \"2023-08-21\"\n}"
+}
+```
+
+注意这里的 `date` 参数，上面我们通过 `get_current_date()` 得到今天的日期是 `2023-08-20`，而用户问的是明天合肥的天气，GPT 非常聪明地推导出明天的日期是 `2023-08-21`，可以说是非常优秀了，我们直接使用 GPT 准备好的参数调用 `get_weather_info()` 即可获得明天合肥的天气，再次调用 Chat Completions API：
+
+```
+messages=[
+    {'role': 'user', 'content': "明天合肥的天气怎么样？"},
+    {'role': 'function', 'name': 'get_current_date', 'content': "今天是2023-08-20, 星期日"},
+    {'role': 'function', 'name': 'get_weather_info', 'content': "雷阵雨，33/24℃，北风转西北风"},
+],
+```
+
+通过不断的调用 Function Calling，最后准确地对用户的问题作出了回答：
+
+```
+明天合肥的天气预报为雷阵雨，最高温度为33℃，最低温度为24℃，风向将从北风转为西北风。请注意防雷阵雨的天气情况。
+```
+
+除了能不断地返回 `function_call` 并调用函数外，GPT 还会主动尝试补充函数的参数。有时候，用户的问题不完整，缺少了函数的某个参数，比如用户问 `明天的天气怎么样？`，这时 GPT 并不知道用户所在的城市，它就会问 `请问您所在的城市是哪里？`，等待用户回答之后，才返回 `get_weather_info()` 函数以及对应的参数。
 
 ## LangChain Agent 入门
 
@@ -184,6 +383,12 @@ return next_action
 ## LangChain Agent 进阶
 
 https://python.langchain.com/docs/modules/agents/agent_types/
+
+### 在 LangChain 中使用 OpenAI Functions
+
+https://python.langchain.com/docs/modules/chains/how_to/openai_functions
+
+https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent.html
 
 ## 参考
 
