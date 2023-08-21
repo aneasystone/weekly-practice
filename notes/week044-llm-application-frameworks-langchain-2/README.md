@@ -1,10 +1,10 @@
 # WEEK044 - 大模型应用开发框架 LangChain 学习笔记（二）
 
-在 [上一篇笔记](../week043-llm-application-frameworks-langchain/README.md) 中，我们学习了 LangChain 中的一些基础概念：使用 `LLMs` 和 `ChatModels` 实现基本的聊天功能，使用 `PromptTemplate` 组装提示语，使用 `Document loaders`、`Document transformers`、`Text embedding models`、`Vector stores` 和 `Retrievers` 实现文档问答；然后，我们又学习了 LangChain 的精髓 Chain，以及 Chain 的三大特性：使用 `Memory` 实现 Chain 的记忆功能，使用 `RetrievalQA` 组合多个 Chain 再次实现文档问答，使用 `Callbacks` 对 Chain 进行调试；最后，我们学习了四个基础 Chain：`LLMChain`、`TransformChain`、`SequentialChain` 和 `RouterChain`，使用这四个 Chain 可以组装出更复杂的流程，其中 `RouterChain` 和 `MultiPromptChain` 为我们提出了一种新的思路，使用大模型来决策 Chain 的调用链路，可以动态地解决用户问题；更进一步我们想到，大模型不仅可以动态地选择调用 Chain，也可以动态地选择调用外部的函数，而且使用一些提示语技巧，可以让大模型变成一个推理引擎，这便是 [Agents](https://python.langchain.com/docs/modules/agents/)。
+在 [上一篇笔记](../week043-llm-application-frameworks-langchain/README.md) 中，我们学习了 LangChain 中的一些基础概念：使用 `LLMs` 和 `ChatModels` 实现基本的聊天功能，使用 `PromptTemplate` 组装提示语，使用 `Document loaders`、`Document transformers`、`Text embedding models`、`Vector stores` 和 `Retrievers` 实现文档问答；然后，我们又学习了 LangChain 的精髓 Chain，以及 Chain 的三大特性：使用 `Memory` 实现 Chain 的记忆功能，使用 `RetrievalQA` 组合多个 Chain 再次实现文档问答，使用 `Callbacks` 对 Chain 进行调试；最后，我们学习了四个基础 Chain：`LLMChain`、`TransformChain`、`SequentialChain` 和 `RouterChain`，使用这四个 Chain 可以组装出更复杂的流程，其中 `RouterChain` 和 `MultiPromptChain` 为我们提出了一种新的思路，使用大模型来决策 Chain 的调用链路，可以动态地解决用户问题；更进一步我们想到，大模型不仅可以动态地选择调用 Chain，也可以动态地选择调用外部的函数，而且使用一些提示语技巧，可以让大模型变成一个推理引擎，这便是 [Agent](https://python.langchain.com/docs/modules/agents/)。
 
 ## OpenAI 的插件功能
 
-在学习 LangChain 的 Agents 之前，我们先来学习一下 OpenAI 的插件功能，这可以让我们对 Agents 的基本概念和工作原理有一个更深入的了解。
+在学习 LangChain 的 Agent 之前，我们先来学习一下 OpenAI 的插件功能，这可以让我们对 Agent 的基本概念和工作原理有一个更深入的了解。
 
 ### ChatGPT Plugins
 
@@ -131,12 +131,12 @@ completion = openai.ChatCompletion.create(
     ],
     functions=[
         {
-            "name": "get_current_date",
-            "description": "获取今天的日期信息，包括几月几号和星期几",
-            "parameters": {
-                "type": "object",
-                "properties": {}
-			}
+          "name": "get_current_date",
+          "description": "获取今天的日期信息，包括几月几号和星期几",
+          "parameters": {
+              "type": "object",
+              "properties": {}
+          }
         }
     ],
     function_call="auto",
@@ -195,7 +195,7 @@ result = function(args)
 print(result)
 ```
 
-拿到函数调用的结果之后，我们再一次调用 Chat Completions API，这一次我们将函数调用的结果一起放在 `messages` 中，注意将它的 `role` 设置为 `function`：
+拿到函数调用的结果之后，我们再一次调用 Chat Completions API，这一次我们将函数调用的结果和用户的问题一起放在 `messages` 中，注意将它的 `role` 设置为 `function`：
 
 ```
 completion = openai.ChatCompletion.create(
@@ -323,9 +323,17 @@ messages=[
 
 除了能不断地返回 `function_call` 并调用函数外，GPT 还会主动尝试补充函数的参数。有时候，用户的问题不完整，缺少了函数的某个参数，比如用户问 `明天的天气怎么样？`，这时 GPT 并不知道用户所在的城市，它就会问 `请问您所在的城市是哪里？`，等待用户回答之后，才返回 `get_weather_info()` 函数以及对应的参数。
 
-## LangChain Agent 入门
+## 学习 LangChain Agent
 
-我们知道，大模型虽然擅长推理，但是却不擅长算术和计数，比如问它单词 `hello` 是由几个字母组成的，它就有可能胡编乱造，我们可以自定义一个函数 `get_word_length()` 帮助大模型来回答关于单词长度的问题：
+学习完 OpenAI 的插件机制之后，我们再来学习 LangChain 的 Agent 就会发现有很多概念是相通的。我们从官方文档中的一个入门示例开始。
+
+### 快速入门
+
+我们知道，大模型虽然擅长推理，但是却不擅长算术和计数，比如问它单词 `hello` 是由几个字母组成的，它就有可能胡编乱造，我们可以定义一个函数 `get_word_length()` 帮助大模型来回答关于单词长度的问题。
+
+> 我们也可以使用 OpenAI 的 Function Calling 来解决这个问题，但是 Function Calling 机制只有 OpenAI 的接口才支持；而 LangChain 面对的是各种大模型，并不是所有大模型都支持 Function Calling 机制，这是要专门训练的，所以 LangChain Agent 使用了一种更通用的实现机制。
+
+入门示例的代码如下：
 
 ```
 from langchain.chat_models import ChatOpenAI
@@ -362,11 +370,11 @@ result = agent_executor.run("how many letters in the word 'hello'?")
 print(result)
 ```
 
-这是 LangChain 官方文档中关于 Agent 的一个入门示例，从上面的代码中我们可以注意到 Agent 有这么几个重要的概念：
+从上面的代码中我们可以注意到 Agent 有这么几个重要的概念：
 
-* Tools - 希望被 Agent 执行的函数，被称为工具，我们需要尽可能地描述清楚每个工具的功能，以便 Agent 能选择合适的工具；官方 [内置了一些常用的工具](https://python.langchain.com/docs/modules/agents/tools/)，我们可以直接使用 `load_tools()` 来加载；
+* Tools - 希望被 Agent 执行的函数，被称为 **工具**，类似于 OpenAI 的插件，我们需要尽可能地描述清楚每个工具的功能，以便 Agent 能选择合适的工具；
 
-* Agent - 经常被翻译成 **代理**，可以帮我们将用户的问题拆解成多个子任务，然后动态地选择和调用 Chain 或工具依次解决这些子任务，直到用户的问题完全被解决；根据所使用的策略，可以将 Agent [划分成不同的类型](https://python.langchain.com/docs/modules/agents/agent_types/)；Agent 的执行流程如下图所示：
+* Agent - 经常被翻译成 **代理**，类似于 OpenAI 的 Function Calling 机制，可以帮我们将用户的问题拆解成多个子任务，然后动态地选择和调用 Chain 或工具依次解决这些子任务，直到用户的问题完全被解决；Agent 的执行流程如下图所示：
 
 ![](./images/agent.png)
 
@@ -380,9 +388,39 @@ while next_action != AgentFinish:
 return next_action
 ```
 
-## LangChain Agent 进阶
+### LangChain Agent 进阶
 
-https://python.langchain.com/docs/modules/agents/agent_types/
+下面深入学习 LangChain Agent 的这几个概念。
+
+### 使用工具
+
+在入门示例中，我们使用 `@tool` 装饰器定义了一个工具：
+
+```
+@tool
+def get_word_length(word: str) -> int:
+    """Returns the length of a word."""
+    return len(word)
+```
+
+除了这种方式，我们还可以使用 `Tool.from_function()` 来定义工具：
+
+```
+Tool.from_function(
+    func=get_word_length,
+    name="get_word_length",
+    description="Returns the length of a word."
+)
+```
+
+官方 [内置了一些常用的工具](https://python.langchain.com/docs/modules/agents/tools/)，我们可以直接使用 `load_tools()` 来加载；
+
+### Agent 类型
+
+根据所使用的策略，可以将 Agent [划分成不同的类型](https://python.langchain.com/docs/modules/agents/agent_types/)；
+
+
+
 
 ### 在 LangChain 中使用 OpenAI Functions
 
