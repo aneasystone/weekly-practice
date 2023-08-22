@@ -9,9 +9,12 @@ llm = ChatOpenAI(temperature=0)
 
 # tools
 @tool
-def get_word_length(word: str) -> int:
+def get_word_length(word: str, excluding_hyphen: bool) -> int:
     """Returns the length of a word."""
-    return len(word)
+    if excluding_hyphen:
+        return len(word.replace('-', ''))
+    else:
+        return len(word)
 
 tools = [get_word_length]
 
@@ -25,8 +28,10 @@ prompt = OpenAIFunctionsAgent.create_prompt(system_message=system_message)
 agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
 
 # create an agent executor
-agent_executor = AgentExecutor(agent=agent, tools=tools)
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 # run the agent executor
-result = agent_executor.run("how many letters in the word 'hello'?")
+result = agent_executor.run("how many letters in the word 'weekly-practice', including the hyphen?")
+print(result)
+result = agent_executor.run("how many letters in the word 'weekly-practice', excluding the hyphen?")
 print(result)

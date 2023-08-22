@@ -403,7 +403,7 @@ def get_word_length(word: str) -> int:
     return len(word)
 ```
 
-除了这种方式，我们还可以使用 `Tool.from_function()` 来定义工具：
+除了这种方式，官方还提供了另外两种方式来定义工具。第一种是使用 `Tool.from_function()` 方法：
 
 ```
 Tool.from_function(
@@ -411,6 +411,26 @@ Tool.from_function(
     name="get_word_length",
     description="Returns the length of a word."
 )
+```
+
+第二种是直接继承 `BaseTool` 类：
+
+```
+class WordLengthTool(BaseTool):
+    name = "get_word_length"
+    description = "Returns the length of a word."
+
+    def _run(
+        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
+    ) -> str:
+        """Use the tool."""
+        return len(query)
+
+    async def _arun(
+        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+    ) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("get_word_length does not support async")
 ```
 
 官方 [内置了一些常用的工具](https://python.langchain.com/docs/modules/agents/tools/)，我们可以直接使用 `load_tools()` 来加载；
