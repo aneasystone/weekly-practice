@@ -372,9 +372,9 @@ print(result)
 
 从上面的代码中我们可以注意到 Agent 有这么几个重要的概念：
 
-* Tools - 希望被 Agent 执行的函数，被称为 **工具**，类似于 OpenAI 的插件，我们需要尽可能地描述清楚每个工具的功能，以便 Agent 能选择合适的工具；
+* [Tools](https://python.langchain.com/docs/modules/agents/tools/) - 希望被 Agent 执行的函数，被称为 **工具**，类似于 OpenAI 的插件，我们需要尽可能地描述清楚每个工具的功能，以便 Agent 能选择合适的工具；
 
-* Agent - 经常被翻译成 **代理**，类似于 OpenAI 的 Function Calling 机制，可以帮我们将用户的问题拆解成多个子任务，然后动态地选择和调用 Chain 或工具依次解决这些子任务，直到用户的问题完全被解决；Agent 的执行流程如下图所示：
+* [Agent](https://python.langchain.com/docs/modules/agents/) - 经常被翻译成 **代理**，类似于 OpenAI 的 Function Calling 机制，可以帮我们将用户的问题拆解成多个子任务，然后动态地选择和调用 Chain 或工具依次解决这些子任务，直到用户的问题完全被解决；Agent 的执行流程如下图所示：
 
 ![](./images/agent.png)
 
@@ -403,7 +403,37 @@ def get_word_length(word: str) -> int:
     return len(word)
 ```
 
-除了这种方式，官方还提供了另外两种方式来定义工具。第一种是使用 `Tool.from_function()` 方法：
+工具的名称默认为方法名，工具的描述为方法的 `doc_string`，工具方法支持多个参数：
+
+```
+@tool
+def get_word_length(word: str, excluding_hyphen: bool) -> int:
+    """Returns the length of a word."""
+    if excluding_hyphen:
+        return len(word.replace('-', ''))
+    else:
+        return len(word)
+```
+
+当工具方法有多个参数时，参数的描述就很重要，我们可以通过 `args_schema` 来传入一个 `BaseModel`，这是 [Pydantic](https://github.com/pydantic/pydantic) 中用于定义数据模型的基类：
+
+```
+class WordLengthSchema(BaseModel):
+    word: str = Field(description = "the word to be calculating")
+    excluding_hyphen: bool = Field(description = "excluding the hyphen or not, default to false")
+
+@tool(args_schema = WordLengthSchema)
+def get_word_length(word: str, excluding_hyphen: bool) -> int:
+    """Returns the length of a word."""
+    if excluding_hyphen:
+        return len(word.replace('-', ''))
+    else:
+        return len(word)
+```
+
+> LangChain 的代码中大量使用了 Pydantic 库，它提供了一种简单而强大的方式来验证和解析输入数据，并将其转换为类型安全的 Python 对象。
+
+除了使用 `@tool` 装饰器，官方还提供了另外两种方式来定义工具。第一种是使用 `Tool.from_function()`：
 
 ```
 Tool.from_function(
@@ -413,7 +443,30 @@ Tool.from_function(
 )
 ```
 
-第二种是直接继承 `BaseTool` 类：
+不过这个方法只支持接受一个字符串输入和一个字符串输出，如果工具方法有多个参数，必须得使用 `StructuredTool.from_function()`：
+
+```
+StructuredTool.from_function(
+    func=get_word_length,
+    name="get_word_length",
+    description="Returns the length of a word."
+)
+```
+
+同样，我们可以通过 `args_schema` 来传入一个 `BaseModel` 对方法的参数进行描述：
+
+```
+StructuredTool.from_function(
+    func=get_word_length,
+    name="get_word_length",
+    description="Returns the length of a word.",
+    args_schema=WordLengthSchema
+)
+```
+
+实际上查看 LangChain 的源码你就会发现，`@tool` 装饰器就是通过 `Tool.from_function()` 和 `StructuredTool.from_function()` 来实现的。
+
+第二种定义工具的方法是直接继承 `BaseTool` 类：
 
 ```
 class WordLengthTool(BaseTool):
@@ -421,19 +474,21 @@ class WordLengthTool(BaseTool):
     description = "Returns the length of a word."
 
     def _run(
-        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
+        self, word: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
-        return len(query)
+        return len(word)
 
     async def _arun(
-        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+        self, word: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("get_word_length does not support async")
 ```
 
-官方 [内置了一些常用的工具](https://python.langchain.com/docs/modules/agents/tools/)，我们可以直接使用 `load_tools()` 来加载；
+当工具方法有多个参数时，我们就在 `_run` 方法上定义多个参数，同时使用 `args_schema` 对多个参数进行描述。
+
+除了自己定义工具，LangChain 还内置了一些常用的工具，我们可以直接使用 `load_tools()` 来加载：
 
 ### Agent 类型
 

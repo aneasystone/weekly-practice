@@ -3,34 +3,30 @@ from langchain.tools import BaseTool
 from langchain.schema import SystemMessage
 from langchain.agents import OpenAIFunctionsAgent
 from langchain.agents import AgentExecutor
-from typing import Optional, Type
+from typing import Optional
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
-from pydantic import BaseModel, Field
 
 # llm
 llm = ChatOpenAI(temperature=0)
-
-class WordLengthSchema(BaseModel):
-    word: str = Field("the word to be calculating")
-    excluding_hyphen: bool = Field("excluding the hyphen or not, default to false")
 
 # tools
 class WordLengthTool(BaseTool):
     name = "get_word_length"
     description = "Returns the length of a word."
-    # args_schema: Type[WordLengthSchema] = WordLengthSchema
 
+    # TODO 多个参数不生效
+    
     def _run(
-        self, query: str, excluding_hyphen: bool = False, run_manager: Optional[CallbackManagerForToolRun] = None
+        self, word: str, excluding_hyphen: bool = False, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
         if excluding_hyphen:
-            return len(query.replace('-', ''))
+            return len(word.replace('-', ''))
         else:
-            return len(query)
+            return len(word)
 
     async def _arun(
-        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+        self, word: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("get_word_length does not support async")

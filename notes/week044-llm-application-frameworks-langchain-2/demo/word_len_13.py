@@ -3,15 +3,23 @@ from langchain.agents import tool
 from langchain.schema import SystemMessage
 from langchain.agents import OpenAIFunctionsAgent
 from langchain.agents import AgentExecutor
+from pydantic import BaseModel, Field
 
 # llm
 llm = ChatOpenAI(temperature=0)
 
+class WordLengthSchema(BaseModel):
+    word: str = Field(description = "the word to be calculating")
+    excluding_hyphen: bool = Field(description = "excluding the hyphen or not, default to false")
+
 # tools
-@tool
-def get_word_length(word: str) -> int:
+@tool(args_schema = WordLengthSchema)
+def get_word_length(word: str, excluding_hyphen: bool) -> int:
     """Returns the length of a word."""
-    return len(word)
+    if excluding_hyphen:
+        return len(word.replace('-', ''))
+    else:
+        return len(word)
 
 tools = [get_word_length]
 
@@ -28,5 +36,7 @@ agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 # run the agent executor
-result = agent_executor.run("how many letters in the word 'weekly-practice'?")
+result = agent_executor.run("how many letters in the word 'weekly-practice', including the hyphen?")
+print(result)
+result = agent_executor.run("how many letters in the word 'weekly-practice', excluding the hyphen?")
 print(result)

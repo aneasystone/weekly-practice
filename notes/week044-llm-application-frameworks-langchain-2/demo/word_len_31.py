@@ -15,13 +15,13 @@ class WordLengthTool(BaseTool):
     description = "Returns the length of a word."
 
     def _run(
-        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
+        self, word: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
-        return len(query)
+        return len(word)
 
     async def _arun(
-        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+        self, word: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("get_word_length does not support async")
