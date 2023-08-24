@@ -331,8 +331,6 @@ messages=[
 
 我们知道，大模型虽然擅长推理，但是却不擅长算术和计数，比如问它单词 `hello` 是由几个字母组成的，它就有可能胡编乱造，我们可以定义一个函数 `get_word_length()` 帮助大模型来回答关于单词长度的问题。
 
-> 我们也可以使用 OpenAI 的 Function Calling 来解决这个问题，但是 Function Calling 机制只有 OpenAI 的接口才支持；而 LangChain 面对的是各种大模型，并不是所有大模型都支持 Function Calling 机制，这是要专门训练的，所以 LangChain Agent 使用了一种更通用的实现机制。
-
 入门示例的代码如下：
 
 ```
@@ -486,16 +484,62 @@ class WordLengthTool(BaseTool):
         raise NotImplementedError("get_word_length does not support async")
 ```
 
-当工具方法有多个参数时，我们就在 `_run` 方法上定义多个参数，同时使用 `args_schema` 对多个参数进行描述。
+当工具方法有多个参数时，我们就在 `_run` 方法上定义多个参数，同时使用 `args_schema` 对多个参数进行描述：
+
+```
+class WordLengthTool(BaseTool):
+    name = "get_word_length"
+    description = "Returns the length of a word."
+    args_schema: Type[WordLengthSchema] = WordLengthSchema
+
+    def _run(
+        self, word: str, excluding_hyphen: bool = False, run_manager: Optional[CallbackManagerForToolRun] = None
+    ) -> str:
+        """Use the tool."""
+        if excluding_hyphen:
+            return len(word.replace('-', ''))
+        else:
+            return len(word)
+```
 
 除了自己定义工具，LangChain 还内置了一些常用的工具，我们可以直接使用 `load_tools()` 来加载：
 
+```
+from langchain.agents import load_tools
+
+tools = load_tools(["serpapi"])
+```
+
+可以从 [load_tools.py](https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain/agents/load_tools.py) 源码中找到支持的工具列表。
+
 ### Agent 类型
 
-根据所使用的策略，可以将 Agent [划分成不同的类型](https://python.langchain.com/docs/modules/agents/agent_types/)；
+有些同学可能已经注意到，在示例代码中我们使用了 `OpenAIFunctionsAgent`，很显然，这个 Agent 是基于 OpenAI 的 Function Calling 实现的，它通过 `format_tool_to_openai_function()` 将工具转换为 OpenAI 的 `functions` 参数。但是 Function Calling 机制只有 OpenAI 的接口才支持，而 LangChain 面对的是各种大模型，并不是所有的大模型都支持 Function Calling 机制，这是要专门训练的，所以 LangChain 的 Agent 还需要支持一种更通用的实现机制。
 
+TODO
 
+根据所使用的策略，可以将 Agent [划分成不同的类型](https://python.langchain.com/docs/modules/agents/agent_types/)，LangChain 中提供了一个 `initialize_agent()` 方法可以简化示例代码中 `OpenAIFunctionsAgent` 的创建过程：
 
+```
+from langchain.agents import initialize_agent
+from langchain.agents import AgentType
+
+agent_executor = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
+```
+
+* OPENAI_FUNCTIONS
+* OPENAI_MULTI_FUNCTIONS
+
+* ZERO_SHOT_REACT_DESCRIPTION
+* CHAT_ZERO_SHOT_REACT_DESCRIPTION
+* STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION
+
+* CONVERSATIONAL_REACT_DESCRIPTION
+* CHAT_CONVERSATIONAL_REACT_DESCRIPTION
+
+* REACT_DOCSTORE
+
+* SELF_ASK_WITH_SEARCH
 
 ### 在 LangChain 中使用 OpenAI Functions
 
