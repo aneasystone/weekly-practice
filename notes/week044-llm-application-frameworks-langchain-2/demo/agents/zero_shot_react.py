@@ -2,15 +2,16 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents import tool
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
-from langchain.schema import SystemMessage
-from langchain.agents import OpenAIFunctionsAgent
-from langchain.agents import AgentExecutor
+from pydantic import BaseModel, Field
 
 # llm
 llm = ChatOpenAI(temperature=0)
 
+class WordLengthSchema(BaseModel):
+    word: str = Field(description = "the word to be calculating, excluding the quotation marks") # not work
+
 # tools
-@tool
+@tool(args_schema = WordLengthSchema)
 def get_word_length(word: str) -> int:
     """Returns the length of a word."""
     return len(word)

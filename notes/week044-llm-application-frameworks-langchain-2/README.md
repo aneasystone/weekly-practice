@@ -514,32 +514,91 @@ tools = load_tools(["serpapi"])
 
 ### Agent 类型
 
-有些同学可能已经注意到，在示例代码中我们使用了 `OpenAIFunctionsAgent`，很显然，这个 Agent 是基于 OpenAI 的 Function Calling 实现的，它通过 `format_tool_to_openai_function()` 将工具转换为 OpenAI 的 `functions` 参数。但是 Function Calling 机制只有 OpenAI 的接口才支持，而 LangChain 面对的是各种大模型，并不是所有的大模型都支持 Function Calling 机制，这是要专门训练的，所以 LangChain 的 Agent 还需要支持一种更通用的实现机制。
-
-TODO
-
-根据所使用的策略，可以将 Agent [划分成不同的类型](https://python.langchain.com/docs/modules/agents/agent_types/)，LangChain 中提供了一个 `initialize_agent()` 方法可以简化示例代码中 `OpenAIFunctionsAgent` 的创建过程：
+有些同学可能已经注意到，在示例代码中我们使用了 `OpenAIFunctionsAgent`，我们也可以使用 `initialize_agent()` 方法简化 `OpenAIFunctionsAgent` 的创建过程：
 
 ```
+from langchain.chat_models import ChatOpenAI
+from langchain.agents import tool
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
+# llm
+llm = ChatOpenAI(temperature=0)
+
+# tools
+@tool
+def get_word_length(word: str) -> int:
+    """Returns the length of a word."""
+    return len(word)
+
+tools = [get_word_length]
+
+# create an agent executor
 agent_executor = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
+
+# run the agent executor
+result = agent_executor.run("how many letters in the word 'weekly-practice'?")
+print(result)
 ```
 
-* OPENAI_FUNCTIONS
-* OPENAI_MULTI_FUNCTIONS
+很显然，这个 Agent 是基于 OpenAI 的 Function Calling 实现的，它通过 `format_tool_to_openai_function()` 将 LangChain 的工具转换为 OpenAI 的 `functions` 参数。但是 Function Calling 机制只有 OpenAI 的接口才支持，而 LangChain 面对的是各种大模型，并不是所有的大模型都支持 Function Calling 机制，这是要专门训练的，所以 LangChain 的 Agent 还需要支持一种更通用的实现机制。根据所使用的策略，LangChain 支持 [多种 Agent 类型](https://python.langchain.com/docs/modules/agents/agent_types/)。
+
+#### Zero-shot ReAct Agent
+
+ReAct 这个词出自一篇论文 [ReAct: Synergizing Reasoning and Acting in Language Models](https://react-lm.github.io/)，它是由 `Reason` 和 `Act` 两个词组合而成，表示一种将 **推理** 和 **行动** 与大模型相结合的通用范式：
+
+![](./images/react.png)
+
+传统的 `Reason Only` 型应用（如 [Chain-of-Thought Prompting](https://www.promptingguide.ai/techniques/cot)）具备很强的语言能力，擅长通用文本的逻辑推断，但由于不会和外部环境交互，因此它的认知非常受限；而传统的 `Act Only` 型应用（如 [WebGPT](https://openai.com/research/webgpt)、[SayCan](https://say-can.github.io/)、[ACT-1](https://www.adept.ai/blog/act-1)）能和外界进行交互，解决某类特定问题，但它的行为逻辑较简单，不具备通用的推理能力。
+
+`ReAct` 的思想，旨在将这两种应用的优势结合起来。针对一个复杂问题，首先使用大模型的推理能力制定出解决该问题的行动计划，这好比人的大脑，可以对问题进行分析思考；然后使用行动能力与外部源（例如知识库或环境）进行交互，以获取额外信息，这好比人的五官和手脚，可以感知世界，并执行动作；大模型对行动的结果进行跟踪，并不断地更新行动计划，直到问题被解决。通过这种模式，我们能基于大模型构建更为强大的 AI 应用，大名鼎鼎的 [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) 项目就是基于 ReAct 模式实现的。
+
+LangChain 基于 ReAct 思想实现了一些 Agent，其中最简单的就是 Zero-shot ReAct Agent，我们将上面的 `AgentType.OPENAI_FUNCTIONS` 替换成 `AgentType.ZERO_SHOT_REACT_DESCRIPTION` 即可：
+
+```
+agent_executor = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+```
+
+执行结果如下：
+
+```
+> Entering new AgentExecutor chain...
+I should use the get_word_length tool to find the length of the word.
+Action: get_word_length
+Action Input: 'weekly-practice'
+Observation: 17
+Thought:The word 'weekly-practice' has 17 letters.
+Final Answer: 17
+
+> Finished chain.
+17
+```
+
+从输出结果可以一窥 Agent 的思考过程，包括三个部分：`Thought` 是由大模型生成的想法，是执行行动的依据；`Action` 是指大模型判断本次需要执行的具体动作；`Observation` 是执行动作后从外部获取的信息。
+
+> 可以看到这个 Agent 没有 OpenAI 那么智能，它在计算单词长度时没有去掉左右的引号。
 
 * ZERO_SHOT_REACT_DESCRIPTION
 * CHAT_ZERO_SHOT_REACT_DESCRIPTION
 * STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION
 
+#### Conversational ReAct Agent
+
 * CONVERSATIONAL_REACT_DESCRIPTION
 * CHAT_CONVERSATIONAL_REACT_DESCRIPTION
 
+#### ReAct DocStore Agent
+
 * REACT_DOCSTORE
 
+#### Self-Ask Agent
+
 * SELF_ASK_WITH_SEARCH
+
+#### OpenAI Functions Agent
+
+* OPENAI_FUNCTIONS
+* OPENAI_MULTI_FUNCTIONS
 
 ### 在 LangChain 中使用 OpenAI Functions
 
@@ -554,6 +613,7 @@ https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_ag
 * [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
 * [LangChain初学者入门指南](https://mp.weixin.qq.com/s/F4QokLPrimFS1LRjXDbwQQ)
 * [LangChain：Model as a Service粘合剂，被ChatGPT插件干掉了吗？](https://36kr.com/p/2203231346847113)
+* [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://juejin.cn/post/7260129616908222525)
 
 ### AI Agents
 
