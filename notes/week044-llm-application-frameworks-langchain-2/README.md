@@ -553,7 +553,7 @@ ReAct 这个词出自一篇论文 [ReAct: Synergizing Reasoning and Acting in La
 
 `ReAct` 的思想，旨在将这两种应用的优势结合起来。针对一个复杂问题，首先使用大模型的推理能力制定出解决该问题的行动计划，这好比人的大脑，可以对问题进行分析思考；然后使用行动能力与外部源（例如知识库或环境）进行交互，以获取额外信息，这好比人的五官和手脚，可以感知世界，并执行动作；大模型对行动的结果进行跟踪，并不断地更新行动计划，直到问题被解决。通过这种模式，我们能基于大模型构建更为强大的 AI 应用，大名鼎鼎的 [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) 项目就是基于 ReAct 模式实现的。
 
-LangChain 基于 ReAct 思想实现了一些 Agent，其中最简单的就是 Zero-shot ReAct Agent，我们将上面的 `AgentType.OPENAI_FUNCTIONS` 替换成 `AgentType.ZERO_SHOT_REACT_DESCRIPTION` 即可：
+LangChain 基于 ReAct 思想实现了一些 Agent，其中最简单的就是 [Zero-shot ReAct Agent](https://python.langchain.com/docs/modules/agents/agent_types/react.html)，我们将上面的 `AgentType.OPENAI_FUNCTIONS` 替换成 `AgentType.ZERO_SHOT_REACT_DESCRIPTION` 即可：
 
 ```
 agent_executor = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
@@ -578,14 +578,189 @@ Final Answer: 17
 
 > 可以看到这个 Agent 没有 OpenAI 那么智能，它在计算单词长度时没有去掉左右的引号。
 
-* ZERO_SHOT_REACT_DESCRIPTION
-* CHAT_ZERO_SHOT_REACT_DESCRIPTION
-* STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION
+为了展示 Agent 思维链的强大之处，我们可以输入一个更复杂的问题：
+
+```
+Calculate the length of the word 'weekly-practice' times the word 'aneasystone'?
+```
+
+要回答这个问题，Agent 必须先计算两个单词的长度，然后将两个长度相乘得到乘积，所以我们要在工具箱中加一个用于计算的工具，可以直接使用 LangChain 内置的 `llm-math` 工具：
+
+```
+@tool
+def get_word_length(word: str) -> int:
+    """Returns the length of a word."""
+    return len(word)
+
+tools = load_tools(["llm-math"], llm=llm)
+tools.append(get_word_length)
+```
+
+运行结果如下：
+
+```
+> Entering new AgentExecutor chain...
+We need to calculate the length of the word 'weekly-practice' and the length of the word 'aneasystone', and then multiply them together.
+Action: get_word_length
+Action Input: 'weekly-practice'
+Observation: 17
+Thought:We have the length of the word 'weekly-practice'. Now we need to find the length of the word 'aneasystone'.
+Action: get_word_length
+Action Input: 'aneasystone'
+Observation: 13
+Thought:We have the lengths of both words. Now we can multiply them together to get the final answer.
+Action: Calculator
+Action Input: 17 * 13
+Observation: Answer: 221
+Thought:I now know the final answer.
+Final Answer: The length of the word 'weekly-practice' times the word 'aneasystone' is 221.
+
+> Finished chain.
+The length of the word 'weekly-practice' times the word 'aneasystone' is 221.
+```
+
+针对最简单的 Zero-shot ReAct Agent，LangChain 提供了三个实现：
+
+* `ZERO_SHOT_REACT_DESCRIPTION` - 使用 LLMs 实现；
+* `CHAT_ZERO_SHOT_REACT_DESCRIPTION` - 使用 ChatModels 实现；
+* `STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION` - 上面两种 Agent 使用的工具都只支持输入简单的字符串，而这种 Agent 通过 `args_schema` 来生成工具的输入，支持在工具中使用多个参数；
 
 #### Conversational ReAct Agent
 
-* CONVERSATIONAL_REACT_DESCRIPTION
-* CHAT_CONVERSATIONAL_REACT_DESCRIPTION
+和 Chain 一样，也可以给 Agent 增加记忆功能，默认情况下，Zero-shot ReAct Agent 是不具有记忆功能的，不过我们可以通过 `agent_kwargs` 参数修改 Agent 让其具备记忆功能。我们可以使用下面的技巧将 Agent 所使用的 Prompt 打印出来看看：
+
+```
+print(agent_executor.agent.llm_chain.prompt.template)
+```
+
+输出结果如下：
+
+```
+Answer the following questions as best you can. You have access to the following tools:
+
+Calculator: Useful for when you need to answer questions about math.
+get_word_length: get_word_length(word: str) -> int - Returns the length of a word.
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [Calculator, get_word_length]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+
+Begin!
+
+Question: {input}
+Thought:{agent_scratchpad}
+```
+
+如果要让它具备记忆功能，我们需要在 Prompt 中加上历史会话内容，其实上面的 Prompt 包括了 `prefix`、`format_instructions` 和 `suffix` 三个部分，我们将 `prefix` 和 `suffix` 修改成下面这样：
+
+```
+prefix = """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+suffix = """Begin!"
+
+{chat_history}
+Question: {input}
+{agent_scratchpad}"""
+```
+
+主要的修改点在 `suffix` 参数，我们加上了 `{chat_history}` 占位符表示历史会话记录，由于引入了新的占位符，所以在 `input_variables` 中也需要加上 `chat_history` 变量，这个变量的内容会被 `ConversationBufferMemory` 自动替换：
+
+```
+from langchain.memory import ConversationBufferMemory
+
+memory = ConversationBufferMemory(memory_key="chat_history")
+
+# create an agent executor
+agent_executor = initialize_agent(
+    tools, 
+    llm, 
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
+    verbose=True,
+    memory=memory,
+    agent_kwargs={
+        "prefix": prefix,
+        "suffix": suffix,
+        "input_variables": ["input", "chat_history", "agent_scratchpad"],
+    }
+)
+```
+
+至此我们这个 Agent 就具备记忆功能了，可以将上面那个复杂问题拆分成三个小问题分别问它：
+
+```
+result = agent_executor.run("how many letters in the word 'weekly-practice'?")
+print(result)
+result = agent_executor.run("how many letters in the word 'hello-world'?")
+print(result)
+result = agent_executor.run("what is the product of results above?")
+print(result)
+```
+
+执行结果如下，可以看出在回答第三个问题时它记住了上面两轮对话的内容：
+
+```
+> Entering new AgentExecutor chain...
+Thought: I can use the get_word_length tool to find the length of the word 'weekly-practice'.
+Action: get_word_length
+Action Input: 'weekly-practice'
+Observation: 17
+Thought:I now know the final answer
+Final Answer: The word 'weekly-practice' has 17 letters.
+
+> Finished chain.
+The word 'weekly-practice' has 17 letters.
+
+
+> Entering new AgentExecutor chain...
+Thought: I need to find the length of the word 'hello-world'.
+Action: get_word_length
+Action Input: 'hello-world'
+Observation: 13
+Thought:The word 'hello-world' has 13 letters.
+Final Answer: The word 'hello-world' has 13 letters.
+
+> Finished chain.
+The word 'hello-world' has 13 letters.
+
+
+> Entering new AgentExecutor chain...
+Thought: I need to calculate the product of the results above.
+Action: Calculator
+Action Input: 17 * 13
+Observation: Answer: 221
+Thought:I now know the final answer.
+Final Answer: The product of the results above is 221.
+
+> Finished chain.
+The product of the results above is 221.
+```
+
+像上面这样给 Agent 增加记忆实在是太繁琐了，LangChain 于是内置了两种 [Conversational ReAct Agent](https://python.langchain.com/docs/modules/agents/agent_types/chat_conversation_agent) 来简化这个过程：
+
+* `CONVERSATIONAL_REACT_DESCRIPTION` - 使用 LLMs 实现；
+* `CHAT_CONVERSATIONAL_REACT_DESCRIPTION` - 使用 ChatModels 实现；
+
+使用 Conversational ReAct Agent 要简单得多，我们只需要准备一个 memory 参数即可：
+
+```
+# memory
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+# create an agent executor
+agent_executor = initialize_agent(
+    tools, 
+    llm, 
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION, 
+    verbose=True,
+    memory=memory,
+)
+```
 
 #### ReAct DocStore Agent
 
