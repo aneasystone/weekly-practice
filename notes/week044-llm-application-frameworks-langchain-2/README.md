@@ -805,7 +805,54 @@ agent_executor = initialize_agent(
 
 #### ReAct DocStore Agent
 
-* REACT_DOCSTORE
+和 Zero-shot ReAct Agent 一样，[ReAct DocStore Agent](https://python.langchain.com/docs/modules/agents/agent_types/react_docstore.html) 也是一个基于 ReAct 框架实现的 Agent。事实上，ReAct DocStore Agent 才是 [ReAct 这篇论文](https://react-lm.github.io/) 的标准实现，这个 Agent 必须包含两个指定工具：`Search` 用于调用 DocStore 搜索相关文档，`Lookup` 用于从搜索的文档中查询关键词信息。
+
+> Zero-shot ReAct Agent 更像是一个通用的 [MRKL 系统](https://arxiv.org/abs/2205.00445)，MRKL 的全称是模块化推理、知识和语言系统，它是一种模块化的神经符号架构，结合了大型语言模型、外部知识源和离散推理，它最初 [由 AI21 Labs 提出](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system)，并实现了 Jurassic-X，对 MRKL 感兴趣的同学可以参考 [这篇博客](https://zhuanlan.zhihu.com/p/526713337)。
+
+LangChain 目前貌似只实现了 Wikipedia 和 InMemory 两个 DocStore，下面的例子中我们使用 Wikipedia 来进行搜索：
+
+```
+from langchain import Wikipedia
+from langchain.agents import Tool
+from langchain.agents.react.base import DocstoreExplorer
+
+docstore = DocstoreExplorer(Wikipedia())
+tools = [
+    Tool(
+        name="Search",
+        func=docstore.search,
+        description="useful for when you need to ask with search",
+    ),
+    Tool(
+        name="Lookup",
+        func=docstore.lookup,
+        description="useful for when you need to ask with lookup",
+    ),
+]
+```
+
+然后创建一个类型为 `AgentType.REACT_DOCSTORE` 的 Agent，并提出一个问题：谁是当今美国总统？
+
+```
+agent_executor = initialize_agent(tools, llm, agent=AgentType.REACT_DOCSTORE, verbose=True)
+
+result = agent_executor.run("Who is the current president of the United States?")
+print(result)
+```
+
+运行结果如下：
+
+```
+> Entering new AgentExecutor chain...
+Thought: I need to find out who the current president of the United States is.
+Action: Search[current president of the United States]
+Observation: The president of the United States (POTUS) is the head of state and head of government of the United States... Joe Biden is the 46th and current president of the United States, having assumed office on January 20, 2021.
+Thought:Joe Biden is the current president of the United States.
+Action: Finish[Joe Biden]
+
+> Finished chain.
+Joe Biden
+```
 
 #### Self-Ask Agent
 
