@@ -856,12 +856,65 @@ Joe Biden
 
 #### Self-Ask Agent
 
-* SELF_ASK_WITH_SEARCH
+[Self-Ask Agent](https://python.langchain.com/docs/modules/agents/agent_types/self_ask_with_search.html) 是另一种基于 ReAct 框架的 Agent，它直接使用搜索引擎作为唯一的工具，工具名称必须叫做 `Intermediate Answer`，一般使用 Google 搜索来实现；Self-Ask 的原理来自于 [这篇论文](https://ofir.io/self-ask.pdf)，通过下面的提示语技巧让大模型以 `Follow up/Intermediate answer` 这种固定的格式回答用户问题：
+
+```
+Question: Who lived longer, Muhammad Ali or Alan Turing?
+Are follow up questions needed here: Yes.
+Follow up: How old was Muhammad Ali when he died?
+Intermediate answer: Muhammad Ali was 74 years old when he died.
+Follow up: How old was Alan Turing when he died?
+Intermediate answer: Alan Turing was 41 years old when he died.
+So the final answer is: Muhammad Ali
+```
+
+其中 `Follow up` 是我们需要搜索的内容，它类似于 Zero-shot ReAct Agent 里的 `Action/Action Input`，由于直接使用搜索引擎，所以不需要让大模型决定使用哪个工具和参数；`Intermediate answer` 是搜索的结果，它类似于 Zero-shot ReAct Agent 里的 `Observation`；经过不断的搜索，大模型最终得到问题的答案。
+
+下面是使用 Self-Ask Agent 的示例，首先通过 `SerpAPI` 定义一个名为 `Intermediate Answer` 的工具：
+
+```
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name="Intermediate Answer",
+        func=search.run,
+        description="useful for when you need to ask with search",
+    )
+]
+```
+
+然后创建一个类型为 `AgentType.SELF_ASK_WITH_SEARCH` 的 Agent，并提出一个问题：当今美国总统的出生日期是什么时候？
+
+```
+agent_executor = initialize_agent(tools, llm, agent=AgentType.SELF_ASK_WITH_SEARCH, verbose=True)
+
+result = agent_executor.run("When is the current president of the United States born?")
+print(result)
+```
+
+运行结果如下：
+
+```
+> Entering new AgentExecutor chain...
+Yes.
+Follow up: Who is the current president of the United States?
+Intermediate answer: Joe Biden
+Follow up: When was Joe Biden born?
+Intermediate answer: November 20, 1942
+So the final answer is: November 20, 1942
+
+> Finished chain.
+November 20, 1942
+```
 
 #### OpenAI Functions Agent
 
 * OPENAI_FUNCTIONS
 * OPENAI_MULTI_FUNCTIONS
+
+#### Plan and execute Agent
+
+https://python.langchain.com/docs/modules/agents/agent_types/plan_and_execute.html
 
 ### 在 LangChain 中使用 OpenAI Functions
 

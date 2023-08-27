@@ -29,4 +29,5 @@ print(agent_executor.agent.llm_chain.prompt.template)
 
 # run the agent executor
 result = agent_executor.run("Who is the current president of the United States?")
+# result = agent_executor.run("When is the current president of the United States born?")
 print(result)
