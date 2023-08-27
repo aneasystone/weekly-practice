@@ -658,18 +658,59 @@ Question: {input}
 Thought:{agent_scratchpad}
 ```
 
-如果要让它具备记忆功能，我们需要在 Prompt 中加上历史会话内容，其实上面的 Prompt 包括了 `prefix`、`format_instructions` 和 `suffix` 三个部分，我们将 `prefix` 和 `suffix` 修改成下面这样：
+这个 Prompt 就是实现 ReAct 的核心，它实际上包括了三个部分。第一部分称为前缀（`prefix`），可以在这里加一些通用的提示语，并列出大模型可以使用的工具名称和描述：
 
 ```
-prefix = """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
-suffix = """Begin!"
+Answer the following questions as best you can. You have access to the following tools:
+
+Calculator: Useful for when you need to answer questions about math.
+get_word_length: get_word_length(word: str) -> int - Returns the length of a word.
+```
+
+第二部分称为格式化指令（`format_instructions`），内容如下：
+
+```
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [Calculator, get_word_length]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+```
+
+这段指令让大模型必须按照 `Thought/Action/Action Input/Observation` 这种特定的格式来回答我们的问题，然后我们将 `Observation` 设置为停止词（`Stop Word`）。如果大模型返回的结果中有 `Action` 和 `Action Input`，就说明大模型需要调用外部工具获取进一步的信息，于是我们就去执行该工具，并将执行结果放在 `Observation` 中，接着再次调用大模型，这样我们每执行一次，就能得到大模型的一次思考过程，直到大模型返回 `Final Answer` 为止，此时我们就得到了最终结果。
+
+第三部分称为后缀（`suffix`），包括两个占位符，`{input}` 表示用户输入的问题，`{agent_scratchpad}` 表示 Agent 每一步思考的过程，可以让 Agent 继续思考下去：
+
+```
+Begin!
+
+Question: {input}
+Thought:{agent_scratchpad}
+```
+
+可以看到上面的 Prompt 中并没有考虑历史会话，如果要让 Agent 具备记忆功能，我们必须在 Prompt 中加上历史会话内容，我们将 `prefix` 修改成下面这样：
+
+```
+Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:
+```
+
+明确地指出这是一次和人类的会话。然后将 `suffix` 修改为：
+
+```
+
+Begin!"
 
 {chat_history}
 Question: {input}
-{agent_scratchpad}"""
+{agent_scratchpad}
 ```
 
-主要的修改点在 `suffix` 参数，我们加上了 `{chat_history}` 占位符表示历史会话记录，由于引入了新的占位符，所以在 `input_variables` 中也需要加上 `chat_history` 变量，这个变量的内容会被 `ConversationBufferMemory` 自动替换：
+我们在里面加上了 `{chat_history}` 占位符表示历史会话记录。由于引入了新的占位符，所以在 `input_variables` 中也需要加上 `chat_history` 变量，这个变量的内容会被 `ConversationBufferMemory` 自动替换，修改后的代码如下：
 
 ```
 from langchain.memory import ConversationBufferMemory
@@ -789,6 +830,7 @@ https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_ag
 * [LangChain初学者入门指南](https://mp.weixin.qq.com/s/F4QokLPrimFS1LRjXDbwQQ)
 * [LangChain：Model as a Service粘合剂，被ChatGPT插件干掉了吗？](https://36kr.com/p/2203231346847113)
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://juejin.cn/post/7260129616908222525)
+* [Superpower LLMs with Conversational Agents](https://www.pinecone.io/learn/series/langchain/langchain-agents/)
 
 ### AI Agents
 

@@ -3,6 +3,7 @@ from langchain.agents import tool, load_tools
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 from langchain.memory import ConversationBufferMemory
+from langchain.prompts import MessagesPlaceholder, PromptTemplate
 
 # llm
 llm = ChatOpenAI(temperature=0)
@@ -27,6 +28,16 @@ agent_executor = initialize_agent(
     verbose=True,
     memory=memory,
 )
+
+if isinstance(agent_executor.agent.llm_chain.prompt, PromptTemplate):
+    print(agent_executor.agent.llm_chain.prompt.template)
+else:
+    for message in agent_executor.agent.llm_chain.prompt.messages:
+        if isinstance(message, MessagesPlaceholder):
+            print(message.variable_name)
+        else:
+            print(message.prompt.template)
+        print('---')
 
 # run the agent executor
 result = agent_executor.run("how many letters in the word 'weekly-practice'?")
