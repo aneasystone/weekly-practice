@@ -686,6 +686,14 @@ on_llm_end: <...略>
 on_chain_end: {'text': '\n\nThe weather today is really nice.'}
 ```
 
+还有一种更简单的调试方法，直接将 `langchain.debug` 设置为 `True` 即可，如下：
+
+```
+import langchain
+
+langchain.debug = True
+```
+
 ## 从 Chain 到 Agent
 
 通过上一节的学习，我们掌握了 Chain 的基本概念和用法，对 Chain 的三大特性也有了一个大概的认识，关于 Chain 还有很多高级主题等着我们去探索，比如 [Chain 的异步调用](https://python.langchain.com/docs/modules/chains/how_to/async_chain)，[实现自定义的 Chain](https://python.langchain.com/docs/modules/chains/how_to/custom_chain)，[Chain 的序列化和反序列化](https://python.langchain.com/docs/modules/chains/how_to/serialization)，[从 LangChainHub 加载 Chain](https://python.langchain.com/docs/modules/chains/how_to/from_hub)，等等。

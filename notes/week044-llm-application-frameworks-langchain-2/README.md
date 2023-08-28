@@ -846,7 +846,8 @@ print(result)
 > Entering new AgentExecutor chain...
 Thought: I need to find out who the current president of the United States is.
 Action: Search[current president of the United States]
-Observation: The president of the United States (POTUS) is the head of state and head of government of the United States... Joe Biden is the 46th and current president of the United States, having assumed office on January 20, 2021.
+Observation: The president of the United States (POTUS) is the head of state and head of government of the United States... 
+Joe Biden is the 46th and current president of the United States, having assumed office on January 20, 2021.
 Thought:Joe Biden is the current president of the United States.
 Action: Finish[Joe Biden]
 
@@ -909,8 +910,23 @@ November 20, 1942
 
 #### OpenAI Functions Agent
 
-* OPENAI_FUNCTIONS
-* OPENAI_MULTI_FUNCTIONS
+上面的几种 Agent 都是基于 ReAct 框架实现的，这虽然是一种比较通用的解决方案，但是当我们使用 OpenAI 时，[OpenAI Functions Agent](https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent) 才是我们的最佳选择，因为 ReAct 归根结底是基于提示工程的，执行结果有着很大的不确定性，OpenAI 的 Function Calling 机制相对来说要更加可靠。
+
+在入门示例中，我们已经用到了 OpenAI Functions Agent 类型，这一节我们将学习另一种类型 [OpenAI Multi Functions Agent](https://python.langchain.com/docs/modules/agents/agent_types/openai_multi_functions_agent)。
+
+OpenAI Functions Agent 的缺点是每次只能返回一个工具，比如我们的问题是 `合肥和上海今天的天气怎么样？`，OpenAI Functions Agent 第一次会返回一个函数调用 `get_weather_info(city='合肥')`，然后我们需要再调用一次，第二次又会返回一个函数调用 `get_weather_info(city='上海')`，最后 OpenAI 对两个结果进行总结得到最终答案。
+
+很显然，这两次调用是可以并行处理的，如果 Agent 能一次性返回两次调用，这将大大提高我们的执行效率，这就是提出 OpenAI Multi Functions Agent 的初衷。
+
+为了对比这两种 Agent 的区别，我们可以使用下面的技巧开启 LangChain 的调试模式：
+
+```
+import langchain
+
+langchain.debug = True
+```
+
+
 
 #### Plan and execute Agent
 
