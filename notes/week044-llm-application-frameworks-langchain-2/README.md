@@ -926,17 +926,296 @@ import langchain
 langchain.debug = True
 ```
 
+然后使用同一个问题对两个 Agent 进行提问：
 
+```
+Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?
+```
+
+OpenAI Functions Agent 的运行结果如下：
+
+<details><summary>点击查看详情</summary>
+
+```
+[chain/start] [1:chain:AgentExecutor] Entering Chain run with input:
+{
+  "input": "Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?"
+}
+[llm/start] [1:chain:AgentExecutor > 2:llm:ChatOpenAI] Entering LLM run with input:
+{
+  "prompts": [
+    "System: You are a helpful AI assistant.\nHuman: Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?"
+  ]
+}
+[llm/end] [1:chain:AgentExecutor > 2:llm:ChatOpenAI] [1.08s] Exiting LLM run with output:
+{
+  "generations": [
+    [
+      {
+        "text": "",
+        "generation_info": {
+          "finish_reason": "function_call"
+        },
+        "message": {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain",
+            "schema",
+            "messages",
+            "AIMessage"
+          ],
+          "kwargs": {
+            "content": "",
+            "additional_kwargs": {
+              "function_call": {
+                "name": "get_word_length",
+                "arguments": "{\n  \"word\": \"weekly-practice\"\n}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  ],
+  "llm_output": {
+    "token_usage": {
+      "prompt_tokens": 111,
+      "completion_tokens": 18,
+      "total_tokens": 129
+    },
+    "model_name": "gpt-3.5-turbo"
+  },
+  "run": null
+}
+[tool/start] [1:chain:AgentExecutor > 3:tool:get_word_length] Entering Tool run with input:
+"{'word': 'weekly-practice'}"
+[tool/end] [1:chain:AgentExecutor > 3:tool:get_word_length] [0.217ms] Exiting Tool run with output:
+"15"
+[llm/start] [1:chain:AgentExecutor > 4:llm:ChatOpenAI] Entering LLM run with input:
+{
+  "prompts": [
+    "System: You are a helpful AI assistant.\nHuman: Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?\nAI: {'name': 'get_word_length', 'arguments': '{\\n  \"word\": \"weekly-practice\"\\n}'}\nFunction: 15"
+  ]
+}
+[llm/end] [1:chain:AgentExecutor > 4:llm:ChatOpenAI] [649.318ms] Exiting LLM run with output:
+{
+  "generations": [
+    [
+      {
+        "text": "",
+        "generation_info": {
+          "finish_reason": "function_call"
+        },
+        "message": {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain",
+            "schema",
+            "messages",
+            "AIMessage"
+          ],
+          "kwargs": {
+            "content": "",
+            "additional_kwargs": {
+              "function_call": {
+                "name": "get_word_length",
+                "arguments": "{\n  \"word\": \"aneasystone\"\n}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  ],
+  "llm_output": {
+    "token_usage": {
+      "prompt_tokens": 139,
+      "completion_tokens": 18,
+      "total_tokens": 157
+    },
+    "model_name": "gpt-3.5-turbo"
+  },
+  "run": null
+}
+[tool/start] [1:chain:AgentExecutor > 5:tool:get_word_length] Entering Tool run with input:
+"{'word': 'aneasystone'}"
+[tool/end] [1:chain:AgentExecutor > 5:tool:get_word_length] [0.148ms] Exiting Tool run with output:
+"11"
+[llm/start] [1:chain:AgentExecutor > 6:llm:ChatOpenAI] Entering LLM run with input:
+{
+  "prompts": [
+    "System: You are a helpful AI assistant.\nHuman: Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?\nAI: {'name': 'get_word_length', 'arguments': '{\\n  \"word\": \"weekly-practice\"\\n}'}\nFunction: 15\nAI: {'name': 'get_word_length', 'arguments': '{\\n  \"word\": \"aneasystone\"\\n}'}\nFunction: 11"
+  ]
+}
+[llm/end] [1:chain:AgentExecutor > 6:llm:ChatOpenAI] [1.66s] Exiting LLM run with output:
+{
+  "generations": [
+    [
+      {
+        "text": "The word 'weekly-practice' has a length of 15 characters, while the word 'aneasystone' has a length of 11 characters.",
+        "generation_info": {
+          "finish_reason": "stop"
+        },
+        "message": {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain",
+            "schema",
+            "messages",
+            "AIMessage"
+          ],
+          "kwargs": {
+            "content": "The word 'weekly-practice' has a length of 15 characters, while the word 'aneasystone' has a length of 11 characters.",
+            "additional_kwargs": {}
+          }
+        }
+      }
+    ]
+  ],
+  "llm_output": {
+    "token_usage": {
+      "prompt_tokens": 167,
+      "completion_tokens": 32,
+      "total_tokens": 199
+    },
+    "model_name": "gpt-3.5-turbo"
+  },
+  "run": null
+}
+[chain/end] [1:chain:AgentExecutor] [3.39s] Exiting Chain run with output:
+{
+  "output": "The word 'weekly-practice' has a length of 15 characters, while the word 'aneasystone' has a length of 11 characters."
+}
+The word 'weekly-practice' has a length of 15 characters, while the word 'aneasystone' has a length of 11 characters.
+```
+
+</details>
+
+可以看到 OpenAI Functions Agent 调了两次大模型，第一次大模型返回 `get_word_length` 函数计算单词 `weekly-practice` 的长度，第二次再次返回 `get_word_length` 函数计算单词 `aneasystone` 的长度。
+
+而 OpenAI Multi Functions Agent 的执行结果如下：
+
+<details><summary>点击查看详情</summary>
+
+```
+[chain/start] [1:chain:AgentExecutor] Entering Chain run with input:
+{
+  "input": "Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?"
+}
+[llm/start] [1:chain:AgentExecutor > 2:llm:ChatOpenAI] Entering LLM run with input:
+{
+  "prompts": [
+    "System: You are a helpful AI assistant.\nHuman: Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?"
+  ]
+}
+[llm/end] [1:chain:AgentExecutor > 2:llm:ChatOpenAI] [3.26s] Exiting LLM run with output:
+{
+  "generations": [
+    [
+      {
+        "text": "",
+        "generation_info": {
+          "finish_reason": "function_call"
+        },
+        "message": {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain",
+            "schema",
+            "messages",
+            "AIMessage"
+          ],
+          "kwargs": {
+            "content": "",
+            "additional_kwargs": {
+              "function_call": {
+                "name": "tool_selection",
+                "arguments": "{\n  \"actions\": [\n    {\n      \"action_name\": \"get_word_length\",\n      \"action\": {\n        \"word\": \"weekly-practice\"\n      }\n    },\n    {\n      \"action_name\": \"get_word_length\",\n      \"action\": {\n        \"word\": \"aneasystone\"\n      }\n    }\n  ]\n}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  ],
+  "llm_output": {
+    "token_usage": {
+      "prompt_tokens": 105,
+      "completion_tokens": 75,
+      "total_tokens": 180
+    },
+    "model_name": "gpt-3.5-turbo"
+  },
+  "run": null
+}
+[tool/start] [1:chain:AgentExecutor > 3:tool:get_word_length] Entering Tool run with input:
+"{'word': 'weekly-practice'}"
+[tool/end] [1:chain:AgentExecutor > 3:tool:get_word_length] [0.303ms] Exiting Tool run with output:
+"15"
+[tool/start] [1:chain:AgentExecutor > 4:tool:get_word_length] Entering Tool run with input:
+"{'word': 'aneasystone'}"
+[tool/end] [1:chain:AgentExecutor > 4:tool:get_word_length] [0.229ms] Exiting Tool run with output:
+"11"
+[llm/start] [1:chain:AgentExecutor > 5:llm:ChatOpenAI] Entering LLM run with input:
+{
+  "prompts": [
+    "System: You are a helpful AI assistant.\nHuman: Calculate the length of the word 'weekly-practice' and the word 'aneasystone'?\nAI: {'name': 'tool_selection', 'arguments': '{\\n  \"actions\": [\\n    {\\n      \"action_name\": \"get_word_length\",\\n      \"action\": {\\n        \"word\": \"weekly-practice\"\\n      }\\n    },\\n    {\\n      \"action_name\": \"get_word_length\",\\n      \"action\": {\\n        \"word\": \"aneasystone\"\\n      }\\n    }\\n  ]\\n}'}\nFunction: 15\nAI: {'name': 'tool_selection', 'arguments': '{\\n  \"actions\": [\\n    {\\n      \"action_name\": \"get_word_length\",\\n      \"action\": {\\n        \"word\": \"weekly-practice\"\\n      }\\n    },\\n    {\\n      \"action_name\": \"get_word_length\",\\n      \"action\": {\\n        \"word\": \"aneasystone\"\\n      }\\n    }\\n  ]\\n}'}\nFunction: 11"
+  ]
+}
+[llm/end] [1:chain:AgentExecutor > 5:llm:ChatOpenAI] [1.02s] Exiting LLM run with output:
+{
+  "generations": [
+    [
+      {
+        "text": "The word 'weekly-practice' has a length of 15 characters, and the word 'aneasystone' has a length of 11 characters.",
+        "generation_info": {
+          "finish_reason": "stop"
+        },
+        "message": {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain",
+            "schema",
+            "messages",
+            "AIMessage"
+          ],
+          "kwargs": {
+            "content": "The word 'weekly-practice' has a length of 15 characters, and the word 'aneasystone' has a length of 11 characters.",
+            "additional_kwargs": {}
+          }
+        }
+      }
+    ]
+  ],
+  "llm_output": {
+    "token_usage": {
+      "prompt_tokens": 275,
+      "completion_tokens": 32,
+      "total_tokens": 307
+    },
+    "model_name": "gpt-3.5-turbo"
+  },
+  "run": null
+}
+[chain/end] [1:chain:AgentExecutor] [4.29s] Exiting Chain run with output:
+{
+  "output": "The word 'weekly-practice' has a length of 15 characters, and the word 'aneasystone' has a length of 11 characters."
+}
+The word 'weekly-practice' has a length of 15 characters, and the word 'aneasystone' has a length of 11 characters.
+```
+
+</details>
+
+可以看到 OpenAI Multi Functions Agent 调了一次大模型，返回了一个叫做 `tool_selection` 的工具，这个函数是 LangChain 特意构造的，它的参数是我们定义的多个工具，这样就使得 OpenAI 一次返回多个工具供我们调用。
 
 #### Plan and execute Agent
 
 https://python.langchain.com/docs/modules/agents/agent_types/plan_and_execute.html
-
-### 在 LangChain 中使用 OpenAI Functions
-
-https://python.langchain.com/docs/modules/chains/how_to/openai_functions
-
-https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent.html
 
 ## 参考
 
@@ -948,6 +1227,8 @@ https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_ag
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://juejin.cn/post/7260129616908222525)
 * [Superpower LLMs with Conversational Agents](https://www.pinecone.io/learn/series/langchain/langchain-agents/)
 
+## 更多
+
 ### AI Agents
 
 * [Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT)
@@ -957,3 +1238,7 @@ https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_ag
 * [Haystack](https://github.com/deepset-ai/haystack)
 * [Open-Assistant](https://github.com/LAION-AI/Open-Assistant)
 * [BentoML](https://github.com/bentoml/BentoML)
+
+### OpenAI Functions Chain
+
+自从 OpenAI 推出 Function Calling 功能之后，LangChain 就积极地将其应用到自己的项目中，在 LangChain 的文档中，可以看到很多 OpenAI Functions 的身影。除了这篇笔记所介绍的 [OpenAI Functions Agent](https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent.html) 和 [OpenAI Multi Functions Agent](https://python.langchain.com/docs/modules/agents/agent_types/openai_multi_functions_agent)，OpenAI Functions 还可以用在 Chain 中，[OpenAI Functions Chain](https://python.langchain.com/docs/modules/chains/how_to/openai_functions) 可以用来生成结构化的输出，在信息提取、文本标注等场景下非常有用。
