@@ -372,9 +372,7 @@ print(result)
 
 * [Tools](https://python.langchain.com/docs/modules/agents/tools/) - 希望被 Agent 执行的函数，被称为 **工具**，类似于 OpenAI 的插件，我们需要尽可能地描述清楚每个工具的功能，以便 Agent 能选择合适的工具；
 
-* [Agent](https://python.langchain.com/docs/modules/agents/) - 经常被翻译成 **代理**，类似于 OpenAI 的 Function Calling 机制，可以帮我们将用户的问题拆解成多个子任务，然后动态地选择和调用 Chain 或工具依次解决这些子任务，直到用户的问题完全被解决；Agent 的执行流程如下图所示：
-
-![](./images/agent.png)
+* [Agent](https://python.langchain.com/docs/modules/agents/) - 经常被翻译成 **代理**，类似于 OpenAI 的 Function Calling 机制，可以帮我们理解用户的问题，然后从给定的工具集中选择能解决用户问题的工具，并交给 Agent Executor 执行；
 
 * Agent Executor - Agent 执行器，它本质上是一个 Chain，所以可以和其他的 Chain 或 Agent Executor 进行组合；它会递归地调用 Agent 获取下一步的动作，并执行 Agent 中定义的工具，直到 Agent 认为问题已经解决，则递归结束，下面是整个过程的伪代码：
 
@@ -1215,7 +1213,165 @@ The word 'weekly-practice' has a length of 15 characters, and the word 'aneasyst
 
 #### Plan and execute Agent
 
-https://python.langchain.com/docs/modules/agents/agent_types/plan_and_execute.html
+上面所介绍的所有 Agent，本质上其实都是一样的：给定一组工具，然后大模型根据用户的输入一步一步地选择工具来执行，每一步的结果都用于决定下一步操作，直到问题被解决，像这种逐步执行的 Agent 被称为 **Action Agent**，它比较适合小型任务；如果要处理需要保持长期目标的复杂任务，使用 Action Agent 经常会出现推理跑偏的问题，这时就轮到 [Plan and execute Agent](https://python.langchain.com/docs/modules/agents/agent_types/plan_and_execute.html) 上场了。
+
+Plan and execute Agent 会提前对问题制定好完整的执行计划，然后在不更新计划的情况下逐步执行，即先把用户的问题拆解成多个子任务，然后再执行各个子任务，直到用户的问题完全被解决：
+
+![](./images/agent.png)
+
+我们可以动态的选择工具或 Chain 来解决这些子任务，但更好的做法是使用 Action Agent，这样我们可以将 Action Agent 的动态性和 Plan and execute Agent 的计划能力相结合，对复杂问题的解决效果更好。
+
+Plan and execute Agent 的思想来自开源项目 [BabyAGI](https://github.com/yoheinakajima/babyagi)，相比于 Action Agent 所使用的 Chain-of-Thought Prompting，它所使用的是 Plan-and-Solve Prompting，感兴趣的同学可以阅读 [Plan-and-Solve Prompting 的论文](https://arxiv.org/abs/2305.04091)。
+
+和之前的 Action Agent 一样，在使用 Plan and execute Agent 之前我们需要提前准备好工具列表，这里我们准备两个工具，一个搜索，一个计算：
+
+```
+from langchain.llms import OpenAI
+from langchain import SerpAPIWrapper
+from langchain.agents.tools import Tool
+from langchain import LLMMathChain
+
+search = SerpAPIWrapper()
+llm_math_chain = LLMMathChain.from_llm(llm=OpenAI(temperature=0), verbose=True)
+tools = [
+    Tool(
+        name = "Search",
+        func=search.run,
+        description="useful for when you need to answer questions about current events"
+    ),
+    Tool(
+        name="Calculator",
+        func=llm_math_chain.run,
+        description="useful for when you need to answer questions about math"
+    ),
+]
+```
+
+接下来创建 Plan and execute Agent，它主要包括两个部分：`planner` 和 `executor`，`planner` 用于制定计划，将任务划分成若干个子任务，`executor` 用于执行计划，处理子任务，其中 `executor` 可以使用 Chain 或上面的任意 Action Agent 来实现。Plan and execute Agent 目前还是 LangChain 的实验功能，相应的实现在 `langchain.experimental` 模块下：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.experimental.plan_and_execute import PlanAndExecute, load_agent_executor, load_chat_planner
+
+model = ChatOpenAI(temperature=0)
+planner = load_chat_planner(model)
+executor = load_agent_executor(model, tools, verbose=True)
+agent = PlanAndExecute(planner=planner, executor=executor, verbose=True)
+agent.run("Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?")
+```
+
+运行结果的第一步可以看到整个任务的执行计划：
+
+```
+> Entering new PlanAndExecute chain...
+steps=[
+  Step(value="Search for information about Leo DiCaprio's girlfriend."), 
+  Step(value='Find her current age.'), 
+  Step(value='Calculate her current age raised to the 0.43 power.'), 
+  Step(value="Given the above steps taken, respond to the user's original question.\n\n")]
+```
+
+然后是每个子任务的执行结果，首先是搜索 `Leo DiCaprio's girlfriend`：
+
+```
+> Entering new AgentExecutor chain...
+Thought: I can use the Search tool to find information about Leo DiCaprio's girlfriend.
+
+Action:
+```{"action": "Search", "action_input": "Leo DiCaprio girlfriend"}```
+Observation: Blake Lively and DiCaprio are believed to have enjoyed a whirlwind five-month romance in 2011. The pair were seen on a yacht together in Cannes, ...
+Thought:Based on my search, it seems that Blake Lively was one of Leo DiCaprio's girlfriends. They were believed to have had a five-month romance in 2011 and were seen together on a yacht in Cannes.
+
+> Finished chain.
+*****
+
+Step: Search for information about Leo DiCaprio's girlfriend.
+
+Response: Based on my search, it seems that Blake Lively was one of Leo DiCaprio's girlfriends. They were believed to have had a five-month romance in 2011 and were seen together on a yacht in Cannes.
+```
+
+搜到的这个新闻有点老了，得到结果是 `Blake Lively`，然后计算她的年龄：
+
+```
+> Entering new AgentExecutor chain...
+Thought: To find Blake Lively's current age, I can calculate it based on her birthdate. I will use the Calculator tool to subtract her birth year from the current year.
+
+Action:
+{"action": "Calculator", "action_input": "2022 - 1987"}
+
+> Entering new LLMMathChain chain...
+2022 - 1987
+
+...numexpr.evaluate("2022 - 1987")...
+
+Answer: 35
+> Finished chain.
+
+Observation: Answer: 35
+Thought:Blake Lively's current age is 35.
+
+> Finished chain.
+*****
+
+Step: Find her current age.
+
+Response: Blake Lively's current age is 35.
+```
+
+然后使用数学工具计算年龄的 0.43 次方：
+
+```
+> Entering new AgentExecutor chain...
+Thought: To calculate Blake Lively's current age raised to the 0.43 power, I can use a calculator tool.
+
+Action:
+{"action": "Calculator", "action_input": "35^0.43"}
+
+> Entering new LLMMathChain chain...
+35**0.43
+
+...numexpr.evaluate("35**0.43")...
+
+Answer: 4.612636795281377
+> Finished chain.
+
+Observation: Answer: 4.612636795281377
+Thought:To calculate Blake Lively's current age raised to the 0.43 power, I used a calculator tool and the result is 4.612636795281377.
+
+Action:
+{"action": "Final Answer", "action_input": "Blake Lively's current age raised to the 0.43 power is approximately 4.6126."}
+
+
+> Finished chain.
+*****
+
+Step: Calculate her current age raised to the 0.43 power.
+
+Response: Blake Lively's current age raised to the 0.43 power is approximately 4.6126.
+```
+
+最后得到结果，润色后输出：
+
+```
+> Entering new AgentExecutor chain...
+Action:
+{
+  "action": "Final Answer",
+  "action_input": "Blake Lively's current age raised to the 0.43 power is approximately 4.6126."
+}
+
+> Finished chain.
+*****
+
+Step: Given the above steps taken, respond to the user's original question.
+
+Response: Action:
+{
+  "action": "Final Answer",
+  "action_input": "Blake Lively's current age raised to the 0.43 power is approximately 4.6126."
+}
+> Finished chain.
+```
 
 ## 参考
 
@@ -1226,6 +1382,8 @@ https://python.langchain.com/docs/modules/agents/agent_types/plan_and_execute.ht
 * [LangChain：Model as a Service粘合剂，被ChatGPT插件干掉了吗？](https://36kr.com/p/2203231346847113)
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://juejin.cn/post/7260129616908222525)
 * [Superpower LLMs with Conversational Agents](https://www.pinecone.io/learn/series/langchain/langchain-agents/)
+* [2023年新生代大模型Agents技术,ReAct,Self-Ask,Plan-and-execute,以及AutoGPT, HuggingGPT等应用](https://zhuanlan.zhihu.com/p/642357544)
+* [LLM Powered Autonomous Agents](https://lilianweng.github.io/posts/2023-06-23-agent/)
 
 ## 更多
 
