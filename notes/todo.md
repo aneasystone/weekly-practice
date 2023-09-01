@@ -23,9 +23,13 @@
 * [Create and Detect Memory Leaks in Java](https://www.baeldung.com/java-create-detect-memory-leaks)
 * [Can a Java Application Use More Memory Than the Heap Size?](https://www.baeldung.com/java-memory-beyond-heap)
 * [长连接 Netty 服务内存泄漏，看我如何一步步捉 “虫” 解决](https://my.oschina.net/u/4090830/blog/8685855)
-* [Unleash the Power of Open Source Java Profilers: Comparing VisualVM, JMC, and async-profiler](https://www.infoq.com/articles/open-source-java-profilers/)
 * [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
 * [Possible Root Causes for High CPU Usage in Java](https://www.baeldung.com/java-high-cpu-usage-causes)
+
+#### VisualVM
+
+* [JDBC Profiling with VisualVM](https://vladmihalcea.com/jdbc-profiling-visualvm/)
+* [Unleash the Power of Open Source Java Profilers: Comparing VisualVM, JMC, and async-profiler](https://www.infoq.com/articles/open-source-java-profilers/)
 
 ### Spring Boot 启动优化
 
