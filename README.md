@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK045 - [使用 Arthas 排查线上问题](./notes/week045-trouble-shooting-with-arthas/README.md)
 * WEEK044 - [大模型应用开发框架 LangChain 学习笔记（二）](./notes/week044-llm-application-frameworks-langchain-2/README.md)
 * WEEK043 - [大模型应用开发框架 LangChain 学习笔记](./notes/week043-llm-application-frameworks-langchain/README.md)
 * WEEK042 - [使用 Embedding 技术打造本地知识库助手](./notes/week042-doc-qa-using-embedding/README.md)
