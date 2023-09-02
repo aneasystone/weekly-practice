@@ -224,6 +224,7 @@
 * [Linux Performance Analysis in 60,000 Milliseconds](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（上册）](https://blog.csdn.net/l569590478/article/details/128665558)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
+* [Linux 网络延迟故障排查](https://z.itpub.net/article/detail/B4C1A280915C008AFE190AACAB45A5CB)
 
 ### 网络
 

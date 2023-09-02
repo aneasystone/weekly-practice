@@ -3,6 +3,211 @@
 * [未来百科 | 为发现全球优质AI工具产品而生](https://nav.6aiq.com/)
 * [AI 工具集导航](https://ai.nancheng.fun/)
 
+## 工具和产品
+
+### 聊天助手
+
+* [ChatGPT](https://chat.openai.com/)
+* [Claude AI](https://www.anthropic.com/claude-in-slack)
+* [Bard](https://bard.google.com/)
+* [HuggingChat](https://huggingface.co/chat/)
+* [Character.AI](https://beta.character.ai/)
+* [文心一言](https://yiyan.baidu.com/)
+* [通义千问](https://qianwen.aliyun.com/)
+* [讯飞星火](https://xinghuo.xfyun.cn/)
+
+#### 聚合聊天
+
+* [ChatHub](https://github.com/chathub-dev/chathub) - ChatHub is an all-in-one chatbot client
+* [Poe](https://poe.com/)
+
+#### 智能搜索
+
+* [Perplexity AI](https://www.perplexity.ai/) - Where knowledge begins
+
+### 编程助手
+
+* [GitHub Copilot](https://github.com/features/copilot) - Your AI pair programmer
+* [Amazon CodeWhisperer](https://aws.amazon.com/cn/codewhisperer/)
+* [OpenAI Codex](https://openai.com/blog/openai-codex)
+* [Codeium](https://codeium.com/)
+* [Tabnine](https://www.tabnine.com/) - AI assistant for software developers
+* [AlphaCode](https://alphacode.deepmind.com/)
+* [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
+* [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
+* [StarCoder](https://github.com/bigcode-project/starcoder)
+* [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
+* [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
+* [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
+
+#### 调试助手
+
+* [JamGPT](https://jam.dev/jamgpt) - AI Debugging Assistant
+* [DoctorGPT](https://github.com/ingyamilmolinar/doctorgpt) - DoctorGPT brings GPT into production for application log error diagnosing!
+
+#### 命令行
+
+* [HeyCLI](https://www.heycli.com/) - Linux commands in natural language
+
+#### 前端开发
+
+* [Quest AI](https://www.quest.ai/) - Easiest way to build React Apps
+
+#### 代码转换
+
+* [GPT-Migrate](https://github.com/0xpayne/gpt-migrate) - Easily migrate your codebase from one framework or language to another.
+
+#### 数据库
+
+* [AI2sql](https://www.ai2sql.io/) - Write SQL queries with no knowledge of SQL
+* [AI Query](https://aiquery.co/) - Generate SQL Queries with AI in Seconds
+* [sqlchat/sqlchat](https://github.com/sqlchat/sqlchat) - Chat-based SQL Client and Editor for the next decade
+* [chat2db/Chat2DB](https://github.com/chat2db/Chat2DB) - 智能的通用数据库SQL客户端和报表工具
+* [csunny/DB-GPT](https://github.com/csunny/DB-GPT) - Interact your data and environment using the local GPT, no data leaks, 100% privately, 100% security
+* [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
+
+#### 文档生成
+
+* [DocuWriter.ai](https://www.docuwriter.ai/) - AI-powered tools to generate Code documentation, Tests, and Code Refactors from your source code files
+
+#### Code Review
+
+* [appleboy/CodeGPT](https://github.com/appleboy/CodeGPT) - A CLI written in Go language that writes git commit messages or do a code review brief for you using ChatGPT AI (gpt-4, gpt-3.5-turbo model) and automatically installs a git prepare-commit-msg hook.
+
+#### API 开发
+
+* [HTTPie AI](https://httpie.io/ai) - 一种新型的 API 交互方式，使用自然语言创建请求
+* [ApiCat](https://github.com/apicat/apicat) - 一款基于 AI 技术的 API 开发工具，它旨在通过自动化和智能化的方式，帮助开发人员更快速、更高效地开发 API
+
+### 日常办公
+
+#### 写作助手
+
+* [Notion AI](https://www.notion.so/product/ai) - Work faster. Write better. Think bigger.
+* [NovelAI](https://novelai.net/) - The AI Storyteller
+* [达观助手](http://www.datagrand.com/products/wps-plugin/) - 智能写作专家
+* [Moonbeam](https://www.gomoonbeam.com/) - your long-form writing AI assistant
+* [Copy.ai](https://www.copy.ai/) - Write better marketing copy and content with AI
+* [Jasper](https://www.jasper.ai/) - AI Writer | AI Marketing Co-Pilot
+* [QuillBot AI](https://quillbot.com/) - Paraphrasing Tool
+* [Grammarly](https://www.grammarly.com/) - Free Online Writing Assistant
+* [Smodin](https://smodin.io/) - Multi-lingual Writing Assistance
+* [JenniAI](https://jenni.ai/) - Supercharge Your Next Research Paper
+* [Compose AI](https://www.compose.ai/) - Automate Your Writing
+
+#### 文档总结
+
+* [ChatPDF](https://www.chatpdf.com/) - Chat with any PDF!
+* [ChatDOC](https://chatdoc.com/) - Chat with your documents
+
+#### 音视频总结
+
+* [BibiGPT](https://b.jimmylv.cn/) - 一键总结音视频内容
+
+#### 思维导图
+
+* [EdrawMind AI](https://www.edrawmind.com/ai-mind-map.html) - AI-Powered Mind Mapping Made Simple and Intuitive
+
+#### PPT
+
+* [MindShow](https://www.mindshow.fun/) - 输入内容自动生成 PPT，让想法快速展示
+
+#### Excel
+
+* [Sheet+](https://sheetplus.ai/) - AI-powered tools for Excel & Google Sheets
+
+### 图像创作
+
+#### 图像生成
+
+* [Midjourney](https://www.midjourney.com/home/)
+* [Stability.AI](https://stability.ai/)
+	* [Stable Diffusion](https://stablediffusionweb.com/)
+	* [Stable Studio](https://github.com/Stability-AI/StableStudio)
+* [DALL.E.2](https://openai.com/product/dall-e-2)
+* [Image Creator from Microsoft Bing](https://www.bing.com/create) - 来自 Microsoft 必应的图像创建器
+* [Adobe Firefly](https://www.adobe.com/sensei/generative-ai/firefly.html)
+* [Openjourney](https://openjourney.art/)
+* [Imagen](https://imagen.research.google/) - Text-to-Image Diffusion Models
+* [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
+* [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
+
+#### 二维码生成
+
+* [MewXAI星月熊](https://qr.mewx.art/) - 使用AI让你的二维码独一无二
+
+#### Logo 制作
+
+* [AIDesign](https://ailogo.qq.com/guide/brandname) - 10秒创建您的LOGO！
+* [LogoAi](https://www.logoai.com/)
+
+#### 设计助手
+
+* [Vizcom](https://www.vizcom.ai/) - Render your drawings in seconds 
+* [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
+* [Flair](https://flair.ai/) - THE AI DESIGN TOOL FOR BRANDED CONTENT
+* [Galileo AI](https://www.usegalileo.ai/) - Galileo AI creates delightful, editable UI designs from a simple text description. It empowers you to design faster than ever.
+
+#### 风格转换
+
+* [lllyasviel/style2paints](https://github.com/lllyasviel/style2paints) - Style2paints V4 is the current best AI driven lineart colorization tool.
+* [Deep Photo Style Transfer](https://github.com/luanfujun/deep-photo-styletransfer) - Code and data for paper "Deep Photo Style Transfer": https://arxiv.org/abs/1703.07511
+
+#### 图片编辑
+
+* [DragGAN](https://github.com/XingangPan/DragGAN) - Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold
+* [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
+* [Segment Anything](https://github.com/facebookresearch/segment-anything)
+* [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
+* [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
+* [remove.bg](https://www.remove.bg/zh) - 图片去除背景
+
+#### 动画生成
+
+* [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
+
+### 音视频助手
+
+#### 音乐创作
+
+* [Magenta](https://github.com/tensorflow/magenta) - Music and Art Generation with Machine Intelligence
+* [Audiocraft](https://github.com/facebookresearch/audiocraft) - Audiocraft is a PyTorch library for deep learning research on audio generation
+	* [MusicGen](https://ai.honu.io/papers/musicgen/) - Simple and Controllable Music Generation
+	* [MusicGen](https://huggingface.co/spaces/facebook/MusicGen)
+* [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
+* [Uberduck](https://www.uberduck.ai/) - Make Music with AI Vocals
+
+#### 语音合成
+
+* [Coqui](https://coqui.ai/) - Clone your voice in seconds or choose from our available AI voices
+* [Resemble](https://www.resemble.ai/) - AI Voice Generator with Text-to-Speech and Speech-to-Speech
+* [voice.ai](https://voice.ai/) - Free Real Time Voice Changer
+
+#### 语音识别
+
+* [openai/whisper](https://github.com/openai/whisper) - Robust Speech Recognition via Large-Scale Weak Supervision
+* [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Port of OpenAI's Whisper model in C/C++
+* [DELTA](https://github.com/didi/delta) - DELTA is a deep learning based natural language and speech processing platform. 
+* [Gladia](https://www.gladia.io/) - From audio to knowledge
+
+#### 语音转写
+
+* [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
+
+#### 视频创作
+
+* [Runway](https://runwayml.com) - Advancing creativity with artificial intelligence.
+* [Fliki](https://fliki.ai/) - Video creation made 10x simpler & faster with AI
+* [腾讯智影](https://zenvideo.qq.com/) - 在线智能视频创作平台
+* [Wonder Studio](https://wonderdynamics.com/) - An AI tool that automatically animates, lights and composes CG characters into a live-action scene
+* [SCUTlihaoyu/open-chat-video-editor](https://github.com/SCUTlihaoyu/open-chat-video-editor) - 开源的短视频生成和编辑工具
+* [gyroflow/gyroflow](https://github.com/gyroflow/gyroflow) - Video stabilization using gyroscope data
+
+#### 虚拟形象
+
+* [Synthesia](https://www.synthesia.io/) - Synthesia is a #1 AI Video Creation Platform
+* [D-ID](https://www.d-id.com/) - The Digital People Platform
+
 ## 模型社区
 
 * [Hugging Face](https://huggingface.co/)
@@ -100,29 +305,15 @@
 
 ## 大模型应用
 
-### 聊天助手
-
-* [ChatGPT](https://chat.openai.com/)
-* [Claude AI](https://www.anthropic.com/claude-in-slack)
-* [Bard](https://bard.google.com/)
-* [HuggingChat](https://huggingface.co/chat/)
-
-#### 聚合
-
-* [ChatHub](https://github.com/chathub-dev/chathub) - ChatHub is an all-in-one chatbot client
-* [Poe](https://poe.com/)
-
 #### ChatGPT 应用
 
 * [Visual ChatGPT](https://github.com/microsoft/visual-chatgpt) - Official repo for the paper: Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
 * [josStorer/chatGPTBox](https://github.com/josStorer/chatGPTBox) - Integrating ChatGPT into your browser deeply, everything you need is here
-* [哔哔终结者 BibiGPT](https://b.jimmylv.cn/)
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
 * [k8sgpt-ai/k8sgpt](https://github.com/k8sgpt-ai/k8sgpt) - Giving Kubernetes Superpowers to everyone
 * [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
 * [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) - Reverse engineered API of Microsoft's Bing Chat AI
 * [gd3kr/BlenderGPT](https://github.com/gd3kr/BlenderGPT) - Use commands in English to control Blender with OpenAI's GPT-4
-* [ingyamilmolinar/doctorgpt](https://github.com/ingyamilmolinar/doctorgpt) - DoctorGPT brings GPT into production for application log error diagnosing!
 * [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
 * [yakGPT/yakGPT](https://github.com/yakGPT/yakGPT) - Locally running, hands-free ChatGPT UI
 
@@ -137,50 +328,16 @@
 * [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) - Reverse engineered ChatGPT API
 * [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
 
-### 写作助手
-
-* [Notion AI](https://www.notion.so/product/ai)
-* [达观助手-智能写作专家](http://www.datagrand.com/products/wps-plugin/)
-* [ChatPDF - Chat with any PDF!](https://www.chatpdf.com/)
-* [ChatDOC - Chat with your documents](https://chatdoc.com/)
-* [Paraphrasing Tool - QuillBot AI](https://quillbot.com/)
-* [Grammarly: Free Online Writing Assistant](https://www.grammarly.com/)
-* [Smodin: Multi-lingual Writing Assistance](https://smodin.io/)
-
 ### 文本创作
 
 * [EssayKillerBrain/EssayKiller_V2](https://github.com/EssayKillerBrain/EssayKiller_V2) - 基于开源GPT2.0的初代创作型人工智能 | 可扩展、可进化
 * [binary-husky/chatgpt_academic](https://github.com/binary-husky/chatgpt_academic) - 科研工作专用ChatGPT拓展，特别优化学术Paper润色体验，支持自定义快捷按钮，支持自定义函数插件，支持markdown代码块表格显示，Tex公式双显示，新增Python/C++项目剖析/自译解功能，PDF/LaTex论文翻译/总结功能，兼容ChatGLM等本地模型
-
-### 代码辅助
-
-* [GitHub Copilot](https://github.com/features/copilot) - Your AI pair programmer
-* [Amazon CodeWhisperer](https://aws.amazon.com/cn/codewhisperer/)
-* [Codeium](https://codeium.com/)
-* [Tabnine](https://www.tabnine.com/) - AI assistant for software developers
-* [AlphaCode](https://alphacode.deepmind.com/)
-* [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
-* [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
-* [StarCoder](https://github.com/bigcode-project/starcoder)
-* [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
-* [appleboy/CodeGPT](https://github.com/appleboy/CodeGPT) - A CLI written in Go language that writes git commit messages or do a code review brief for you using ChatGPT AI (gpt-4, gpt-3.5-turbo model) and automatically installs a git prepare-commit-msg hook.
-* [sqlchat/sqlchat](https://github.com/sqlchat/sqlchat) - Chat-based SQL Client and Editor for the next decade
-* [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
-* [ApiCat](https://github.com/apicat/apicat) - 一款基于 AI 技术的 API 开发工具，它旨在通过自动化和智能化的方式，帮助开发人员更快速、更高效地开发 API
-* [GPT-Migrate](https://github.com/0xpayne/gpt-migrate) - Easily migrate your codebase from one framework or language to another.
-* [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
 
 ### 文档助手
 
 * [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
 * [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
 * [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
-
-### 数据库助手
-
-* [chat2db/Chat2DB](https://github.com/chat2db/Chat2DB) - 智能的通用数据库SQL客户端和报表工具
-* [csunny/DB-GPT](https://github.com/csunny/DB-GPT) - Interact your data and environment using the local GPT, no data leaks, 100% privately, 100% security
-* [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
 
 ### 个人助手
 
@@ -258,14 +415,6 @@
 
 ## 图像类
 
-* [Midjourney](https://www.midjourney.com/home/)
-* [Stability.AI](https://stability.ai/)
-	* [StableStudio](https://github.com/Stability-AI/StableStudio)
-* [DALL.E.2](https://openai.com/product/dall-e-2)
-* [NovelAI](https://novelai.net/)
-* [Adobe Firefly](https://www.adobe.com/sensei/generative-ai/firefly.html)
-* [Openjourney](https://openjourney.art/)
-
 ### Awesome
 
 * [hua1995116/awesome-ai-painting](https://github.com/hua1995116/awesome-ai-painting) - AI绘画资料合集（包含国内外可使用平台、使用教程、参数教程、部署教程、业界新闻等等） stable diffusion tutorial、disco diffusion tutorial、 AI Platform
@@ -286,29 +435,6 @@
 * [【AI绘画】AI又进化了，革命性突破](https://cuijiahua.com/blog/2023/02/ai-30.html)
 * [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
 * [novicezk/midjourney-proxy](https://github.com/novicezk/midjourney-proxy) - 代理 MidJourney 的discord频道，实现api形式调用AI绘图
-
-### 图像生成
-
-* [Imagen: Text-to-Image Diffusion Models](https://imagen.research.google/)
-* [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
-* [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
-* [Magenta](https://github.com/tensorflow/magenta) - Music and Art Generation with Machine Intelligence
-
-#### 二维码
-
-* [MewXAI星月熊](https://qr.mewx.art/) - 使用AI让你的二维码独一无二
-
-### 风格转换
-
-* [lllyasviel/style2paints](https://github.com/lllyasviel/style2paints) - Style2paints V4 is the current best AI driven lineart colorization tool.
-* [Deep Photo Style Transfer](https://github.com/luanfujun/deep-photo-styletransfer) - Code and data for paper "Deep Photo Style Transfer": https://arxiv.org/abs/1703.07511
-
-### 图片修复
-
-* [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
-* [Segment Anything](https://github.com/facebookresearch/segment-anything)
-	* [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
-* [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
 
 ## 提示工程
 
@@ -337,14 +463,3 @@
 * [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
 * [Knit](https://promptknit.com/) - A better playground for prompt designers
-
-## 其他
-
-* [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
-* [SCUTlihaoyu/open-chat-video-editor](https://github.com/SCUTlihaoyu/open-chat-video-editor) - 开源的短视频生成和编辑工具
-* [DragGAN](https://github.com/XingangPan/DragGAN) - Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold
-* [Audiocraft](https://github.com/facebookresearch/audiocraft) - Audiocraft is a PyTorch library for deep learning research on audio generation
-	* [MusicGen](https://ai.honu.io/papers/musicgen/) - Simple and Controllable Music Generation
-	* [MusicGen](https://huggingface.co/spaces/facebook/MusicGen)
-* [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
-* [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
