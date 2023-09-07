@@ -106,12 +106,22 @@ time       2023-09-06 07:16:31
 
 这些命令根据功能大抵可以分为以下几类：
 
-* JVM 命令：比如使用 [jvm](https://arthas.aliyun.com/doc/jvm.html) 查看当前 JVM 的信息，使用 [memory](https://arthas.aliyun.com/doc/memory.html) 查看 JVM 内存信息，使用 [dashboard](https://arthas.aliyun.com/doc/dashboard.html) 查看当前系统的实时数据面板；
+* JVM 命令
+  * [jvm](https://arthas.aliyun.com/doc/jvm.html) - 查看当前 JVM 的信息；
+  * [sysenv](https://arthas.aliyun.com/doc/sysenv.html) - 查看 JVM 的环境变量；
+  * [sysprop](https://arthas.aliyun.com/doc/sysprop.html) - 查看 JVM 的系统属性；
+  * [memory](https://arthas.aliyun.com/doc/memory.html) - 查看 JVM 内存信息；
+  * [heapdump](https://arthas.aliyun.com/doc/heapdump.html) - 将 Java 进程的堆快照导出到某个文件中，方便我们对堆内存进行分析；
+  * [mbean](https://arthas.aliyun.com/doc/mbean.html) - 查看或实时监控 Mbean 的信息；
+  * [getstatic](https://arthas.aliyun.com/doc/getstatic.html) - 查看类的静态属性；
+  * [ognl](https://arthas.aliyun.com/doc/ognl.html) - 执行 ognl 表达式；ognl 非常灵活，可以实现很多功能，比如上面的查看或修改系统属性，查看类的静态属性都可以通过 ognl 实现；
+  * [thread](https://arthas.aliyun.com/doc/thread.html) - 查看所有线程的信息，包括线程名称、线程组、优先级、线程状态、CPU 使用率、堆栈信息等；
+  * [dashboard](https://arthas.aliyun.com/doc/dashboard.html) - 查看当前系统的实时数据面板，包括了线程、内存、GC 和 Runtime 等信息；可以把它看成是 `thread`、`memory`、`jvm`、`sysenv`、`sysprop` 几个命令的综合体；
 * 类命令：
 * 基础命令：
 * 监控命令：
 
-在 [week028-jvm-diagnostic-tools](../week028-jvm-diagnostic-tools/README.md) 这篇笔记中我总结了很多 JDK 自带的诊断工具，其实有很多 Arthas 命令和那些 JDK 工具的功能是类似的，只是 Arthas 在输出格式上做了优化，让输出的内容更加美观和易读。
+在 [week028-jvm-diagnostic-tools](../week028-jvm-diagnostic-tools/README.md) 这篇笔记中我总结了很多 JDK 自带的诊断工具，其实有很多 Arthas 命令和那些 JDK 工具的功能是类似的，只是 Arthas 在输出格式上做了优化，让输出的内容更加美观和易读，而且在功能上做了增强。比如 `sysprop` 类似于 `jinfo`，都可以查看 JVM 的系统属性，但是比 `jinfo` 强的是，它还能修改系统属性；`heapdump` 类似于 `jmap -heap`，都可以导出进程的堆内存，只是它在使用上更加简洁；`thread` 类似于 `jstack`，都可以列出 JVM 的所有线程，但是 `thread` 以表格形式显示，方便用户阅读，而且增加了 CPU 使用率的功能，可以方便我们快速找出当前最忙的线程；
 
 ## 线上问题排查
 
