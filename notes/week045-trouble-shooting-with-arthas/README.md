@@ -110,18 +110,36 @@ time       2023-09-06 07:16:31
   * [jvm](https://arthas.aliyun.com/doc/jvm.html) - 查看当前 JVM 的信息；
   * [sysenv](https://arthas.aliyun.com/doc/sysenv.html) - 查看 JVM 的环境变量；
   * [sysprop](https://arthas.aliyun.com/doc/sysprop.html) - 查看 JVM 的系统属性；
-  * [memory](https://arthas.aliyun.com/doc/memory.html) - 查看 JVM 内存信息；
+  * [vmoption](https://arthas.aliyun.com/doc/vmoption.html) - 查看或修改 JVM 诊断相关的参数；
+  * [memory](https://arthas.aliyun.com/doc/memory.html) - 查看 JVM 的内存信息；
   * [heapdump](https://arthas.aliyun.com/doc/heapdump.html) - 将 Java 进程的堆快照导出到某个文件中，方便我们对堆内存进行分析；
-  * [mbean](https://arthas.aliyun.com/doc/mbean.html) - 查看或实时监控 Mbean 的信息；
-  * [getstatic](https://arthas.aliyun.com/doc/getstatic.html) - 查看类的静态属性；
-  * [ognl](https://arthas.aliyun.com/doc/ognl.html) - 执行 ognl 表达式；ognl 非常灵活，可以实现很多功能，比如上面的查看或修改系统属性，查看类的静态属性都可以通过 ognl 实现；
   * [thread](https://arthas.aliyun.com/doc/thread.html) - 查看所有线程的信息，包括线程名称、线程组、优先级、线程状态、CPU 使用率、堆栈信息等；
   * [dashboard](https://arthas.aliyun.com/doc/dashboard.html) - 查看当前系统的实时数据面板，包括了线程、内存、GC 和 Runtime 等信息；可以把它看成是 `thread`、`memory`、`jvm`、`sysenv`、`sysprop` 几个命令的综合体；
-* 类命令：
+  * [perfcounter](https://arthas.aliyun.com/doc/perfcounter.html) - 查看当前 JVM 的 Perf Counter 信息； 
+  * [logger](https://arthas.aliyun.com/doc/logger.html) - 查看应用日志信息，支持动态更新日志级别；
+  * [mbean](https://arthas.aliyun.com/doc/mbean.html) - 查看或实时监控 Mbean 的信息；
+  * [vmtool](https://arthas.aliyun.com/doc/vmtool.html) - 利用 JVMTI 接口，实现查询内存对象，强制 GC 等功能；
+  * [getstatic](https://arthas.aliyun.com/doc/getstatic.html) - 查看类的静态属性；
+  * [ognl](https://arthas.aliyun.com/doc/ognl.html) - 执行 ognl 表达式；ognl 非常灵活，可以实现很多功能，比如上面的查看或修改系统属性，查看类的静态属性都可以通过 ognl 实现；
+* 类命令
+  * [classloader](https://arthas.aliyun.com/doc/classloader.html) - 查看 JVM 中所有的 Classloader 信息；
+  * [dump](https://arthas.aliyun.com/doc/dump.html) - 将指定类导出成 `.class` 字节码文件；
+  * [jad](https://arthas.aliyun.com/doc/jad.html) - 将指定类反编译成 Java 源码；
+  * [mc](https://arthas.aliyun.com/doc/mc.html) - 内存编译器，将 Java 源码编译成 `.class` 字节码文件；
 * 基础命令：
 * 监控命令：
 
-在 [week028-jvm-diagnostic-tools](../week028-jvm-diagnostic-tools/README.md) 这篇笔记中我总结了很多 JDK 自带的诊断工具，其实有很多 Arthas 命令和那些 JDK 工具的功能是类似的，只是 Arthas 在输出格式上做了优化，让输出的内容更加美观和易读，而且在功能上做了增强。比如 `sysprop` 类似于 `jinfo`，都可以查看 JVM 的系统属性，但是比 `jinfo` 强的是，它还能修改系统属性；`heapdump` 类似于 `jmap -heap`，都可以导出进程的堆内存，只是它在使用上更加简洁；`thread` 类似于 `jstack`，都可以列出 JVM 的所有线程，但是 `thread` 以表格形式显示，方便用户阅读，而且增加了 CPU 使用率的功能，可以方便我们快速找出当前最忙的线程；
+在 [week028-jvm-diagnostic-tools](../week028-jvm-diagnostic-tools/README.md) 这篇笔记中我总结了很多 JDK 自带的诊断工具，其实有很多 Arthas 命令和那些 JDK 工具的功能是类似的，只是 Arthas 在输出格式上做了优化，让输出的内容更加美观和易读，而且在功能上做了增强。
+
+| Arthas 命令 | JDK 工具 | 对比 |
+| ---------- | -------- | ---- |
+| `sysprop` | `jinfo -sysprops` | 都可以查看 JVM 的系统属性，但是 `sysprop` 比 `jinfo` 强的是，它还能修改系统属性 |
+| `vmoption` | `jinfo -flag` | 都可以查看 JVM 参数，但是 `vmoption` 只显示诊断相关的参数，比如 `HeapDumpOnOutOfMemoryError`、`PrintGC` 等 |
+| `memory` | `jmap -heap` | 都可以查看 JVM 的内存信息，但是 `memory` 以表格形式显示，方便用户阅读 |
+| `heapdump` | `jmap -heap` | 都可以导出进程的堆内存，只是它在使用上更加简洁 |
+| `thread` | `jstack` | 都可以列出 JVM 的所有线程，但是 `thread` 以表格形式显示，方便用户阅读，而且增加了 CPU 使用率的功能，可以方便我们快速找出当前最忙的线程 |
+| `perfcounter` | `jcmd PerfCounter.print` | 都可以查看 JVM 进程的性能统计信息 |
+| `classloader` | `jmap -clstats` | 都可以查看 JVM 的 Classloader 统计信息，但是 `classloader` 命令还支持以树的形式查看，另外它还支持查看每个 Classloader 实际的 URL，通过 Classloader 查找资源等 |
 
 ## 线上问题排查
 
@@ -139,6 +157,8 @@ $ curl -X POST -H "Content-Type: application/json" -d '{"x":1}' http://localhost
 
 
 ### 使用 `jad/sc/redefine` 热更新代码
+
+### 使用 `logger` 动态更新日志级别
 
 ### 排查类冲突问题
 
