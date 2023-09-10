@@ -77,7 +77,7 @@ time       2023-09-06 07:16:31
  perfcounter  Display the perf counter information.
  ognl         Execute ognl expression.
  mc           Memory compiler, compiles java files into bytecode and class files in memory.
- redefine     Redefine classes. @see Instrumentation#redefineClasses(ClassDefinition...)                                                        
+ redefine     Redefine classes. @see Instrumentation#redefineClasses(ClassDefinition...)
  retransform  Retransform classes. @see Instrumentation#retransformClasses(Class...)
  dashboard    Overview of target jvm's thread, memory, gc, vm, tomcat info.
  dump         Dump class byte array from JVM
@@ -88,7 +88,7 @@ time       2023-09-06 07:16:31
  version      Display Arthas version
  session      Display current session information
  sysprop      Display and change the system properties.
- sysenv       Display the system env.                                                                                                           
+ sysenv       Display the system env.
  vmoption     Display, and update the vm diagnostic options.
  logger       Print logger info, and update the logger level
  history      Display command history
@@ -165,7 +165,7 @@ time       2023-09-06 07:16:31
 | `sysprop` | `jinfo -sysprops` | 都可以查看 JVM 的系统属性，但是 `sysprop` 比 `jinfo` 强的是，它还能修改系统属性 |
 | `vmoption` | `jinfo -flag` | 都可以查看 JVM 参数，但是 `vmoption` 只显示诊断相关的参数，比如 `HeapDumpOnOutOfMemoryError`、`PrintGC` 等 |
 | `memory` | `jmap -heap` | 都可以查看 JVM 的内存信息，但是 `memory` 以表格形式显示，方便用户阅读 |
-| `heapdump` | `jmap -heap` | 都可以导出进程的堆内存，只是它在使用上更加简洁 |
+| `heapdump` | `jmap -dump` | 都可以导出进程的堆内存，只是它在使用上更加简洁 |
 | `thread` | `jstack` | 都可以列出 JVM 的所有线程，但是 `thread` 以表格形式显示，方便用户阅读，而且增加了 CPU 使用率的功能，可以方便我们快速找出当前最忙的线程 |
 | `perfcounter` | `jcmd PerfCounter.print` | 都可以查看 JVM 进程的性能统计信息 |
 | `classloader` | `jmap -clstats` | 都可以查看 JVM 的 Classloader 统计信息，但是 `classloader` 命令还支持以树的形式查看，另外它还支持查看每个 Classloader 实际的 URL，通过 Classloader 查找资源等 |
