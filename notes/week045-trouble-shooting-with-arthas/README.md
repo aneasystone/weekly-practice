@@ -201,18 +201,103 @@ time       2023-09-06 07:16:31
 
 ## 线上问题排查
 
-### 使用 `watch` 监听函数出入参和异常
+了解了 Arthas 的命令之后，接下来总结一些使用 Arthas 对常见问题的排查思路。
+
+### 使用 `watch` 监听方法出入参和异常
+
+相信不少人见过类似下面这样的代码，在遇到异常情况时直接返回系统错误，而没有将异常信息和堆栈打印出来：
+
+```
+@PostMapping("/add")
+public String add(@RequestBody DemoAdd demoAdd) {
+  try {
+    Integer result = demoService.add(demoAdd);
+    return String.valueOf(result);
+  } catch (Exception e) {
+    return "系统错误！";
+  }
+}
+```
+
+有时候只打印了异常信息 `e.getMessage()`，但是一看日志全是 `NullPointerException`，一旦出现异常，根本不知道是哪行代码出了问题。这时，Arthas 的 `watch` 命令就可以派上用场了：
+
+```
+$ watch com.example.demo.DemoService add -x 2
+Press Q or Ctrl+C to abort.
+Affect(class count: 1 , method count: 1) cost in 143 ms, listenerId: 1
+```
+
+我们对 `demoService.add()` 方法进行监听，当遇到正常请求时：
 
 ```
 $ curl -X POST -H "Content-Type: application/json" -d '{"x":1,"y":2}' http://localhost:8080/add
 3
 ```
 
+`watch` 的输出如下：
+
+```
+method=com.example.demo.DemoService.add location=AtExit
+ts=2023-09-11 08:00:46; [cost=1.4054ms] result=@ArrayList[
+    @Object[][
+        @DemoAdd[DemoAdd(x=1, y=2)],
+    ],
+    @DemoService[
+    ],
+    @Integer[3],
+]
+```
+
+`location=AtExit` 表示这个方法正常结束，`result` 表示方法在结束时的变量值，默认只监听方法的入参、方法所在的实例对象、以及方法的返回值。
+
+当遇到异常请求时：
+
 ```
 $ curl -X POST -H "Content-Type: application/json" -d '{"x":1}' http://localhost:8080/add
 系统错误！
 ```
 
+`watch` 的输出如下：
+
+```
+method=com.example.demo.DemoService.add location=AtExceptionExit
+ts=2023-09-11 08:05:20; [cost=0.1402ms] result=@ArrayList[
+    @Object[][
+        @DemoAdd[DemoAdd(x=1, y=null)],
+    ],
+    @DemoService[
+    ],
+    null,
+]
+```
+
+可以看到 `location=AtExceptionExit` 表示这个方法抛出了异常，同样地，`result` 默认只监听方法的入参、方法所在的实例对象、以及方法的返回值。那么能不能拿到具体的异常信息呢？当然可以，通过自定义观察表达式可以轻松实现。
+
+默认情况下，`watch` 命令使用的观察表达式为 `{params, target, returnObj}`，所以输出结果里并没有异常信息，我们将观察表达式改为 `{params, target, returnObj, throwExp}` 重新监听：
+
+```
+$ watch com.example.demo.DemoService add "{params, target, returnObj, throwExp}" -x 2
+```
+
+此时就可以输出具体的异常信息了：
+
+```
+method=com.example.demo.DemoService.add location=AtExceptionExit
+ts=2023-09-11 08:11:19; [cost=0.0961ms] result=@ArrayList[
+    @Object[][
+        @DemoAdd[DemoAdd(x=1, y=null)],
+    ],
+    @DemoService[
+    ],
+    null,
+    java.lang.NullPointerException
+        at com.example.demo.DemoService.add(DemoService.java:11)
+        at com.example.demo.controller.DemoController.add(DemoController.java:20)
+    ,
+]
+```
+
+> 观察表达式其实是一个 ognl 表达式，可以观察的维度也比较多，参考 [表达式核心变量](https://arthas.aliyun.com/doc/advice-class.html)。
 
 ### 使用 `jad/sc/redefine` 热更新代码
 
