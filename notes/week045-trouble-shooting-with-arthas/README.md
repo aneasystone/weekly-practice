@@ -299,9 +299,76 @@ ts=2023-09-11 08:11:19; [cost=0.0961ms] result=@ArrayList[
 
 > 观察表达式其实是一个 ognl 表达式，可以观察的维度也比较多，参考 [表达式核心变量](https://arthas.aliyun.com/doc/advice-class.html)。
 
-### 使用 `jad/sc/redefine` 热更新代码
-
 ### 使用 `logger` 动态更新日志级别
+
+在 [week014-spring-boot-actuator](../week014-spring-boot-actuator/README.md) 这篇笔记中，我们学习过 Spring Boot Actuator 内置了一个 `/loggers` 端点，可以查看或修改 logger 的日志等级，比如下面这个 POST 请求将 `com.example.demo` 的日志等级改为 `DEBUG`：
+
+```
+$ curl -s -X POST -d '{"configuredLevel": "DEBUG"}' \
+  -H "Content-Type: application/json" \
+  http://localhost:8080/actuator/loggers/com.example.demo
+```
+
+使用这种方法修改日志级别可以不重启目标程序，这在线上问题排查时非常有用，但是有时候我们会遇到一些没有开启 Actuator 功能的 Java 程序，这时就可以使用 Arthas 的 `logger` 命令，实现类似的效果。
+
+直接输入 `logger` 命令，查看程序所有的 logger 信息：
+
+```
+$ logger
+ name                    ROOT
+ class                   ch.qos.logback.classic.Logger
+ classLoader             org.springframework.boot.loader.LaunchedURLClassLoader@6433a2
+ classLoaderHash         6433a2
+ level                   INFO
+ effectiveLevel          INFO
+ additivity              true
+ codeSource              jar:file:/D:/demo/target/demo-0.0.1-SNAPSHOT.jar!/BOOT
+                         -INF/lib/logback-classic-1.2.10.jar!/
+ appenders               name            CONSOLE
+                         class           ch.qos.logback.core.ConsoleAppender
+                         classLoader     org.springframework.boot.loader.LaunchedURLClassLoader@6433a2
+                         classLoaderHash 6433a2
+                         target          System.out
+```
+
+默认情况下只会打印有 appender 的 logger 信息，可以加上 `--include-no-appender` 参数打印所有的 logger 信息，不过这个输出会很长，通常使用 `-n` 参数打印指定 logger 的信息：
+
+```
+$ logger -n com.example.demo
+ name                    com.example.demo
+ class                   ch.qos.logback.classic.Logger
+ classLoader             org.springframework.boot.loader.LaunchedURLClassLoader@6433a2
+ classLoaderHash         6433a2
+ level                   null
+ effectiveLevel          INFO
+ additivity              true
+ codeSource              jar:file:/D:/demo/target/demo-0.0.1-SNAPSHOT.jar!/BOOT 
+                         -INF/lib/logback-classic-1.2.10.jar!/
+```
+
+可以看到 `com.example.demo` 的日志级别是 `null`，说明并没有设置，我们可以使用 `-l` 参数来修改它：
+
+```
+$ logger -n com.example.demo -l debug
+Update logger level fail. Try to specify the classloader with the -c option. 
+Use `sc -d CLASSNAME` to find out the classloader hashcode.
+```
+
+需要注意的是，默认情况下，`logger` 命令会在 `SystemClassloader` 下执行，如果应用是传统的 war 应用，或者是 Spring Boot 的 fat jar 应用，那么需要指定 classloader。在上面执行 `logger -n` 时，输出中的 classLoader 和 classLoaderHash 这两行很重要，我们可以使用 `-c <classLoaderHash>` 来指定 classloader：
+
+```
+$ logger -n com.example.demo -l debug -c 6433a2
+Update logger level success.
+```
+
+也可以直接使用 `--classLoaderClass <classLoader>` 来指定 classloader：
+
+```
+$ logger -n com.example.demo -l debug --classLoaderClass org.springframework.boot.loader.LaunchedURLClassLoader
+Update logger level success.
+```
+
+### 使用 `jad/sc/redefine` 热更新代码
 
 ### 使用 `ognl` 调用 Spring Bean
 
