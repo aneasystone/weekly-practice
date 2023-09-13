@@ -222,7 +222,7 @@ public String add(@RequestBody DemoAdd demoAdd) {
 有时候只打印了异常信息 `e.getMessage()`，但是一看日志全是 `NullPointerException`，一旦出现异常，根本不知道是哪行代码出了问题。这时，Arthas 的 `watch` 命令就可以派上用场了：
 
 ```
-$ watch com.example.demo.DemoService add -x 2
+$ watch com.example.demo.service.DemoService add -x 2
 Press Q or Ctrl+C to abort.
 Affect(class count: 1 , method count: 1) cost in 143 ms, listenerId: 1
 ```
@@ -237,7 +237,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{"x":1,"y":2}' http://loc
 `watch` 的输出如下：
 
 ```
-method=com.example.demo.DemoService.add location=AtExit
+method=com.example.demo.service.DemoService.add location=AtExit
 ts=2023-09-11 08:00:46; [cost=1.4054ms] result=@ArrayList[
     @Object[][
         @DemoAdd[DemoAdd(x=1, y=2)],
@@ -260,7 +260,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{"x":1}' http://localhost
 `watch` 的输出如下：
 
 ```
-method=com.example.demo.DemoService.add location=AtExceptionExit
+method=com.example.demo.service.DemoService.add location=AtExceptionExit
 ts=2023-09-11 08:05:20; [cost=0.1402ms] result=@ArrayList[
     @Object[][
         @DemoAdd[DemoAdd(x=1, y=null)],
@@ -276,13 +276,13 @@ ts=2023-09-11 08:05:20; [cost=0.1402ms] result=@ArrayList[
 默认情况下，`watch` 命令使用的观察表达式为 `{params, target, returnObj}`，所以输出结果里并没有异常信息，我们将观察表达式改为 `{params, target, returnObj, throwExp}` 重新监听：
 
 ```
-$ watch com.example.demo.DemoService add "{params, target, returnObj, throwExp}" -x 2
+$ watch com.example.demo.service.DemoService add "{params, target, returnObj, throwExp}" -x 2
 ```
 
 此时就可以输出具体的异常信息了：
 
 ```
-method=com.example.demo.DemoService.add location=AtExceptionExit
+method=com.example.demo.service.DemoService.add location=AtExceptionExit
 ts=2023-09-11 08:11:19; [cost=0.0961ms] result=@ArrayList[
     @Object[][
         @DemoAdd[DemoAdd(x=1, y=null)],
@@ -291,7 +291,7 @@ ts=2023-09-11 08:11:19; [cost=0.0961ms] result=@ArrayList[
     ],
     null,
     java.lang.NullPointerException
-        at com.example.demo.DemoService.add(DemoService.java:11)
+        at com.example.demo.service.DemoService.add(DemoService.java:11)
         at com.example.demo.controller.DemoController.add(DemoController.java:20)
     ,
 ]
@@ -368,11 +368,53 @@ $ logger -n com.example.demo -l debug --classLoaderClass org.springframework.boo
 Update logger level success.
 ```
 
-### 使用 `jad/sc/redefine` 热更新代码
+### 使用 `ognl` 查看系统属性和应用配置
 
-### 使用 `ognl` 调用 Spring Bean
+有时候我们会在线上环境遇到一些莫名奇妙的问题：比如明明数据库地址配置得好好的，但是程序却报数据库连接错误；又或者明明在配置中心对配置进行了修改，但是程序中却似乎始终不生效；这时我们不确定到底是程序本身逻辑的问题，还是程序没有加载到正确的配置，如果能将程序加载的配置信息打印出来，这个问题就很容易排查了。
+
+如果程序使用了 `System.getenv()` 来获取环境变量，我们可以使用 `sysenv` 来进行确认：
+
+```
+$ sysenv JAVA_HOME
+ KEY                          VALUE 
+---------------------------------------------------------------
+ JAVA_HOME                    C:\Program Files\Java\jdk1.8.0_351
+```
+
+如果程序使用了 `System.getProperties()` 来获取系统属性，我们可以使用 `sysprop` 来进行确认：
+
+```
+$ sysprop file.encoding
+ KEY                          VALUE  
+-----------------------------------
+ file.encoding                GBK
+```
+
+如果发现系统属性的值有问题，可以使用 `sysprop` 对其动态修改：
+
+```
+$ sysprop file.encoding UTF-8
+Successfully changed the system property.
+ KEY                          VALUE  
+-----------------------------------
+ file.encoding                UTF-8
+```
+
+实际上，无论是 `sysenv` 还是 `sysprop`，我们都可以使用 `ognl` 命令实现：
+
+```
+$ ognl '@System@getenv("JAVA_HOME")'
+@String[C:\Program Files\Java\jdk1.8.0_351]
+$ 
+$ ognl '@System@getProperty("file.encoding")'
+@String[UTF-8]
+```
+
+[OGNL](https://en.wikipedia.org/wiki/OGNL) 是 Object Graphic Navigation Language 的缩写，表示对象图导航语言，它是一种表达式语言，用于访问对象属性、调用对象方法等，它被广泛集成在各大框架中，如 Struts2、MyBatis、Thymeleaf、Spring Web Flow 等。
 
 https://github.com/alibaba/arthas/issues/482
+
+### 使用 `jad/sc/redefine` 热更新代码
 
 ### 排查类冲突问题
 
