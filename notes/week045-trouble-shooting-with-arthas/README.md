@@ -412,7 +412,35 @@ $ ognl '@System@getProperty("file.encoding")'
 
 [OGNL](https://en.wikipedia.org/wiki/OGNL) 是 Object Graphic Navigation Language 的缩写，表示对象图导航语言，它是一种表达式语言，用于访问对象属性、调用对象方法等，它被广泛集成在各大框架中，如 Struts2、MyBatis、Thymeleaf、Spring Web Flow 等。
 
-https://github.com/alibaba/arthas/issues/482
+除了环境变量和系统属性，应用程序本身的配置文件也常常需要排查，在 Spring Boot 程序中，应用配置非常灵活，当存在多个配置文件时，往往搞不清配置是否生效了。这时我们也可以通过 `ognl` 命令来查看配置，不过使用 `ognl` 有一个限制，它只能访问静态方法，所以我们在代码中要实现一个 `SpringUtils.getBean()` 静态方法，这个方法通过 `ApplicationContext` 来获取 Spring Bean：
+
+```
+@Component
+public class SpringUtils implements ApplicationContextAware {
+
+    private static ApplicationContext CONTEXT;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        CONTEXT = applicationContext;
+    }
+    
+    public static Object getBean(String beanName) {
+        return CONTEXT.getBean(beanName);
+    }
+}
+```
+
+这样我们就可以通过 `ognl` 来查看应用程序的配置类了：
+
+```
+$ ognl '@com.example.demo.utils.SpringUtils@getBean("demoProperties")'
+@DemoProperties[
+    title=@String[demo title],
+]
+```
+
+那么如果我们的代码中没有 `SpringUtils.getBean()` 这样的静态方法怎么办呢？
 
 ### 使用 `jad/sc/redefine` 热更新代码
 
@@ -426,6 +454,7 @@ https://github.com/alibaba/arthas/issues/482
 * [OGNL 参考文档](https://commons.apache.org/proper/commons-ognl/language-guide.html)
 * [Arthas 在线教程 - Killercoda](https://killercoda.com/arthas/course/arthas-tutorials-cn)
 * [redefine VS. retransform](https://lsieun.github.io/java-agent/s01ch03/redefine-vs-retransform.html)
+* [Alibaba Arthas实践--获取到Spring Context，然后为所欲为](https://github.com/alibaba/arthas/issues/482)
 
 ## 更多
 
