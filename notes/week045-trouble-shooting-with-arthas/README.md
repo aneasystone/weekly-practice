@@ -299,6 +299,102 @@ ts=2023-09-11 08:11:19; [cost=0.0961ms] result=@ArrayList[
 
 > 观察表达式其实是一个 ognl 表达式，可以观察的维度也比较多，参考 [表达式核心变量](https://arthas.aliyun.com/doc/advice-class.html)。
 
+从上面的例子可以看到，使用 `watch` 命令有一个很不方便的地方，我们需要提前写好观察表达式，当忘记写表达式或表达式写得不对时，就有可能没有监听到我们的调用，或者虽然监听到调用却没有得到我们想要的内容，这样我们就得反复调试。所以 Arthas 又推出了一个 `tt` 命令，名为 **时空隧道（Time Tunnel）**。
+
+使用 `tt` 命令时大多数情况下不用太关注观察表达式，直接监听类方法即可：
+
+```
+$ tt -t com.example.demo.service.DemoService add
+```
+
+`tt` 会自动地将所有调用都保存下来，直到用户按下 `Ctrl+C` 结束监听；注意如果方法的调用非常频繁，记得用 `-n` 参数限制记录的次数，防止记录太多导致内存爆炸：
+
+```
+$ tt -t com.example.demo.service.DemoService add -n 10
+```
+
+当监听结束后，使用 `-l` 参数查看记录列表：
+
+```
+$ tt -l
+ INDEX  TIMESTAMP            COST(ms)  IS-RET  IS-EXP  OBJECT       CLASS                    METHOD                   
+------------------------------------------------------------------------------------------------------------
+ 1000   2023-09-15 07:51:10  0.8111     true   false  0x62726348   DemoService              add
+ 1001   2023-09-15 07:51:16  0.1017     false  true   0x62726348   DemoService              add
+```
+
+其中 `INDEX` 列非常重要，我们可以使用 `-i` 参数指定某条记录查看它的详情：
+
+```
+$ tt -i 1000
+ INDEX          1000
+ GMT-CREATE     2023-09-15 07:51:10
+ COST(ms)       0.8111
+ OBJECT         0x62726348
+ CLASS          com.example.demo.service.DemoService
+ METHOD         add
+ IS-RETURN      true
+ IS-EXCEPTION   false
+ PARAMETERS[0]  @DemoAdd[
+                    x=@Integer[1],
+                    y=@Integer[2],
+                ]
+ RETURN-OBJ     @Integer[3]
+Affect(row-cnt:1) cost in 0 ms.
+```
+
+从输出中可以看到方法的入参和返回值，如果方法有异常，异常信息也不会丢了：
+
+```
+$ tt -i 1001
+ INDEX            1001                                                                                      
+ GMT-CREATE       2023-09-15 07:51:16
+ COST(ms)         0.1017
+ OBJECT           0x62726348
+ CLASS            com.example.demo.service.DemoService                                                      
+ METHOD           add
+ IS-RETURN        false
+ IS-EXCEPTION     true
+ PARAMETERS[0]    @DemoAdd[
+                      x=@Integer[1],                                                                        
+                      y=null,
+                  ]
+                        at com.example.demo.service.DemoService.add(DemoService.java:21)
+                        at com.example.demo.controller.DemoController.add(DemoController.java:21)
+                        ...
+Affect(row-cnt:1) cost in 13 ms.
+```
+
+`tt` 命令记录了所有的方法调用，方便我们回溯，所以被称为时空隧道，而且，由于它保存了当时调用的所有现场信息，所以我们还可以主动地对一条历史记录进行重做，这在复现某些不常见的 BUG 时非常有用：
+
+```
+$ tt -i 1000 -p
+ RE-INDEX       1000
+ GMT-REPLAY     2023-09-15 07:52:31
+ OBJECT         0x62726348
+ CLASS          com.example.demo.service.DemoService
+ METHOD         add
+ PARAMETERS[0]  @DemoAdd[
+                    x=@Integer[1],
+                    y=@Integer[2],
+                ]
+ IS-RETURN      true
+ IS-EXCEPTION   false
+ COST(ms)       0.1341
+ RETURN-OBJ     @Integer[3]
+Time fragment[1000] successfully replayed 1 times.
+```
+
+另外，由于 `tt` 保存了当前环境的对象引用，所以我们甚至可以通过这个对象引用来调用它的方法：
+
+```
+$ tt -i 1000 -w 'target.properties()' -x 2
+@DemoProperties[
+    title=@String[demo title],
+]
+Affect(row-cnt:1) cost in 148 ms.
+```
+
 ### 使用 `logger` 动态更新日志级别
 
 在 [week014-spring-boot-actuator](../week014-spring-boot-actuator/README.md) 这篇笔记中，我们学习过 Spring Boot Actuator 内置了一个 `/loggers` 端点，可以查看或修改 logger 的日志等级，比如下面这个 POST 请求将 `com.example.demo` 的日志等级改为 `DEBUG`：
@@ -441,6 +537,23 @@ $ ognl '@com.example.demo.utils.SpringUtils@getBean("demoProperties")'
 ```
 
 那么如果我们的代码中没有 `SpringUtils.getBean()` 这样的静态方法怎么办呢？
+
+```
+$ tt -t org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter invokeHandlerMethod 
+Press Q or Ctrl+C to abort.
+Affect(class count: 1 , method count: 1) cost in 43 ms, listenerId: 2
+ INDEX  TIMESTAMP            COST(ms)  IS-RET  IS-EXP  OBJECT       CLASS                    METHOD
+------------------------------------------------------------------------------------------------------------
+ 1002   2023-09-15 07:59:27  3.5448     true   false   0x57023e7    RequestMappingHandlerAd  invokeHandlerMethod
+```
+
+```
+$ tt -i 1002 -w 'target.getApplicationContext().getBean("demoProperties")'
+@DemoProperties[
+    title=@String[demo title],
+]
+Affect(row-cnt:1) cost in 3 ms.
+```
 
 ### 使用 `jad/sc/redefine` 热更新代码
 
