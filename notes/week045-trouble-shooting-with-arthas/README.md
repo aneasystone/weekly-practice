@@ -625,11 +625,21 @@ $ retransform --deleteAll
 $ retransform --classPattern com.example.demo.service.DemoService
 ```
 
-不过要注意的是，Arthas 的热更新也并非无所不能，它也有一些限制，比如不能修改、添加、删除类的字段和方法，只能在原来的方法上修改逻辑。
+> 不过要注意的是，Arthas 的热更新也并非无所不能，它也有一些限制，比如不能修改、添加、删除类的字段和方法，只能在原来的方法上修改逻辑。
 
-### 使用 `trace` 排查性能问题
+> 另外，在生产环境热更新代码并不是很好的行为，而且还非常危险，一定要严格地控制，上线规范也同样重要。
 
-### 排查类冲突问题
+### 其他使用场景
+
+Arthas 的使用非常灵活，有时候甚至还会有一些意想不到的功能，除了上面这些使用场景，Arthas 的 Issues 中还收集了一些 [用户案例](https://github.com/alibaba/arthas/issues?q=label%3Auser-case)，其中有几个案例对我印象很深，非常有启发性，可供参考。
+
+* [使用 `stack` 命令定位 `System.exit/System.gc` 的调用来源](https://github.com/alibaba/arthas/issues/20)
+* [使用 `sc` 和 `jad` 排查 `NoSuchMethodError` 问题](https://github.com/alibaba/arthas/issues/160)
+* [使用 `redefine` 修改 `StringBuilder.toString()` 定位未知的日志来源](https://github.com/alibaba/arthas/issues/263)
+* [使用 `trace javax.servlet.Servlet/Filter` 排查 Spring Boot 应用 404/401 问题](https://github.com/alibaba/arthas/issues/429)
+* [使用 `tt` 定位 Java 应用 CPU 负载过高问题](https://github.com/alibaba/arthas/issues/1202)
+* [使用 `profiler` 做复杂链路分析，排查性能问题](https://github.com/alibaba/arthas/issues/1416)
+* [使用 `trace` 命令将接口性能优化十倍](https://github.com/alibaba/arthas/issues/1892)
 
 ## 参考
 
@@ -639,6 +649,7 @@ $ retransform --classPattern com.example.demo.service.DemoService
 * [redefine VS. retransform](https://lsieun.github.io/java-agent/s01ch03/redefine-vs-retransform.html)
 * [Alibaba Arthas实践--获取到Spring Context，然后为所欲为](https://github.com/alibaba/arthas/issues/482)
 * [Arthas 用户案例](https://github.com/alibaba/arthas/issues?q=label%3Auser-case)
+* [使用 SkyWalking & Arthas 优化微服务性能](https://github.com/alibaba/arthas/issues/1653)
 
 ## 更多
 
