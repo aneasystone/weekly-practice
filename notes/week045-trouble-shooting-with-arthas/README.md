@@ -538,14 +538,18 @@ $ ognl '@com.example.demo.utils.SpringUtils@getBean("demoProperties")'
 
 那么如果我们的代码中没有 `SpringUtils.getBean()` 这样的静态方法怎么办呢？
 
+在上面我们学到 Arthas 里有一个 `tt` 命令，可以记录方法调用的所有现场信息，并可以使用 `ognl` 表达式对现场信息进行查看；这也就意味着我们可以调用监听目标对象的方法，如果监听目标对象有类似于 `getBean()` 或 `getApplicationContext()` 这样的方法，那么我们就可以间接地获取到 Spring Bean。在 Spring MVC 程序中，`RequestMappingHandlerAdapter` 就是这样绝佳的一个监听对象，每次处理请求时都会调用它的 `invokeHandlerMethod()` 方法，我们对这个方法进行监听：
+
 ```
-$ tt -t org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter invokeHandlerMethod 
+$ tt -t org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter invokeHandlerMethod
 Press Q or Ctrl+C to abort.
 Affect(class count: 1 , method count: 1) cost in 43 ms, listenerId: 2
  INDEX  TIMESTAMP            COST(ms)  IS-RET  IS-EXP  OBJECT       CLASS                    METHOD
 ------------------------------------------------------------------------------------------------------------
  1002   2023-09-15 07:59:27  3.5448     true   false   0x57023e7    RequestMappingHandlerAd  invokeHandlerMethod
 ```
+
+因为这个对象有 `getApplicationContext()` 方法，所以可以通过 `tt -w` 来调用它，从而获取配置 Bean 的内容：
 
 ```
 $ tt -i 1002 -w 'target.getApplicationContext().getBean("demoProperties")'
@@ -555,11 +559,77 @@ $ tt -i 1002 -w 'target.getApplicationContext().getBean("demoProperties")'
 Affect(row-cnt:1) cost in 3 ms.
 ```
 
-### 使用 `jad/sc/redefine` 热更新代码
+### 使用 `jad/sc/retransform` 热更新代码
 
-### 排查类冲突问题
+有时候我们排查出问题原因后，发现只需一个小小的改动就可以修复问题，可能是加一行判空处理，或者是修复一处逻辑错误；又或者问题太复杂一时排查不出结果，需要加几行调试代码来方便问题的定位；如果修改代码，再重新发布到生产环境，耗时会非常长，而且重启服务也可能会影响到当前的用户。在比较紧急的情况下，热更新功能就可以排上用场了，不用重启服务就能在线修改代码逻辑。
+
+热更新代码一般分为下面四个步骤：
+
+第一步，使用 `jad` 命令将要修改的类反编译成 `.java` 文件：
+
+```
+$ jad --source-only com.example.demo.service.DemoService > /tmp/DemoService.java
+```
+
+第二步，修改代码：
+
+```
+$ vi /tmp/DemoService.java
+```
+
+比如我们在 `add()` 方法中加入判空处理：
+
+```
+           public Integer add(DemoAdd demoAdd) {
+                if (demoAdd.getX() == null) {
+                    demoAdd.setX(0);
+                }
+                if (demoAdd.getY() == null) {
+                    demoAdd.setY(0);
+                }
+/*20*/         log.debug("x = {}, y = {}", (Object)demoAdd.getX(), (Object)demoAdd.getY());
+/*21*/         return demoAdd.getX() + demoAdd.getY();
+           }
+```
+
+第三步，使用 `mc` 命令将修改后的 `.java` 文件编译成 `.class` 字节码文件：
+
+```
+$ mc /tmp/DemoService.java -d /tmp
+Memory compiler output:
+D:\tmp\com\example\demo\service\DemoService.class
+Affect(row-cnt:1) cost in 1312 ms.
+```
+
+> `mc` 命令有时会失败，这时我们可以在本地开发环境修改代码，并编译成 `.class` 文件，再上传到服务器上。
+
+最后一步，使用 `redefine` 或 `retransform` 对类进行热更新：
+
+```
+$ retransform /tmp/com/example/demo/service/DemoService.class
+retransform success, size: 1, classes:
+com.example.demo.service.DemoService
+```
+
+`redefine` 和 `retransform` 都可以热更新，但是 `redefine` 和 `jad` / `watch` / `trace` / `monitor` / `tt` 等命令冲突，所以推荐使用 `retransform` 命令。热更新成功后，使用异常请求再请求一次，现在不会报系统错误了：
+
+```
+$ curl -X POST -H "Content-Type: application/json" -d '{"x":1}' http://localhost:8080/add
+1
+```
+
+如果要还原所做的修改，那么只需要删除这个类对应的 `retransform entry`，然后再重新触发 `retransform` 即可：
+
+```
+$ retransform --deleteAll
+$ retransform --classPattern com.example.demo.service.DemoService
+```
+
+不过要注意的是，Arthas 的热更新也并非无所不能，它也有一些限制，比如不能修改、添加、删除类的字段和方法，只能在原来的方法上修改逻辑。
 
 ### 使用 `trace` 排查性能问题
+
+### 排查类冲突问题
 
 ## 参考
 
@@ -568,6 +638,7 @@ Affect(row-cnt:1) cost in 3 ms.
 * [Arthas 在线教程 - Killercoda](https://killercoda.com/arthas/course/arthas-tutorials-cn)
 * [redefine VS. retransform](https://lsieun.github.io/java-agent/s01ch03/redefine-vs-retransform.html)
 * [Alibaba Arthas实践--获取到Spring Context，然后为所欲为](https://github.com/alibaba/arthas/issues/482)
+* [Arthas 用户案例](https://github.com/alibaba/arthas/issues?q=label%3Auser-case)
 
 ## 更多
 
