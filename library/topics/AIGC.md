@@ -5,6 +5,8 @@
 
 ## 工具和产品
 
+* [AIdea](https://github.com/mylxsw/aidea) - 一款支持 GPT、国产大模型，支持 Stable Diffusion 文生图、图生图、SDXL1.0、超分辨率、图片上色的全能型 APP。
+
 ### 聊天助手
 
 * [ChatGPT](https://chat.openai.com/)
@@ -15,6 +17,7 @@
 * [文心一言](https://yiyan.baidu.com/)
 * [通义千问](https://qianwen.aliyun.com/)
 * [讯飞星火](https://xinghuo.xfyun.cn/)
+* [豆包](https://www.doubao.com/)
 
 #### 聚合聊天
 
@@ -24,6 +27,7 @@
 #### 智能搜索
 
 * [Perplexity AI](https://www.perplexity.ai/) - Where knowledge begins
+* [Kagi Labs](https://kagi.com/fastgpt)
 
 ### 编程助手
 
@@ -39,6 +43,7 @@
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
 * [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
+* [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 
 #### 调试助手
 
@@ -59,6 +64,9 @@
 
 #### 数据库
 
+* [caesarhq/textSQL](https://github.com/caesarhq/textSQL) - uses LLMs to democratize access to data analysis.
+	* [Census GPT](https://censusgpt.com/)
+	* [San Francisco GPT](https://censusgpt.com/SF)
 * [AI2sql](https://www.ai2sql.io/) - Write SQL queries with no knowledge of SQL
 * [AI Query](https://aiquery.co/) - Generate SQL Queries with AI in Seconds
 * [sqlchat/sqlchat](https://github.com/sqlchat/sqlchat) - Chat-based SQL Client and Editor for the next decade
@@ -106,6 +114,7 @@
 
 #### 思维导图
 
+* [AmyMind](https://amymind.com/) - 伴你思考的AI思维导图
 * [EdrawMind AI](https://www.edrawmind.com/ai-mind-map.html) - AI-Powered Mind Mapping Made Simple and Intuitive
 
 #### PPT
@@ -143,6 +152,7 @@
 
 #### 设计助手
 
+* [PMAI](https://www.pm-ai.cn/) - 产品经理的AI助手，让你工作更轻松。一键生成PRD、解决方案、流程图、sql等功能
 * [Vizcom](https://www.vizcom.ai/) - Render your drawings in seconds 
 * [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
 * [Flair](https://flair.ai/) - THE AI DESIGN TOOL FOR BRANDED CONTENT
@@ -207,6 +217,7 @@
 
 * [Synthesia](https://www.synthesia.io/) - Synthesia is a #1 AI Video Creation Platform
 * [D-ID](https://www.d-id.com/) - The Digital People Platform
+* [TheRamU/Fay](https://github.com/TheRamU/Fay) - 包含Fay控制器及数字人模型
 
 ## 模型社区
 
@@ -248,7 +259,10 @@
 * 知海图AI - 知乎
 * [小冰](https://www.xiaoice.com/)
 * [写作猫](https://xiezuocat.com/) - 秘塔网络
-* [Baichuan](https://github.com/baichuan-inc/Baichuan-13B) - 百川智能
+* [百川大模型](https://www.baichuan-ai.com/home) - 百川智能
+	* [Baichuan-7B](https://github.com/baichuan-inc/Baichuan-7B)
+	* [Baichuan-13B](https://github.com/baichuan-inc/Baichuan-13B)
+	* [Baichuan2](https://github.com/baichuan-inc/Baichuan2)
 * [TigerBot](https://github.com/TigerResearch/TigerBot) - 虎博网络
 * [书生·浦语](https://internlm.org/) - 上海人工智能实验室
 	* [InternLM](https://github.com/InternLM/InternLM)
@@ -257,7 +271,7 @@
 
 ### 领域大模型
 
-* 学而思 MathGPT - 教育
+* 学而思 [MathGPT](https://www.mathgpt.com/) - 教育
 * 彭博社 [BloombergGPT](https://arxiv.org/abs/2303.17564) - 金融
 * 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
 * [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
@@ -335,6 +349,7 @@
 
 ### 文档助手
 
+* [HelpLook](https://www.helplook.net/) - 快速搭建知识库/帮助中心/企业博客，并基于现有知识数据与AI模型，定制企业级专属「AI问答机器人」
 * [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
 * [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
 * [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
@@ -367,15 +382,27 @@
 * [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
 	* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
 * [LlamaIndex](https://github.com/jerryjliu/llama_index) - LlamaIndex (GPT Index) is a data framework for your LLM applications
-* [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
-* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
-* [BabyAGI](https://github.com/yoheinakajima/babyagi)
-* [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
 * [BentoML](https://github.com/bentoml/BentoML) - Build Production-Grade AI Applications
 * [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
 * [LangKit](https://github.com/whylabs/langkit) - An open-source toolkit for monitoring Language Learning Models.
+* [Rivet](https://github.com/Ironclad/rivet) - The open-source visual AI programming environment and TypeScript library
+
+### 工作流
+
+* [FlowiseAI/Flowise](https://github.com/FlowiseAI/Flowise) - Drag & drop UI to build your customized LLM flow using LangchainJS
+* [logspace-ai/langflow](https://github.com/logspace-ai/langflow) - LangFlow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
+* [向量脉络 VectorVein](https://github.com/AndersonBY/vector-vein)
+* [ChatFlow](https://github.com/prompt-engineering/chat-flow)
+* [Questflow](https://www.questflow.ai/) - Build AI agents for workflow automation with no-code
+
+### Agent
+
+* [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
+* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
+* [BabyAGI](https://github.com/yoheinakajima/babyagi)
+* [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 
 ### 模型推理
 

@@ -8,6 +8,10 @@
 
 ## Java
 
+### Java Agent
+
+* [手把手教你实现一个Java Agent](https://mp.weixin.qq.com/s/BB9GwJVhadjxUWZTaLr5bA)
+
 ### 学习 JNI
 
 * [Guide to JNI (Java Native Interface)](https://www.baeldung.com/jni)
@@ -71,6 +75,7 @@
 
 ### 实现 Spring Boot 3 应用的可观测性
 
+* [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
 * [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
 * [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
 * [Micrometer Documentation](https://micrometer.io/docs)
@@ -110,6 +115,10 @@
 * [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
 
 ## Kubernetes
+
+### 扩展 Kubernetes
+
+* [要魔改Kubernetes，我们可以从哪里扩展](https://mp.weixin.qq.com/s/AtrluQNkKHpLFjVvp_BYBg)
 
 ### 在 Kubernetes 中调度 GPU 资源
 
@@ -172,6 +181,7 @@
 
 ### 深入 Istio
 
+* [从Istio在CNCF毕业，看服务网格的架构变迁](https://mp.weixin.qq.com/s/_VNdxzhxCoQCcITqyklASg)
 * [MoE 系列 - 如何使用 Golang 扩展 Envoy [一]](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-1/)
 * [MoE 系列 [二] - Golang 扩展从 Envoy 接收配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-2/)
 * [MoE 系列 [三] - 使用 Istio 动态更新 Go 扩展配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-3/)
@@ -184,6 +194,10 @@
 
 * [MySQL 索引之道](https://juejin.cn/post/7161964571853815822)
 * [1.5万字+30张图盘点索引常见的11个知识点](https://www.cnblogs.com/zzyang/p/17440187.html)
+
+### 锁
+
+* [鹅厂T12详解MySQL加锁机制](https://mp.weixin.qq.com/s/TEXjgA85vUrvx2Q6O5Id1A)
 
 ### 数据库分片
 
@@ -229,6 +243,13 @@
 ### 网络
 
 * [一张图感受真实的 TCP 状态转移](https://segmentfault.com/a/1190000043834899)
+
+### eBPF
+
+* [EBPF 介绍](https://coolshell.cn/articles/22320.html)
+* [从石器时代到成为“神”，一文讲透 eBPF 技术发展演进史](https://www.infoq.cn/article/Y8NP88aKpFBtG7H2kK4a)
+* [万字长文解读 Linux 内核追踪机制](https://www.infoq.cn/article/jH1lRuqQTi3gjvs5Dh6b)
+* [eBPF 动手实践系列一：解构内核源码 eBPF 样例编译过程](https://my.oschina.net/u/5583868/blog/8670498)
 
 ## 其他
 
@@ -285,6 +306,7 @@
 ### 监控告警
 
 * [夜莺 - All-in-one 的开源观测平台](https://github.com/ccfos/nightingale)
+* [一文搞懂 VictoriaMetrics 的使用](https://www.qikqiak.com/post/victoriametrics-usage/)
 
 ### 实战 Litmus 云原生混沌工程
 
@@ -317,6 +339,7 @@
 ## 前端
 
 * [Vue3.0 完全教程](https://zhuanlan.zhihu.com/p/482851017)
+* [最全系列的vue3入门教程『图文并茂』](https://mp.weixin.qq.com/s/nLpmPOWiMQFWVrxrzedA7g)
 
 ### 前端规范
 
