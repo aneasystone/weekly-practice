@@ -251,6 +251,10 @@
 * [万字长文解读 Linux 内核追踪机制](https://www.infoq.cn/article/jH1lRuqQTi3gjvs5Dh6b)
 * [eBPF 动手实践系列一：解构内核源码 eBPF 样例编译过程](https://my.oschina.net/u/5583868/blog/8670498)
 
+### 系统架构
+
+* [聊聊万亿流量场景下的负载均衡实践](https://xie.infoq.cn/article/25dfb48d7892d071807322ee3)
+
 ## 其他
 
 * [Decoding small QR codes by hand](https://blog.qartis.com/decoding-small-qr-codes-by-hand/)

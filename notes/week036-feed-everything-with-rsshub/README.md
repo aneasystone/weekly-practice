@@ -221,11 +221,13 @@ $ docker run --name rsshub \
 	diygod/rsshub
 ```
 
-注意我们将 `lib/v2` 目录挂载进容器，这样才能让我们的订阅源生效。我制作了三个 RSS 订阅源，有需要的小伙伴可以自取：
+注意我们将 `lib/v2` 目录挂载进容器，这样才能让我们的订阅源生效。我制作了几个 RSS 订阅源，有需要的小伙伴可以自取：
 
 * [Apache - APISIX 博客](https://www.aneasystone.com/rsshub/apache/apisix/blog)
 * [支流科技 - 博客](https://www.aneasystone.com/rsshub/apiseven/blog)
 * [云原生社区 - 博客](https://www.aneasystone.com/rsshub/cloudnative/blog)
+* [文章 - 廖雪峰的官方网站](https://www.aneasystone.com/rsshub/liaoxuefeng/blog)
+* [青蛙小白](https://www.aneasystone.com/rsshub/frognew/blog)
 
 ## 参考
 

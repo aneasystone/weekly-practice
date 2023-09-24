@@ -275,6 +275,7 @@
 * 彭博社 [BloombergGPT](https://arxiv.org/abs/2303.17564) - 金融
 * 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
 * [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
+* [MediaGPT](https://github.com/IMOSR/MediaGPT) - 中文自媒体大模型
 
 ### 国外大模型
 
@@ -349,6 +350,8 @@
 
 ### 文档助手
 
+* [Khoj](https://khoj.dev/) - An open-source AI copilot for your Second Brain
+	* [khoj-ai/khoj](https://github.com/khoj-ai/khoj) - Search and chat with your personal knowledge base
 * [HelpLook](https://www.helplook.net/) - 快速搭建知识库/帮助中心/企业博客，并基于现有知识数据与AI模型，定制企业级专属「AI问答机器人」
 * [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
 * [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
@@ -403,6 +406,7 @@
 * [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
+* [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 
 ### 模型推理
 
