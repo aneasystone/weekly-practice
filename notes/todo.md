@@ -38,6 +38,7 @@
 ### Spring Boot 启动优化
 
 * [7min到40s：SpringBoot启动优化实践](https://juejin.cn/post/7181342523728592955)
+* [探索｜Spring并行初始化加速的思路和实践](https://mp.weixin.qq.com/s/1xIWCoCdQtAPlcZe3zHusQ)
 
 ### Reactor 响应式编程
 
@@ -73,6 +74,13 @@
 * [External Debugging With JMXTerm](https://www.baeldung.com/java-jmxterm-external-debugging)
 * [Calling JMX MBean Method From a Shell Script](https://www.baeldung.com/jmx-mbean-shell-access)
 
+#### 垃圾回收
+
+* [7 kinds of garbage collection for Java](https://opensource.com/article/22/7/garbage-collection-java)
+* [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
+* [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
+* [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
+
 ### 实现 Spring Boot 3 应用的可观测性
 
 * [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
@@ -84,6 +92,14 @@
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
 * [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
 * [A Java Library’s New Approach To Observability](https://foojay.io/today/not-your-grandfathers-logs-a-java-librarys-new-approach-to-observability/)
+
+### Spring StateMachine
+
+* [如何设计一个状态机！](https://mp.weixin.qq.com/s/8lZ1jpvOTb2cd4-IhclaMg)
+
+### JPA
+
+* [Understanding JPA/Hibernate Associations](https://www.baeldung.com/jpa-hibernate-associations)
 
 ### 使用 Picocli 打造一个命令行程序
 
@@ -104,6 +120,7 @@
 * [Guide to Creating Archetypes](https://maven.apache.org/guides/mini/guide-creating-archetypes.html)
 * [Maven Archetype Plugin](https://maven.apache.org/archetype/maven-archetype-plugin/)
 * [Maven Archetype 多 Module 自定义代码脚手架](https://www.cnblogs.com/ilovejaney/p/15802243.html)
+* [从 0 到 1 搭建自己的脚手架（java 后端）](https://xie.infoq.cn/article/b5bcd8306931a52fe166940e7)
 
 ### 虚拟线程
 
@@ -119,6 +136,18 @@
 ### 扩展 Kubernetes
 
 * [要魔改Kubernetes，我们可以从哪里扩展](https://mp.weixin.qq.com/s/AtrluQNkKHpLFjVvp_BYBg)
+
+### Ingress
+
+* [Ingress：k8s集群进出流量的总管](https://mp.weixin.qq.com/s/YbiqttXFQf2DZcIvHmAuLw)
+* [为什么 APISIX Ingress 是比 Ingress NGINX 更好的选择？](https://www.apiseven.com/blog/apisix-ingress-vs-ingress-nginx-2)
+* [为什么 APISIX Ingress 是比 Traefik 更好的选择？](https://www.apiseven.com/blog/why-you-should-choose-apisix-ingress-instead-on-traefik)
+* [为什么 APISIX Ingress 是比 Emissary-ingress 更好的选择？](https://mp.weixin.qq.com/s/eFwOtF31tcTbmeU4Rd8ktQ)
+* [Kong Ingress Controller with Spring Boot](https://www.baeldung.com/spring-boot-kong-ingress)
+
+### Gateway API
+
+* [Kubernetes Gateway API 深入解读和落地指南](https://cloudnative.to/blog/kubernetes-gateway-api-explained/)
 
 ### 在 Kubernetes 中调度 GPU 资源
 
@@ -219,6 +248,10 @@
 * [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
 * [一次访问Redis延时高问题排查与总结](https://mp.weixin.qq.com/s/f3dQIC4DBhWibyXQKBXrzg)
 
+## Kafka
+
+* [Kafka 核心全面总结，高可靠高性能核心原理探究](https://mp.weixin.qq.com/s/X51yOKjbZRDeUhzmudrmrw)
+
 ## Linux
 
 ### 学习 tcpdump
@@ -239,6 +272,7 @@
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（上册）](https://blog.csdn.net/l569590478/article/details/128665558)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
 * [Linux 网络延迟故障排查](https://z.itpub.net/article/detail/B4C1A280915C008AFE190AACAB45A5CB)
+* [生产Nginx现大量TIME-WAIT，连接耗尽，该如何处理？](https://mp.weixin.qq.com/s/U3ukNQOmsKmfHI20TFSxoQ)
 
 ### 网络
 
@@ -335,6 +369,12 @@
 * [设计模式详解之工厂模式](https://xie.infoq.cn/article/4b8e7ce446d58c79337a476c3)
 * [设计模式详解之策略模式](https://xie.infoq.cn/article/0f0f1b453827b2c5ccb624ade)
 * [聊一聊模板方法模式](https://mp.weixin.qq.com/s/6sSmc-8w5lpnB16N-UC13A)
+
+### 文章
+
+* [分布式事务最经典的七种解决方案](https://segmentfault.com/a/1190000040321750)
+* [Seata Saga 模式快速入门和最佳实践](https://mp.weixin.qq.com/s/cGi2wzCroMVHhPgvqASlBQ)
+* [实战分布式事务【Seata+Spring Cloud】](https://mp.weixin.qq.com/s/zlnOwSUXsOvzGJC00zQggw)
 
 ## 技术大会
 
