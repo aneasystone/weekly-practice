@@ -287,6 +287,7 @@
 * 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
 * [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
 * [MediaGPT](https://github.com/IMOSR/MediaGPT) - 中文自媒体大模型
+* [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
 
 ### 国外大模型
 

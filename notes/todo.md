@@ -197,6 +197,11 @@
 
 * [KubeVela](https://kubevela.io/zh/)
 
+### 优雅发布
+
+* [GitOps 实践之渐进式发布](https://coding.net/help/insight/gitops)
+* [基于 nacos/springcloud/k8s 的不停机服务更新[graceful shutdown]](http://yelog.org/2022/07/27/springboot-graceful-shutdown-based-on-nacos2-and-k8s/)
+
 ### 使用 KubeSphere 管理 Kubernetes
 
 * [KubeSphere 文档](https://kubesphere.io/zh/docs/v3.3)
@@ -353,6 +358,7 @@
 ### Nginx
 
 * [Nginx 常用配置及和基本功能讲解](https://my.oschina.net/u/4090830/blog/8694569)
+* [用 Nginx 禁止国外 IP 访问我的网站](https://mp.weixin.qq.com/s/M5WGozQdBvX_ZvW9rATzbQ)
 
 ### 算法
 
