@@ -110,6 +110,10 @@
 * [从Commons CLI迁移到Picocli](https://blog.csdn.net/Tybyqi/article/details/85787550)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
 
+### 工作流
+
+* [Camunda 7工作流引擎 API 以及与Springboot集成实现工作流配置全纪录](https://blog.csdn.net/yu619251940/article/details/129670382)
+
 ### Maven
 
 * [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
@@ -224,21 +228,23 @@
 
 ## 数据库
 
-### 索引
+### MySQL
+
+#### 索引
 
 * [MySQL 索引之道](https://juejin.cn/post/7161964571853815822)
 * [1.5万字+30张图盘点索引常见的11个知识点](https://www.cnblogs.com/zzyang/p/17440187.html)
 
-### 锁
+#### 锁
 
 * [鹅厂T12详解MySQL加锁机制](https://mp.weixin.qq.com/s/TEXjgA85vUrvx2Q6O5Id1A)
 
-### 数据库分片
+#### 数据库分片
 
 * [数据库分片（Database Sharding)详解](https://zhuanlan.zhihu.com/p/57185574)
 * [图解数据库分片技术](https://posts.careerengine.us/p/641433ce681dcb4a7b7d6da4)
 
-### 缓存同步
+#### 缓存同步
 
 * [MySQL 与 Redis 缓存的同步方案](https://mp.weixin.qq.com/s/e4qJp4zcXHJQycJwq1mgzQ)
 * [数据库和缓存如何保证一致性？](https://xiaolincoding.com/redis/architecture/mysql_redis_consistency.html)
@@ -253,9 +259,26 @@
 * [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
 * [一次访问Redis延时高问题排查与总结](https://mp.weixin.qq.com/s/f3dQIC4DBhWibyXQKBXrzg)
 
-## Kafka
+### ElasticSearch
+
+#### 查询指南
+
+* [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+* [Search your data](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-your-data.html)
+* [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
+* [Aggregations](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html)
+
+#### 优化实践
+
+* [Elasticsearch核心应用场景-日志优化实践](https://cloud.tencent.com/developer/article/2302427)
+* [干货 | Elasticsearch 8.X 性能优化实战](https://elastic.blog.csdn.net/article/details/130437128)
+* [得物社区亿级ES数据搜索性能调优实践](https://my.oschina.net/u/5783135/blog/8821399)
+
+### 消息队列
 
 * [Kafka 核心全面总结，高可靠高性能核心原理探究](https://mp.weixin.qq.com/s/X51yOKjbZRDeUhzmudrmrw)
+* [引入RabbitMQ后，如何保证全链路数据100%不丢失？](https://cloud.tencent.com/developer/article/1919835)
+* [消息队列20年：腾讯专家沉淀的MQ设计精要](https://mp.weixin.qq.com/s/EuD2SQKiU15k1nRqtRfC4A)
 
 ## Linux
 
@@ -323,23 +346,6 @@
 * [微服务架构下网关的技术选型](https://www.jianshu.com/p/97324f7f3134)
 * [Active Health Check strategies with Spring Cloud Gateway](https://spring.io/blog/2023/07/05/active-health-check-strategies-with-spring-cloud-gateway)
 * [Evaluating Apache APISIX vs. Spring Cloud Gateway](https://blog.frankel.ch/spring-cloud-gateway-apache-apisix/)
-
-### ElasticSearch 查询指南
-
-* [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
-* [Search your data](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-your-data.html)
-* [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
-* [Aggregations](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html)
-
-### ElasticSearch 优化
-
-* [Elasticsearch核心应用场景-日志优化实践](https://cloud.tencent.com/developer/article/2302427)
-* [干货 | Elasticsearch 8.X 性能优化实战](https://elastic.blog.csdn.net/article/details/130437128)
-* [得物社区亿级ES数据搜索性能调优实践](https://my.oschina.net/u/5783135/blog/8821399)
-
-### 消息队列
-
-* [引入RabbitMQ后，如何保证全链路数据100%不丢失？](https://cloud.tencent.com/developer/article/1919835)
 
 ### Go 学习笔记
 
