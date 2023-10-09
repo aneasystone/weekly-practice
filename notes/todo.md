@@ -141,18 +141,6 @@
 
 * [要魔改Kubernetes，我们可以从哪里扩展](https://mp.weixin.qq.com/s/AtrluQNkKHpLFjVvp_BYBg)
 
-### Ingress
-
-* [Ingress：k8s集群进出流量的总管](https://mp.weixin.qq.com/s/YbiqttXFQf2DZcIvHmAuLw)
-* [为什么 APISIX Ingress 是比 Ingress NGINX 更好的选择？](https://www.apiseven.com/blog/apisix-ingress-vs-ingress-nginx-2)
-* [为什么 APISIX Ingress 是比 Traefik 更好的选择？](https://www.apiseven.com/blog/why-you-should-choose-apisix-ingress-instead-on-traefik)
-* [为什么 APISIX Ingress 是比 Emissary-ingress 更好的选择？](https://mp.weixin.qq.com/s/eFwOtF31tcTbmeU4Rd8ktQ)
-* [Kong Ingress Controller with Spring Boot](https://www.baeldung.com/spring-boot-kong-ingress)
-
-### Gateway API
-
-* [Kubernetes Gateway API 深入解读和落地指南](https://cloudnative.to/blog/kubernetes-gateway-api-explained/)
-
 ### 在 Kubernetes 中调度 GPU 资源
 
 * [k8s 调度 GPU](https://www.cnblogs.com/linhaifeng/p/16111733.html)
