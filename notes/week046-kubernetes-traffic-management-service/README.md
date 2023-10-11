@@ -18,23 +18,26 @@ kind: Deployment
 metadata:
   labels:
     app: myapp
+    version: v1
   name: myapp
 spec:
   replicas: 3
   selector:
     matchLabels:
       app: myapp
+      version: v1
   template:
     metadata:
       labels:
         app: myapp
+        version: v1
     spec:
       containers:
       - image: jocatalin/kubernetes-bootcamp:v1
         name: myapp
 ```
 
-确认三个副本都成功启动：
+等待三个副本都启动成功：
 
 ```
 # kubectl get deploy myapp -o wide
@@ -85,6 +88,17 @@ Hello Kubernetes bootcamp! | Running on: myapp-fdb95659d-fl5c4 | v=1
 
 ## Service 配置细节
 
+### 标签选择器
+
+在上面的 Service 定义中，最重要的一个字段是 `spec.selector` 选择器，Service 通过 [标签选择器](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) 选择符合条件的 Pod，并将选中的 Pod 作为网络服务的提供者。并且 Service 能持续监听 Pod 集合，一旦 Pod 集合发生变动，Service 就会同步被更新。
+
+> 注意，标签选择器有两种类型：
+> * 基于等值的需求（*Equality-based*）：比如 `environment = production` 或 `tier != frontend`
+> * 基于集合的需求（*Set-based*）：比如 `environment in (production, qa)` 或 `tier notin (frontend, backend)`
+> Service 只支持基于等值的选择器。
+
+在上面的例子中，Service 的选择器为 `app: myapp`，而 Pod 有两个标签：`app: myapp` 和 `version: v1`，很显然是能够选中的。选中的 Pod 会自动加入到 Service 的 Endpoints 中，可以通过 `kubectl describe svc` 确认 Service 绑定了哪些 Endpoints：
+
 ```
 # kubectl describe svc myapp
 Name:              myapp
@@ -104,13 +118,44 @@ Session Affinity:  None
 Events:            <none>
 ```
 
+也可以直接使用 `kubectl get endpoints` 查看：
+
 ```
 # kubectl get endpoints myapp
 NAME    ENDPOINTS                                                     AGE
 myapp   100.121.213.101:8080,100.121.213.103:8080,100.84.80.80:8080   22m
 ```
 
-## Service 类型
+使用选择器可以很灵活的控制要暴露哪些 Pod。假设我们的服务现在要升级，同时老版本的服务还不能下线，那么可以给新版本的 Pod 打上 `app: myapp` 和 `version: v2` 标签：
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: myapp
+    version: v2
+  name: myapp2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: myapp
+        version: v2
+    spec:
+      containers:
+      - image: jocatalin/kubernetes-bootcamp:v2
+        name: myapp2
+```
+
+这样 Service 就可以同时选择 v1 和 v2 的服务。
+
+### Service 类型
 
 在 [week013-playing-with-kubernetes](../week013-playing-with-kubernetes/README.md) 这篇笔记中我们了解到，`Service` 有如下几种类型：
 
@@ -121,13 +166,13 @@ myapp   100.121.213.101:8080,100.121.213.103:8080,100.84.80.80:8080   22m
 
 这一节将更深入地学习这几种类型的使用。
 
-### `ClusterIP`
+#### `ClusterIP`
 
-### `NodePort`
+#### `NodePort`
 
-### `LoadBalancer`
+#### `LoadBalancer`
 
-### `ExternalName`
+#### `ExternalName`
 
 https://kubernetes.io/docs/concepts/services-networking/service/
 
