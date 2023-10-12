@@ -141,9 +141,62 @@ Service 支持的协议有以下几种：
 * [PROXY 协议](https://www.haproxy.org/download/2.5/doc/proxy-protocol.txt)
 * TLS Server
 
+#### 具名端口
+
+在应用程序升级时，服务的端口可能会发生变动，如果希望 Service 同时选择新老两个版本的 Pod，那么 `targetPort` 就不能写死。Kubernetes 支持为每个端口赋一个名称，然后我们将新老版本的端口名称保持一致，再将 `targetPort` 配置成该名称即可。
+
+首先修改 Deployment 的定义，为端口赋上名称：
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: myapp
+    version: v1
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: myapp
+        version: v1
+    spec:
+      containers:
+      - image: jocatalin/kubernetes-bootcamp:v1
+        name: myapp
+        ports:
+        - name: myapp-port
+          containerPort: 8080
+          protocol: TCP
+```
+
+然后修改 Service 定义中的 `targetPort` 为端口名称即可：
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  ports:
+  - port: 38080
+    targetPort: myapp-port
+  selector:
+    app: myapp
+  type: ClusterIP
+```
+
 ### 标签选择器
 
-另一个重要字段是 `spec.selector` 选择器：
+Service 中的另一个重要字段是 `spec.selector` 选择器：
 
 ```
 spec:
@@ -221,6 +274,13 @@ spec:
 https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
 
 ### Service 类型
+
+Service 中第三个重要字段是 `spec.type` 服务类型：
+
+```
+spec:
+  type: ClusterIP
+```
 
 在 [week013-playing-with-kubernetes](../week013-playing-with-kubernetes/README.md) 这篇笔记中我们了解到，`Service` 有如下几种类型：
 
