@@ -56,9 +56,7 @@ metadata:
   name: myapp
 spec:
   ports:
-  - name: http
-    port: 38080
-    protocol: TCP
+  - port: 38080
     targetPort: 8080
   selector:
     app: myapp
@@ -88,9 +86,72 @@ Hello Kubernetes bootcamp! | Running on: myapp-fdb95659d-fl5c4 | v=1
 
 ## Service 配置细节
 
+上面是一个简单的 Service 示例，这一节对其配置参数进行详细说明。
+
+### 端口配置
+
+在上面的 Service 定义中，第一个重要参数是 `spec.ports` 端口配置：
+
+```
+spec:
+  ports:
+  - port: 38080
+    targetPort: 8080
+```
+
+其中 `port` 表示 Service 的端口，`targetPort` 表示 Pod 的端口。Service 创建成功之后，Kubernetes 会为该 Service 分配一个 IP 地址，Service 从自己的 IP 地址和 `port` 端口接收请求，并将请求映射到符合条件的 Pod 的 `targetPort`。
+
+#### 多端口配置
+
+可以在一个 Service 对象中定义多个端口，此时，我们必须为每个端口定义一个名字：
+
+```
+spec:
+  ports:
+  - name: http
+    port: 38080
+    targetPort: 8080
+  - name: https
+    port: 38083
+    targetPort: 8083
+```
+
+#### 协议配置
+
+此外，可以给 Service 的端口指定协议：
+
+```
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 38080
+    targetPort: 8080
+```
+
+Service 支持的协议有以下几种：
+
+* `TCP` - 所有的 Service 都支持 TCP 协议，这也是默认值；
+* `UDP` - 几乎所有的 Service 都支持 UDP 协议，对于 `LoadBalancer` 类型的 Service，是否支持取决于云供应商；
+* `SCTP` - 这是一种比较少见的协议，叫做 **流控制传输协议（Stream Control Transmission Protocol）**，和 TCP/UDP 属于同一层，常用于信令传输网络中，比如 4G 核心网的信令交互就是使用的 SCTP，WebRTC 中的 Data Channel 也是基于 SCTP 实现的；如果你的 Kubernetes 安装了支持 SCTP 协议的网络插件，那么大多数 Service 也就支持 SCTP 协议，同样地，对于 `LoadBalancer` 类型的 Service，是否支持取决于云供应商（大多数都不支持）；
+
+具体的内容可以参考 Kubernetes 的官网文档 [Protocols for Services](https://kubernetes.io/docs/reference/networking/service-protocols/)，文档中对于 TCP 协议，还列出了一些特殊场景，这些大多是对于 `LoadBalancer` 类型的 Service，需要使用云供应商所提供特定的注解：
+
+* HTTP 或 HTTPS 协议
+* [PROXY 协议](https://www.haproxy.org/download/2.5/doc/proxy-protocol.txt)
+* TLS Server
+
 ### 标签选择器
 
-在上面的 Service 定义中，最重要的一个字段是 `spec.selector` 选择器，Service 通过 [标签选择器](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) 选择符合条件的 Pod，并将选中的 Pod 作为网络服务的提供者。并且 Service 能持续监听 Pod 集合，一旦 Pod 集合发生变动，Service 就会同步被更新。
+另一个重要字段是 `spec.selector` 选择器：
+
+```
+spec:
+  selector:
+    app: myapp
+```
+
+Service 通过 [标签选择器](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) 选择符合条件的 Pod，并将选中的 Pod 作为网络服务的提供者。并且 Service 能持续监听 Pod 集合，一旦 Pod 集合发生变动，Service 就会同步被更新。
 
 > 注意，标签选择器有两种类型：
 > * 基于等值的需求（*Equality-based*）：比如 `environment = production` 或 `tier != frontend`
@@ -155,6 +216,10 @@ spec:
 
 这样 Service 就可以同时选择 v1 和 v2 的服务。
 
+#### 不带选择器的 Service
+
+https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
+
 ### Service 类型
 
 在 [week013-playing-with-kubernetes](../week013-playing-with-kubernetes/README.md) 这篇笔记中我们了解到，`Service` 有如下几种类型：
@@ -168,6 +233,8 @@ spec:
 
 #### `ClusterIP`
 
+https://github.com/guangzhengli/k8s-tutorials#service
+
 #### `NodePort`
 
 #### `LoadBalancer`
@@ -176,13 +243,9 @@ spec:
 
 https://kubernetes.io/docs/concepts/services-networking/service/
 
-https://kuboard.cn/learning/k8s-intermediate/service/service.html
-
 https://kubernetes.feisky.xyz/concepts/objects/service
 
 https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_8.html
-
-https://github.com/guangzhengli/k8s-tutorials#service
 
 https://jimmysong.io/kubernetes-handbook/concepts/service.html
 
