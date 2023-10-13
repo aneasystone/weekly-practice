@@ -271,6 +271,40 @@ spec:
 
 #### 不带选择器的 Service
 
+正如上面所说，Service 通过标签选择器选择符合条件的 Pod，并将选中的 Pod 加入到 Service 的 Endpoints 中。但是 Kubernetes 还支持一种特殊的不带选择器的 Service，如下所示：
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-no-selector
+spec:
+  ports:
+  - port: 38081
+    targetPort: 80
+  type: ClusterIP
+```
+
+由于这个 Service 没有选择器，所以也就不会扫描 Pod，也就不会自动创建 Endpoint，不过我们可以手动创建一个 Endpoint 对象：
+
+```
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: svc-no-selector
+subsets:
+  - addresses:
+      - ip: 47.93.22.98
+    ports:
+      - port: 80
+```
+
+Endpoint 和 Service 的名称保持一致，这样这个 Service 就会映射到我们手动指定的 IP 地址和端口了。这种 Service 在很多场景下都非常有用：
+
+* 可以在 Kubernetes 集群内部以 Service 的方式访问集群外部的地址；
+* 可以将 Service 指向另一个名称空间中的 Service，或者另一个 Kubernetes 集群中的 Service；
+* 可以系统中一部分应用程序迁移到 Kubernetes 中，另一部分仍然保留在 Kubernetes 之外；
+
 https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
 
 ### Service 类型
