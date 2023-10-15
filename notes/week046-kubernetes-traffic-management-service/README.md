@@ -305,8 +305,6 @@ Endpoint 和 Service 的名称保持一致，这样这个 Service 就会映射�
 * 可以将 Service 指向另一个名称空间中的 Service，或者另一个 Kubernetes 集群中的 Service；
 * 可以系统中一部分应用程序迁移到 Kubernetes 中，另一部分仍然保留在 Kubernetes 之外；
 
-https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
-
 ### Service 类型
 
 Service 中第三个重要字段是 `spec.type` 服务类型：
@@ -327,13 +325,87 @@ spec:
 
 #### `ClusterIP`
 
-https://github.com/guangzhengli/k8s-tutorials#service
+`ClusterIP` 是 Service 的默认类型，这种类型的 Service 只能从集群内部访问，它的调用示意图如下：
+
+![](./images/service-type-clusterip.png)
+
+可以看到，从 Pod 中访问 Service 时写死了 IP 地址，虽然说 Service 没有 Pod 那么易变，但是也可能出现误删的情况，重新创建 Service 之后，它的 IP 地址还是会发生变化，这时那些使用固定 IP 访问 Service 的 Pod 都需要调整了，Kubernetes 支持通过 `spec.clusterIP` 字段自定义集群 IP 地址：
+
+```
+spec:
+  type: ClusterIP
+  clusterIP: 10.96.3.215
+```
+
+这样可以让 Service 的 IP 地址固定下来，不过要注意的是，该 IP 地址必须在 kube-apiserver 的 `--service-cluster-ip-range` 配置参数范围内，这个参数可以从 kube-apiserver 的 Pod 定义中找到：
+
+```
+# kubectl get pods -n kube-system kube-apiserver-xxx -o yaml
+...
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --service-cluster-ip-range=10.96.0.0/22
+...
+```
+
+不过写死 IP 地址终究不是最佳实践，Kubernetes 提供了两种服务发现机制来解决这个问题：
+
+* 环境变量
+* DNS
+
+TODO 服务发现机制
 
 #### `NodePort`
 
+`NodePort` 是 `ClusterIP` 的超集，这种类型的 Service 可以从集群外部访问，我们可以通过集群中的任意一台主机来访问它，调用示意图如下：
+
+![](./images/service-type-nodeport.png)
+
 #### `LoadBalancer`
 
+`LoadBalancer` 是 `NodePort` 的超集，这种类型的 Service 也可以从集群外部访问，而且它是以一个统一的负载均衡器地址来访问的，所以调用方不用关心集群中的主机地址，调用示意图如下：
+
+![](./images/service-type-loadbalancer.png)
+
 #### `ExternalName`
+
+`ExternalName` 是一种特殊类型的 Service，这也是一种不带选择器的 Service，不会生成后端的 Endpoint，而且它不用定义端口，而是指定外部服务的 DNS 域名：
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-external-name
+spec:
+  type: ExternalName
+  externalName: www.aneasystone.com
+```
+
+查询该 Service 信息可以看到，这个 Service 没有 `CLUSTER-IP`，只有 `EXTERNAL-IP`：
+
+```
+# kubectl get svc svc-external-name
+NAME                TYPE           CLUSTER-IP   EXTERNAL-IP           PORT(S)   AGE
+svc-external-name   ExternalName   <none>       www.aneasystone.com   <none>    40m
+```
+
+要访问这个 Service，我们需要进到 Pod 容器里，随便找一个容器：
+
+```
+# kubectl exec -it myapp-b9744c975-ftgdx -- bash
+```
+
+然后通过这个 Service 的域名 `svc-external-name.default.svc.cluster.local` 来访问：
+
+```
+root@myapp-b9744c975-ftgdx:/# curl https://svc-external-name.default.svc.cluster.local -k
+```
+
+当以域名的方式访问 Service 时，集群的 DNS 服务将返回一个值为 `www.aneasystone.com` 的 CNAME 记录，整个过程都发生在 DNS 层，不会进行代理或转发。
+
+https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
 
 https://kubernetes.io/docs/concepts/services-networking/service/
 
@@ -347,6 +419,10 @@ https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%
 
 https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md
 
+## Service 实现原理
+
+https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html
+
 ## Network Policy
 
 https://kubernetes.feisky.xyz/concepts/objects/network-policy
@@ -357,6 +433,7 @@ https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Kubernetes%20%E5%AE%9E%E8%B7%
 
 ## 参考
 
+1. [Kubernetes 练习手册](https://k8s-tutorials.pages.dev/service.html)
 1. [数据包在 Kubernetes 中的一生（1）](https://blog.fleeto.us/post/life-of-a-packet-in-k8s-1/)
 1. [IPVS从入门到精通kube-proxy实现原理](https://zhuanlan.zhihu.com/p/94418251)
 1. [Kubernetes（k8s）kube-proxy、Service详解](https://www.cnblogs.com/liugp/p/16372503.html)
