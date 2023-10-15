@@ -209,6 +209,7 @@ Service 通过 [标签选择器](https://kubernetes.io/docs/concepts/overview/wo
 > 注意，标签选择器有两种类型：
 > * 基于等值的需求（*Equality-based*）：比如 `environment = production` 或 `tier != frontend`
 > * 基于集合的需求（*Set-based*）：比如 `environment in (production, qa)` 或 `tier notin (frontend, backend)`
+> 
 > Service 只支持基于等值的选择器。
 
 在上面的例子中，Service 的选择器为 `app: myapp`，而 Pod 有两个标签：`app: myapp` 和 `version: v1`，很显然是能够选中的。选中的 Pod 会自动加入到 Service 的 Endpoints 中，可以通过 `kubectl describe svc` 确认 Service 绑定了哪些 Endpoints：
@@ -350,12 +351,16 @@ spec:
 ...
 ```
 
-不过写死 IP 地址终究不是最佳实践，Kubernetes 提供了两种服务发现机制来解决这个问题：
+#### 服务发现
+
+像上面那样写死 IP 地址终究不是最佳实践，Kubernetes 提供了两种服务发现机制来解决这个问题：
 
 * 环境变量
 * DNS
 
-TODO 服务发现机制
+https://kuboard.cn/learning/k8s-intermediate/service/service-details.html#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0
+
+https://kuboard.cn/learning/k8s-intermediate/service/dns.html
 
 #### `NodePort`
 
@@ -368,6 +373,12 @@ TODO 服务发现机制
 `LoadBalancer` 是 `NodePort` 的超集，这种类型的 Service 也可以从集群外部访问，而且它是以一个统一的负载均衡器地址来访问的，所以调用方不用关心集群中的主机地址，调用示意图如下：
 
 ![](./images/service-type-loadbalancer.png)
+
+* [k8s系列06-负载均衡器之MatelLB](https://tinychen.com/20220519-k8s-06-loadbalancer-metallb/)
+* [玩转K8S的LoadBalancer](https://zhuanlan.zhihu.com/p/266422557)
+* [本地集群使用 OpenELB 实现 Load Balancer 负载均衡](https://www.qikqiak.com/post/openelb/)
+* [本地环境Kubernetes LoadBalancer实现](http://just4coding.com/2021/11/21/custom-loadbalancer/)
+* [本地 k8s 集群也可以有 LoadBalancer](https://todoit.tech/k8s/mentallb/)
 
 #### `ExternalName`
 
@@ -405,6 +416,8 @@ root@myapp-b9744c975-ftgdx:/# curl https://svc-external-name.default.svc.cluster
 
 当以域名的方式访问 Service 时，集群的 DNS 服务将返回一个值为 `www.aneasystone.com` 的 CNAME 记录，整个过程都发生在 DNS 层，不会进行代理或转发。
 
+> [CNAME](https://zh.wikipedia.org/zh-hans/CNAME%E8%AE%B0%E5%BD%95) 全称为 **Canonical Name**，它通过一个域名来表示另一个域名的别名，当一个站点拥有多个子域时，CNAME 非常有用，譬如可以将 `www.example.com` 和 `ftp.example.com` 都通过 CNAME 记录指向 `example.com`，而 `example.com` 则通过 A 记录指向服务的真实 IP 地址，这样就可以方便地在同一个地址上运行多个服务。
+
 https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
 
 https://kubernetes.io/docs/concepts/services-networking/service/
@@ -422,6 +435,18 @@ https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%
 ## Service 实现原理
 
 https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html
+
+### userspace 代理模式
+
+![](./images/kube-proxy-userspace.png)
+
+### iptables 代理模式
+
+![](./images/kube-proxy-iptables.png)
+
+### ipvs 代理模式
+
+![](./images/kube-proxy-ipvs.png)
 
 ## Network Policy
 
