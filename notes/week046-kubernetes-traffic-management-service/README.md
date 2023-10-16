@@ -358,9 +358,115 @@ spec:
 * 环境变量
 * DNS
 
-https://kuboard.cn/learning/k8s-intermediate/service/service-details.html#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0
+第一种方式是环境变量，kubelet 在启动容器时会扫描所有的 Service，并将 Service 信息通过环境变量的形式注入到容器中。我们随便进入一个容器：
 
-https://kuboard.cn/learning/k8s-intermediate/service/dns.html
+```
+# kubectl exec -it myapp-b9744c975-dv4qr -- bash
+```
+
+通过 `env` 命令查看环境变量：
+
+```
+root@myapp-b9744c975-dv4qr:/# env | grep MYAPP
+MYAPP_SERVICE_HOST=10.96.3.215
+MYAPP_SERVICE_PORT=38080
+MYAPP_PORT=tcp://10.96.3.215:38080
+MYAPP_PORT_38080_TCP_PROTO=tcp
+MYAPP_PORT_38080_TCP_ADDR=10.96.3.215
+MYAPP_PORT_38080_TCP_PORT=38080
+MYAPP_PORT_38080_TCP=tcp://10.96.3.215:38080
+```
+
+最常用的两个环境变量是 `{SVCNAME}_SERVICE_HOST` 和 `{SVCNAME}_SERVICE_PORT`，其中 `{SVCNAME}` 表示 Service 的名称，被转换为大写形式。
+
+> 在使用基于环境变量的服务发现方式时要特别注意一点，必须先创建 Service，再创建 Pod，否则，Pod 中不会有该 Service 对应的环境变量。
+
+第二种方式是 DNS，它没有创建顺序的问题，但是它依赖 DNS 服务，在 Kubernetes v1.10 之前的版本中，使用的是 [kube-dns](https://github.com/kubernetes/dns) 服务，后来的版本使用的是 [CoreDNS](https://coredns.io/) 服务。kubelet 在启动容器时会生成一个 `/etc/resolv.conf` 文件：
+
+```
+root@myapp-b9744c975-dv4qr:/# cat /etc/resolv.conf 
+search default.svc.cluster.local svc.cluster.local cluster.local
+nameserver 10.96.0.10
+options ndots:5
+```
+
+这里的 `nameserver 10.96.0.10` 就是 CoreDNS 对应的 Service 地址：
+
+```
+# kubectl get svc kube-dns -n kube-system
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   342d
+```
+
+CoreDNS 监听 Kubernetes API 上创建和删除 Service 的事件，并为每一个 Service 创建一条 DNS 记录，这条 DNS 记录的格式如下：`service-name.namespace-name`。
+
+比如我们这里的 myapp 在 default 命名空间中，所以生成的 DNS 记录为 `myapp.default`，集群中所有的 Pod 都可以通过这个 DNS 名称解析到它的 IP 地址：
+
+```
+root@myapp-b9744c975-dv4qr:/# curl http://myapp.default:38080
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-kvgcl | v=1
+```
+
+当位于同一个命名空间时，命名空间可以省略：
+
+```
+root@myapp-b9744c975-dv4qr:/# curl http://myapp:38080
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-kvgcl | v=1
+```
+
+这是通过上面 `/etc/resolv.conf` 文件中的 `search` 参数实现的，DNS 会按照 `default.svc.cluster.local` -> `svc.cluster.local` -> `cluster.local` 这个顺序进行解析。很显然，如果使用 `myapp.default` 第一条会解析失败，第二条才解析成功，而使用 `myapp` 第一条就解析成功了，所以如果在同一个命名空间下时，应该优先使用省略的域名格式，这样可以减少解析次数。
+
+我们也可以使用 `nslookup` 查看解析的过程：
+
+```
+# nslookup -debug -type=a myapp
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+Query #2 completed in 1ms:
+** server can't find myapp.cluster.local: NXDOMAIN
+
+Query #0 completed in 1ms:
+Name:	myapp.default.svc.cluster.local
+Address: 10.96.3.215
+
+Query #1 completed in 1ms:
+** server can't find myapp.svc.cluster.local: NXDOMAIN
+```
+
+> 注：从输出可以看到三次解析其实是并发进行的，而不是串行的。
+
+当然，我们也可以使用域名的全路径：
+
+```
+root@myapp-b9744c975-dv4qr:/# curl http://myapp.default.svc.cluster.local:38080
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-dv4qr | v=1
+```
+
+这时会直接解析，不会有多余的步骤：
+
+```
+# nslookup -debug -type=a myapp.default.svc.cluster.local
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+Query #0 completed in 1ms:
+Name:	myapp.default.svc.cluster.local
+Address: 10.96.3.215
+```
+
+此外，当 Service 的端口有名称时，DNS 还支持解析 SRV 记录，其格式为 `port-name.protocol-name.service-name.namespace-name.svc.cluster.local`：
+
+```
+# nslookup -debug -type=srv http.tcp.myapp.default.svc.cluster.local
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+Query #0 completed in 3ms:
+http.tcp.myapp.default.svc.cluster.local	service = 0 100 38080 myapp.default.svc.cluster.local
+```
+
+具体内容可参考 Kubernetes 的文档 [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)。
 
 #### `NodePort`
 
@@ -433,6 +539,8 @@ https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%
 https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md
 
 ## Service 实现原理
+
+https://kuboard.cn/learning/k8s-intermediate/service/service-details.html
 
 https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html
 
