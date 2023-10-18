@@ -470,6 +470,8 @@ http.tcp.myapp.default.svc.cluster.local	service = 0 100 38080 myapp.default.svc
 
 具体内容可参考 Kubernetes 的文档 [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)。
 
+> 注意，我们无法直接通过 curl 来访问这个地址，因为 curl 还不支持 SRV，事实上，支持 SRV 这个需求在 [curl 的 TODO 列表](https://curl.se/docs/todo.html#SRV_and_URI_DNS_records) 上已经挂了好多年了。
+
 #### `NodePort`
 
 `NodePort` 是 `ClusterIP` 的超集，这种类型的 Service 可以从集群外部访问，我们可以通过集群中的任意一台主机来访问它，调用示意图如下：
@@ -525,8 +527,6 @@ root@myapp-b9744c975-ftgdx:/# curl https://svc-external-name.default.svc.cluster
 当以域名的方式访问 Service 时，集群的 DNS 服务将返回一个值为 `www.aneasystone.com` 的 CNAME 记录，整个过程都发生在 DNS 层，不会进行代理或转发。
 
 > [CNAME](https://zh.wikipedia.org/zh-hans/CNAME%E8%AE%B0%E5%BD%95) 全称为 **Canonical Name**，它通过一个域名来表示另一个域名的别名，当一个站点拥有多个子域时，CNAME 非常有用，譬如可以将 `www.example.com` 和 `ftp.example.com` 都通过 CNAME 记录指向 `example.com`，而 `example.com` 则通过 A 记录指向服务的真实 IP 地址，这样就可以方便地在同一个地址上运行多个服务。
-
-https://kubernetes.io/docs/concepts/services-networking/service/
 
 https://kubernetes.feisky.xyz/concepts/objects/service
 
@@ -589,22 +589,61 @@ iptables 代理模式的工作流程如下：
 
 为了解决 iptables 代理模式上面所说的性能问题，Kubernetes 从 v1.8 开始引入了一种新的 ipvs 模式，并从 v1.12 开始成为 `kube-proxy` 的默认代理模式。
 
+[ipvs](https://en.wikipedia.org/wiki/IP_Virtual_Server) 全称 IP Virtual Server，它运行在 Linux 主机内核中，提供传输层负载均衡的功能，也被称为四层交换机，它作为 [LVS](http://www.linuxvirtualserver.org/) 项目的一部分，从 2.4.x 开始进入 Linux 内核的主分支。IPVS 也是基于 [netfilter](https://www.netfilter.org/) 框架实现的，它通过虚拟 IP 将 TCP/UDP 请求转发到真实的服务器上。
+
+ipvs 相对于 iptables 来说，在大规模 Kubernetes 集群中有着更好的扩展性和性能，而且它支持更加复杂的负载均衡算法，还支持健康检查和连接重试等功能。
+
+ipvs 代理模式的工作流程如下：
+
 ![](./images/kube-proxy-ipvs.png)
+
+1. 首先 `kube-proxy` 监听 apiserver 获得创建和删除 Service/Endpoint 的事件；
+2. 根据监听到的事件，调用 netlink 接口，创建 ipvs 规则；并且将 Service/Endpoint 的变化同步到 ipvs 规则中；
+3. 当访问一个 Service 时，ipvs 将请求重定向到后端 Pod 上；
+
+可以使用 `ipvsadm` 命令查看所有的 ipvs 规则：
+
+```
+# ipvsadm -ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+...
+TCP  10.96.3.215:38080 rr
+  -> 100.84.80.88:8080            Masq    1      0          3         
+  -> 100.121.213.72:8080          Masq    1      0          2         
+  -> 100.121.213.109:8080         Masq    1      0          3         
+...
+```
+
+这里的 `10.96.3.215:38080` 就是 myapp 这个 Service 的 ClusterIP 和端口，`rr` 表示负载均衡的方式为 `round-robin`，所有发送到这个 Service 的请求都会转发到下面三个 Pod 的 IP 上。
 
 ## Network Policy
 
 https://kubernetes.feisky.xyz/concepts/objects/network-policy
 
-## CoreDNS
-
-https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Kubernetes%20%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/11%20%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%20DNS%20%E7%9A%84%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5.md
-
 ## 参考
 
+1. [Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/)
 1. [Kubernetes 教程 | Kuboard](https://kuboard.cn/learning/k8s-intermediate/service/service-details.html)
 1. [Kubernetes 练习手册](https://k8s-tutorials.pages.dev/service.html)
 1. [数据包在 Kubernetes 中的一生（1）](https://blog.fleeto.us/post/life-of-a-packet-in-k8s-1/)
-1. [IPVS从入门到精通kube-proxy实现原理](https://zhuanlan.zhihu.com/p/94418251)
 1. [Kubernetes（k8s）kube-proxy、Service详解](https://www.cnblogs.com/liugp/p/16372503.html)
 1. [华为云在 K8S 大规模场景下的 Service 性能优化实践](https://zhuanlan.zhihu.com/p/37230013)
 1. [Kubernetes 从1.10到1.11升级记录(续)：Kubernetes kube-proxy开启IPVS模式](https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html)
+1. [浅谈 Kubernetes Service 负载均衡实现机制](https://xigang.github.io/2019/07/21/kubernetes-service/)
+
+## 更多
+
+### ipvs 代理模式实践
+
+* [IPVS 从入门到精通 kube-proxy 实现原理](https://zhuanlan.zhihu.com/p/94418251)
+* [KubeProxy：IPVS 模式](https://lqingcloud.cn/post/kube-proxy-02/)
+
+### iptables 代理模式实践
+
+* [KubeProxy：IPtables 模式](https://lqingcloud.cn/post/kube-proxy-01/)
+
+### CoreDNS
+
+* [Kubernetes 实践入门指南/11 服务发现 DNS 的落地实践](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Kubernetes%20%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/11%20%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%20DNS%20%E7%9A%84%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5.md)
