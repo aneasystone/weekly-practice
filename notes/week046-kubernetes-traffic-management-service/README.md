@@ -353,6 +353,8 @@ spec:
 ...
 ```
 
+> 我们还可以将 `spec.clusterIP` 字段设置为 `None`，这是一种特殊的 Service，被称为 **Headless Service**，这种 Service 没有自己的 IP 地址，所以一般通过 DNS 形式访问。如果配置了选择器，则通过选择器查找符合条件的 Pod 创建 Endpoint，并将 Pod 的 IP 地址添加到 DNS 记录中；如果没有配置选择器，则不创建 Endpoint，对 `ExternalName` 类型的 Service，返回 CNAME 记录，对于其他类型的 Service，返回与 Service 同名的 Endpoint 的 A 记录。
+
 #### 服务发现
 
 像上面那样写死 IP 地址终究不是最佳实践，Kubernetes 提供了两种服务发现机制来解决这个问题：
@@ -528,16 +530,6 @@ root@myapp-b9744c975-ftgdx:/# curl https://svc-external-name.default.svc.cluster
 
 > [CNAME](https://zh.wikipedia.org/zh-hans/CNAME%E8%AE%B0%E5%BD%95) 全称为 **Canonical Name**，它通过一个域名来表示另一个域名的别名，当一个站点拥有多个子域时，CNAME 非常有用，譬如可以将 `www.example.com` 和 `ftp.example.com` 都通过 CNAME 记录指向 `example.com`，而 `example.com` 则通过 A 记录指向服务的真实 IP 地址，这样就可以方便地在同一个地址上运行多个服务。
 
-https://kubernetes.feisky.xyz/concepts/objects/service
-
-https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_8.html
-
-https://jimmysong.io/kubernetes-handbook/concepts/service.html
-
-https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md
-
-https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md
-
 ## Service 实现原理
 
 安装完 Kubernetes 之后，我们可以在 `kube-system` 命名空间下看到有一个名为 `kube-proxy` 的 DaemonSet，这个代理服务运行在集群中的每一个节点上，它是实现 Service 的关键所在：
@@ -618,20 +610,19 @@ TCP  10.96.3.215:38080 rr
 
 这里的 `10.96.3.215:38080` 就是 myapp 这个 Service 的 ClusterIP 和端口，`rr` 表示负载均衡的方式为 `round-robin`，所有发送到这个 Service 的请求都会转发到下面三个 Pod 的 IP 上。
 
-## Network Policy
-
-https://kubernetes.feisky.xyz/concepts/objects/network-policy
-
 ## 参考
 
 1. [Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/)
 1. [Kubernetes 教程 | Kuboard](https://kuboard.cn/learning/k8s-intermediate/service/service-details.html)
 1. [Kubernetes 练习手册](https://k8s-tutorials.pages.dev/service.html)
+1. [Service - Kubernetes 指南](https://kubernetes.feisky.xyz/concepts/objects/service)
+1. [Service · Kubernetes 中文指南](https://jimmysong.io/kubernetes-handbook/concepts/service.html)
 1. [数据包在 Kubernetes 中的一生（1）](https://blog.fleeto.us/post/life-of-a-packet-in-k8s-1/)
 1. [Kubernetes（k8s）kube-proxy、Service详解](https://www.cnblogs.com/liugp/p/16372503.html)
 1. [华为云在 K8S 大规模场景下的 Service 性能优化实践](https://zhuanlan.zhihu.com/p/37230013)
 1. [Kubernetes 从1.10到1.11升级记录(续)：Kubernetes kube-proxy开启IPVS模式](https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html)
 1. [浅谈 Kubernetes Service 负载均衡实现机制](https://xigang.github.io/2019/07/21/kubernetes-service/)
+1. [八 Service 配置清单](https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_8.html)
 
 ## 更多
 
@@ -647,3 +638,7 @@ https://kubernetes.feisky.xyz/concepts/objects/network-policy
 ### CoreDNS
 
 * [Kubernetes 实践入门指南/11 服务发现 DNS 的落地实践](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Kubernetes%20%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/11%20%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%20DNS%20%E7%9A%84%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5.md)
+
+### Network Policy
+
+https://kubernetes.feisky.xyz/concepts/objects/network-policy
