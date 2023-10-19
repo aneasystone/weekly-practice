@@ -308,6 +308,14 @@ Endpoint 和 Service 的名称保持一致，这样这个 Service 就会映射�
 
 > `ExternalName` 类型的 Service 也是一种不带选择器的 Service，它通过返回外部服务的 DNS 名称来实现的，参考下面的章节。
 
+#### EndpointSlice
+
+https://kubernetes.io/zh-cn/docs/concepts/services-networking/endpoint-slices/
+
+https://kubernetes.io/blog/2020/09/02/scaling-kubernetes-networking-with-endpointslices/
+
+https://github.com/kubernetes/enhancements/tree/master/keps/sig-network/0752-endpointslices
+
 ### Service 类型
 
 Service 中第三个重要字段是 `spec.type` 服务类型：
@@ -480,17 +488,68 @@ http.tcp.myapp.default.svc.cluster.local	service = 0 100 38080 myapp.default.svc
 
 ![](./images/service-type-nodeport.png)
 
+要创建 `NodePort` 类型的 Service，我们需要将 `spec.type` 修改为 `NodePort`，并且在 `spec.ports` 中添加一个 `nodePort` 字段：
+
+```
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 38080
+    nodePort: 30000
+    targetPort: myapp-port
+```
+
+注意这个端口必须在 kube-apiserver 的 `--service-node-port-range` 配置参数范围内，这个参数可以从 kube-apiserver 的 Pod 定义中找到：
+
+```
+# kubectl get pods -n kube-system kube-apiserver-xxx -o yaml
+...
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --service-node-port-range=30000-32767
+...
+```
+
+> 如果不设置 `nodePort` 字段，会在这个范围内随机生成一个端口。 
+
+通过 `kubectl get svc` 查看 Service 信息：
+
+```
+# kubectl get svc myapp
+NAME    TYPE       CLUSTER-IP   EXTERNAL-IP   PORT(S)           AGE
+myapp   NodePort   10.96.0.95   <none>        38080:30000/TCP   3s
+```
+
+可以看到，`NodePort` 类型的 Service 和 `ClusterIP` 类型一样，也分配有一个 CLUSTER-IP，我们仍然可以通过这个地址在集群内部访问（所以说 `NodePort` 是 `ClusterIP` 的超集）：
+
+```
+# curl 10.96.0.95:38080
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-28r5w | v=1
+```
+
+和 `ClusterIP` 类型不一样的是，`PORT(S)` 这一列现在有两个端口 `38080:30000/TCP`，其中 38080 是 ClusterIP 对应的端口，30000 是 NodePort 对应的端口，这个端口暴露在集群中的每一台主机上，我们可以从集群外通过 `nodeIp:nodePort` 来访问：
+
+```
+# curl 172.31.164.40:30000
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-mb8l2 | v=1
+# curl 172.31.164.67:30000
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-9xm5j | v=1
+# curl 172.31.164.75:30000
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-28r5w | v=1
+```
+
 #### `LoadBalancer`
 
-`LoadBalancer` 是 `NodePort` 的超集，这种类型的 Service 也可以从集群外部访问，而且它是以一个统一的负载均衡器地址来访问的，所以调用方不用关心集群中的主机地址，调用示意图如下：
+`NodePort` 类型的 Service 虽然解决了集群外部访问的问题，但是让集群外部知道集群内每个节点的 IP 仍然不是好的做法，当集群扩缩容时，节点 IP 依然可能会变动。于是 `LoadBalancer` 类型被提出来了，通过在集群边缘部署一个负载均衡器，解决了集群节点暴露的问题。
+
+`LoadBalancer` 是 `NodePort` 的超集，所以这种类型的 Service 也可以从集群外部访问，而且它是以一个统一的负载均衡器地址来访问的，所以调用方不用关心集群中的主机地址，调用示意图如下：
 
 ![](./images/service-type-loadbalancer.png)
 
-* [k8s系列06-负载均衡器之MatelLB](https://tinychen.com/20220519-k8s-06-loadbalancer-metallb/)
-* [玩转K8S的LoadBalancer](https://zhuanlan.zhihu.com/p/266422557)
-* [本地集群使用 OpenELB 实现 Load Balancer 负载均衡](https://www.qikqiak.com/post/openelb/)
-* [本地环境Kubernetes LoadBalancer实现](http://just4coding.com/2021/11/21/custom-loadbalancer/)
-* [本地 k8s 集群也可以有 LoadBalancer](https://todoit.tech/k8s/mentallb/)
+如果要创建 `LoadBalancer` 类型的 Service，大部分情况下依赖于云供应商提供的 LoadBalancer 服务，比如 AWS 的 [ELB（Elastic Load Balancer）](https://aws.amazon.com/elasticloadbalancing)，阿里云的 [SLB（Server Load Balancer）](https://www.aliyun.com/product/slb)等，不过我们也可以使用一些开源软件搭建自己的 Load Balancer，比如 [OpenELB](https://github.com/openelb/openelb)、[MatelLB](https://metallb.universe.tf/) 等。
 
 #### `ExternalName`
 
@@ -642,3 +701,11 @@ TCP  10.96.3.215:38080 rr
 ### Network Policy
 
 https://kubernetes.feisky.xyz/concepts/objects/network-policy
+
+### 搭建自己的 Load Balancer
+
+* [k8s系列06-负载均衡器之MatelLB](https://tinychen.com/20220519-k8s-06-loadbalancer-metallb/)
+* [玩转K8S的LoadBalancer](https://zhuanlan.zhihu.com/p/266422557)
+* [本地集群使用 OpenELB 实现 Load Balancer 负载均衡](https://www.qikqiak.com/post/openelb/)
+* [本地环境Kubernetes LoadBalancer实现](http://just4coding.com/2021/11/21/custom-loadbalancer/)
+* [本地 k8s 集群也可以有 LoadBalancer](https://todoit.tech/k8s/mentallb/)
