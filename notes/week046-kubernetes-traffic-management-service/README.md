@@ -135,7 +135,7 @@ Service 支持的协议有以下几种：
 * `UDP` - 几乎所有的 Service 都支持 UDP 协议，对于 `LoadBalancer` 类型的 Service，是否支持取决于云供应商；
 * `SCTP` - 这是一种比较少见的协议，叫做 **流控制传输协议（Stream Control Transmission Protocol）**，和 TCP/UDP 属于同一层，常用于信令传输网络中，比如 4G 核心网的信令交互就是使用的 SCTP，WebRTC 中的 Data Channel 也是基于 SCTP 实现的；如果你的 Kubernetes 安装了支持 SCTP 协议的网络插件，那么大多数 Service 也就支持 SCTP 协议，同样地，对于 `LoadBalancer` 类型的 Service，是否支持取决于云供应商（大多数都不支持）；
 
-具体的内容可以参考 Kubernetes 的官网文档 [Protocols for Services](https://kubernetes.io/docs/reference/networking/service-protocols/)，文档中对于 TCP 协议，还列出了一些特殊场景，这些大多是对于 `LoadBalancer` 类型的 Service，需要使用云供应商所提供特定的注解：
+具体的内容可以参考 Kubernetes 的官网文档 [Protocols for Services](https://kubernetes.io/docs/reference/networking/service-protocols/)，文档中对于 TCP 协议，还列出了一些特殊场景，这些大多是对于 `LoadBalancer` 类型的 Service，需要使用云供应商所提供的特定注解：
 
 * HTTP 或 HTTPS 协议
 * [PROXY 协议](https://www.haproxy.org/download/2.5/doc/proxy-protocol.txt)
@@ -286,7 +286,7 @@ spec:
   type: ClusterIP
 ```
 
-由于这个 Service 没有选择器，所以也就不会扫描 Pod，也就不会自动创建 Endpoint，不过我们可以手动创建一个 Endpoint 对象：
+由于这个 Service 没有选择器，所以也就不会扫描 Pod，也就不会自动创建 Endpoints，不过我们可以手动创建一个 Endpoints 对象：
 
 ```
 apiVersion: v1
@@ -300,21 +300,44 @@ subsets:
       - port: 80
 ```
 
-Endpoint 和 Service 的名称保持一致，这样这个 Service 就会映射到我们手动指定的 IP 地址和端口了。这种 Service 在很多场景下都非常有用：
+Endpoints 和 Service 的名称保持一致，这样这个 Service 就会映射到我们手动指定的 IP 地址和端口了。这种 Service 在很多场景下都非常有用：
 
 * 可以在 Kubernetes 集群内部以 Service 的方式访问集群外部的地址；
 * 可以将 Service 指向另一个名称空间中的 Service，或者另一个 Kubernetes 集群中的 Service；
-* 可以系统中一部分应用程序迁移到 Kubernetes 中，另一部分仍然保留在 Kubernetes 之外；
+* 可以将系统中一部分应用程序迁移到 Kubernetes 中，另一部分仍然保留在 Kubernetes 之外；
 
 > `ExternalName` 类型的 Service 也是一种不带选择器的 Service，它通过返回外部服务的 DNS 名称来实现的，参考下面的章节。
 
-#### EndpointSlice
+#### EndpointSlice API
 
-https://kubernetes.io/zh-cn/docs/concepts/services-networking/endpoint-slices/
+Endpoints API 存在一个很明显的问题：每个 Service 对象都只能对应一个 Endpoints 对象，也就意味着 Endpoints 对象需要保存和 Service 关联的所有后端 Pod 的地址和端口，这对于大多数人来说可能不是什么问题，但是一旦集群规模变大，Endpoints 对象将变得非常庞大，比如 Pod 数量如果达到 5000，那么一个 Endpoints 对象大约有 1.5MB，而 etcd 存储默认限制的大小就是 1.5MB，再多就存不下了。
 
-https://kubernetes.io/blog/2020/09/02/scaling-kubernetes-networking-with-endpointslices/
+除了集群的规模受到限制之外，还有另一个比较严重的问题，只要一个 Pod 发生变动，整个 Endpoints 都要跟着变动，想象这样一个场景：我们要对这 5000 个 Pod 进行滚动更新，那么 Endpoints 至少要变动 5000 次，如果集群中存在 3000 个节点，每个节点都监听着 Endpoints 的变动，这个 Endpoints 对象在集群中传输所消耗的流量高达 `1.5MB * 5000 * 3000 = 22TB` ！
 
-https://github.com/kubernetes/enhancements/tree/master/keps/sig-network/0752-endpointslices
+于是在 [KEP-0752](https://github.com/kubernetes/enhancements/tree/master/keps/sig-network/0752-endpointslices) 中，Kubernetes 提出了一个新的 [EndpointSlice API](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/)，这个 API 已经在 v1.19 版本中开始默认启用，它的思想很简单，将一个 Endpoints 对象分成多个 EndpointSlice 对象：
+
+![](./images/endpoint-slices.png)
+
+这样集群规模将不受限制，而且 Pod 变动后，只需变动少量的 EndpointSlice 即可，大大提高了集群的扩展性和可靠性。
+
+继续上面那个不带选择器的 Service 的例子，我们也可以手动创建一个 EndpointSlice 对象：
+
+```
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: svc-no-selector-1
+  labels:
+    kubernetes.io/service-name: svc-no-selector
+addressType: IPv4
+ports:
+  - appProtocol: http
+    protocol: TCP
+    port: 80
+endpoints:
+  - addresses:
+      - 47.93.22.98
+```
 
 ### Service 类型
 
@@ -361,7 +384,7 @@ spec:
 ...
 ```
 
-> 我们还可以将 `spec.clusterIP` 字段设置为 `None`，这是一种特殊的 Service，被称为 **Headless Service**，这种 Service 没有自己的 IP 地址，所以一般通过 DNS 形式访问。如果配置了选择器，则通过选择器查找符合条件的 Pod 创建 Endpoint，并将 Pod 的 IP 地址添加到 DNS 记录中；如果没有配置选择器，则不创建 Endpoint，对 `ExternalName` 类型的 Service，返回 CNAME 记录，对于其他类型的 Service，返回与 Service 同名的 Endpoint 的 A 记录。
+> 我们还可以将 `spec.clusterIP` 字段设置为 `None`，这是一种特殊的 Service，被称为 **Headless Service**，这种 Service 没有自己的 IP 地址，所以一般通过 DNS 形式访问。如果配置了选择器，则通过选择器查找符合条件的 Pod 创建 Endpoints，并将 Pod 的 IP 地址添加到 DNS 记录中；如果没有配置选择器，则不创建 Endpoints，对 `ExternalName` 类型的 Service，返回 CNAME 记录，对于其他类型的 Service，返回与 Service 同名的 Endpoints 的 A 记录。
 
 #### 服务发现
 
@@ -553,7 +576,7 @@ Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-28r5w | v=1
 
 #### `ExternalName`
 
-`ExternalName` 是一种特殊类型的 Service，这也是一种不带选择器的 Service，不会生成后端的 Endpoint，而且它不用定义端口，而是指定外部服务的 DNS 名称：
+`ExternalName` 是一种特殊类型的 Service，这也是一种不带选择器的 Service，不会生成后端的 Endpoints，而且它不用定义端口，而是指定外部服务的 DNS 名称：
 
 ```
 apiVersion: v1
@@ -618,7 +641,7 @@ userspace 代理模式在 Kubernetes 第一个版本中就支持了，是 `kube-
 1. 首先 `kube-proxy` 监听 apiserver 获得创建和删除 Service 的事件；
 2. 当监听到 Service 创建时，`kube-proxy` 在其所在的节点上为 Service 打开一个随机端口；
 3. 然后 `kube-proxy` 创建 iptables 规则，将发送到该 Service 的请求重定向到这个随机端口；
-4. 同时，`kube-proxy` 也会监听 apiserver 获得创建和删除 Endpoint 的事件，因为 Endpoint 对应着后端可用的 Pod，所以任何发送到该随机端口的请求将被代理转发到该 Service 的后端 Pod 上；
+4. 同时，`kube-proxy` 也会监听 apiserver 获得创建和删除 Endpoints 的事件，因为 Endpoints 对应着后端可用的 Pod，所以任何发送到该随机端口的请求将被代理转发到该 Service 的后端 Pod 上；
 
 ### iptables 代理模式
 
@@ -632,7 +655,7 @@ iptables 代理模式的工作流程如下：
 
 1. 首先 `kube-proxy` 监听 apiserver 获得创建和删除 Service 的事件；
 2. 当监听到 Service 创建时，`kube-proxy` 在其所在的节点上为 Service 创建对应 iptables 规则；
-3. 同时，`kube-proxy` 也会监听 apiserver 获得创建和删除 Endpoint 的事件，对于 Service 中的每一个 Endpoint，`kube-proxy` 都创建一个 iptables 规则，所以任何发送到 Service 的请求将被转发到该 Service 的后端 Pod 上；
+3. 同时，`kube-proxy` 也会监听 apiserver 获得创建和删除 Endpoints 的事件，对于 Service 中的每一个 Endpoints，`kube-proxy` 都创建一个 iptables 规则，所以任何发送到 Service 的请求将被转发到该 Service 的后端 Pod 上；
 
 使用 iptables 代理模式时，会随机选择一个后端 Pod 创建连接，如果该 Pod 没有响应，则创建连接失败，这和 userspace 代理模式是不一样的；使用 userspace 代理模式时，如果 Pod 没有响应，`kube-proxy` 会自动尝试连接另外的 Pod；所以一般推荐配置 Pod 的就绪检查（`readinessProbe`），这样 `kube-proxy` 只会将正常的 Pod 加入到 iptables 规则中，从而避免了请求被转发到有问题的 Pod 上。
 
@@ -648,8 +671,8 @@ ipvs 代理模式的工作流程如下：
 
 ![](./images/kube-proxy-ipvs.png)
 
-1. 首先 `kube-proxy` 监听 apiserver 获得创建和删除 Service/Endpoint 的事件；
-2. 根据监听到的事件，调用 netlink 接口，创建 ipvs 规则；并且将 Service/Endpoint 的变化同步到 ipvs 规则中；
+1. 首先 `kube-proxy` 监听 apiserver 获得创建和删除 Service/Endpoints 的事件；
+2. 根据监听到的事件，调用 netlink 接口，创建 ipvs 规则；并且将 Service/Endpoints 的变化同步到 ipvs 规则中；
 3. 当访问一个 Service 时，ipvs 将请求重定向到后端 Pod 上；
 
 可以使用 `ipvsadm` 命令查看所有的 ipvs 规则：
@@ -682,6 +705,7 @@ TCP  10.96.3.215:38080 rr
 1. [Kubernetes 从1.10到1.11升级记录(续)：Kubernetes kube-proxy开启IPVS模式](https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.html)
 1. [浅谈 Kubernetes Service 负载均衡实现机制](https://xigang.github.io/2019/07/21/kubernetes-service/)
 1. [八 Service 配置清单](https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_8.html)
+1. [Scaling Kubernetes Networking With EndpointSlices](https://kubernetes.io/blog/2020/09/02/scaling-kubernetes-networking-with-endpointslices/)
 
 ## 更多
 
