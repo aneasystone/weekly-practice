@@ -339,6 +339,8 @@ endpoints:
       - 47.93.22.98
 ```
 
+EndpointSlice 的命名规则一般是在 Service 名称后加上一串随机字符，保证唯一即可，它和 Service 之间的关系是通过标签 `kubernetes.io/service-name` 来关联的。
+
 ### Service 类型
 
 Service 中第三个重要字段是 `spec.type` 服务类型：
@@ -384,7 +386,7 @@ spec:
 ...
 ```
 
-> 我们还可以将 `spec.clusterIP` 字段设置为 `None`，这是一种特殊的 Service，被称为 **Headless Service**，这种 Service 没有自己的 IP 地址，所以一般通过 DNS 形式访问。如果配置了选择器，则通过选择器查找符合条件的 Pod 创建 Endpoints，并将 Pod 的 IP 地址添加到 DNS 记录中；如果没有配置选择器，则不创建 Endpoints，对 `ExternalName` 类型的 Service，返回 CNAME 记录，对于其他类型的 Service，返回与 Service 同名的 Endpoints 的 A 记录。
+> 我们还可以将 `spec.clusterIP` 字段设置为 `None`，这是一种特殊的 Service，被称为 **Headless Service**，这种 Service 没有自己的 IP 地址，一般通过 DNS 形式访问，而且只能在集群内部访问。如果配置了选择器，则通过选择器查找符合条件的 Pod 创建 Endpoints，并将 Pod 的 IP 地址添加到 DNS 记录中；如果没有配置选择器，则不创建 Endpoints，对 `ExternalName` 类型的 Service，返回 CNAME 记录，对于其他类型的 Service，返回与 Service 同名的 Endpoints 的 A 记录。
 
 #### 服务发现
 
@@ -722,9 +724,12 @@ TCP  10.96.3.215:38080 rr
 
 * [Kubernetes 实践入门指南/11 服务发现 DNS 的落地实践](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Kubernetes%20%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/11%20%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%20DNS%20%E7%9A%84%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5.md)
 
-### Network Policy
+### 使用 Network Policy 管理 Kubernetes 流量
 
-https://kubernetes.feisky.xyz/concepts/objects/network-policy
+* [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+* [NetworkPolicy - Kubernetes 指南](https://kubernetes.feisky.xyz/concepts/objects/network-policy)
+* [Securing Kubernetes Cluster Networking](https://ahmet.im/blog/kubernetes-network-policy/)
+* [Kubernetes Network Policy Recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
 
 ### 搭建自己的 Load Balancer
 

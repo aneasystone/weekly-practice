@@ -2,6 +2,7 @@
 
 * [未来百科 | 为发现全球优质AI工具产品而生](https://nav.6aiq.com/)
 * [AI 工具集导航](https://ai.nancheng.fun/)
+* [AI 导航](https://ai.dreamthere.cn/)
 
 ## 工具和产品
 
@@ -24,10 +25,24 @@
 * [ChatHub](https://github.com/chathub-dev/chathub) - ChatHub is an all-in-one chatbot client
 * [Poe](https://poe.com/)
 
+#### 角色扮演
+
+* [Shaunwei/RealChar](https://github.com/Shaunwei/RealChar) - Create, Customize and Talk to your AI Character/Companion in Realtime (All in One Codebase!).
+
 #### 智能搜索
 
 * [Perplexity AI](https://www.perplexity.ai/) - Where knowledge begins
 * [Kagi Labs](https://kagi.com/fastgpt)
+* [GPT Researcher](https://github.com/assafelovic/gpt-researcher) - GPT based autonomous agent that does online comprehensive research on any given topic
+* [Automating Web Research](https://blog.langchain.dev/automating-web-research/)
+
+#### 学习助手
+
+* [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
+* [Pi, your personal AI](https://heypi.com/talk)
+* [Forefront](https://www.forefront.ai/) - Your AI assistant for work
+* [AIBus](https://albus.org/) - Albus is an AI app that explores any topic you like from different perspectives
+* [liou666/polyglot](https://github.com/liou666/polyglot) - 跨平台AI语言练习应用
 
 ### 编程助手
 
@@ -41,9 +56,18 @@
 * [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
 * [StarCoder](https://github.com/bigcode-project/starcoder)
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
+* [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
 * [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
 * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
+* [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
+* [bloop](https://bloop.ai/) - Find Code. Fast.
+* [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
+
+#### 数据分析
+
+* [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
+* [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
 
 #### 调试助手
 
@@ -109,10 +133,23 @@
 * [JenniAI](https://jenni.ai/) - Supercharge Your Next Research Paper
 * [Compose AI](https://www.compose.ai/) - Automate Your Writing
 
-#### 文档总结
+#### 文档问答
 
+* [Langchain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat) - 基于 Langchain 与 ChatGLM 等语言模型的本地知识库问答
+* [Khoj](https://khoj.dev/) - An open-source AI copilot for your Second Brain
+	* [khoj-ai/khoj](https://github.com/khoj-ai/khoj) - Search and chat with your personal knowledge base
+* [HelpLook](https://www.helplook.net/) - 快速搭建知识库/帮助中心/企业博客，并基于现有知识数据与AI模型，定制企业级专属「AI问答机器人」
+* [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
+* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
+* [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
 * [ChatPDF](https://www.chatpdf.com/) - Chat with any PDF!
 * [ChatDOC](https://chatdoc.com/) - Chat with your documents
+* [StanGirard/quivr](https://github.com/StanGirard/quivr) - Dump all your files and chat with it using your Generative AI Second Brain using LLMs & Embeddings
+
+#### 网页助手
+
+* [Wiseone](https://wiseone.io/) - Your AI-powered reading tool
+* [Webpilot](https://github.com/webpilot-ai/Webpilot) - a free, open-source "Copilot for web" that allows you to have free-form conversations with web pages
 
 #### 音视频总结
 
@@ -129,12 +166,17 @@
 
 #### Excel
 
+* [酷表 ChatExcel](https://chatexcel.com/)
 * [Sheet+](https://sheetplus.ai/) - AI-powered tools for Excel & Google Sheets
 
 #### 论文助手
 
 * [EssayKillerBrain/EssayKiller_V2](https://github.com/EssayKillerBrain/EssayKiller_V2) - 基于开源GPT2.0的初代创作型人工智能 | 可扩展、可进化
 * [binary-husky/chatgpt_academic](https://github.com/binary-husky/chatgpt_academic) - 科研工作专用ChatGPT拓展，特别优化学术Paper润色体验，支持自定义快捷按钮，支持自定义函数插件，支持markdown代码块表格显示，Tex公式双显示，新增Python/C++项目剖析/自译解功能，PDF/LaTex论文翻译/总结功能，兼容ChatGLM等本地模型
+
+#### 投资助手
+
+* [StockAI.Trade](https://stockai.trade/) - 基于ChatGPT的AI选股工具
 
 ### 图像创作
 
@@ -173,15 +215,21 @@
 
 * [lllyasviel/style2paints](https://github.com/lllyasviel/style2paints) - Style2paints V4 is the current best AI driven lineart colorization tool.
 * [Deep Photo Style Transfer](https://github.com/luanfujun/deep-photo-styletransfer) - Code and data for paper "Deep Photo Style Transfer": https://arxiv.org/abs/1703.07511
+* [ClipDrop - Stable Doodle](https://clipdrop.co/stable-doodle) - Transform your doodles into real images in seconds
 
 #### 图片编辑
 
+* [InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix) - an instruction-based image editing model
 * [DragGAN](https://github.com/XingangPan/DragGAN) - Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold
 * [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
 * [Segment Anything](https://github.com/facebookresearch/segment-anything)
 * [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
 * [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
 * [remove.bg](https://www.remove.bg/zh) - 图片去除背景
+
+#### 图片修复
+
+* [GFPGAN](https://github.com/TencentARC/GFPGAN) - aims at developing Practical Algorithms for Real-world Face Restoration.
 
 #### 动画生成
 
@@ -223,6 +271,7 @@
 * [Wonder Studio](https://wonderdynamics.com/) - An AI tool that automatically animates, lights and composes CG characters into a live-action scene
 * [SCUTlihaoyu/open-chat-video-editor](https://github.com/SCUTlihaoyu/open-chat-video-editor) - 开源的短视频生成和编辑工具
 * [gyroflow/gyroflow](https://github.com/gyroflow/gyroflow) - Video stabilization using gyroscope data
+* [ShortGPT](https://github.com/RayVentura/ShortGPT) - Experimental AI framework for automated short/video content creation.
 
 #### 虚拟形象
 
@@ -243,6 +292,7 @@
 
 * [文心大模型](https://wenxin.baidu.com/) - 百度
 * [通义大模型](https://tongyi.aliyun.com/) - 阿里
+    * [Qwen-7B](https://github.com/QwenLM/Qwen-7B) - 通义千问-7B
 * [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
 * [星火认知大模型](https://xinghuo.xfyun.cn/) - 科大讯飞
 * [言犀](https://yanxi.jd.com/) - 京东
@@ -279,6 +329,7 @@
 	* [InternLM](https://github.com/InternLM/InternLM)
 * [EduChat](https://github.com/icalk-nlp/EduChat) - 华东师范大学
 * [Linly](https://github.com/CVI-SZU/Linly) - 深圳大学计算机视觉研究所
+* [MiLM-6B](https://github.com/XiaoMi/MiLM-6B) - 小米
 
 ### 领域大模型
 
@@ -288,6 +339,8 @@
 * [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
 * [MediaGPT](https://github.com/IMOSR/MediaGPT) - 中文自媒体大模型
 * [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
+* [TransGPT](https://github.com/DUOMO/TransGPT) - 交通大模型
+* [MathGLM](https://github.com/THUDM/MathGLM) - GPT Can Solve Mathematical Problems Without a Calculator
 
 ### 国外大模型
 
@@ -329,12 +382,19 @@
 * [OpenBMB/CPM-Bee](https://github.com/OpenBMB/CPM-Bee) - 百亿参数的中英文双语基座大模型
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
+* [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
+
+### 多模态
+
+* [TaskMatrix](https://github.com/microsoft/TaskMatrix) - Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
+* [NExT-GPT](https://next-gpt.github.io/) - Any-to-Any Multimodal Large Language Model
+* [Qwen-VL](https://github.com/QwenLM/Qwen-VL) - Qwen Large Vision Language Model
+* [InternLM-XComposer](https://github.com/InternLM/InternLM-XComposer) - 浦语·灵笔
 
 ## 大模型应用
 
 #### ChatGPT 应用
 
-* [Visual ChatGPT](https://github.com/microsoft/visual-chatgpt) - Official repo for the paper: Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
 * [josStorer/chatGPTBox](https://github.com/josStorer/chatGPTBox) - Integrating ChatGPT into your browser deeply, everything you need is here
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
 * [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
@@ -354,27 +414,6 @@
 * [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) - Reverse engineered ChatGPT API
 * [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
 
-### 文档助手
-
-* [Khoj](https://khoj.dev/) - An open-source AI copilot for your Second Brain
-	* [khoj-ai/khoj](https://github.com/khoj-ai/khoj) - Search and chat with your personal knowledge base
-* [HelpLook](https://www.helplook.net/) - 快速搭建知识库/帮助中心/企业博客，并基于现有知识数据与AI模型，定制企业级专属「AI问答机器人」
-* [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
-* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
-* [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
-
-### 个人助手
-
-* [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
-* [Pi, your personal AI](https://heypi.com/talk)
-* [Forefront](https://www.forefront.ai/) - Your AI assistant for work
-* [AIBus](https://albus.org/) - Albus is an AI app that explores any topic you like from different perspectives
-* [liou666/polyglot](https://github.com/liou666/polyglot) - 跨平台AI语言练习应用
-
-### 投资助手
-
-* [StockAI.Trade](https://stockai.trade/) - 基于ChatGPT的AI选股工具
-
 ### 部署教程
 
 * [基于 Azure OpenAI 免费注册使用 ChatGPT 教程](https://mp.weixin.qq.com/s/fVGqRTEPIsREnKTTmLSg-Q)
@@ -385,11 +424,13 @@
 * [Licoy/ChatGPT-Midjourney](https://github.com/Licoy/ChatGPT-Midjourney) - 一键拥有你自己的 ChatGPT+Midjourney 网页服务
 * [Ice-Hazymoon/openai-scf-proxy](https://github.com/Ice-Hazymoon/openai-scf-proxy) - 使用腾讯云函数一分钟搭建 OpenAI 免翻墙代理
 * [保姆教程 | 用GPU云主机搭建AI大语言模型并用Flask封装成API，实现用户与模型对话](https://developer.jdcloud.com/article/2904)
+* [快速部署ChatGLM-6B大模型实战总结](https://mp.weixin.qq.com/s/Teqq5UaJHAeqBiunYUB1fQ)
 
 ### 大模型应用开发
 
 * [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
 	* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
+    * [Awesome LangChain](https://github.com/kyrolabs/awesome-langchain)
 * [LlamaIndex](https://github.com/jerryjliu/llama_index) - LlamaIndex (GPT Index) is a data framework for your LLM applications
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
@@ -397,6 +438,7 @@
 * [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
 * [LangKit](https://github.com/whylabs/langkit) - An open-source toolkit for monitoring Language Learning Models.
 * [Rivet](https://github.com/Ironclad/rivet) - The open-source visual AI programming environment and TypeScript library
+* [Semantic Kernel](https://github.com/microsoft/semantic-kernel) - Integrate cutting-edge LLM technology quickly and easily into your apps
 
 ### 工作流
 
@@ -414,9 +456,19 @@
 * [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 
-### 模型推理
+### RPA
 
+* [TagUI](https://github.com/aisingapore/TagUI) - Free RPA tool by AI Singapore
+* [OpenRPA](https://github.com/open-rpa/openrpa) - Free Open Source Enterprise Grade RPA
+* [OpenFlow](https://github.com/open-rpa/openflow) - Scalable, secure workflow solution
+* [Robocorp](https://robocorp.com/) - Supercharge Python for Automation and Integrations
+* [OpenBots](https://openbots.ai/) - First Enterprise RPA With Zero Bot Licensing
+
+### 模型推理 & 部署
+
+* [jmorganca/ollama](https://github.com/jmorganca/ollama) - Get up and running with Llama 2 and other large language models locally
 * [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
+* [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
 
 ### 模型评估
 
@@ -432,7 +484,6 @@
 ### Web UI
 
 * [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键免费部署你的跨平台私人 ChatGPT 应用
-* [Streamlit](https://github.com/streamlit/streamlit) - A faster way to build and share data apps.
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
 * [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
@@ -500,3 +551,8 @@
 * [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
 * [Knit](https://promptknit.com/) - A better playground for prompt designers
+
+## 词嵌入
+
+* [SentenceTransformers](https://www.sbert.net/)
+* [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models

@@ -6,7 +6,15 @@
 
 * [ChatGPT平替模型：LLaMA](https://zhuanlan.zhihu.com/p/614118339)
 
+### 提示工程
+
+* [检索增强生成 (RAG) | Prompt Engineering Guide](https://www.promptingguide.ai/zh/techniques/rag)
+
 ## Java
+
+### Java 21
+
+* [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
 
 ### Java Agent
 
@@ -39,6 +47,15 @@
 
 * [7min到40s：SpringBoot启动优化实践](https://juejin.cn/post/7181342523728592955)
 * [探索｜Spring并行初始化加速的思路和实践](https://mp.weixin.qq.com/s/1xIWCoCdQtAPlcZe3zHusQ)
+* [Spring-Startup-Analyzer](https://github.com/linyimin0812/spring-startup-analyzer) - generates an interactive Spring application startup report that lets you understand what contributes to the application startup time and helps to optimize it.
+
+### Spring Boot 解析
+
+* [三万字盘点Spring 9大核心基础功能](https://mp.weixin.qq.com/s/dY3xGAJnFpgz4ae4ZMlOZg)
+
+### Spring Security
+
+* [How to Implement Simple Authentication in Spring Boot?](https://www.tutorialspoint.com/how-to-implement-simple-authentication-in-spring-boot)
 
 ### Reactor 响应式编程
 
@@ -52,6 +69,10 @@
 
 * [动态代理大揭秘，带你彻底弄清楚动态代理！](https://my.oschina.net/u/1584523/blog/5261706)
 
+### SPI
+
+* [JDK中「SPI」原理分析](https://mp.weixin.qq.com/s/X1f94Q0iUp6IP99G8Ft7MQ)
+
 ### 异步
 
 * [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
@@ -64,6 +85,12 @@
 ### gRPC
 
 * [ProtoBuf 教程](https://www.wdbyte.com/tool/protobuf/)
+* [理解 gRPC 协议](https://taoshu.in/grpc.html)
+* [Protocol Buffers 编码](https://taoshu.in/pb-encoding.html)
+
+### 零拷贝
+
+* [搞明白什么是零拷贝，就是这么简单](https://mp.weixin.qq.com/s/ULVCvSLIGvj3VtY5prtxGw)
 
 ### JVM
 
@@ -81,17 +108,27 @@
 * [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
 * [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
 
-### 实现 Spring Boot 3 应用的可观测性
+### 可观测性
 
-* [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
-* [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
-* [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
+* [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
+
+#### Micrometer
+
 * [Micrometer Documentation](https://micrometer.io/docs)
 	* [Micrometer Observation](https://micrometer.io/docs/observation)
 	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
-* [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
 * [A Java Library’s New Approach To Observability](https://foojay.io/today/not-your-grandfathers-logs-a-java-librarys-new-approach-to-observability/)
+* [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
+
+#### OpenTelemetry
+
+* [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
+* [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
+
+#### SkyWalking
+
+* [10分钟3个步骤集成使用SkyWalking](http://www.mangod.top/articles/2023/10/11/1696996147664.html)
 
 ### Spring StateMachine
 
@@ -167,6 +204,11 @@
 * [排障技能](https://imroc.cc/kubernetes/troubleshooting/skill/index.html)
 * [监控、日志和调试](https://kubernetes.io/zh-cn/docs/tasks/debug/)
 
+### 获取客户端真实 IP
+
+* [聊聊部署在K8S的项目如何获取客户端真实IP](https://juejin.cn/post/7239058077273079864)
+* [k8s生产实践之获取客户端真实IP](https://cloud.tencent.com/developer/article/1870731)
+
 ### 小技巧
 
 * [How to Get the YAML of a Deployed Kubernetes Object](https://www.baeldung.com/ops/kubernetes-yaml-deployed-object)
@@ -205,9 +247,16 @@
 * [使用 KEDA 自动伸缩 Kubernetes 应用](https://mp.weixin.qq.com/s/y0pIC70DYcaOUD7wMvCn1Q)
 * [应用现代化中的弹性伸缩](https://www.kubesphere.io/zh/blogs/building-resilient-and-scalable-systems/)
 
+### Kubernetes 网络
+
+* [CNCF 宣布 Cilium 正式毕业](https://www.infoq.cn/article/PMaq9IdtYBhPp3hrRqUt)
+* [Kubernetes网络排错指南（万字长文）](https://mp.weixin.qq.com/s/Beb4QsfiR12bXLsG9VGCFw)
+* [记一次KUBERNETES/DOCKER网络排障](https://coolshell.cn/articles/18654.html)
+
 ### 深入 Istio
 
 * [从Istio在CNCF毕业，看服务网格的架构变迁](https://mp.weixin.qq.com/s/_VNdxzhxCoQCcITqyklASg)
+* [Istio 中的负载均衡详解及多集群路由实践](https://jimmysong.io/blog/demystifying-the-load-balancing-in-istio/)
 * [MoE 系列 - 如何使用 Golang 扩展 Envoy [一]](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-1/)
 * [MoE 系列 [二] - Golang 扩展从 Envoy 接收配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-2/)
 * [MoE 系列 [三] - 使用 Istio 动态更新 Go 扩展配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-3/)
@@ -267,6 +316,7 @@
 * [Kafka 核心全面总结，高可靠高性能核心原理探究](https://mp.weixin.qq.com/s/X51yOKjbZRDeUhzmudrmrw)
 * [引入RabbitMQ后，如何保证全链路数据100%不丢失？](https://cloud.tencent.com/developer/article/1919835)
 * [消息队列20年：腾讯专家沉淀的MQ设计精要](https://mp.weixin.qq.com/s/EuD2SQKiU15k1nRqtRfC4A)
+* [实战总结｜记一次消息队列堆积的问题排查](https://mp.weixin.qq.com/s/MQdwf4yEl73Br2FvJd5ExQ)
 
 ## Linux
 
@@ -293,6 +343,7 @@
 ### 网络
 
 * [一张图感受真实的 TCP 状态转移](https://segmentfault.com/a/1190000043834899)
+* [用了 TCP 协议，就一定不会丢包吗？](https://mp.weixin.qq.com/s/9MYbyIBiPS4XephXaMkzww)
 
 ### eBPF
 
@@ -307,7 +358,7 @@
 
 ## 其他
 
-* [Decoding small QR codes by hand](https://blog.qartis.com/decoding-small-qr-codes-by-hand/)
+* [老码农的运行时漫谈](https://mp.weixin.qq.com/s/JcA2xIkkd0amerPCEF0KHw)
 
 ### WebAssembly
 
