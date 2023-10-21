@@ -1,6 +1,7 @@
 # AIGC
 
-* [未来百科 | 为发现全球优质AI工具产品而生](https://nav.6aiq.com/)
+* [ToolAI](https://www.toolai.io/zh/) - 全球最完整最全面的AI人工智能工具集合
+* [未来百科](https://nav.6aiq.com/) - 为发现全球优质AI工具产品而生
 * [AI 工具集导航](https://ai.nancheng.fun/)
 * [AI 导航](https://ai.dreamthere.cn/)
 
@@ -101,7 +102,7 @@
 * [AI Query](https://aiquery.co/) - Generate SQL Queries with AI in Seconds
 * [sqlchat/sqlchat](https://github.com/sqlchat/sqlchat) - Chat-based SQL Client and Editor for the next decade
 * [chat2db/Chat2DB](https://github.com/chat2db/Chat2DB) - 智能的通用数据库SQL客户端和报表工具
-* [csunny/DB-GPT](https://github.com/csunny/DB-GPT) - Interact your data and environment using the local GPT, no data leaks, 100% privately, 100% security
+* [eosphoros-ai/DB-GPT](https://github.com/eosphoros-ai/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
 * [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
 
 #### 文档生成
@@ -145,6 +146,7 @@
 * [ChatPDF](https://www.chatpdf.com/) - Chat with any PDF!
 * [ChatDOC](https://chatdoc.com/) - Chat with your documents
 * [StanGirard/quivr](https://github.com/StanGirard/quivr) - Dump all your files and chat with it using your Generative AI Second Brain using LLMs & Embeddings
+* [PDF GPT](https://github.com/bhaskatripathi/pdfGPT) - allows you to chat with the contents of your PDF file by using GPT capabilities.
 
 #### 网页助手
 
@@ -364,6 +366,7 @@
 * [DeepSpeed](https://github.com/microsoft/DeepSpeed) - Microsoft
 	* [DeepSpeed-Chat](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat)
 	* [DeepSpeed-Chat：最强ChatGPT训练框架，一键完成RLHF训练！](https://mp.weixin.qq.com/s/uuquavhwNg1P9AaIMXOE_A)
+* [Mistral](https://docs.mistral.ai/)
 
 ### 其他大模型
 

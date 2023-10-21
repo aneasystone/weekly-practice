@@ -8,16 +8,33 @@
 
 ### 提示工程
 
+* [Prompt Engineering | Lil'Log](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
+* [The Prompt Landscape](https://blog.langchain.dev/the-prompt-landscape/)
 * [检索增强生成 (RAG) | Prompt Engineering Guide](https://www.promptingguide.ai/zh/techniques/rag)
+
+### Structured Extraction
+
+* [Instructor (openai_function_call)](https://jxnl.github.io/instructor/)
+
+### Code Interpreter
+
+* [How to use ChatGPT’s new “Code Interpreter” feature](https://www.pluralsight.com/resources/blog/data/chatgpt-code-interpreter-plugin-guide)
+
+### Agents
+
+* [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
 
 ## Java
 
 ### Java 21
 
+* [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
 
 ### Java Agent
 
+* [Java Agent：通灵之术](https://lsieun.github.io/article/java-agent-summoning-jutsu.html)
+* [Java Agent 系列一：基础篇](https://lsieun.github.io/java-agent/java-agent-01.html)
 * [手把手教你实现一个Java Agent](https://mp.weixin.qq.com/s/BB9GwJVhadjxUWZTaLr5bA)
 
 ### 学习 JNI
@@ -52,6 +69,16 @@
 ### Spring Boot 解析
 
 * [三万字盘点Spring 9大核心基础功能](https://mp.weixin.qq.com/s/dY3xGAJnFpgz4ae4ZMlOZg)
+
+### Spring Modulith
+
+* [Introducing Spring Modulith](https://spring.io/blog/2022/10/21/introducing-spring-modulith)
+* [Introduction to Spring Modulith](https://www.baeldung.com/spring-modulith)
+* [Guide to Modulith with Spring Boot - Piotr's TechBlog](https://piotrminkowski.com/2023/10/13/guide-to-modulith-with-spring-boot/)
+
+### Spring Cloud
+
+* [Java Microservices with Spring Boot and Spring Cloud](https://auth0.com/blog/java-spring-boot-microservices/)
 
 ### Spring Security
 
@@ -249,6 +276,9 @@
 
 ### Kubernetes 网络
 
+* [浅谈 K8s Pod IP 分配机制](https://mp.weixin.qq.com/s/yrg3BkDIxDTa5p45Gsbhww)
+* [16 张图硬核讲解 Kubernetes 网络模型](https://zhuanlan.zhihu.com/p/555185137)
+* [深入理解 kubernetes 网络原理](https://www.zhihu.com/column/c_1414266494658650112)
 * [CNCF 宣布 Cilium 正式毕业](https://www.infoq.cn/article/PMaq9IdtYBhPp3hrRqUt)
 * [Kubernetes网络排错指南（万字长文）](https://mp.weixin.qq.com/s/Beb4QsfiR12bXLsG9VGCFw)
 * [记一次KUBERNETES/DOCKER网络排障](https://coolshell.cn/articles/18654.html)
