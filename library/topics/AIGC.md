@@ -64,9 +64,11 @@
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
+* [CodeShell](https://github.com/WisdomShell/codeshell) - 多语言代码大模型基座
 
 #### 数据分析
 
+* [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - OpenAI's Code Interpreter in your terminal, running locally
 * [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
 * [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
 
@@ -80,6 +82,7 @@
 * [HeyCLI](https://www.heycli.com/) - Linux commands in natural language
 * [aider](https://aider.chat/) - AI pair programming in your terminal
 	* [paul-gauthier/aider](https://github.com/paul-gauthier/aider)
+* [Mods!](https://github.com/charmbracelet/mods) - AI on the command line
 
 #### 前端开发
 
@@ -141,7 +144,7 @@
 	* [khoj-ai/khoj](https://github.com/khoj-ai/khoj) - Search and chat with your personal knowledge base
 * [HelpLook](https://www.helplook.net/) - 快速搭建知识库/帮助中心/企业博客，并基于现有知识数据与AI模型，定制企业级专属「AI问答机器人」
 * [Chatbase](https://www.chatbase.co/) - Custom ChatGPT for your data
-* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation search & assistance
+* [arc53/DocsGPT](https://github.com/arc53/DocsGPT) - GPT-powered chat for documentation, chat with your documents
 * [我让 ChatGPT 化身为全知全能的文档小助理](https://mp.weixin.qq.com/s/HJ1LHGCjPL0qjf8e7bMLjg)
 * [ChatPDF](https://www.chatpdf.com/) - Chat with any PDF!
 * [ChatDOC](https://chatdoc.com/) - Chat with your documents
@@ -161,6 +164,7 @@
 
 * [AmyMind](https://amymind.com/) - 伴你思考的AI思维导图
 * [EdrawMind AI](https://www.edrawmind.com/ai-mind-map.html) - AI-Powered Mind Mapping Made Simple and Intuitive
+* [InstaGraph](https://instagraph.ai/) - Converts natural language prompts or URLs into a visualized knowlege graph
 
 #### PPT
 
@@ -189,6 +193,7 @@
 	* [Stable Diffusion](https://stablediffusionweb.com/)
 	* [Stable Studio](https://github.com/Stability-AI/StableStudio)
 * [DALL.E.2](https://openai.com/product/dall-e-2)
+* [Fooocus](https://github.com/lllyasviel/Fooocus) - Focus on prompting and generating
 * [Image Creator from Microsoft Bing](https://www.bing.com/create) - 来自 Microsoft 必应的图像创建器
 * [Adobe Firefly](https://www.adobe.com/sensei/generative-ai/firefly.html)
 * [Openjourney](https://openjourney.art/)
@@ -218,6 +223,8 @@
 * [lllyasviel/style2paints](https://github.com/lllyasviel/style2paints) - Style2paints V4 is the current best AI driven lineart colorization tool.
 * [Deep Photo Style Transfer](https://github.com/luanfujun/deep-photo-styletransfer) - Code and data for paper "Deep Photo Style Transfer": https://arxiv.org/abs/1703.07511
 * [ClipDrop - Stable Doodle](https://clipdrop.co/stable-doodle) - Transform your doodles into real images in seconds
+* [FaceChain](https://github.com/modelscope/facechain) - 一个可以用来打造个人数字形象的深度学习模型工具
+* [Magic123](https://github.com/guochengqian/Magic123) - One Image to High-Quality 3D Object Generation Using Both 2D and 3D Diffusion Priors
 
 #### 图片编辑
 
@@ -284,7 +291,6 @@
 ## 模型社区
 
 * [Hugging Face](https://huggingface.co/)
-	* [huggingface/transformers](https://github.com/huggingface/transformers) - Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.
 * [Civitai](https://civitai.com/)
 * [魔搭社区 ModelScope](https://modelscope.cn/home)
 
@@ -343,6 +349,7 @@
 * [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
 * [TransGPT](https://github.com/DUOMO/TransGPT) - 交通大模型
 * [MathGLM](https://github.com/THUDM/MathGLM) - GPT Can Solve Mathematical Problems Without a Calculator
+* [OpenBioMed](https://github.com/PharMolix/OpenBioMed) - 多模态生物医药大模型
 
 ### 国外大模型
 
@@ -367,6 +374,7 @@
 	* [DeepSpeed-Chat](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat)
 	* [DeepSpeed-Chat：最强ChatGPT训练框架，一键完成RLHF训练！](https://mp.weixin.qq.com/s/uuquavhwNg1P9AaIMXOE_A)
 * [Mistral](https://docs.mistral.ai/)
+* [Gorilla](https://github.com/ShishirPatil/gorilla) - An API store for LLMs
 
 ### 其他大模型
 
@@ -458,6 +466,7 @@
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
+* [Generative Agents](https://github.com/joonspk-research/generative_agents) - Interactive Simulacra of Human Behavior
 
 ### RPA
 
@@ -466,6 +475,12 @@
 * [OpenFlow](https://github.com/open-rpa/openflow) - Scalable, secure workflow solution
 * [Robocorp](https://robocorp.com/) - Supercharge Python for Automation and Integrations
 * [OpenBots](https://openbots.ai/) - First Enterprise RPA With Zero Bot Licensing
+
+### 训练 & 微调
+
+* [ColossalAI](https://github.com/hpcaitech/ColossalAI) - Making large AI models cheaper, faster and more accessible
+* [Ludwig](https://github.com/ludwig-ai/ludwig) - Low-code framework for building custom LLMs, neural networks, and other AI models
+* [DLLXW/baby-llama2-chinese](https://github.com/DLLXW/baby-llama2-chinese) - 从头预训练+SFT一个小参数量的中文LLaMa2
 
 ### 模型推理 & 部署
 

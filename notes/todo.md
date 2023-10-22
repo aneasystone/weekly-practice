@@ -30,6 +30,7 @@
 
 * [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
+* [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
 
 ### Java Agent
 
@@ -69,6 +70,12 @@
 ### Spring Boot 解析
 
 * [三万字盘点Spring 9大核心基础功能](https://mp.weixin.qq.com/s/dY3xGAJnFpgz4ae4ZMlOZg)
+
+### Spring Boot 3
+
+* [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/3.2.x/reference/htmlsingle/)
+* [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
+* [How Google Cloud emulators and Testcontainers speed up development](https://cloud.google.com/blog/products/application-development/develop-and-test-spring-boot-applications-consistently/)
 
 ### Spring Modulith
 
@@ -114,6 +121,7 @@
 * [ProtoBuf 教程](https://www.wdbyte.com/tool/protobuf/)
 * [理解 gRPC 协议](https://taoshu.in/grpc.html)
 * [Protocol Buffers 编码](https://taoshu.in/pb-encoding.html)
+* [Introduction to gRPC with Spring Boot](https://piotrminkowski.com/2023/08/29/introduction-to-grpc-with-spring-boot/)
 
 ### 零拷贝
 
@@ -146,12 +154,12 @@
 	* [Micrometer Tracing](https://micrometer.io/docs/tracing)
 	* [Micrometer Context Propagation](https://micrometer.io/docs/contextPropagation)
 * [A Java Library’s New Approach To Observability](https://foojay.io/today/not-your-grandfathers-logs-a-java-librarys-new-approach-to-observability/)
-* [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
 
 #### OpenTelemetry
 
 * [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
 * [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
+* [A practical guide to data collection with OpenTelemetry and Prometheus](https://grafana.com/blog/2023/07/20/a-practical-guide-to-data-collection-with-opentelemetry-and-prometheus/)
 
 #### SkyWalking
 
@@ -161,8 +169,9 @@
 
 * [如何设计一个状态机！](https://mp.weixin.qq.com/s/8lZ1jpvOTb2cd4-IhclaMg)
 
-### JPA
+### 数据库
 
+* [Spring Data JDBC - How To Maintain Your Database Schema](https://spring.io/blog/2023/08/29/spring-data-jdbc-how-to-maintain-your-database-schema)
 * [Understanding JPA/Hibernate Associations](https://www.baeldung.com/jpa-hibernate-associations)
 
 ### 使用 Picocli 打造一个命令行程序
