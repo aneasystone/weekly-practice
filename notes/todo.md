@@ -56,6 +56,10 @@
 * [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
 * [Possible Root Causes for High CPU Usage in Java](https://www.baeldung.com/java-high-cpu-usage-causes)
 
+### 调试技巧
+
+* [Level-up your Java Debugging Skills with on-demand Debugging](https://foojay.io/today/level-up-your-java-debugging-skills-with-on-demand-debugging/)
+
 #### VisualVM
 
 * [JDBC Profiling with VisualVM](https://vladmihalcea.com/jdbc-profiling-visualvm/)
@@ -142,6 +146,7 @@
 * [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
 * [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
 * [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
+* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
 
 ### 可观测性
 
@@ -164,6 +169,13 @@
 #### SkyWalking
 
 * [10分钟3个步骤集成使用SkyWalking](http://www.mangod.top/articles/2023/10/11/1696996147664.html)
+
+#### 日志
+
+* [Send Your Logs To Loki](https://foojay.io/today/send-your-logs-to-loki/)
+* [Introduction to Grafana Loki](https://www.baeldung.com/ops/grafana-loki)
+* [系统日志规范及最佳实践](https://xie.infoq.cn/article/c7e46aa4bd7de3edb855c1f29)
+* [日志搜集系统从ELK到EFK](https://blog.csdn.net/mawming/article/details/78344939)
 
 ### Spring StateMachine
 
@@ -209,6 +221,10 @@
 * [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
 
 ## Kubernetes
+
+### 部署教程
+
+* [Bootstrap an Air Gapped Cluster With Kubeadm](https://kubernetes.io/blog/2023/10/12/bootstrap-an-air-gapped-cluster-with-kubeadm/)
 
 ### 扩展 Kubernetes
 

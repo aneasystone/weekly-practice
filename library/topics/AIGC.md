@@ -60,6 +60,7 @@
 * [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
 * [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
+* [GPT Pilot](https://github.com/Pythagora-io/gpt-pilot) - Dev tool that writes scalable apps from scratch while the developer oversees the implementation
 * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
@@ -150,6 +151,7 @@
 * [ChatDOC](https://chatdoc.com/) - Chat with your documents
 * [StanGirard/quivr](https://github.com/StanGirard/quivr) - Dump all your files and chat with it using your Generative AI Second Brain using LLMs & Embeddings
 * [PDF GPT](https://github.com/bhaskatripathi/pdfGPT) - allows you to chat with the contents of your PDF file by using GPT capabilities.
+* [GenAI Stack](https://github.com/docker/genai-stack) - Langchain + Docker + Neo4j
 
 #### 网页助手
 
@@ -212,6 +214,7 @@
 
 #### 设计助手
 
+* [WHEE](https://www.whee.com/) - AI视觉创作的灵感激发器
 * [PMAI](https://www.pm-ai.cn/) - 产品经理的AI助手，让你工作更轻松。一键生成PRD、解决方案、流程图、sql等功能
 * [Vizcom](https://www.vizcom.ai/) - Render your drawings in seconds 
 * [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
@@ -268,9 +271,11 @@
 * [DELTA](https://github.com/didi/delta) - DELTA is a deep learning based natural language and speech processing platform. 
 * [Gladia](https://www.gladia.io/) - From audio to knowledge
 
-#### 语音转写
+#### 语音处理
 
+* [Ultimate Vocal Remover V5](https://ultimatevocalremover.com/) - The best vocal remover application on the internet, and it's totally free and open source!
 * [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
+* [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) - 一个基于 VITS 的简单易用的变声框架
 
 #### 视频创作
 
@@ -327,6 +332,7 @@
 * [竹间智能](https://www.emotibot.com/)
 * 知海图AI - 知乎
 * [小冰](https://www.xiaoice.com/)
+* [九章元识大模型](https://datacanvas.io/) 九章云极 DataCanvas
 * [写作猫](https://xiezuocat.com/) - 秘塔网络
 * [百川大模型](https://www.baichuan-ai.com/home) - 百川智能
 	* [Baichuan-7B](https://github.com/baichuan-inc/Baichuan-7B)
@@ -379,6 +385,7 @@
 ### 其他大模型
 
 * [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) - 中文LLaMA&Alpaca大语言模型+本地CPU/GPU部署 (Chinese LLaMA & Alpaca LLMs)
+* [ymcui/Chinese-LLaMA-Alpaca-2](https://github.com/ymcui/Chinese-LLaMA-Alpaca-2) - 中文LLaMA-2 & Alpaca-2大模型二期项目 + 16K超长上下文模型
 * [Baize](https://github.com/project-baize/baize-chatbot)
 * [Chinese Vicuna](https://github.com/Facico/Chinese-Vicuna) - A Chinese Instruction-following LLaMA-based Model
 * [GPT4All](https://github.com/nomic-ai/gpt4all)
@@ -394,6 +401,7 @@
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
 * [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
+* [LongLoRA](https://github.com/dvlab-research/LongLoRA) - LongLoRA and LongAlpaca for Long-context LLMs
 
 ### 多模态
 
@@ -467,6 +475,7 @@
 * [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 * [Generative Agents](https://github.com/joonspk-research/generative_agents) - Interactive Simulacra of Human Behavior
+* [XAgent](https://github.com/OpenBMB/XAgent) - An Autonomous LLM Agent for Complex Task Solving
 
 ### RPA
 
@@ -518,6 +527,8 @@
 * [ChatGPT 火了，一大批开源平替也来了](https://my.oschina.net/oscpyaqxylk/blog/8671170)
 * [可能是最全的开源 LLM （大语言模型）整理](https://my.oschina.net/oscpyaqxylk/blog/8727824)
 * [两条命令搞定 ChatGPT API 的调用问题，有手就会！](https://blog.didispace.com/openai-proxy-aliyunfc/)
+* [LLM Map: 大模型技术图谱](https://gitee.com/oschina/llm-map)
+* [awesome-llm: 可能是最全的开源 LLM （大语言模型）整理](https://gitee.com/oschina/awesome-llm)
 
 ## 图像类
 
@@ -574,3 +585,7 @@
 
 * [SentenceTransformers](https://www.sbert.net/)
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models
+
+## 记忆管理
+
+* [MemGPT](https://github.com/cpacker/MemGPT) - Teaching LLMs memory management for unbounded context
