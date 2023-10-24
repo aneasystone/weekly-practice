@@ -4,16 +4,35 @@
 
 大抵来说，这类文档问答系统基本上都是基于 Embedding 和向量数据库来实现的，首先将文档分割成片段保存在向量库中，然后拿着用户的问题在向量库中检索，检索出来的结果是和用户问题最接近的文档片段，最后再将这些片段和用户问题一起交给大模型进行总结和提炼，从而给出用户问题的答案。在这个过程中，向量数据库是最关键的一环，这也是前一段时间向量数据库火得飞起的原因。
 
+不过，并不是所有的知识库都是以文档的形式存在的，还有很多结构化的知识散落在企业的各种数据源中，数据源可能是 MySQL、Mongo 等数据库，也可能是 CSV、Excel 等表格，还可能是 Neo4j、Nebula 等图谱数据库。如果要针对这些知识进行问答，Embedding 基本上就派不上用场了，所以我们还得想另外的解决方案，这篇文章将针对这种场景做一番粗略的研究。
 
+## 基本思路
+
+## LangChain
+
+### QA over structured data
+
+https://python.langchain.com/docs/expression_language/cookbook/sql_db
+
+https://python.langchain.com/docs/use_cases/qa_structured/sql
+
+### SQL Database Toolkit and Agent
+
+https://python.langchain.com/docs/integrations/toolkits/sql_database
+
+## DB-GPT
 
 https://db-gpt.readthedocs.io/en/latest/
 
+## 常见 SQL 用例
+
 ## 参考
 
-* [‘Talk’ to Your SQL Database Using LangChain and Azure OpenAI](https://towardsdatascience.com/talk-to-your-sql-database-using-langchain-and-azure-openai-bb79ad22c5e2)
-* [SQL](https://python.langchain.com/docs/use_cases/qa_structured/sql)
-* [LLMs and SQL](https://blog.langchain.dev/llms-and-sql/)
 * [Querying a SQL DB](https://python.langchain.com/docs/expression_language/cookbook/sql_db)
+* [QA over structured data](https://python.langchain.com/docs/use_cases/qa_structured/sql)
+* [SQL Database Toolkit and Agent](https://python.langchain.com/docs/integrations/toolkits/sql_database)
+* [LLMs and SQL](https://blog.langchain.dev/llms-and-sql/)
+* [‘Talk’ to Your SQL Database Using LangChain and Azure OpenAI](https://towardsdatascience.com/talk-to-your-sql-database-using-langchain-and-azure-openai-bb79ad22c5e2)
 * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
 * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
 * [大模型与数据科学：从Text-to-SQL 开始（一）](https://zhuanlan.zhihu.com/p/640580808)
