@@ -8,6 +8,17 @@
 
 ## 基本思路
 
+![](./images/db-qa.png)
+
+## 初步尝试
+
+```
+$ docker run -d -p 3306:3306 --name mysql \
+	-v $PWD/init:/docker-entrypoint-initdb.d \
+	-e MYSQL_ROOT_PASSWORD=123456 \
+	mysql:5.7
+```
+
 ## LangChain
 
 ### QA over structured data
