@@ -12,15 +12,120 @@
 
 ![](./images/db-qa.png)
 
-那么问题来了，如何将用户的问题转换为查询语句呢？
+那么问题来了，如何将用户的问题转换为查询语句呢？毋庸置疑，当然是让大模型来帮忙。
 
-### 初步尝试
+### 准备数据
+
+首先，我们创建一个测试数据库，然后创建一个简单的学生表，包含学生的姓名、学号、性别等信息：
+
+```
+/*!40101 SET NAMES utf8 */;
+
+CREATE DATABASE IF NOT EXISTS `demo` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+
+USE `demo`;
+
+CREATE TABLE IF NOT EXISTS `students`(
+   `id` INT UNSIGNED AUTO_INCREMENT,
+   `no` VARCHAR(100) NOT NULL,
+   `name` VARCHAR(100) NOT NULL,
+   `sex` INT NULL,
+   `birthday` DATE NULL,
+   PRIMARY KEY ( `id` )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
+```
+
+接着插入 10 条测试数据：
+
+```
+INSERT INTO `students` (`no`, `name`, `sex`, `birthday`) VALUES
+('202301030001', '张启文', 1, '2015-04-14'),
+('202301030002', '李金玉', 0, '2015-06-28'),
+('202301030003', '王海红', 0, '2015-07-01'),
+('202301030004', '王可可', 0, '2015-04-03'),
+('202301030005', '郑丽英', 0, '2015-10-19'),
+('202301030006', '张海华', 1, '2015-01-04'),
+('202301030007', '文奇', 1, '2015-11-03'),
+('202301030008', '孙然', 1, '2014-12-29'),
+('202301030009', '周军', 1, '2015-07-15'),
+('202301030010', '罗国华', 1, '2015-08-01');
+```
+
+然后将上面的初始化 SQL 语句放在 `init` 目录下，通过下面的命令启动 MySQL 数据库：
 
 ```
 $ docker run -d -p 3306:3306 --name mysql \
 	-v $PWD/init:/docker-entrypoint-initdb.d \
 	-e MYSQL_ROOT_PASSWORD=123456 \
 	mysql:5.7
+```
+
+### 将用户问题转为 SQL
+
+```
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+
+llm = OpenAI(temperature=0.9)
+
+prompt = PromptTemplate.from_template("""根据下面的数据库表结构，生成一条 SQL 查询语句来回答用户的问题：
+
+{schema}
+
+用户问题：{question}
+SQL 查询语句：""")
+
+def text_to_sql(schema, question):
+	text = prompt.format(schema=schema, question=question)
+	response = llm.predict(text)
+	return response
+```
+
+### 执行 SQL
+
+```
+#
+# Install mysqlclient: https://github.com/PyMySQL/mysqlclient
+#
+# $ sudo apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-config
+# $ pip3 install mysqlclient
+#
+import MySQLdb
+
+def execute_sql(sql):
+	result = ''
+	db = MySQLdb.connect("192.168.1.44", "root", "123456", "demo", charset='utf8' )
+	cursor = db.cursor()
+	try:
+		cursor.execute(sql)
+		results = cursor.fetchall()
+		for row in results:
+			result += ' '.join(str(x) for x in row) + '\n'
+	except:
+		print("Error: unable to fetch data")
+	db.close()
+	return result
+```
+
+### 回答用户问题
+
+```
+prompt_qa = PromptTemplate.from_template("""根据下面的数据库表结构，SQL 查询语句和结果，以自然语言回答用户的问题：
+
+{schema}
+
+用户问题：{question}
+SQL 查询语句：{query}
+SQL 查询结果：{result}
+回答：""")
+
+def qa(schema, question):
+	query = text_to_sql(schema=schema, question=question)
+	print(query)
+	result = execute_sql(query)
+	text = prompt_qa.format(schema=schema, question=question, query=query, result=result)
+	response = llm.predict(text)
+	return response
 ```
 
 ## LangChain
