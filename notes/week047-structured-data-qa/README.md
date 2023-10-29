@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS `students`(
 ```
 INSERT INTO `students` (`no`, `name`, `sex`, `birthday`) VALUES
 ('202301030001', '张启文', 1, '2015-04-14'),
-('202301030002', '李金玉', 0, '2015-06-28'),
-('202301030003', '王海红', 0, '2015-07-01'),
-('202301030004', '王可可', 0, '2015-04-03'),
-('202301030005', '郑丽英', 0, '2015-10-19'),
+('202301030002', '李金玉', 2, '2015-06-28'),
+('202301030003', '王海红', 2, '2015-07-01'),
+('202301030004', '王可可', 2, '2015-04-03'),
+('202301030005', '郑丽英', 2, '2015-10-19'),
 ('202301030006', '张海华', 1, '2015-01-04'),
 ('202301030007', '文奇', 1, '2015-11-03'),
 ('202301030008', '孙然', 1, '2014-12-29'),
@@ -61,6 +61,8 @@ $ docker run -d -p 3306:3306 --name mysql \
 ```
 
 ### 将用户问题转为 SQL
+
+接下来，我们尝试一下让大模型将用户问题转换为 SQL 语句，提示语如下：
 
 ```
 from langchain.llms import OpenAI
@@ -81,15 +83,89 @@ def text_to_sql(schema, question):
 	return response
 ```
 
-### 执行 SQL
+这个提示语非常直白，直接将数据库表结构和用户问题丢给大模型，让其生成一条 SQL 查询语句。使用几个简单的问题测试下，发现效果还可以：
 
 ```
-#
-# Install mysqlclient: https://github.com/PyMySQL/mysqlclient
-#
-# $ sudo apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-config
-# $ pip3 install mysqlclient
-#
+schema = "CREATE TABLE ..."
+question = "王可可的学号是多少？"
+sql = text_to_sql(schema=schema, question=question)
+print(sql)
+
+# SELECT no FROM students WHERE name = '王可可';
+```
+
+```
+question = "王可可今年多大？"
+sql = text_to_sql(schema=schema, question=question)
+print(sql)
+
+# SELECT YEAR(CURRENT_DATE) - YEAR(birthday) FROM students WHERE NAME='王可可';
+```
+
+```
+question = "王可可和孙然谁的年龄大？"
+sql = text_to_sql(schema=schema, question=question)
+print(sql)
+
+# SELECT NAME, YEAR(CURDATE())-YEAR(birthday) AS age
+# FROM students
+# WHERE NAME IN ("王可可", "孙然")
+# ORDER BY age DESC LIMIT 1;
+```
+
+不过，当我们的字段有特殊含义时，生成的 SQL 语句就不对了，比如这里我们使用 `sex=1` 表示男生，`sex=2` 表示女生，但是 ChatGPT 生成 SQL 的时候，认为 `sex=0` 表示女生：
+
+```
+question = "班上一共有多少个女生？"
+sql = text_to_sql(schema=schema, question=question)
+print(sql)
+
+# SELECT COUNT(*) FROM students WHERE sex=0;
+```
+
+为了让大模型知道字段的确切含义，我们可以在数据库表结构中给字段加上注释：
+
+```
+schema = """CREATE TABLE IF NOT EXISTS `students`(
+   `id` INT UNSIGNED AUTO_INCREMENT,
+   `no` VARCHAR(100) NOT NULL,
+   `name` VARCHAR(100) NOT NULL,
+   `sex` INT NULL COMMENT '1表示男生，2表示女生',
+   `birthday` DATE NULL,
+   PRIMARY KEY ( `id` )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
+"""
+```
+
+这样生成的 SQL 语句就没问题了：
+
+```
+question = "班上一共有多少个女生？"
+sql = text_to_sql(schema=schema, question=question)
+print(sql)
+
+# SELECT COUNT(*) FROM students WHERE sex=2;
+```
+
+### 执行 SQL
+
+得到 SQL 语句之后，接下来，我们就可以查询数据库了。在 Python 里操作 MySQL 数据库，有两个库经常被人提到：
+
+* [PyMySQL](https://github.com/PyMySQL/PyMySQL)
+* [mysqlclient](https://github.com/PyMySQL/mysqlclient)
+
+这两个库的区别在于：PyMySQL 是使用纯 Python 实现的，使用起来简单方便，可以直接通过 `pip install PyMySQL` 进行安装；mysqlclient 其实就是 Python 3 版本的 MySQLdb，它是基于 C 扩展模块实现的，需要针对不同平台进行编译安装，但正因为此，mysqlclient 的速度非常快，在正式项目中推荐使用它。
+
+这里我们就使用 mysqlclient 来执行 SQL，首先安装它：
+
+```
+$ sudo apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-config
+$ pip3 install mysqlclient
+```
+
+然后连接数据库执行 SQL 语句，它的用法和 MySQLdb 几乎完全兼容：
+
+```
 import MySQLdb
 
 def execute_sql(sql):
@@ -109,6 +185,8 @@ def execute_sql(sql):
 
 ### 回答用户问题
 
+拿到 SQL 语句的执行结果之后，我们就可以再次组织下提示语，让大模型以自然语言的形式来回答用户的问题：
+
 ```
 prompt_qa = PromptTemplate.from_template("""根据下面的数据库表结构，SQL 查询语句和结果，以自然语言回答用户的问题：
 
@@ -126,6 +204,17 @@ def qa(schema, question):
 	text = prompt_qa.format(schema=schema, question=question, query=query, result=result)
 	response = llm.predict(text)
 	return response
+```
+
+测试效果如下：
+
+```
+schema = "CREATE TABLE ..."
+question = "王可可的学号是多少？"
+answer = qa(schema=schema, question=question)
+print(answer)
+
+# 王可可的学号是202301030004。
 ```
 
 ## LangChain
@@ -158,3 +247,4 @@ https://db-gpt.readthedocs.io/en/latest/
 * [大模型与数据科学：从Text-to-SQL 开始（一）](https://zhuanlan.zhihu.com/p/640580808)
 * [大模型与商业智能BI：LLM-as-数据小助理（二）](https://zhuanlan.zhihu.com/p/640696719)
 * [大模型+知识库/数据库问答的若干问题（三）](https://zhuanlan.zhihu.com/p/642125832)
+* [How can I connect to MySQL in Python 3 on Windows?](https://stackoverflow.com/questions/4960048/how-can-i-connect-to-mysql-in-python-3-on-windows)
