@@ -62,7 +62,7 @@ $ docker run -d -p 3306:3306 --name mysql \
 
 ### 将用户问题转为 SQL
 
-接下来，我们尝试一下让大模型将用户问题转换为 SQL 语句，提示语如下：
+接下来，我们尝试一下让大模型将用户问题转换为 SQL 语句。实际上，这被称之为 **Text-to-SQL**，有很多研究人员对这个课题进行过探讨和研究，Nitarshan Rajkumar 等人在 [Evaluating the Text-to-SQL Capabilities of Large Language Models](https://arxiv.org/abs/2204.00498) 这篇论文中对各种提示语的效果进行了对比测试，他们发现，当在提示语中使用 `CREATE TABLE` 来描述数据库表结构时，模型的效果最好。所以我们构造如下的提示语：
 
 ```
 from langchain.llms import OpenAI
@@ -242,9 +242,14 @@ https://db-gpt.readthedocs.io/en/latest/
 * [SQL Database Toolkit and Agent](https://python.langchain.com/docs/integrations/toolkits/sql_database)
 * [LLMs and SQL](https://blog.langchain.dev/llms-and-sql/)
 * [‘Talk’ to Your SQL Database Using LangChain and Azure OpenAI](https://towardsdatascience.com/talk-to-your-sql-database-using-langchain-and-azure-openai-bb79ad22c5e2)
-* [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
-* [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
 * [大模型与数据科学：从Text-to-SQL 开始（一）](https://zhuanlan.zhihu.com/p/640580808)
 * [大模型与商业智能BI：LLM-as-数据小助理（二）](https://zhuanlan.zhihu.com/p/640696719)
 * [大模型+知识库/数据库问答的若干问题（三）](https://zhuanlan.zhihu.com/p/642125832)
 * [How can I connect to MySQL in Python 3 on Windows?](https://stackoverflow.com/questions/4960048/how-can-i-connect-to-mysql-in-python-3-on-windows)
+
+## 更多
+
+### Semi-structured and Multi-modal RAG
+
+* [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
+* [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
