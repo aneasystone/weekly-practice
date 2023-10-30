@@ -147,6 +147,8 @@ print(sql)
 # SELECT COUNT(*) FROM students WHERE sex=2;
 ```
 
+根据 Nitarshan Rajkumar 等人的研究，我们还可以对提示语做进一步的优化，比如在 `CREATE TABLE` 表结构的后面加几条表中具有代表性的示例数据，或者增加几个 SQL 查询的例子等等。
+
 ### 执行 SQL
 
 得到 SQL 语句之后，接下来，我们就可以查询数据库了。在 Python 里操作 MySQL 数据库，有两个库经常被人提到：
@@ -218,6 +220,61 @@ print(answer)
 ```
 
 ## LangChain
+
+上面的步骤我们也可以使用 LangChain 来实现。
+
+### 使用 `SQLDatabase` 获取数据库表结构信息
+
+在 LangChain 的最新版本中，引入了 `SQLDatabase` 类可以方便地获取数据库表结构信息。我们首先安装 LangChain 的最新版本：
+
+> 在写这篇博客时，最新版本是 0.0.324，LangChain 的版本更新很快，请随时关注官方文档。
+
+```
+$ pip3 install langchain==0.0.324
+```
+
+然后使用 `SQLDatabase.from_uri()` 初始化一个 `SQLDatabase` 实例，由于 `SQLDatabase` 是基于 [SQLAlchemy](https://www.sqlalchemy.org/) 实现的，所以参数格式和 SQLAlchemy 的 [create_engine](https://docs.sqlalchemy.org/en/20/core/engines.html) 是一致的：
+
+```
+from langchain.utilities import SQLDatabase
+
+db = SQLDatabase.from_uri("mysql+pymysql://root:123456@192.168.1.45:3306/demo?charset=utf8")
+```
+
+然后我们就可以使用 `get_table_info()` 方法来获取表结构信息：
+
+```
+print(db.get_table_info())
+```
+
+默认情况下该方法会返回数据库中所有表的信息，通过 `table_names` 参数指定只返回某个表的信息：
+
+```
+print(db.get_table_info(table_names=["students"]))
+```
+
+查询结果如下：
+
+```
+CREATE TABLE students (
+        id INTEGER(10) UNSIGNED NOT NULL AUTO_INCREMENT, 
+        no VARCHAR(100) NOT NULL, 
+        name VARCHAR(100) NOT NULL, 
+        sex INTEGER(11) COMMENT '1表示男生，2表示女生', 
+        birthday DATE, 
+        PRIMARY KEY (id)
+)DEFAULT CHARSET=utf8 ENGINE=InnoDB
+
+/*
+3 rows from students table:
+id      no      name    sex     birthday
+1       202301030001    张启文  1       2015-04-14
+2       202301030002    李金玉  2       2015-06-28
+3       202301030003    王海红  2       2015-07-01
+*/
+```
+
+可以看出 `SQLDatabase` 不仅查询了表的结构信息，还将表中前三条数据一并返回了，用于组装提示语。
 
 ### QA over structured data
 
