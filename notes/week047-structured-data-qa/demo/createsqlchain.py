@@ -13,3 +13,10 @@ from langchain.chains import create_sql_query_chain
 chain = create_sql_query_chain(ChatOpenAI(temperature=0), db)
 response = chain.invoke({"question": "班上一共有多少个女生？"})
 print(response)
+
+# SELECT COUNT(*) AS total_female_students
+# FROM students
+# WHERE sex = 2
+
+result = db.run(response)
+print(result)

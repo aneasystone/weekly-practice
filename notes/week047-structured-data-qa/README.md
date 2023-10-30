@@ -276,6 +276,59 @@ id      no      name    sex     birthday
 
 可以看出 `SQLDatabase` 不仅查询了表的结构信息，还将表中前三条数据一并返回了，用于组装提示语。
 
+### 使用 `create_sql_query_chain` 转换 SQL 语句
+
+接下来我们将用户问题转换为 SQL 语句。LangChain 提供了一个 Chain 来做这个事，这个 Chain 并没有具体的名字，但是我们可以使用 `create_sql_query_chain` 来创建它：
+
+```
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import create_sql_query_chain
+
+chain = create_sql_query_chain(ChatOpenAI(temperature=0), db)
+```
+
+`create_sql_query_chain` 的第一个参数是大模型，第二个参数是上一节创建的 `SQLDatabase`，注意这里大模型的参数 `temperature=0`，因为我们希望大模型生成的 SQL 语句越固定越好，而不是随机变化。
+
+得到 Chain 之后，就可以调用 `chain.invoke()` 将用户问题转换为 SQL 语句：
+
+```
+response = chain.invoke({"question": "班上一共有多少个女生？"})
+print(response)
+
+# SELECT COUNT(*) AS total_female_students
+# FROM students
+# WHERE sex = 2
+```
+
+其实，`create_sql_query_chain` 还有第三个参数，用于设置提示语，不设置的话将使用下面的默认提示语：
+
+```
+PROMPT_SUFFIX = """Only use the following tables:
+{table_info}
+
+Question: {input}"""
+
+_mysql_prompt = """You are a MySQL expert. Given an input question, first create a syntactically correct MySQL query to run, then look at the results of the query and return the answer to the input question.
+Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per MySQL. You can order the results to return the most informative data in the database.
+Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in backticks (`) to denote them as delimited identifiers.
+Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+Pay attention to use CURDATE() function to get the current date, if the question involves "today".
+
+Use the following format:
+
+Question: Question here
+SQLQuery: SQL Query to run
+SQLResult: Result of the SQLQuery
+Answer: Final answer here
+
+"""
+
+MYSQL_PROMPT = PromptTemplate(
+    input_variables=["input", "table_info", "top_k"],
+    template=_mysql_prompt + PROMPT_SUFFIX,
+)
+```
+
 ### QA over structured data
 
 https://python.langchain.com/docs/expression_language/cookbook/sql_db
