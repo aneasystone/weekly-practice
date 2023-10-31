@@ -329,13 +329,57 @@ MYSQL_PROMPT = PromptTemplate(
 )
 ```
 
-### QA over structured data
+### 执行 SQL 语句并回答用户问题
 
-https://python.langchain.com/docs/expression_language/cookbook/sql_db
+得到 SQL 语句之后，我们就可以通过 `SQLDatabase` 运行它：
+
+```
+result = db.run(response)
+print(result)
+
+# [(4,)]
+```
+
+然后再重新组织提示语，让大模型以自然语言的形式对用户问题进行回答，跟上面类似，此处略过。
+
+#### 使用 `SQLDatabaseChain` 实现数据库问答
+
+不过 LangChain 提供了更方便的方式实现数据库问答，那就是 `SQLDatabaseChain`，可以将上面几个步骤合而为一。不过 `SQLDatabaseChain` 目前还处于实验阶段，我们需要先安装 `langchain_experimental`：
+
+```
+$ pip3 install langchain_experimental==0.0.32
+```
+
+然后就可以使用 `SQLDatabaseChain` 来回答用户问题了：
+
+```
+from langchain.utilities import SQLDatabase
+from langchain.llms import OpenAI
+from langchain_experimental.sql import SQLDatabaseChain
+
+db = SQLDatabase.from_uri("mysql+pymysql://root:123456@192.168.1.45:3306/demo?charset=utf8")
+llm = OpenAI(temperature=0, verbose=True)
+db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
+
+response = db_chain.run("班上一共有多少个女生？")
+print(response)
+```
+
+我们通过 `verbose=True` 参数让 `SQLDatabaseChain` 输出执行的详细过程，结果如下：
+
+```
+> Entering new SQLDatabaseChain chain...
+班上一共有多少个女生？
+SQLQuery:SELECT COUNT(*) FROM students WHERE sex = 2;
+SQLResult: [(4,)]
+Answer:班上一共有4个女生。
+> Finished chain.
+班上一共有4个女生。
+```
+
+#### 使用 SQL Agent 实现数据库问答
 
 https://python.langchain.com/docs/use_cases/qa_structured/sql
-
-### SQL Database Toolkit and Agent
 
 https://python.langchain.com/docs/integrations/toolkits/sql_database
 
@@ -363,3 +407,19 @@ https://db-gpt.readthedocs.io/en/latest/
 
 * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
 * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
+
+### LCEL
+
+在 LangChain 中，我们还可以通过 [LCEL（LangChain Expression Language）](https://python.langchain.com/docs/expression_language/) 来简化 Chain 的创建，比如对数据库进行问答，[官方有一个示例](https://python.langchain.com/docs/expression_language/cookbook/sql_db)，可以用下面这样的管道式语法来写：
+
+```
+full_chain = (
+    RunnablePassthrough.assign(query=sql_response)
+    | RunnablePassthrough.assign(
+        schema=get_schema,
+        response=lambda x: db.run(x["query"]),
+    )
+    | prompt_response
+    | model
+)
+```

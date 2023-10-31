@@ -20,3 +20,5 @@ print(response)
 
 result = db.run(response)
 print(result)
+
+# [(4,)]
