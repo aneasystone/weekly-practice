@@ -147,7 +147,12 @@ print(sql)
 # SELECT COUNT(*) FROM students WHERE sex=2;
 ```
 
-根据 Nitarshan Rajkumar 等人的研究，我们还可以对提示语做进一步的优化，比如在 `CREATE TABLE` 表结构的后面加几条表中具有代表性的示例数据，或者增加几个 SQL 查询的例子等等。
+根据 Nitarshan Rajkumar 等人的研究，我们还可以对提示语做进一步的优化，比如：
+
+* 给表结构进行更详细的说明；
+* 在表结构后面加几条具有代表性的示例数据；
+* 增加几个用户问题和对应的 SQL 查询的例子；
+* 使用向量数据库，根据用户问题动态查询相关的 SQL 查询的例子；
 
 ### 执行 SQL
 
@@ -247,10 +252,18 @@ db = SQLDatabase.from_uri("mysql+pymysql://root:123456@192.168.1.45:3306/demo?ch
 print(db.get_table_info())
 ```
 
-默认情况下该方法会返回数据库中所有表的信息，通过 `table_names` 参数指定只返回某个表的信息：
+默认情况下该方法会返回数据库中所有表的信息，可以通过 `table_names` 参数指定只返回某个表的信息：
 
 ```
 print(db.get_table_info(table_names=["students"]))
+```
+
+也可以在 `SQLDatabase.from_uri()` 时通过 `include_tables` 参数指定：
+
+```
+from langchain.utilities import SQLDatabase
+
+db = SQLDatabase.from_uri("mysql+pymysql://root:123456@192.168.1.45:3306/demo?charset=utf8", include_tables=["students"])
 ```
 
 查询结果如下：
@@ -376,6 +389,8 @@ Answer:班上一共有4个女生。
 > Finished chain.
 班上一共有4个女生。
 ```
+
+> 注意：`SQLDatabaseChain` 会一次性查询出数据库中所有的表结构，然后丢给大模型生成 SQL，当数据库中表较多时，生成效果可能并不好，这时最好手工指定使用哪些表，再生成 SQL，或者使用 `SQLDatabaseSequentialChain`，它第一步会让大模型确定该使用哪些表，然后再调用 `SQLDatabaseChain`。
 
 #### 使用 SQL Agent 实现数据库问答
 
