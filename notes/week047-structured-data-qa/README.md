@@ -383,9 +383,19 @@ https://python.langchain.com/docs/use_cases/qa_structured/sql
 
 https://python.langchain.com/docs/integrations/toolkits/sql_database
 
-## DB-GPT
+## 一些开源项目
 
-https://db-gpt.readthedocs.io/en/latest/
+目前市面上已经诞生了大量基于结构化数据的问答产品，比如 [酷表Excel](https://chatexcel.com/)、[Sheet+](https://sheetplus.ai/)、[Julius AI](https://julius.ai/) 等，它们通过聊天的方式来操控 Excel 或 Google Sheet 表格，还有 [AI Query](https://aiquery.co/)、[AI2sql](https://www.ai2sql.io/) 等，它们将自然语言转化为可以执行的 SQL 语句，让所有数据库小白也可以做数据分析。
+
+在开源社区，类似的项目也是百花齐放，比如 [sql-translator](https://github.com/whoiskatrin/sql-translator)、[textSQL](https://github.com/caesarhq/textSQL)、[sqlchat](https://github.com/sqlchat/sqlchat)、[Chat2DB](https://github.com/chat2db/Chat2DB)、[DB-GPT](https://github.com/eosphoros-ai/DB-GPT) 等等，其中热度最高的当属 Chat2DB 和 DB-GPT 这两个开源项目。
+
+### Chat2DB
+
+[Chat2DB](https://github.com/chat2db/Chat2DB) 是一款智能的数据库客户端软件，和 Navicat、DBeaver 相比，Chat2DB 集成了 AIGC 的能力，能够将自然语言转换成 SQL，也可以将 SQL 翻译成自然语言，或对 SQL 提出优化建议；此外，Chat2DB 还集成了报表能力，用户可以用对话的形式进行数据统计和分析。
+
+### DB-GPT
+
+[DB-GPT](https://github.com/eosphoros-ai/DB-GPT) 是一款基于知识库的问答产品，它同时支持结构化和非结构化数据的问答，支持生成报表，还支持自定义插件，在交互形式上和 ChatGPT 类似。它的一大特点是支持海量的模型管理，包括开源模型和 API 接口，并支持模型的自动化微调。
 
 ## 常见 SQL 用例
 

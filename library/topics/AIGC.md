@@ -108,6 +108,7 @@
 * [chat2db/Chat2DB](https://github.com/chat2db/Chat2DB) - 智能的通用数据库SQL客户端和报表工具
 * [eosphoros-ai/DB-GPT](https://github.com/eosphoros-ai/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
 * [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
+* [defog-ai/sqlcoder](https://github.com/defog-ai/sqlcoder) - SoTA LLM for converting natural language questions to SQL queries
 
 #### 文档生成
 
@@ -176,6 +177,7 @@
 
 * [酷表 ChatExcel](https://chatexcel.com/)
 * [Sheet+](https://sheetplus.ai/) - AI-powered tools for Excel & Google Sheets
+* [Julius AI](https://julius.ai/) - Your AI Data Analyst
 
 #### 论文助手
 
