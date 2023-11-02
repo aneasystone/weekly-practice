@@ -394,6 +394,92 @@ Answer:班上一共有4个女生。
 
 #### 使用 SQL Agent 实现数据库问答
 
+在 [week044-llm-application-frameworks-langchain-2](../week044-llm-application-frameworks-langchain-2/README.md) 这篇笔记中，我们学习了 LangChain 的 Agent 功能，借助 ReAct 提示工程或 OpenAI 的 Function Calling 技术，可以让大模型具有推理和使用外部工具的能力。很显然，如果我们将数据库相关的操作都定义成一个个的工具，那么通过 LangChain Agent 应该也可以实现数据库问答功能。
+
+LangChain 将数据库相关的操作封装在 `SQLDatabaseToolkit` 工具集中，我们可以直接使用：
+
+```
+from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+from langchain.sql_database import SQLDatabase
+from langchain.llms.openai import OpenAI
+
+db = SQLDatabase.from_uri("mysql+pymysql://root:123456@192.168.1.45:3306/demo?charset=utf8")
+toolkit = SQLDatabaseToolkit(db=db, llm=OpenAI(temperature=0))
+```
+
+这个工具集中实际上包含了四个工具：
+
+| 工具名 | 工具类 | 工具说明 |
+| ----- | ------ | ------- |
+| `sql_db_list_tables` | `ListSQLDatabaseTool` | 查询数据库中所有表名 |
+| `sql_db_schema` | `InfoSQLDatabaseTool` | 根据表名查询表结构信息和示例数据 |
+| `sql_db_query` | `QuerySQLDataBaseTool` | 执行 SQL 返回执行结果 |
+| `sql_db_query_checker` | `QuerySQLCheckerTool` | 使用大模型分析 SQL 语句是否正确 |
+
+另外，LangChain 还提供了 `create_sql_agent` 方法用于快速创建一个用于处理数据库的 Agent：
+
+```
+from langchain.agents import create_sql_agent
+from langchain.agents.agent_types import AgentType
+
+agent_executor = create_sql_agent(
+    llm=OpenAI(temperature=0),
+    toolkit=toolkit,
+    verbose=True,
+    agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+)
+```
+
+其中 `agent_type` 只能选 `ZERO_SHOT_REACT_DESCRIPTION` 和 `OPENAI_FUNCTIONS` 这两种，实际上就对应着 `ZeroShotAgent` 和 `OpenAIFunctionsAgent`，在使用上和其他的 Agent 并无二致：
+
+```
+response = agent_executor.run("班上一共有多少个女生？")
+print(response)
+```
+
+执行结果如下：
+
+```
+> Entering new AgentExecutor chain...
+Thought: I should query the database to get the answer.
+Action: sql_db_list_tables
+Action Input: ""
+Observation: students
+Thought: I should query the schema of the students table.
+Action: sql_db_schema
+Action Input: "students"
+Observation: 
+CREATE TABLE students (
+        id INTEGER(10) UNSIGNED NOT NULL AUTO_INCREMENT, 
+        no VARCHAR(100) NOT NULL, 
+        name VARCHAR(100) NOT NULL, 
+        sex INTEGER(11) COMMENT '1表示男生，2表示女生', 
+        birthday DATE, 
+        PRIMARY KEY (id)
+)DEFAULT CHARSET=utf8 ENGINE=InnoDB
+
+/*
+3 rows from students table:
+id      no      name    sex     birthday
+1       202301030001    张启文  1       2015-04-14
+2       202301030002    李金玉  2       2015-06-28
+3       202301030003    王海红  2       2015-07-01
+*/
+Thought: I should query the database to get the number of female students.
+Action: sql_db_query
+Action Input: SELECT COUNT(*) FROM students WHERE sex = 2
+Observation: [(4,)]
+Thought: I now know the final answer.
+Final Answer: 班上一共有4个女生。
+
+> Finished chain.
+班上一共有4个女生。
+```
+
+可以看出整个执行过程非常流畅，首先获取数据库中的表，然后查询表结构，接着生成 SQL 语句并执行，最后得到用户问题的答案。
+
+使用 SQL Agent 比 `SQLDatabaseChain` 要灵活的多，我们不仅可以实现数据库问答，还可以实现一些其他功能，比如 SQL 生成，SQL 校验，SQL 解释和优化，生成数据库描述，等等，我们还可以根据需要在工具集中添加自己的工具，扩展出更丰富的功能。
+
 https://python.langchain.com/docs/use_cases/qa_structured/sql
 
 https://python.langchain.com/docs/integrations/toolkits/sql_database
