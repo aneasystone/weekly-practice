@@ -190,6 +190,8 @@ def execute_sql(sql):
 	return result
 ```
 
+> 注意，大模型生成的 SQL 可能会对数据库造成破坏，所以在生产环境一定要做好安全防护，比如：使用只读的账号，限制返回结果的条数，等等。
+
 ### 回答用户问题
 
 拿到 SQL 语句的执行结果之后，我们就可以再次组织下提示语，让大模型以自然语言的形式来回答用户的问题：
@@ -480,9 +482,10 @@ Final Answer: 班上一共有4个女生。
 
 使用 SQL Agent 比 `SQLDatabaseChain` 要灵活的多，我们不仅可以实现数据库问答，还可以实现一些其他功能，比如 SQL 生成，SQL 校验，SQL 解释和优化，生成数据库描述，等等，我们还可以根据需要在工具集中添加自己的工具，扩展出更丰富的功能。
 
-https://python.langchain.com/docs/use_cases/qa_structured/sql
+LangChain 的 [这篇文档中](https://python.langchain.com/docs/use_cases/qa_structured/sql#extending-the-sql-toolkit) 就给出了两个拓展工具集的例子，我觉得很有参考意义：
 
-https://python.langchain.com/docs/integrations/toolkits/sql_database
+* **Including dynamic few-shot examples**：这个例子将一些用户问题和对应的 SQL 示例存储到向量数据库中，然后创建一个额外的名为 `sql_get_similar_examples` 的工具用于从向量库中获取类似示例，并将提示语修改为：先从向量库中查找类似的示例，判断示例能否构造出回答用户问题的 SQL 语句，如果能，直接通过示例构造出 SQL 语句，如果不能，则通过查询数据库的表结构来构造；
+* **Finding and correcting misspellings for proper nouns**：这也是一个很实用的示例，用户在提问时往往会输入一些错别字，特别是人物名称、公司名称或地址信息等专有名词，比如将 `张晓红今年多大？` 写成了 `张小红今年多大？`，这时直接搜索数据库肯定是搜不出结果的。在这个例子中，首先将数据库中所有艺人名称和专辑名称存储到向量数据库中，然后创建了一个额外的名为 `name_search` 的工具用于从向量库中获取近似的名称，并将提示语修改为：如果用户问题设计到专有名词，首先搜索向量库判断名称的拼写是否有误，如果拼写有误，要使用正确的名称构造 SQL 语句来回答用户的问题。
 
 ## 一些开源项目
 
@@ -513,6 +516,12 @@ https://python.langchain.com/docs/integrations/toolkits/sql_database
 * [How can I connect to MySQL in Python 3 on Windows?](https://stackoverflow.com/questions/4960048/how-can-i-connect-to-mysql-in-python-3-on-windows)
 
 ## 更多
+
+### 其他结构化数据源
+
+* [使用 `ElasticsearchDatabaseChain` 实现基于 ES 的文档问答](https://python.langchain.com/docs/use_cases/qa_structured/sql#elastic-search)
+* [Pandas Dataframe Agent](https://python.langchain.com/docs/integrations/toolkits/pandas)
+* [CSV Agent](https://python.langchain.com/docs/integrations/toolkits/csv)
 
 ### Semi-structured and Multi-modal RAG
 
