@@ -497,11 +497,37 @@ LangChain 的 [这篇文档中](https://python.langchain.com/docs/use_cases/qa_s
 
 [Chat2DB](https://github.com/chat2db/Chat2DB) 是一款智能的数据库客户端软件，和 Navicat、DBeaver 相比，Chat2DB 集成了 AIGC 的能力，能够将自然语言转换成 SQL，也可以将 SQL 翻译成自然语言，或对 SQL 提出优化建议；此外，Chat2DB 还集成了报表能力，用户可以用对话的形式进行数据统计和分析。
 
+Chat2DB 提供了 Windows、Mac、Linux 等平台的安装包，也支持以 Web 形式进行部署，我们直接通过官方镜像安装：
+
+```
+$ docker run --name=chat2db -ti -p 10824:10824 chat2db/chat2db:latest
+```
+
+启动成功后，访问 `http://localhost:10824` 会进入 Chat2DB 的登录页面，默认的用户名和密码是 `chat2db/chat2db`，登录成功后，添加数据库连接，然后可以创建新的表，查看表结构，查看表中数据，等等，这和传统的数据库客户端软件并无二致：
+
+![](./images/chat2db-console.png)
+
+和传统的数据库客户端软件相比，Chat2DB 最重要的一点区别在于，用户可以在控制台中输入自然语言，比如像下面这样，输入 `查询王可可的学号` 并回车，这时会自动生成 SQL 语句，点击执行按钮就可以得到结果：
+
+![](./images/chat2db-generate-sql-select.png)
+
+通过这种方式来管理数据库让人感觉很自然，即使数据库小白也能对数据库进行各种操作，比如要创建一个表：
+
+![](./images/chat2db-generate-sql-create-table.png)
+
+插入一些测试数据：
+
+![](./images/chat2db-generate-sql-insert.png)
+
+遇到不懂的 SQL 语句，用户还可以对 SQL 语句进行解释和优化，整个体验可以说是非常流畅，另外，Chat2DB 还支持通过自然语言的方式生成报表，比如柱状图、折线图、饼图等，便于用户进行数据统计和分析：
+
+![](./images/chat2db-dashboard.png)
+
+默认情况下，Chat2DB 使用的是 Chat2DB AI 接口，关注官方公众号后就可以免费使用，我们也可以切换成 OpenAI 或 AzureAI 接口，或使用自己部署的大模型接口，具体内容请参考官方提供的 [ChatGLM-6B](https://github.com/chat2db/chat2db-chatglm-6b-deploy/blob/main/README_CN.md) 和 [sqlcoder](https://github.com/chat2db/chat2db-sqlcoder-deploy/blob/main/README_CN.md) 的部署方法。
+
 ### DB-GPT
 
 [DB-GPT](https://github.com/eosphoros-ai/DB-GPT) 是一款基于知识库的问答产品，它同时支持结构化和非结构化数据的问答，支持生成报表，还支持自定义插件，在交互形式上和 ChatGPT 类似。它的一大特点是支持海量的模型管理，包括开源模型和 API 接口，并支持模型的自动化微调。
-
-## 常见 SQL 用例
 
 ## 参考
 
@@ -517,18 +543,35 @@ LangChain 的 [这篇文档中](https://python.langchain.com/docs/use_cases/qa_s
 
 ## 更多
 
-### 其他结构化数据源
+### 基于其他结构化数据源的文档问答
+
+#### Neo4j
+
+* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
+* [Constructing knowledge graphs from text using OpenAI functions: Leveraging knowledge graphs to power LangChain Applications](https://blog.langchain.dev/constructing-knowledge-graphs-from-text-using-openai-functions/)
+
+#### Elasticsearch
 
 * [使用 `ElasticsearchDatabaseChain` 实现基于 ES 的文档问答](https://python.langchain.com/docs/use_cases/qa_structured/sql#elastic-search)
+
+#### CSV
+
+* [Benchmarking Question/Answering Over CSV Data](https://blog.langchain.dev/benchmarking-question-answering-over-csv-data/)
 * [Pandas Dataframe Agent](https://python.langchain.com/docs/integrations/toolkits/pandas)
 * [CSV Agent](https://python.langchain.com/docs/integrations/toolkits/csv)
 
-### Semi-structured and Multi-modal RAG
+#### Excel
 
+* [Summarizing and Querying Data from Excel Spreadsheets Using eparse and a Large Language Model](https://blog.langchain.dev/summarizing-and-querying-data-from-excel-spreadsheets-using-eparse-and-a-large-language-model/)
+
+### 基于半结构化和多模数据源的文档问答
+
+* [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
 * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
+* [Semi-structured and Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_and_multi_modal_RAG.ipynb)
 * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
 
-### LCEL
+### 学习 LCEL
 
 在 LangChain 中，我们还可以通过 [LCEL（LangChain Expression Language）](https://python.langchain.com/docs/expression_language/) 来简化 Chain 的创建，比如对数据库进行问答，[官方有一个示例](https://python.langchain.com/docs/expression_language/cookbook/sql_db)，可以用下面这样的管道式语法来写：
 
