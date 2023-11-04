@@ -2,6 +2,11 @@
 
 ## 大模型
 
+### RAG
+
+* [Query Transformations](https://blog.langchain.dev/query-transformations/)
+* [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
+
 ### 实战 LLaMA
 
 * [ChatGPT平替模型：LLaMA](https://zhuanlan.zhihu.com/p/614118339)
@@ -24,6 +29,12 @@
 
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
 
+### 模型推理和部署
+
+### 模型训练和微调
+
+* [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
+
 ## Java
 
 ### Java 21
@@ -31,6 +42,12 @@
 * [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
+* [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
+
+### GraalVM
+
+* [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
+* [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
 
 ### Java Agent
 
@@ -126,6 +143,7 @@
 * [理解 gRPC 协议](https://taoshu.in/grpc.html)
 * [Protocol Buffers 编码](https://taoshu.in/pb-encoding.html)
 * [Introduction to gRPC with Spring Boot](https://piotrminkowski.com/2023/08/29/introduction-to-grpc-with-spring-boot/)
+* [在 kubernetes 环境中实现 gRPC 负载均衡](https://crossoverjie.top/2023/10/16/ob/k8s-grpc-lb/)
 
 ### 零拷贝
 
@@ -193,7 +211,6 @@
 * [Java命令行界面（第10部分）：picocli](https://blog.csdn.net/dnc8371/article/details/106702365)
 * [Picocli 2.0: Steroids上的Groovy脚本](https://picocli.info/zh/picocli-2.0-groovy-scripts-on-steroids.html)
 * [从Commons CLI迁移到Picocli](https://blog.csdn.net/Tybyqi/article/details/85787550)
-* [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
 
 ### 工作流
 
@@ -245,11 +262,21 @@
 * [为Kubernetes集群添加用户](https://zhuanlan.zhihu.com/p/43237959)
 * [创建用户认证授权的 kubeconfig 文件](https://jimmysong.io/kubernetes-handbook/guide/kubectl-user-authentication-authorization.html)
 
-### 学习 Kubernetes 的准入控制
+### 准入控制
 
 * [理清 Kubernetes 中的准入控制（Admission Controller)](https://moelove.info/2021/11/30/%E7%90%86%E6%B8%85-Kubernetes-%E4%B8%AD%E7%9A%84%E5%87%86%E5%85%A5%E6%8E%A7%E5%88%B6Admission-Controller/)
 * [Admission Controllers Reference](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 * [云原生策略引擎 Kyverno （上）](https://moelove.info/2022/03/02/%E4%BA%91%E5%8E%9F%E7%94%9F%E7%AD%96%E7%95%A5%E5%BC%95%E6%93%8E-Kyverno-%E4%B8%8A/)
+
+### 策略管理
+
+* [Secure your Kubernetes environment with OPA and Gatekeeper](https://www.cncf.io/blog/2023/10/09/secure-your-kubernetes-environment-with-opa-and-gatekeeper/)
+
+### Kubernetes Secrets
+
+* [Keeping secrets secure on Kubernetes](https://www.cncf.io/blog/2023/10/10/keeping-secrets-secure-on-kubernetes/)
+* [Secure Kubernetes Secrets with Vault](https://www.baeldung.com/spring-vault-kubernetes-secrets)
+* [Kubernetes security: best practices for Kubernetes secrets management](https://www.cncf.io/blog/2023/09/28/kubernetes-security-best-practices-for-kubernetes-secrets-management/)
 
 ### Kubernetes 故障排查
 
@@ -261,9 +288,10 @@
 * [聊聊部署在K8S的项目如何获取客户端真实IP](https://juejin.cn/post/7239058077273079864)
 * [k8s生产实践之获取客户端真实IP](https://cloud.tencent.com/developer/article/1870731)
 
-### 小技巧
+### `kubectl` 小技巧
 
 * [How to Get the YAML of a Deployed Kubernetes Object](https://www.baeldung.com/ops/kubernetes-yaml-deployed-object)
+* [Edit a Kubernetes Deployment Without Modifying the File Manually](https://www.baeldung.com/ops/kubernetes-edit-deployment-no-manual-change)
 * [JSONPath Support](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
 
 ### 学习 Kubernetes 的工作负载
@@ -287,6 +315,7 @@
 
 * [GitOps 实践之渐进式发布](https://coding.net/help/insight/gitops)
 * [基于 nacos/springcloud/k8s 的不停机服务更新[graceful shutdown]](http://yelog.org/2022/07/27/springboot-graceful-shutdown-based-on-nacos2-and-k8s/)
+* [使用 Argo 项目 Istio 及 SkyWalking 实现 GitOps 和金丝雀部署](https://jimmysong.io/blog/implementing-gitops-and-canary-deployment-with-argo-project-and-istio/)
 
 ### 使用 KubeSphere 管理 Kubernetes
 
@@ -359,6 +388,9 @@
 * [Search your data](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-your-data.html)
 * [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Aggregations](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html)
+* [5000字详说Elasticsearch入门(一)](http://www.mangod.top/articles/2023/10/23/1698024179725.html)
+* [Springboot项目中使用Elasticsearch的RestClient](http://www.mangod.top/articles/2023/10/25/1698206210944.html)
+* [巧记Elasticsearch常用DSL语法](http://www.mangod.top/articles/2023/10/28/1698494800959.html)
 
 #### 优化实践
 
@@ -500,3 +532,8 @@
 * [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
 * [从零到一教你基于vue开发一个组件库](https://juejin.cn/post/6844904085808742407)
 * [远程组件实践](https://zhuanlan.zhihu.com/p/617722122)
+
+## 极客
+
+* [Node.js and Raspberry Pi](https://www.w3schools.com/nodejs/nodejs_raspberrypi.asp)
+* [Monitor temperature and humidity with Grafana and Raspberry Pi](https://grafana.com/blog/2023/10/23/monitor-temperature-and-humidity-with-grafana-and-raspberry-pi/)

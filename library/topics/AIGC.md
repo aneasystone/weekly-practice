@@ -20,6 +20,7 @@
 * [通义千问](https://qianwen.aliyun.com/)
 * [讯飞星火](https://xinghuo.xfyun.cn/)
 * [豆包](https://www.doubao.com/)
+* [Kimi Chat](https://kimi.moonshot.cn) - Moonshot AI 出品的智能助手
 
 #### 聚合聊天
 
@@ -186,6 +187,8 @@
 
 #### 投资助手
 
+* [FinChat.io](https://finchat.io/) - AI Chat for Investors
+* [BeeBee AI](https://beebee.ai/) - Gathering Insights, Crafting Success
 * [StockAI.Trade](https://stockai.trade/) - 基于ChatGPT的AI选股工具
 
 ### 图像创作
@@ -245,10 +248,6 @@
 
 * [GFPGAN](https://github.com/TencentARC/GFPGAN) - aims at developing Practical Algorithms for Real-world Face Restoration.
 
-#### 动画生成
-
-* [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
-
 ### 音视频助手
 
 #### 音乐创作
@@ -279,7 +278,7 @@
 * [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
 * [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) - 一个基于 VITS 的简单易用的变声框架
 
-#### 视频创作
+#### 视频动画
 
 * [Runway](https://runwayml.com) - Advancing creativity with artificial intelligence.
 * [Fliki](https://fliki.ai/) - Video creation made 10x simpler & faster with AI
@@ -288,6 +287,8 @@
 * [SCUTlihaoyu/open-chat-video-editor](https://github.com/SCUTlihaoyu/open-chat-video-editor) - 开源的短视频生成和编辑工具
 * [gyroflow/gyroflow](https://github.com/gyroflow/gyroflow) - Video stabilization using gyroscope data
 * [ShortGPT](https://github.com/RayVentura/ShortGPT) - Experimental AI framework for automated short/video content creation.
+* [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
+* [3D-GPT](https://chuny1.github.io/3DGPT/3dgpt.html) - 3D MODELING WITH LARGE LANGUAGE MODELS
 
 #### 虚拟形象
 
@@ -311,7 +312,7 @@
 * [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
 * [星火认知大模型](https://xinghuo.xfyun.cn/) - 科大讯飞
 * [言犀](https://yanxi.jd.com/) - 京东
-* [混元大模型](https://ai.qq.com/) - 腾讯
+* [混元大模型](https://hunyuan.tencent.com/) - 腾讯
 * [玉言](https://fuxi.163.com/) - 网易伏羲
 * 子曰 - 网易有道
 * [MiniMax](https://api.minimax.chat/)
@@ -585,6 +586,7 @@
 
 ## 词嵌入
 
+* [BERT](https://github.com/google-research/bert)
 * [SentenceTransformers](https://www.sbert.net/)
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models
 
