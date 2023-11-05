@@ -529,6 +529,100 @@ $ docker run --name=chat2db -ti -p 10824:10824 chat2db/chat2db:latest
 
 [DB-GPT](https://github.com/eosphoros-ai/DB-GPT) 是一款基于知识库的问答产品，它同时支持结构化和非结构化数据的问答，支持生成报表，还支持自定义插件，在交互形式上和 ChatGPT 类似。它的一大特点是支持海量的模型管理，包括开源模型和 API 接口，并支持模型的自动化微调。
 
+DB-GPT 的侧重点在于私有化，它强调数据的隐私安全，可以做到整个系统都不依赖于外部环境，完全避免了数据泄露的风险，是一款真正意义上的本地知识库问答产品。它集成了常见的开源大模型和向量数据库，因此，在部署上复杂一点，而且对硬件的要求也要苛刻一点。不过对于哪些没有条件部署大模型的用户来说，DB-GPT 也支持直接 [使用 OpenAI 或 Bard 等接口](https://db-gpt.readthedocs.io/en/latest/getting_started/install/llm/proxyllm/proxyllm.html)。
+
+DB-GPT 支持 [从源码安装](https://db-gpt.readthedocs.io/en/latest/getting_started/install/deploy.html) 和 [从 Docker 镜像安装](https://db-gpt.readthedocs.io/en/latest/getting_started/install/docker/docker.html)，不过官方提供的 Docker 镜像缺少 `openai` 等依赖，需要我们手工安装，所以不建议直接启动，而是先通过 bash 进入容器做一些准备工作：
+
+```
+$ docker run --rm -ti -p 5000:5000 eosphorosai/dbgpt:latest bash
+```
+
+安装 `openai` 依赖：
+
+```
+# pip3 install openai
+```
+
+然后设置一些环境变量，让 DB-GPT 使用 OpenAI 的 Completions 和 Embedding 接口：
+
+```
+# export LLM_MODEL=chatgpt_proxyllm
+# export PROXY_SERVER_URL=https://api.openai.com/v1/chat/completions
+# export PROXY_API_KEY=sk-xx
+# export EMBEDDING_MODEL=proxy_openai
+# export proxy_openai_proxy_server_url=https://api.openai.com/v1
+# export proxy_openai_proxy_api_key=sk-xxx
+```
+
+如果由于网络原因导致 OpenAI 接口无法访问，还需要配置代理（注意先安装 `pysocks` 依赖）：
+
+```
+# pip3 install pysocks
+# export https_proxy=socks5://192.168.1.45:7890
+# export http_proxy=socks5://192.168.1.45:7890
+```
+
+一切准备就绪后，启动 DB-GPT server：
+
+```
+# python3 pilot/server/dbgpt_server.py
+```
+
+等待服务启动成功，访问 `http://localhost:5000/` 即可进入 DB-GPT 的首页：
+
+![](./images/dbgpt-home.png)
+
+DB-GPT 支持几种类型的聊天功能：
+
+* Chat Data
+* Chat Excel
+* Chat DB
+* Chat Knowledge
+* Dashboard
+* Agent Chat
+
+#### Chat DB & Chat Data & Dashboard
+
+Chat DB、Chat Data 和 Dashboard 这三个功能都是基于数据库的问答，要使用它们，首先需要在 `数据库管理` 页面添加数据库。Chat DB 会根据数据库和表的结构信息帮助用户编写 SQL 语句：
+
+![](./images/dbgpt-chat-db.png)
+
+Chat Data 不仅会生成 SQL 语句，还会自动执行并得到结果：
+
+![](./images/dbgpt-chat-data.png)
+
+Dashboard 则比 Chat Data 更进一步，它会生成 SQL 语句，执行得到结果，并生成相应的图表：
+
+![](./images/dbgpt-chat-dashboard.png)
+
+#### Chat Excel
+
+Chat Excel 功能依赖 `openpyxl` 库，需要提前安装：
+
+```
+# pip3 install openpyxl
+```
+
+然后就可以上传 Excel 文件，对其进行分析，并回答用户问题：
+
+![](./images/dbgpt-chat-excel.png)
+
+#### 其他功能
+
+DB-GPT 除了支持结构化数据的问答，也支持非结构化数据的问答，Chat Knowledge 实现的就是这样的功能。要使用它，首先需要在 `知识库管理` 页面添加知识，DB-GPT 支持从文本，URL 或各种文档中导入：
+
+![](./images/dbgpt-chat-kb.png)
+
+然后在 Chat Knowledge 页面就可以选择知识库进行问答了。
+
+DB-GPT 还支持插件功能，你可以从 [DB-GPT-Plugins](https://github.com/eosphoros-ai/DB-GPT-Plugins) 下载插件，也可以 [编写自己的插件并上传](https://db-gpt.readthedocs.io/en/latest/modules/plugins.html)，而且 DB-GPT 兼容 [Auto-GPT 的插件](https://github.com/Significant-Gravitas/Auto-GPT-Plugins) 接口，原则上，所有的 Auto-GPT 插件都可以在这里使用：
+
+![](./images/dbgpt-chat-plugins.png)
+
+然后在 Agent Chat 页面，就可以像 ChatGPT Plus 一样，选择插件进行问答了。
+
+另外，DB-GPT 的模型管理功能也很强大，不仅支持像 OpenAI 或 Bard 这样的大模型代理接口，还集成了大量的开源大模型，而且在 [DB-GPT-Hub](https://github.com/eosphoros-ai/DB-GPT-Hub) 项目中还提供了大量的数据集、工具和文档，让我们可以对这些大模型进行微调，实现更强大的 Text-to-SQL 能力。
+
 ## 参考
 
 * [Querying a SQL DB](https://python.langchain.com/docs/expression_language/cookbook/sql_db)
