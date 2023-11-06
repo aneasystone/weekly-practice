@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK048 - [学习 Kubernetes 流量管理之 Ingress](./notes/week048-kubernetes-traffic-management-ingress/README.md)
 * WEEK047 - [基于结构化数据的文档问答](./notes/week047-structured-data-qa/README.md)
 * WEEK046 - [学习 Kubernetes 流量管理之 Service](./notes/week046-kubernetes-traffic-management-service/README.md)
 * WEEK045 - [使用 Arthas 排查线上问题](./notes/week045-trouble-shooting-with-arthas/README.md)

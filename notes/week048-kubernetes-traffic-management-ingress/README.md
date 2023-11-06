@@ -1,18 +1,32 @@
-# WEEK047 - 学习 Kubernetes 流量管理之 Ingress
+# WEEK048 - 学习 Kubernetes 流量管理之 Ingress
 
-## Ingress
+## 什么是 Ingress
 
 https://kubernetes.io/docs/concepts/services-networking/ingress/
 
+https://jimmysong.io/kubernetes-handbook/concepts/ingress.html
+
+## 部署 Ingress Controllers
+
+https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+
+https://kubernetes.feisky.xyz/extension/ingress
+
+## 部署 Ingress
+
+https://github.com/guangzhengli/k8s-tutorials#ingress
+
 https://kuboard.cn/learning/k8s-intermediate/service/ingress.html
+
+https://crossoverjie.top/2023/09/15/ob/k8s-Ingress/
+
+http://www.mangod.top/articles/2023/09/15/1694742027308.html
+
+## Ingress 类型
 
 https://kubernetes.feisky.xyz/concepts/objects/ingress
 
 https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_9.html
-
-https://github.com/guangzhengli/k8s-tutorials#ingress
-
-https://jimmysong.io/kubernetes-handbook/concepts/ingress.html
 
 https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md
 
