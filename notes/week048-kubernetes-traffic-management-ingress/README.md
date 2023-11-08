@@ -7,17 +7,45 @@
 
 ## 什么是 Ingress
 
+为了解决上面的问题，Kubernetes 提出了一种新的 API 对象，叫做 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)，它通过定义不同的 HTTP 路由规则，将集群内部的 Service 通过 HTTP 的方式暴露到集群外部：
+
+![](./images/ingress.png)
+
+通过 `Ingress` 我们就能以一个集群外部可访问的 URL 来访问集群内部的 Service，不仅如此，它还具有如下特性：
+
+* Load Balancing
+* SSL Termination
+* Name-based Virtual Hosting
+
+## Ingress 实践
+
+这一节将继续延用之前的 `kubernetes-bootcamp` 示例，通过 `Ingress` 将应用程序暴露到集群外部访问。
+
+### 部署 Ingress Controller
+
+`Ingress` 本身其实并不具备集群内外通信的能力，它只是一系列的路由转发规则而已，要让这些路由规则生效，必须先部署 `Ingress Controller` 才行。
+
+由 Kubernetes 支持和维护的 `Ingress Controller` 有三个：
+
+* [Ingress NGINX Controller](https://github.com/kubernetes/ingress-nginx)
+* [AWS Load Balancer Controller](https://github.com/kubernetes-sigs/aws-load-balancer-controller)
+* [GLBC](https://github.com/kubernetes/ingress-gce)
+
+除此之外，[这里](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#additional-controllers) 还列出了很多由第三方社区维护的其他 `Ingress Controller` 可供选择。
+
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
 https://kubernetes.io/docs/concepts/services-networking/ingress/
 
 https://jimmysong.io/kubernetes-handbook/concepts/ingress.html
-
-## 部署 Ingress Controllers
 
 https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
 
 https://kubernetes.feisky.xyz/extension/ingress
 
-## 部署 Ingress
+### 创建 Ingress Class
+
+### 创建 Ingress
 
 https://github.com/guangzhengli/k8s-tutorials#ingress
 
@@ -39,6 +67,7 @@ https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%
 
 ## 参考
 
+* [Ingress | Kubernetes](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 * [Ingress：k8s集群进出流量的总管](https://mp.weixin.qq.com/s/YbiqttXFQf2DZcIvHmAuLw)
 * [为什么 APISIX Ingress 是比 Ingress NGINX 更好的选择？](https://www.apiseven.com/blog/apisix-ingress-vs-ingress-nginx-2)
 * [为什么 APISIX Ingress 是比 Traefik 更好的选择？](https://www.apiseven.com/blog/why-you-should-choose-apisix-ingress-instead-on-traefik)
