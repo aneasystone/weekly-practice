@@ -11,7 +11,7 @@
 
 ![](./images/ingress.png)
 
-通过 `Ingress` 我们就能以一个集群外部可访问的 URL 来访问集群内部的 Service，不仅如此，它还具有如下特性：
+可以将 `Ingress` 理解为 Service 的网关，它是所有流量的入口，通过 `Ingress` 我们就能以一个集群外部可访问的 URL 来访问集群内部的 Service，不仅如此，它还具有如下特性：
 
 * Load Balancing
 * SSL Termination
@@ -135,7 +135,15 @@ spec:
               number: 38080
 ```
 
-这个路由规则很容易理解，就是将 `/hello` 路径映射到后端名为 `myapp` 的 Service 的 38080 端口。其中值得注意的是 `ingressClassName: nginx` 这个配置，细心的同学可能已经发现，在上面部署 Ingress NGINX Controller 的时候，默认还创建了一个 `IngressClass` 资源：
+这个路由规则很容易理解，就是将 `/hello` 路径映射到后端名为 `myapp` 的 Service 的 38080 端口。在使用 Ingress 时要注意你的 Kubernetes 版本，不同的 Kubernetes 版本中 Ingress 的 `apiVersion` 字段略有不同：
+
+| Kubernetes 版本 | Ingress 的 `apiVersion` |
+| -------------- | ------------ |
+| v1.5 - v1.17 | `extensions/v1beta1` |
+| v1.8 - v1.18 | `networking.k8s.io/v1beta1` |
+| v1.19+       | `networking.k8s.io/v1` |
+
+另一点值得注意的是 `ingressClassName: nginx` 这个配置，细心的同学可能已经发现，在上面部署 Ingress NGINX Controller 的时候，默认还创建了一个 `IngressClass` 资源：
 
 ```
 apiVersion: networking.k8s.io/v1
@@ -182,11 +190,137 @@ spec:
 Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-9xm5j | v=1
 ```
 
+可以看出，虽然 `myapp` 这个 Service 类型为 `ClusterIP`，但是通过 Ingress 我们也可以从集群外部对其进行访问了。
+
+### 默认 IngressClass
+
+我们可以给某个 `IngressClass` 加上 `ingressclass.kubernetes.io/is-default-class` 注解，并将值设置为字符串 `"true"`，表示这是集群中默认的 `IngressClass`：
+
+```
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.8.2
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+```
+
+当集群中存在默认的 `IngressClass` 时，创建 `Ingress` 时就可以不用指定 `ingressClassName` 参数了：
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp
+            port:
+              number: 38080
+```
+
+注意，一个集群中最多只应该存在一个默认的 `IngressClass`，如果有多个 `IngressClass` 被设置成默认，那么创建 `Ingress` 时还是得指定 `ingressClassName` 参数。
+
 ## Ingress 类型
 
-https://github.com/guangzhengli/k8s-tutorials#ingress
+根据 Ingress 的使用场景可以将其分成几个不同的类型：
+
+https://kubernetes.io/docs/concepts/services-networking/ingress/#types-of-ingress
 
 https://kubernetes.feisky.xyz/concepts/objects/ingress
+
+### 单服务 Ingress
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-default-backend
+spec:
+  defaultBackend:
+    service:
+      name: myapp
+      port:
+        number: 38080
+```
+
+### 多服务 Ingress
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-simple-fanout
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp
+            port:
+              number: 38080
+      - path: /actuator
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-actuator
+            port:
+              number: 8080
+```
+
+![](./images/ingress-simple-fanout.png)
+
+### 虚拟主机 Ingress
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-virtual-host
+spec:
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /hello
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp
+            port:
+              number: 38080
+  - host: bar.foo.com
+    http:
+      paths:
+      - path: /actuator
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-actuator
+            port:
+              number: 8080
+```
+
+![](./images/ingress-virtual-host.png)
+
+### TLS Ingress
 
 https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_9.html
 
