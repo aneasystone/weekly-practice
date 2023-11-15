@@ -245,6 +245,8 @@ https://kubernetes.feisky.xyz/concepts/objects/ingress
 
 ### 单服务 Ingress
 
+这是最简单的 Ingress 类型，当你只有一个后端 Service 时可以使用它，它不用配置任何路由规则，直接配置一个 `defaultBackend` 指定后端 Service 即可：
+
 ```
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -258,26 +260,57 @@ spec:
         number: 38080
 ```
 
+使用 `kubectl describe ingress` 查看该 Ingress 详情：
+
+```
+# kubectl describe ingress ingress-default-backend
+Name:             ingress-default-backend
+Labels:           <none>
+Namespace:        default
+Address:          172.31.164.67
+Ingress Class:    nginx
+Default backend:  myapp:38080 (100.121.213.109:8080,100.121.213.72:8080,100.84.80.88:8080)
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           *     myapp:38080 (100.121.213.109:8080,100.121.213.72:8080,100.84.80.88:8080)
+Annotations:  <none>
+Events:       <none>
+```
+
+可以看到，无论什么 Host，无论什么 Path，全部路由到 `myapp:38080` 这个后端服务。
+
+这种 Ingress 和直接使用 `NodePort` 或 `LoadBalancer` 类型的 Service 没有区别，不过 `defaultBackend` 不只是单独使用，也可以和 `rules` 结合使用，表示兜底路由，当所有的路由规则都不匹配时请求该后端。
+
 ### 多服务 Ingress
+
+这是最常见的一种 Ingress，通过不同的路由规则映射到后端不同的 Service 端口，这种 Ingress 又被称为 **Fan Out Ingress**，形如其名，它的结构像下面这样成扇形散开：
+
+![](./images/ingress-simple-fanout.png)
+
+下面是多服务 Ingress 的一个示例：
 
 ```
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-simple-fanout
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
   - http:
       paths:
-      - path: /hello
-        pathType: Prefix
+      - path: /test(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: myapp
             port:
               number: 38080
-      - path: /actuator
-        pathType: Prefix
+      - path: /test2(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: hello-actuator
@@ -285,9 +318,44 @@ spec:
               number: 8080
 ```
 
-![](./images/ingress-simple-fanout.png)
+使用 `kubectl describe ingress` 可以查看该 Ingress 的详情：
+
+```
+# kubectl describe ingress ingress-simple-fanout
+Name:             ingress-simple-fanout
+Labels:           <none>
+Namespace:        default
+Address:          
+Ingress Class:    nginx
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /test(/|$)(.*)    myapp:38080 (100.121.213.109:8080,100.121.213.72:8080,100.84.80.88:8080)
+              /test2(/|$)(.*)   hello-actuator:8080 (100.121.213.108:8080,100.84.80.87:8080)
+Annotations:  nginx.ingress.kubernetes.io/rewrite-target: /$2
+              nginx.ingress.kubernetes.io/use-regex: true
+Events:       <none>
+```
+
+可以看到，当请求路径满足 `/test(/|$)(.*)` 时，就路由到后端的 `myapp:38080` 服务，当请求满足 `/test2(/|$)(.*)` 时，就路由到后端的 `hello-actuator:8080` 服务。这里有三个参数需要注意：`path` 表示请求的路径，`pathType` 表示请求的路径匹配类型，`annotations` 则是 Ingress Controller 特定的一些注解。
+
+每一个 `path` 都必须设置 `pathType`，`pathType` 有三种取值：
+
+* **Exact**：完全匹配，表示当请求的路径和 `path` 值完全一样时才匹配，比如 `path` 值为 `/foo`，请求路径必须为 `/foo` 才能匹配，如果是 `/foo/xxx` 或者 `/foo/` 都不匹配；
+* **Prefix**：前缀匹配，表示请求的路径以 `path` 为前缀时才匹配，比如 `path` 值为 `/foo`，请求路径为 `/foo/xxx` 或者 `/foo/` 都可以匹配，但是这里的前缀并完全是字符串前缀匹配，比如请求路径 `/foobar` 就不能匹配；另外，如果有多个路径都满足匹配规则，那么匹配最严格的那条规则，比如有三个 `path`，分别是 `/`，`/aaa` 和 `/aaa/bbb`，当请求路径为 `	/aaa/bbb` 时，匹配的应该是最长的 `/aaa/bbb` 这个规则；
+* **ImplementationSpecific**：匹配规则不确定，由 Ingress Controller 来定义；在上面这个例子中，我们就使用了这种匹配类型，我们在 `path` 中使用了正则表达式，这是 Ingress NGINX Controller 的 [rewrite annotations](https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/rewrite/README.md) 的写法。
+
+当我们请求 `/test2/actuator/info` 这个路径时，默认情况下，Ingress 会将我们的请求转发到后端服务的 `/test2/actuator/info` 地址，如果希望忽略 `/test2` 前缀，而转发到后端的 `/actuator/info` 地址，那就要开启路径重写，Ingress NGINX Controller 提供了一个注解 `nginx.ingress.kubernetes.io/rewrite-target` 来实现重写功能，在定义 `path` 时，先使用正则表达式来匹配路径，比如 `/test2(/|$)(.*)`，然后将 `rewrite-target` 设置为正则的第二个捕获 `/$2`。
 
 ### 虚拟主机 Ingress
+
+Ingress 还支持配置多虚拟主机，将来自不同主机的请求映射到不同的后端服务，如下图所示：
+
+![](./images/ingress-virtual-host.png)
+
+下面是虚拟主机 Ingress 的一个示例：
 
 ```
 apiVersion: networking.k8s.io/v1
@@ -299,7 +367,7 @@ spec:
   - host: foo.bar.com
     http:
       paths:
-      - path: /hello
+      - path: /
         pathType: Prefix
         backend:
           service:
@@ -309,7 +377,7 @@ spec:
   - host: bar.foo.com
     http:
       paths:
-      - path: /actuator
+      - path: /
         pathType: Prefix
         backend:
           service:
@@ -318,15 +386,35 @@ spec:
               number: 8080
 ```
 
-![](./images/ingress-virtual-host.png)
+这里我们将来自 `foo.bar.com` 的请求映射到 `myapp:38080` 服务，将来自 `bar.foo.com` 的请求映射到 `hello-actuator:8080` 服务。将这两个域名添加到 `/etc/hosts` 文件中，使用 `curl` 验证之：
+
+```
+# curl http://foo.bar.com:26360
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-9xm5j | v=1
+```
+
+如果不修改 `/etc/hosts` 文件，也可以通过 `curl` 的 `--resolve` 参数手动解析域名：
+
+```
+# curl http://foo.bar.com:26360 --resolve foo.bar.com:26360:172.31.164.40
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-mb8l2 | v=1
+```
 
 ### TLS Ingress
 
+https://kubernetes.github.io/ingress-nginx/examples/PREREQUISITES/
+
 https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_9.html
 
-https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md
+## 其他特性
+
+https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/
+
+https://kubernetes.github.io/ingress-nginx/examples/
 
 https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md
+
+https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md
 
 ## 参考
 
