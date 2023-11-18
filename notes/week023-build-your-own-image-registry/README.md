@@ -266,6 +266,8 @@ $ openssl req \
 
 注意这里要使用 `-addext` 参数添加 `subjectAltName` 扩展项，也就是 **Subject Alternative Name**，一般缩写为 **SAN**，表示我们的证书使用者是 IP 192.168.1.39，如果你有自己的域名，可以在 SAN 中指定 DNS：`-addext "subjectAltName = DNS:example.hub"`。
 
+> 注意 `-addext` 参数是 OpenSSL v1.1.1 版本引入的，如果你的 OpenSSL 版本较低，建议升级。
+
 如果没有在证书的 SAN 中指定 IP，会报如下错误：
 
 ```
@@ -300,6 +302,8 @@ Organizational Unit Name (eg, section) []:
 Common Name (e.g. server FQDN or YOUR name) []:example.hub
 Email Address []:
 ```
+
+> 这些信息也可以直接在命令行中使用 `-subj` 参数，比如 `-subj "/CN=example.hub"` 即可，每一项对应的缩写可以 [参考这里](https://www.digicert.com/kb/ssl-support/openssl-quick-reference-guide.htm#Usingthe-subjSwitch)。
 
 命令执行成功后会在 `certs` 目录生成 `domain.crt` 和 `domain.key` 两个文件，然后通过下面的命令重新启动镜像仓库（先删除之前启动的），开启 TLS 安全功能：
 

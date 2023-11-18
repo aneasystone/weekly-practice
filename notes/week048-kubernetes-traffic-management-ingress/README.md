@@ -112,6 +112,19 @@ ingress-nginx-controller-admission   ClusterIP   10.96.1.25    <none>        443
 </html>
 ```
 
+注意这里实际上暴露了两个 NodePort，一个是 HTTP 端口，另一个是 HTTPS 端口，这个 HTTPS 端口我们也可以访问（`-k` 表示忽略证书校验）：
+
+```
+# curl -k https://172.31.164.40:23476
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+```
+
 ### 创建 Ingress
 
 接下来，我们创建一个简单的路由规则来验证 `Ingress` 是否有效：
@@ -239,10 +252,6 @@ spec:
 
 根据 Ingress 的使用场景可以将其分成几个不同的类型：
 
-https://kubernetes.io/docs/concepts/services-networking/ingress/#types-of-ingress
-
-https://kubernetes.feisky.xyz/concepts/objects/ingress
-
 ### 单服务 Ingress
 
 这是最简单的 Ingress 类型，当你只有一个后端 Service 时可以使用它，它不用配置任何路由规则，直接配置一个 `defaultBackend` 指定后端 Service 即可：
@@ -345,9 +354,9 @@ Events:       <none>
 
 * **Exact**：完全匹配，表示当请求的路径和 `path` 值完全一样时才匹配，比如 `path` 值为 `/foo`，请求路径必须为 `/foo` 才能匹配，如果是 `/foo/xxx` 或者 `/foo/` 都不匹配；
 * **Prefix**：前缀匹配，表示请求的路径以 `path` 为前缀时才匹配，比如 `path` 值为 `/foo`，请求路径为 `/foo/xxx` 或者 `/foo/` 都可以匹配，但是这里的前缀并完全是字符串前缀匹配，比如请求路径 `/foobar` 就不能匹配；另外，如果有多个路径都满足匹配规则，那么匹配最严格的那条规则，比如有三个 `path`，分别是 `/`，`/aaa` 和 `/aaa/bbb`，当请求路径为 `	/aaa/bbb` 时，匹配的应该是最长的 `/aaa/bbb` 这个规则；
-* **ImplementationSpecific**：匹配规则不确定，由 Ingress Controller 来定义；在上面这个例子中，我们就使用了这种匹配类型，我们在 `path` 中使用了正则表达式，这是 Ingress NGINX Controller 的 [rewrite annotations](https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/rewrite/README.md) 的写法。
+* **ImplementationSpecific**：匹配规则不确定，由 Ingress Controller 来定义；在上面这个例子中，我们就使用了这种匹配类型，我们在 `path` 中使用了正则表达式，通过正则表达式的分组捕获功能，我们可以在 Ingress NGINX Controller 的 [Rewrite annotations](https://kubernetes.github.io/ingress-nginx/examples/rewrite/) 中用来做路由重写。
 
-当我们请求 `/test2/actuator/info` 这个路径时，默认情况下，Ingress 会将我们的请求转发到后端服务的 `/test2/actuator/info` 地址，如果希望忽略 `/test2` 前缀，而转发到后端的 `/actuator/info` 地址，那就要开启路径重写，Ingress NGINX Controller 提供了一个注解 `nginx.ingress.kubernetes.io/rewrite-target` 来实现重写功能，在定义 `path` 时，先使用正则表达式来匹配路径，比如 `/test2(/|$)(.*)`，然后将 `rewrite-target` 设置为正则的第二个捕获 `/$2`。
+当我们请求 `/test2/actuator/info` 这个路径时，默认情况下，Ingress 会将我们的请求转发到后端服务的 `/test2/actuator/info` 地址，如果希望忽略 `/test2` 前缀，而转发到后端的 `/actuator/info` 地址，那就要开启路径重写，Ingress NGINX Controller 提供了一个注解 `nginx.ingress.kubernetes.io/rewrite-target` 来实现路径重写功能，路径重写一般和 [Ingress Path Matching](https://kubernetes.github.io/ingress-nginx/user-guide/ingress-path-matching/) 一起使用，在定义 `path` 时，先使用正则表达式来匹配路径，比如 `/test2(/|$)(.*)`，然后将 `rewrite-target` 设置为正则的第二个分组 `/$2`。
 
 ### 虚拟主机 Ingress
 
@@ -402,9 +411,77 @@ Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-mb8l2 | v=1
 
 ### TLS Ingress
 
-https://kubernetes.github.io/ingress-nginx/examples/PREREQUISITES/
+我们还可以配置 TLS 证书来加强 Ingress 的安全性，这个证书需要放在一个 Secret 对象中。为了验证这个功能，我们先使用 `openssl req` 命令生成证书和私钥：
 
-https://zeusro-awesome-kubernetes-notes.readthedocs.io/zh_CN/latest/chapter_9.html
+```
+$ openssl req \
+  -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+  -keyout tls.key -out tls.crt \
+  -subj "/CN=foo.bar.com/O=foo.bar.com"
+```
+
+这个命令会在当前目录生成两个文件：`tls.key` 为私钥，`tls.crt` 为证书，生成的证书中需要指定 CN（Common Name），也被称为 FQDN（Fully Qualified Domain Name），这个一般就是你的域名，对应下面 Ingress 配置中的 `host` 字段。
+
+然后我们再使用 `kubectl create secret tls` 命令创建一个 TLS 类型的 Secret，并将这两个文件保存进去：
+
+```
+$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt
+```
+
+创建好的 Secret 如下所示：
+
+```
+# kubectl get secret tls-secret -o yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+  namespace: default
+data:
+  tls.crt: LS0t...
+  tls.key: LS0t...
+type: kubernetes.io/tls
+```
+
+> 注意，Secret 中必须包含 `tls.crt` 和 `tls.key` 这两个键。
+
+然后创建 Ingress 时，通过 `tls.secretName` 参数关联上这个 Secret 名称，就可以开启 TLS 功能了：
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-tls
+spec:
+  tls:
+  - hosts:
+      - foo.bar.com
+    secretName: tls-secret
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp
+            port:
+              number: 38080
+```
+
+访问 Ingress 的 HTTPS 端口进行验证：
+
+```
+# curl -k https://foo.bar.com:23476 --resolve foo.bar.com:23476:172.31.164.40
+Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-mb8l2 | v=1
+```
+
+使用 TLS Ingress 时有几点要注意：
+
+* 首先，Ingress 的 TLS 特性被称为 **TLS 终止（TLS termination）**，这意味着从用户到 Ingress 之间的连接是加密的，但是从 Ingress 到 Service 或 Pod 之间的连接仍然是明文的；
+* 其次，Ingress 只支持一个 TLS 端口，当 Ingress 中配置多个主机名时，需要 Ingress Controller 支持 TLS 的 SNI 扩展，Ingress 通过 SNI 来确定使用哪个主机名；
+* 另外，不同 Ingress Controller 支持的 TLS 功能不尽相同，比如 [这里](https://kubernetes.github.io/ingress-nginx/user-guide/tls/) 是 Ingress NGINX Controller 关于 TLS/HTTPS 的文档。
 
 ## 其他特性
 
