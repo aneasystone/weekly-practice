@@ -33,7 +33,11 @@
 
 除此之外，[这里](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#additional-controllers) 还列出了很多由第三方社区维护的其他 `Ingress Controller` 可供选择。
 
-下面我们就以 Ingress NGINX Controller 为例，学习如何部署 Ingress Controller。根据 [官方的部署文档](https://kubernetes.github.io/ingress-nginx/deploy/)，我们大致有两种方式来部署 Ingress NGINX Controller，第一种是通过 Helm 部署：
+下面我们就以 Ingress NGINX Controller 为例，学习如何部署 Ingress Controller。
+
+> 目前有两个基于 Nginx 实现的 Ingress Controller 比较有名，一个是由 Kubernetes 官方维护的 [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx)，被称为 Ingress NGINX Controller，另一个是由 Nginx 官方维护的 [nginxinc/kubernetes-ingress](https://github.com/nginxinc/kubernetes-ingress)，被称为 NGINX Ingress Controller，[两者在技术实现和功能特性上有很多区别](https://ladybug.top/posts/CloudNative/nginx-ingress-controller-and-ingress-nginx-controller-timeout-error.html)，大家在使用时要特别留意。
+
+根据 Ingress NGINX Controller [官方的部署文档](https://kubernetes.github.io/ingress-nginx/deploy/)，我们大致有两种方式来部署它，第一种是通过 Helm 部署：
 
 ```
 # helm upgrade --install ingress-nginx ingress-nginx \
@@ -247,6 +251,272 @@ spec:
 ```
 
 注意，一个集群中最多只应该存在一个默认的 `IngressClass`，如果有多个 `IngressClass` 被设置成默认，那么创建 `Ingress` 时还是得指定 `ingressClassName` 参数。
+
+### 深入 Ingress Controller
+
+为了更进一步地了解 Ingress Controller 的工作原理，我们不妨进入 `ingress-nginx-controller` 容器内部：
+
+```
+# kubectl exec -it ingress-nginx-controller-6c68b88b5d-wdk96 -n ingress-nginx -- bash
+```
+
+在这里我们可以看到 `nginx.conf` 这个熟悉的身影：
+
+```
+ingress-nginx-controller-6c68b88b5d-wdk96:/etc/nginx$ ls
+fastcgi.conf            geoip                   mime.types              nginx.conf              owasp-modsecurity-crs   uwsgi_params
+fastcgi.conf.default    koi-utf                 mime.types.default      nginx.conf.default      scgi_params             uwsgi_params.default
+fastcgi_params          koi-win                 modsecurity             opentelemetry.toml      scgi_params.default     win-utf
+fastcgi_params.default  lua                     modules                 opentracing.json        template
+```
+
+这个文件和普通的 Nginx 配置文件并无二致，查看文件内容可以发现，上面所配置的 Ingress 规则其实都被转换成了 Nginx 规则，此外，我们还发现，Ingress NGINX Controller 是基于 Nginx + Lua 实现的：
+
+```
+ingress-nginx-controller-6c68b88b5d-wdk96:/etc/nginx$ cat nginx.conf
+
+	## start server _
+	server {
+		server_name _ ;
+		
+		listen 80 default_server reuseport backlog=511 ;
+		listen [::]:80 default_server reuseport backlog=511 ;
+		listen 443 default_server reuseport backlog=511 ssl http2 ;
+		listen [::]:443 default_server reuseport backlog=511 ssl http2 ;
+		
+		location /hello/ {
+			
+			set $namespace      "default";
+			set $ingress_name   "my-ingress";
+			set $service_name   "myapp";
+			set $service_port   "38080";
+			set $location_path  "/hello";
+			set $global_rate_limit_exceeding n;
+			
+			rewrite_by_lua_block {
+				lua_ingress.rewrite({
+					force_ssl_redirect = false,
+					ssl_redirect = true,
+					force_no_ssl_redirect = false,
+					preserve_trailing_slash = false,
+					use_port_in_redirects = false,
+					global_throttle = { namespace = "", limit = 0, window_size = 0, key = { }, ignored_cidrs = { } },
+				})
+				balancer.rewrite()
+				plugins.run()
+			}
+			
+			header_filter_by_lua_block {
+				lua_ingress.header()
+				plugins.run()
+			}
+			
+			body_filter_by_lua_block {
+				plugins.run()
+			}
+
+      set $proxy_upstream_name "default-myapp-38080";
+			
+			proxy_pass http://upstream_balancer;
+			
+		}
+	}
+	## end server _
+	
+```
+
+其中 `upstream_balancer` 的定义如下：
+
+```
+	upstream upstream_balancer {
+		### Attention!!!
+		#
+		# We no longer create "upstream" section for every backend.
+		# Backends are handled dynamically using Lua. If you would like to debug
+		# and see what backends ingress-nginx has in its memory you can
+		# install our kubectl plugin https://kubernetes.github.io/ingress-nginx/kubectl-plugin.
+		# Once you have the plugin you can use "kubectl ingress-nginx backends" command to
+		# inspect current backends.
+		#
+		###
+		
+		server 0.0.0.1; # placeholder
+		
+		balancer_by_lua_block {
+			balancer.balance()
+		}
+		
+		keepalive 320;
+		keepalive_time 1h;
+		keepalive_timeout  60s;
+		keepalive_requests 10000;
+		
+	}
+```
+
+通过这里的注释我们了解到，Ingress NGINX Controller 转发的后端地址是动态的，由 Lua 脚本实现，如果想看具体的后端地址，可以安装 [ingress-nginx](https://kubernetes.github.io/ingress-nginx/kubectl-plugin/) 插件，安装 `ingress-nginx` 插件最简单的方式是使用 [krew](https://github.com/kubernetes-sigs/krew) 来安装，所以我们先安装 `krew`，首先下载并解压 [krew 的最新版本](https://github.com/kubernetes-sigs/krew/releases)：
+
+```
+# curl -LO https://github.com/kubernetes-sigs/krew/releases/download/v0.4.4/krew-linux_amd64.tar.gz
+# tar zxvf krew-linux_amd64.tar.gz
+```
+
+然后运行下面的命令进行安装：
+
+```
+# ./krew-linux_amd64 install krew
+Adding "default" plugin index from https://github.com/kubernetes-sigs/krew-index.git.
+Updated the local copy of plugin index.
+Installing plugin: krew
+Installed plugin: krew
+\
+ | Use this plugin:
+ |      kubectl krew
+ | Documentation:
+ |      https://krew.sigs.k8s.io/
+ | Caveats:
+ | \
+ |  | krew is now installed! To start using kubectl plugins, you need to add
+ |  | krew's installation directory to your PATH:
+ |  |
+ |  |   * macOS/Linux:
+ |  |     - Add the following to your ~/.bashrc or ~/.zshrc:
+ |  |         export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+ |  |     - Restart your shell.
+ |  |
+ |  |   * Windows: Add %USERPROFILE%\.krew\bin to your PATH environment variable
+ |  |
+ |  | To list krew commands and to get help, run:
+ |  |   $ kubectl krew
+ |  | For a full list of available plugins, run:
+ |  |   $ kubectl krew search
+ |  |
+ |  | You can find documentation at
+ |  |   https://krew.sigs.k8s.io/docs/user-guide/quickstart/.
+ | /
+/
+```
+
+根据提示，将 `export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"` 添加到 `~/.bashrc` 文件中，然后重新打开 Shell，这样 krew 就安装完成了。接下来，使用 `kubectl krew install` 命令安装 `ingress-nginx` 插件：
+
+```
+# kubectl krew install ingress-nginx
+Updated the local copy of plugin index.
+Installing plugin: ingress-nginx
+Installed plugin: ingress-nginx
+\
+ | Use this plugin:
+ |      kubectl ingress-nginx
+ | Documentation:
+ |      https://kubernetes.github.io/ingress-nginx/kubectl-plugin/
+/
+```
+
+插件安装之后，使用 `kubectl ingress-nginx backends` 命令查看 Ingress NGINX Controller 的后端地址信息：
+
+```
+# kubectl ingress-nginx backends -n ingress-nginx
+[
+  {
+    "name": "default-myapp-38080",
+    "service": {
+      "metadata": {
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "http",
+            "protocol": "TCP",
+            "port": 38080,
+            "targetPort": "myapp-port"
+          }
+        ],
+        "selector": {
+          "app": "myapp"
+        },
+        "clusterIP": "10.96.3.215",
+        "clusterIPs": [
+          "10.96.3.215"
+        ],
+        "type": "ClusterIP",
+        "sessionAffinity": "None",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "internalTrafficPolicy": "Cluster"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    "port": 38080,
+    "sslPassthrough": false,
+    "endpoints": [
+      {
+        "address": "100.84.80.88",
+        "port": "8080"
+      },
+      {
+        "address": "100.121.213.72",
+        "port": "8080"
+      },
+      {
+        "address": "100.121.213.109",
+        "port": "8080"
+      }
+    ],
+    "sessionAffinityConfig": {
+      "name": "",
+      "mode": "",
+      "cookieSessionAffinity": {
+        "name": ""
+      }
+    },
+    "upstreamHashByConfig": {
+      "upstream-hash-by-subset-size": 3
+    },
+    "noServer": false,
+    "trafficShapingPolicy": {
+      "weight": 0,
+      "weightTotal": 0,
+      "header": "",
+      "headerValue": "",
+      "headerPattern": "",
+      "cookie": ""
+    }
+  },
+  {
+    "name": "upstream-default-backend",
+    "port": 0,
+    "sslPassthrough": false,
+    "endpoints": [
+      {
+        "address": "127.0.0.1",
+        "port": "8181"
+      }
+    ],
+    "sessionAffinityConfig": {
+      "name": "",
+      "mode": "",
+      "cookieSessionAffinity": {
+        "name": ""
+      }
+    },
+    "upstreamHashByConfig": {},
+    "noServer": false,
+    "trafficShapingPolicy": {
+      "weight": 0,
+      "weightTotal": 0,
+      "header": "",
+      "headerValue": "",
+      "headerPattern": "",
+      "cookie": ""
+    }
+  }
+]
+```
 
 ## Ingress 类型
 
