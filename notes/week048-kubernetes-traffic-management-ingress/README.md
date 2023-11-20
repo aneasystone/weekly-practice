@@ -275,83 +275,83 @@ fastcgi_params.default  lua                     modules                 opentrac
 ```
 ingress-nginx-controller-6c68b88b5d-wdk96:/etc/nginx$ cat nginx.conf
 
-	## start server _
-	server {
-		server_name _ ;
-		
-		listen 80 default_server reuseport backlog=511 ;
-		listen [::]:80 default_server reuseport backlog=511 ;
-		listen 443 default_server reuseport backlog=511 ssl http2 ;
-		listen [::]:443 default_server reuseport backlog=511 ssl http2 ;
-		
-		location /hello/ {
-			
-			set $namespace      "default";
-			set $ingress_name   "my-ingress";
-			set $service_name   "myapp";
-			set $service_port   "38080";
-			set $location_path  "/hello";
-			set $global_rate_limit_exceeding n;
-			
-			rewrite_by_lua_block {
-				lua_ingress.rewrite({
-					force_ssl_redirect = false,
-					ssl_redirect = true,
-					force_no_ssl_redirect = false,
-					preserve_trailing_slash = false,
-					use_port_in_redirects = false,
-					global_throttle = { namespace = "", limit = 0, window_size = 0, key = { }, ignored_cidrs = { } },
-				})
-				balancer.rewrite()
-				plugins.run()
-			}
-			
-			header_filter_by_lua_block {
-				lua_ingress.header()
-				plugins.run()
-			}
-			
-			body_filter_by_lua_block {
-				plugins.run()
-			}
+  ## start server _
+  server {
+    server_name _ ;
+    
+    listen 80 default_server reuseport backlog=511 ;
+    listen [::]:80 default_server reuseport backlog=511 ;
+    listen 443 default_server reuseport backlog=511 ssl http2 ;
+    listen [::]:443 default_server reuseport backlog=511 ssl http2 ;
+    
+    location /hello/ {
+      
+      set $namespace      "default";
+      set $ingress_name   "my-ingress";
+      set $service_name   "myapp";
+      set $service_port   "38080";
+      set $location_path  "/hello";
+      set $global_rate_limit_exceeding n;
+      
+      rewrite_by_lua_block {
+        lua_ingress.rewrite({
+          force_ssl_redirect = false,
+          ssl_redirect = true,
+          force_no_ssl_redirect = false,
+          preserve_trailing_slash = false,
+          use_port_in_redirects = false,
+          global_throttle = { namespace = "", limit = 0, window_size = 0, key = { }, ignored_cidrs = { } },
+        })
+        balancer.rewrite()
+        plugins.run()
+      }
+      
+      header_filter_by_lua_block {
+        lua_ingress.header()
+        plugins.run()
+      }
+      
+      body_filter_by_lua_block {
+        plugins.run()
+      }
 
       set $proxy_upstream_name "default-myapp-38080";
-			
-			proxy_pass http://upstream_balancer;
-			
-		}
-	}
-	## end server _
-	
+      
+      proxy_pass http://upstream_balancer;
+      
+    }
+  }
+  ## end server _
+  
 ```
 
 其中 `upstream_balancer` 的定义如下：
 
 ```
-	upstream upstream_balancer {
-		### Attention!!!
-		#
-		# We no longer create "upstream" section for every backend.
-		# Backends are handled dynamically using Lua. If you would like to debug
-		# and see what backends ingress-nginx has in its memory you can
-		# install our kubectl plugin https://kubernetes.github.io/ingress-nginx/kubectl-plugin.
-		# Once you have the plugin you can use "kubectl ingress-nginx backends" command to
-		# inspect current backends.
-		#
-		###
-		
-		server 0.0.0.1; # placeholder
-		
-		balancer_by_lua_block {
-			balancer.balance()
-		}
-		
-		keepalive 320;
-		keepalive_time 1h;
-		keepalive_timeout  60s;
-		keepalive_requests 10000;
-		
-	}
+  upstream upstream_balancer {
+    ### Attention!!!
+    #
+    # We no longer create "upstream" section for every backend.
+    # Backends are handled dynamically using Lua. If you would like to debug
+    # and see what backends ingress-nginx has in its memory you can
+    # install our kubectl plugin https://kubernetes.github.io/ingress-nginx/kubectl-plugin.
+    # Once you have the plugin you can use "kubectl ingress-nginx backends" command to
+    # inspect current backends.
+    #
+    ###
+    
+    server 0.0.0.1; # placeholder
+    
+    balancer_by_lua_block {
+      balancer.balance()
+    }
+    
+    keepalive 320;
+    keepalive_time 1h;
+    keepalive_timeout  60s;
+    keepalive_requests 10000;
+    
+  }
 ```
 
 通过这里的注释我们了解到，Ingress NGINX Controller 转发的后端地址是动态的，由 Lua 脚本实现，如果想看具体的后端地址，可以安装 [ingress-nginx](https://kubernetes.github.io/ingress-nginx/kubectl-plugin/) 插件，安装 `ingress-nginx` 插件最简单的方式是使用 [krew](https://github.com/kubernetes-sigs/krew) 来安装，所以我们先安装 `krew`，首先下载并解压 [krew 的最新版本](https://github.com/kubernetes-sigs/krew/releases)：

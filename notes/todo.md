@@ -247,15 +247,6 @@
 
 * [要魔改Kubernetes，我们可以从哪里扩展](https://mp.weixin.qq.com/s/AtrluQNkKHpLFjVvp_BYBg)
 
-### 在 Kubernetes 中调度 GPU 资源
-
-* [k8s 调度 GPU](https://www.cnblogs.com/linhaifeng/p/16111733.html)
-* [docker使用GPU总结](https://www.cnblogs.com/linhaifeng/p/16108285.html)
-* [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin#quick-start)
-* [Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
-* [Monitoring NVIDIA GPU Usage in Kubernetes with Prometheus](https://blog.kubecost.com/blog/nvidia-gpu-usage/)
-* [Kubernetes 教程：在 Containerd 容器中使用 GPU](https://icloudnative.io/posts/add-nvidia-gpu-support-to-k8s-with-containerd/)
-
 ### 学习 Kubernetes 的用户认证
 
 * [Using RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
