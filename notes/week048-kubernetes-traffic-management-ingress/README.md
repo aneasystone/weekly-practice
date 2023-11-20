@@ -755,13 +755,15 @@ Hello Kubernetes bootcamp! | Running on: myapp-b9744c975-mb8l2 | v=1
 
 ## 其他特性
 
-https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/
+Ingress NGINX Controller 通过注解和 ConfigMap 还能实现一些其他有用的特性，比如：
 
-https://kubernetes.github.io/ingress-nginx/examples/
+* [Sticky sessions](https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/)
+* [Basic Authentication](https://kubernetes.github.io/ingress-nginx/examples/auth/basic/)
+* [Canary Deployments](https://kubernetes.github.io/ingress-nginx/examples/canary/)
+* [Exposing TCP and UDP Services](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/)
+* [Exposing gRPC Services](https://kubernetes.github.io/ingress-nginx/examples/grpc/)
 
-https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md
-
-https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md
+更多特性可以参考这里的 [注解列表](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/)。
 
 ## 参考
 
@@ -775,6 +777,8 @@ https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%
 * [Ingress：k8s集群进出流量的总管](https://mp.weixin.qq.com/s/YbiqttXFQf2DZcIvHmAuLw)
 * [k8s入门到实战-使用Ingress](https://crossoverjie.top/2023/09/15/ob/k8s-Ingress/)
 * [5分钟搞懂Ingress / IngressController / IngressClass的区别](http://www.mangod.top/articles/2023/09/15/1694742027308.html)
+* [理解对方暴露服务的对象 Ingress 和 Service](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/13%20%e7%90%86%e8%a7%a3%e5%af%b9%e6%96%b9%e6%9a%b4%e9%9c%b2%e6%9c%8d%e5%8a%a1%e7%9a%84%e5%af%b9%e8%b1%a1%20Ingress%20%e5%92%8c%20Service.md)
+* [Service 层引流技术实践](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/Kubernetes%20%e5%ae%9e%e8%b7%b5%e5%85%a5%e9%97%a8%e6%8c%87%e5%8d%97/15%20Service%20%e5%b1%82%e5%bc%95%e6%b5%81%e6%8a%80%e6%9c%af%e5%ae%9e%e8%b7%b5.md)
 
 ## 更多
 
