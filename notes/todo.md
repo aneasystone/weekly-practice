@@ -31,6 +31,8 @@
 
 ### 模型推理和部署
 
+* [Run LLMs locally](https://python.langchain.com/docs/guides/local_llms)
+
 ### 模型训练和微调
 
 * [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
@@ -165,6 +167,11 @@
 * [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
 * [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
 * [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
+
+#### 内存分析
+
+* [Eclipse Memory Analyzer](https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.mat.ui.help%2Fwelcome.html)
+* [JVM 内存分析工具 MAT 的深度讲解与实践 - 知乎](https://zhuanlan.zhihu.com/p/585668729)
 
 ### 可观测性
 
@@ -338,6 +345,15 @@
 * [MoE 系列 [四] - Go 扩展的异步模式](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-4/)
 * [MoE 系列 [五] - Envoy Go 扩展之内存安全](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-5/)
 
+### 平台工程
+
+* [Platform Engineering 101: Get Started with Platforms](https://www.infracloud.io/blogs/platform-engineering-101/)
+* [Starting Platform Engineering Journey with Backstage](https://www.infracloud.io/blogs/starting-platform-engineering-journey-backstage/)
+
+### eBPF
+
+* [eBPF应用程序开发：快人一步](https://www.cnxct.com/ebpf-application-development-beyond-basics-zh_cn/)
+
 ## 数据库
 
 ### MySQL
@@ -473,6 +489,11 @@
 
 * [夜莺 - All-in-one 的开源观测平台](https://github.com/ccfos/nightingale)
 * [一文搞懂 VictoriaMetrics 的使用](https://www.qikqiak.com/post/victoriametrics-usage/)
+
+### Grafana 插件
+
+* [Grafana 数据源插件开发 (一) 准备开发环境 – Mofeng's Blog](https://blog.mofengfeng.com/2022/11/19/grafana-%E6%95%B0%E6%8D%AE%E6%BA%90%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91-%E4%B8%80-%E5%87%86%E5%A4%87%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/)
+* [Build a data source plugin | Grafana Plugin Tools](https://grafana.com/developers/plugin-tools/tutorials/build-a-data-source-plugin)
 
 ### 实战 Litmus 云原生混沌工程
 

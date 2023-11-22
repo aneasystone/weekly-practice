@@ -35,8 +35,10 @@
 
 * [Perplexity AI](https://www.perplexity.ai/) - Where knowledge begins
 * [Kagi Labs](https://kagi.com/fastgpt)
-* [GPT Researcher](https://github.com/assafelovic/gpt-researcher) - GPT based autonomous agent that does online comprehensive research on any given topic
+* [Tavily](https://tavily.com/)
+    * [GPT Researcher](https://github.com/assafelovic/gpt-researcher) - GPT based autonomous agent that does online comprehensive research on any given topic
 * [Automating Web Research](https://blog.langchain.dev/automating-web-research/)
+* [天工AI搜索](https://search.tiangong.cn/) — 知识从这里开始
 
 #### 学习助手
 
@@ -67,6 +69,7 @@
 * [bloop](https://bloop.ai/) - Find Code. Fast.
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
 * [CodeShell](https://github.com/WisdomShell/codeshell) - 多语言代码大模型基座
+* [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
 
 #### 数据分析
 
@@ -296,6 +299,10 @@
 * [D-ID](https://www.d-id.com/) - The Digital People Platform
 * [TheRamU/Fay](https://github.com/TheRamU/Fay) - 包含Fay控制器及数字人模型
 
+### 机器人
+
+* [RT-2](https://robotics-transformer2.github.io/) - Vision-Language-Action Models
+
 ## 模型社区
 
 * [Hugging Face](https://huggingface.co/)
@@ -496,9 +503,11 @@
 
 ### 模型推理 & 部署
 
+* [vllm-project/vllm](https://github.com/vllm-project/vllm) - A high-throughput and memory-efficient inference and serving engine for LLMs
 * [jmorganca/ollama](https://github.com/jmorganca/ollama) - Get up and running with Llama 2 and other large language models locally
 * [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
 * [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
+* [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
 
 ### 模型评估
 
@@ -573,6 +582,7 @@
 * [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
 * [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
 * [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/advanced-prompt-engineering)
+* [datawhalechina/hugging-llm](https://github.com/datawhalechina/hugging-llm) - HuggingLLM, Hugging Future.
 
 ### 应用产品
 
