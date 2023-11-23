@@ -583,6 +583,7 @@
 * [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
 * [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/advanced-prompt-engineering)
 * [datawhalechina/hugging-llm](https://github.com/datawhalechina/hugging-llm) - HuggingLLM, Hugging Future.
+* [Learn Prompt](https://www.learnprompt.pro/) - Your Cookbook to Becoming to Communicating with AIGC
 
 ### 应用产品
 
