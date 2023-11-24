@@ -10,7 +10,17 @@
 
 ![](./images/aliyun-ecs.png)
 
-于是便抱着试一试的态度下了一单，然后开始了下面的实验。
+于是便抱着试一试的态度下了一单，然后开始了下面的实验。但是刚开始就遇到了问题，安装 NVIDIA 驱动的时候一直报 `Unable to load the kernel module 'nvidia.ko'` 这样的错误:
+
+![](./images/nvidia-driver-error.png)
+
+在网上搜了很多解决方案都没有解决，最后才在阿里云的产品文档中找到了答案：阿里云的 GPU 产品有 **计算型** 和 **虚拟化型** 两种实例规格族，[可以从它们的命名上进行区分](https://help.aliyun.com/zh/egs/instance-naming-conventions)，比如上面我买的这个实例规格为 `ecs.sgn7i-vws-m2s.xlarge`，其中 `sgn` 表示这是一台采用 NVIDIA GRID vGPU 加速的共享型实例，它和 `vgn` 一样，都属于虚拟化型，使用了 [NVIDIA GRID 虚拟 GPU 技术](https://www.nvidia.cn/design-visualization/technologies/grid-technology/)，所以需要安装 GRID 驱动，具体步骤可以 [参考这里](https://help.aliyun.com/zh/egs/user-guide/install-a-grid-driver/)；如果希望手工安装 NVIDIA 驱动，我们需要购买计算型的 GPU 实例。
+
+> 阿里云的产品文档中有一篇 [NVIDIA 驱动安装指引](https://help.aliyun.com/zh/egs/user-guide/installation-guideline-for-nvidia-drivers)，我觉得整理的挺好，文档中对不同的规格、不同的使用场景、不同的操作系统都做了比较详情的介绍。
+
+于是我重新下单，又买了一台规格为 `ecs.gn5i-c2g1.large` 的 **计算型 GPU 实例**，2 核 CPU，8G 内存，显卡为 NVIDIA P4，显存 8G，价格一个小时八块多。
+
+> 购买计算型实例纯粹是为了体验一下 NVIDIA 驱动的安装过程，如果只想进行后面的 Kubernetes 实验，直接使用虚拟化型实例也是可以的。另外，在购买计算型实例时可以选择自动安装 NVIDIA 驱动，对应版本的 CUDA 和 CUDNN 也会一并安装，使用还是很方便的。
 
 ### 安装 NVIDIA 驱动
 
@@ -18,16 +28,88 @@
 
 ```
 # lspci | grep NVIDIA
-00:07.0 VGA compatible controller: NVIDIA Corporation Device 2236 (rev a1)
+00:07.0 3D controller: NVIDIA Corporation GP104GL [Tesla P4] (rev a1)
 ```
 
-此时这个显卡还不能直接使用，我们还需要安装 NVIDIA 的显卡驱动。访问 [NVIDIA Driver Downloads](https://www.nvidia.com/Download/Find.aspx)，在这里找到你的显卡型号并下载：
+此时这个显卡还不能直接使用，因为还需要安装 NVIDIA 的显卡驱动。访问 [NVIDIA Driver Downloads](https://www.nvidia.com/Download/Find.aspx)，在这里选择你的显卡型号和操作系统并搜索：
 
 ![](./images/nvidia-driver-download.png)
 
-### 安装 CUDA 驱动
+从列表中可以看到驱动的不同版本，第一条是最新版本 `535.129.03`，我们点击链接进入下载页面并复制链接地址，然后使用下面的命令下载之：
 
-https://developer.nvidia.com/cuda-toolkit-archive
+```
+# curl -LO https://us.download.nvidia.com/tesla/535.129.03/NVIDIA-Linux-x86_64-535.129.03.run
+```
+
+这个文件其实是一个可执行文件，直接运行即可：
+
+```
+# sh NVIDIA-Linux-x86_64-535.129.03.run
+```
+
+安装过程中会出现一些选项，保持默认即可，等待驱动安装成功后，运行 `nvidia-smi` 命令应该能看到显卡状态：
+
+```
+# nvidia-smi
+Thu Nov 24 08:16:38 2023       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.129.03             Driver Version: 535.129.03   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla P4                       Off | 00000000:00:07.0 Off |                    0 |
+| N/A   41C    P0              23W /  75W |      0MiB /  7680MiB |      2%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+```
+
+### 安装 CUDA
+
+[CUDA](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) 是 NVIDIA 推出的一种通用并行计算平台和编程模型，允许开发人员使用 C、C++ 等编程语言编写高性能计算应用程序，它利用 GPU 的并行计算能力解决复杂的计算问题，特别是在深度学习、科学计算、图形处理等领域。所以一般情况下，安装完 NVIDIA 驱动后，CUDA 也可以一并安装上。
+
+在下载 NVIDIA 驱动时，每个驱动版本都对应了一个 CUDA 版本，比如上面我们在下载驱动版本 `535.129.03` 时可以看到，它对应的 CUDA 版本为 `12.2`，所以我们就按照这个版本号来安装。首先进入 [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive) 页面，这里列出了所有的 CUDA 版本：
+
+![](./images/cuda-download.png)
+
+找到 `12.2` 版本进入下载页面：
+
+![](./images/cuda-download-2.png)
+
+选择操作系统、架构、发行版本和安装类型，下面就会出现相应的下载地址和运行命令，按照提示在服务器中执行即可：
+
+```
+# wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run
+# sh cuda_12.2.2_535.104.05_linux.run
+```
+
+这个安装过程会比较长，当安装成功后，可以看到下面这样的信息：
+
+```
+===========
+= Summary =
+===========
+
+Driver:   Installed
+Toolkit:  Installed in /usr/local/cuda-12.2/
+
+Please make sure that
+ -   PATH includes /usr/local/cuda-12.2/bin
+ -   LD_LIBRARY_PATH includes /usr/local/cuda-12.2/lib64, or, add /usr/local/cuda-12.2/lib64 to /etc/ld.so.conf and run ldconfig as root
+
+To uninstall the CUDA Toolkit, run cuda-uninstaller in /usr/local/cuda-12.2/bin
+To uninstall the NVIDIA Driver, run nvidia-uninstall
+Logfile is /var/log/cuda-installer.log
+```
 
 ## 在 Docker 容器中使用 GPU 资源
 
