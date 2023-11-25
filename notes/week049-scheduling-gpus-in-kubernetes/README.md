@@ -113,7 +113,192 @@ Logfile is /var/log/cuda-installer.log
 
 ## 在 Docker 容器中使用 GPU 资源
 
+GPU 环境准备好之后，接下来我们先试着在 Docker 容器中使用它。由于是新买的系统，并没有 Docker 环境，所以我们要先安装 Docker，可以参考我之前写的 [week002-install-docker](../week002-install-docker/README.md) 这篇博客。
+
+安装完 Docker 之后，执行下面的命令确认版本：
+
+```
+# docker --version
+Docker version 24.0.7, build afdd53b
+```
+
+然后执行下面的命令来测试下 GPU 是否可以在容器中使用：
+
+```
+# docker run --gpus all --rm centos:latest nvidia-smi
+docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].
+```
+
+可以看到命令执行报错了，稍微 Google 一下这个错就知道，想在 Docker 中使用 NVIDIA GPU 还必须安装 `nvidia-container-runtime` 运行时。
+
+### 安装 `nvidia-container-runtime` 运行时
+
+我们一般使用 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) 来安装 `nvidia-container-runtime` 运行时，根据官方文档，首先将 `nvidia-container-toolkit.repo` 文件添加到 yum 的仓库目录 `/etc/yum.repos.d` 中：
+
+```
+# curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
+	tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+```
+
+> 也可以使用 `yum-config-manager --add-repo` 来添加：
+> 
+> ```
+> # yum install -y yum-utils
+> # yum-config-manager --add-repo https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
+> ```
+
+然后使用 `yum install` 安装：
+
+```
+# yum install -y nvidia-container-toolkit
+```
+
+安装 NVIDIA Container Toolkit 之后，再使用下面的命令将 Docker 的运行时配置成 `nvidia-container-runtime`：
+
+```
+# nvidia-ctk runtime configure --runtime=docker
+INFO[0000] Config file does not exist; using empty config 
+INFO[0000] Wrote updated config to /etc/docker/daemon.json 
+INFO[0000] It is recommended that docker daemon be restarted.
+```
+
+这个命令的作用是修改 `/etc/docker/daemon.json` 配置文件：
+
+```
+# cat /etc/docker/daemon.json
+{
+    "runtimes": {
+        "nvidia": {
+            "args": [],
+            "path": "nvidia-container-runtime"
+        }
+    }
+}
+```
+
+按照提示，重启 Docker 服务：
+
+```
+# systemctl restart docker
+```
+
+### 在容器中使用 GPU 资源
+
+配置完 `nvidia-container-runtime` 运行时之后，重新执行下面的命令：
+
+```
+# docker run --gpus all --rm centos:latest nvidia-smi
+Sat Nov 25 02:31:58 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.161.03   Driver Version: 470.161.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A10-2Q       On   | 00000000:00:07.0 Off |                  N/A |
+| N/A   N/A    P0    N/A /  N/A |     64MiB /  1889MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+```
+
+此时我换成了一台共享型 GPU 实例，所以显示的是 A10，驱动版本和 CUDA 版本要低一点，命令的输出表明我们在容器中已经可以访问 GPU 资源了。
+
+> 值得注意的是，我们运行的 `centos:latest` 镜像里本来是没有 `nvidia-smi` 命令的：
+>
+> ```
+> # docker run --rm centos:latest nvidia-smi
+> exec: "nvidia-smi": executable file not found in $PATH: unknown.
+> ```
+>
+> 但是加上 `--gpus all` 参数之后就有这个命令了。
+
+使用 `--gpus all` 参数可以让容器内访问宿主机上的所有显卡，也可以指定某张卡在容器中使用：
+
+```
+# docker run --gpus 1 --rm centos:latest nvidia-smi
+```
+
+或者这样：
+
+```
+# docker run --gpus 'device=0' --rm centos:latest nvidia-smi
+```
+
+接下来，我们再利用 tensorflow 的镜像来测试下是否可以在程序中使用 GPU 资源：
+
+```
+# docker run --rm -it --gpus all tensorflow/tensorflow:2.6.0-gpu bash
+root@bacd1c7c8b6c:/# python3
+Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
+[GCC 8.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+```
+
+在使用 tensorflow 镜像时要注意与 CUDA 版本的兼容性，[这里](https://www.tensorflow.org/install/source?hl=zh-cn#gpu) 有一份 tensorflow 版本和 CUDA 版本之间的对应关系，如果不兼容，会出现如下的报错：
+
+```
+# docker run --rm -it --gpus all tensorflow/tensorflow:latest-gpu bash
+nvidia-container-cli: requirement error: unsatisfied condition: cuda>=12.3, please update your driver to a newer version, or use an earlier cuda container: unknown.
+```
+
+然后使用一段简单的 Python 代码来测试 GPU 功能：
+
+```
+>>> import tensorflow as tf
+>>> print(tf.test.gpu_device_name())
+```
+
+如果一切正常，就会打印出 GPU 的设备名称：
+
+```
+/device:GPU:0
+```
+
+### Docker 19.03 之前
+
+上面介绍的 `--gpus` 参数是在 Docker 19.03 版本之后才引入了，在 Docker 19.03 之前，我们也有几种方式来使用 GPU，第一种也是最原始的方式，通过 `--device` 参数将显卡设备挂载到容器里：
+
+```
+# docker run --rm -it \
+	--device /dev/nvidia0:/dev/nvidia0 \
+	--device /dev/nvidiactl:/dev/nvidiactl \
+	--device /dev/nvidia-uvm:/dev/nvidia-uvm \
+	-e NVIDIA_VISIBLE_DEVICES=all \
+	tensorflow/tensorflow:2.6.0-gpu bash
+```
+
+第二种是使用英伟达公司开发的 [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) 工具，这个工具对 docker 进行了一层封装，使得在容器中也可以访问 GPU 资源，它在使用上和 docker 几乎完全一样：
+
+```
+# nvidia-docker run --rm -it \
+	-e NVIDIA_VISIBLE_DEVICES=all \
+	tensorflow/tensorflow:2.6.0-gpu bash
+```
+
+nvidia-docker 有两个版本：`nvidia-docker` 和 `nvidia-docker2`。nvidia-docker 是一个独立的守护进程，它以 Volume Plugin 的形式存在，它与 Docker 生态系统的兼容性较差，比如它和 docker-compose、docker swarm、Kubernetes 都不能很好地一起工作，因此很快被废弃。随后，官方推出了 nvidia-docker2，它不再是 Volume Plugin，而是作为一个 Docker Runtime，实现机制上的差异，带来了巨大改进，从而和 Docker 生态实现了更好的兼容性，使用上也完全兼容 docker 命令，加一个 `--runtime=nvidia` 参数即可：
+
+```
+# docker run --rm -it \
+	--runtime=nvidia \
+	-e NVIDIA_VISIBLE_DEVICES=all \
+	tensorflow/tensorflow:2.6.0-gpu bash
+```
+
+然而，随着 Docker 19.03 版本的发布，NVIDIA GPU 作为 Docker Runtime 中的设备得到了官方支持，因此 nvidia-docker2 目前也已经被弃用了。
+
 https://www.cnblogs.com/linhaifeng/p/16108285.html
+
+https://www.ctyun.cn/developer/article/453919591477317
 
 ## 在 Kubernetes 中调度 GPU 资源
 
@@ -137,6 +322,7 @@ https://blog.kubecost.com/blog/nvidia-gpu-usage/
 
 ## 参考
 
+* [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 * [k8s 调度 GPU](https://www.cnblogs.com/linhaifeng/p/16111733.html)
 * [docker使用GPU总结](https://www.cnblogs.com/linhaifeng/p/16108285.html)
 * [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin#quick-start)
