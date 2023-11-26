@@ -75,7 +75,7 @@ Thu Nov 24 08:16:38 2023
 
 ### 安装 CUDA
 
-[CUDA](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) 是 NVIDIA 推出的一种通用并行计算平台和编程模型，允许开发人员使用 C、C++ 等编程语言编写高性能计算应用程序，它利用 GPU 的并行计算能力解决复杂的计算问题，特别是在深度学习、科学计算、图形处理等领域。所以一般情况下，安装完 NVIDIA 驱动后，CUDA 也可以一并安装上。
+[CUDA（Compute Unified Device Architecture）](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) 是 NVIDIA 推出的一种通用并行计算平台和编程模型，允许开发人员使用 C、C++ 等编程语言编写高性能计算应用程序，它利用 GPU 的并行计算能力解决复杂的计算问题，特别是在深度学习、科学计算、图形处理等领域。所以一般情况下，安装完 NVIDIA 驱动后，CUDA 也可以一并安装上。
 
 在下载 NVIDIA 驱动时，每个驱动版本都对应了一个 CUDA 版本，比如上面我们在下载驱动版本 `535.129.03` 时可以看到，它对应的 CUDA 版本为 `12.2`，所以我们就按照这个版本号来安装。首先进入 [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive) 页面，这里列出了所有的 CUDA 版本：
 
@@ -273,52 +273,265 @@ nvidia-container-cli: requirement error: unsatisfied condition: cuda>=12.3, plea
 	--device /dev/nvidia0:/dev/nvidia0 \
 	--device /dev/nvidiactl:/dev/nvidiactl \
 	--device /dev/nvidia-uvm:/dev/nvidia-uvm \
-	-e NVIDIA_VISIBLE_DEVICES=all \
 	tensorflow/tensorflow:2.6.0-gpu bash
 ```
 
 第二种是使用英伟达公司开发的 [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) 工具，这个工具对 docker 进行了一层封装，使得在容器中也可以访问 GPU 资源，它在使用上和 docker 几乎完全一样：
 
 ```
-# nvidia-docker run --rm -it \
-	-e NVIDIA_VISIBLE_DEVICES=all \
-	tensorflow/tensorflow:2.6.0-gpu bash
+# nvidia-docker run --rm -it tensorflow/tensorflow:2.6.0-gpu bash
 ```
 
-nvidia-docker 有两个版本：`nvidia-docker` 和 `nvidia-docker2`。nvidia-docker 是一个独立的守护进程，它以 Volume Plugin 的形式存在，它与 Docker 生态系统的兼容性较差，比如它和 docker-compose、docker swarm、Kubernetes 都不能很好地一起工作，因此很快被废弃。随后，官方推出了 nvidia-docker2，它不再是 Volume Plugin，而是作为一个 Docker Runtime，实现机制上的差异，带来了巨大改进，从而和 Docker 生态实现了更好的兼容性，使用上也完全兼容 docker 命令，加一个 `--runtime=nvidia` 参数即可：
+nvidia-docker 有两个版本：`nvidia-docker` 和 `nvidia-docker2`。nvidia-docker 是一个独立的守护进程，它以 [Volume Plugin](https://docs.docker.com/engine/extend/plugins_volume/) 的形式存在，它与 Docker 生态系统的兼容性较差，比如它和 docker-compose、docker swarm、Kubernetes 都不能很好地一起工作，因此很快被废弃。随后，官方推出了 nvidia-docker2，它不再是 Volume Plugin，而是作为一个 [Docker Runtime](https://docs.docker.com/engine/alternative-runtimes/)，实现机制上的差异，带来了巨大改进，从而和 Docker 生态实现了更好的兼容性，使用上也完全兼容 docker 命令，加一个 `--runtime=nvidia` 参数即可：
 
 ```
-# docker run --rm -it \
-	--runtime=nvidia \
-	-e NVIDIA_VISIBLE_DEVICES=all \
-	tensorflow/tensorflow:2.6.0-gpu bash
+# docker run --rm -it --runtime=nvidia tensorflow/tensorflow:2.6.0-gpu bash
 ```
 
 然而，随着 Docker 19.03 版本的发布，NVIDIA GPU 作为 Docker Runtime 中的设备得到了官方支持，因此 nvidia-docker2 目前也已经被弃用了。
 
-https://www.cnblogs.com/linhaifeng/p/16108285.html
-
-https://www.ctyun.cn/developer/article/453919591477317
-
 ## 在 Kubernetes 中调度 GPU 资源
 
-Kubernetes 具有对机器的资源进行分配和使用的能力，比如可以指定容器最多使用多少内存以及使用多少 CPU 计算资源。
+终于到了这篇博客的主题，接下来我们实践一下如何在 Kubernetes 集群中调度 GPU 资源。和 Docker 一样，新买的服务器上也没有 Kubernetes 环境，我们需要先安装 Kubernetes，可以参考我之前写的 [week010-install-kubernetes](../week010-install-kubernetes/README.md) 这篇博客。
+
+我们知道，Kubernetes 具有对机器的资源进行分配和使用的能力，比如可以指定容器最多使用多少内存以及使用多少 CPU 计算资源，同样，我们也可以指定容器使用多少 GPU 资源，但在这之前，我们需要先安装 `nvidia-container-runtime` 运行时，以及 NVIDIA 的设备插件。
+
+### 安装 `nvidia-container-runtime` 运行时
+
+通过上面的学习，我们通过安装 `nvidia-container-runtime` 运行时，在 Docker 容器中访问了 GPU 设备，在 Kubernetes 中调度 GPU 资源同样也需要安装这个 `nvidia-container-runtime`。如果 Kubernetes 使用的容器运行时是 Docker，直接参考上面的章节进行安装配置即可；但 Kubernetes 从 1.24 版本开始，改用 containerd 作为容器运行时，为了在 containerd 容器中使用 NVIDIA 的 GPU 设备，配置步骤稍微有些区别。
+
+首先我们还是先安装 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)，然后通过下面的命令将 `nvidia-container-runtime` 加入 containerd 的运行时列表中：
+
+```
+# nvidia-ctk runtime configure --runtime=containerd
+```
+
+这个命令实际上是对 containerd 的配置文件 `/etc/containerd/config.toml` 进行修改，内容如下：
+
+```
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+      default_runtime_name = "runc"
+      snapshotter = "overlayfs"
+
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+          runtime_engine = ""
+          runtime_root = ""
+          runtime_type = "io.containerd.runc.v2"
+
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
+            BinaryName = "/usr/bin/nvidia-container-runtime"
+            SystemdCgroup = true
+```
+
+注意这个命令并不会修改 `default_runtime_name` 配置，我们需要手动将这个值修改为 `nvidia`:
+
+```
+      default_runtime_name = "nvidia"
+```
+
+然后重启 containerd 服务：
+
+```
+# systemctl restart containerd
+```
 
 ### 安装 NVIDIA 设备插件
 
-https://github.com/NVIDIA/k8s-device-plugin#quick-start
+接下来，我们继续安装 [NVIDIA 设备插件](https://github.com/NVIDIA/k8s-device-plugin)。[设备插件（Device Plugins）](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/) 是 Kubernetes 用于管理和调度容器中设备资源的一种插件机制，它可以将物理设备（如 GPU、FPGA 等）暴露给容器，从而提供更高级别的资源管理和调度能力。
+
+通过下面的命令将 NVIDIA 设备插件部署到集群中：
+
+```
+# kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.3/nvidia-device-plugin.yml
+daemonset.apps/nvidia-device-plugin-daemonset created
+```
+
+从运行结果可以看出，设备插件本质上是一个 DaemonSet，运行 `kubectl get daemonset` 命令查看其是否启动成功：
+
+```
+# kubectl get daemonset -n kube-system
+NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+kube-proxy                       1         1         1       1            1           kubernetes.io/os=linux   90m
+nvidia-device-plugin-daemonset   1         1         1       1            1           <none>                   43s
+```
+
+运行 `kubectl logs` 命令查看其启动日志：
+
+```
+# kubectl logs nvidia-device-plugin-daemonset-s97vk -n kube-system
+I1126 04:46:34.020261       1 main.go:154] Starting FS watcher.
+I1126 04:46:34.020321       1 main.go:161] Starting OS watcher.
+I1126 04:46:34.020578       1 main.go:176] Starting Plugins.
+I1126 04:46:34.020591       1 main.go:234] Loading configuration.
+I1126 04:46:34.020668       1 main.go:242] Updating config with default resource matching patterns.
+I1126 04:46:34.020829       1 main.go:253] 
+Running with config:
+{
+  "version": "v1",
+  "flags": {
+    "migStrategy": "none",
+    "failOnInitError": false,
+    "nvidiaDriverRoot": "/",
+    "gdsEnabled": false,
+    "mofedEnabled": false,
+    "plugin": {
+      "passDeviceSpecs": false,
+      "deviceListStrategy": [
+        "envvar"
+      ],
+      "deviceIDStrategy": "uuid",
+      "cdiAnnotationPrefix": "cdi.k8s.io/",
+      "nvidiaCTKPath": "/usr/bin/nvidia-ctk",
+      "containerDriverRoot": "/driver-root"
+    }
+  },
+  "resources": {
+    "gpus": [
+      {
+        "pattern": "*",
+        "name": "nvidia.com/gpu"
+      }
+    ]
+  },
+  "sharing": {
+    "timeSlicing": {}
+  }
+}
+I1126 04:46:34.020840       1 main.go:256] Retreiving plugins.
+I1126 04:46:34.021064       1 factory.go:107] Detected NVML platform: found NVML library
+I1126 04:46:34.021090       1 factory.go:107] Detected non-Tegra platform: /sys/devices/soc0/family file not found
+I1126 04:46:34.032304       1 server.go:165] Starting GRPC server for 'nvidia.com/gpu'
+I1126 04:46:34.033008       1 server.go:117] Starting to serve 'nvidia.com/gpu' on /var/lib/kubelet/device-plugins/nvidia-gpu.sock
+I1126 04:46:34.037402       1 server.go:125] Registered device plugin for 'nvidia.com/gpu' with Kubelet
+```
+
+如果看到日志显示 `Registered device plugin for 'nvidia.com/gpu' with Kubelet`，表示 NVIDIA 设备插件已经安装成功了。此时，我们也可以在 `kubelet` 的设备插件目录下看到 NVIDIA GPU 的 socket 文件：
+
+```
+# ll /var/lib/kubelet/device-plugins/ | grep nvidia-gpu.sock
+```
+
+但是安装也不一定是一帆风顺的，如果看到下面这样的日志：
+
+```
+I1126 04:34:05.352152       1 main.go:256] Retreiving plugins.
+W1126 04:34:05.352505       1 factory.go:31] No valid resources detected, creating a null CDI handler
+I1126 04:34:05.352539       1 factory.go:107] Detected non-NVML platform: could not load NVML library: libnvidia-ml.so.1: cannot open shared object file: No such file or directory
+I1126 04:34:05.352569       1 factory.go:107] Detected non-Tegra platform: /sys/devices/soc0/family file not found
+E1126 04:34:05.352573       1 factory.go:115] Incompatible platform detected
+E1126 04:34:05.352576       1 factory.go:116] If this is a GPU node, did you configure the NVIDIA Container Toolkit?
+E1126 04:34:05.352578       1 factory.go:117] You can check the prerequisites at: https://github.com/NVIDIA/k8s-device-plugin#prerequisites
+E1126 04:34:05.352582       1 factory.go:118] You can learn how to set the runtime at: https://github.com/NVIDIA/k8s-device-plugin#quick-start
+E1126 04:34:05.352585       1 factory.go:119] If this is not a GPU node, you should set up a toleration or nodeSelector to only deploy this plugin on GPU nodes
+I1126 04:34:05.352590       1 main.go:287] No devices found. Waiting indefinitely.
+```
+
+表示没有找到 NVIDIA 设备，请检查显卡驱动是否安装，或者 containerd 的配置是否正确。
 
 ### 调度 GPU 资源
 
-https://kuboard.cn/learning/k8s-practice/gpu/gpu.html
+接下来，我们创建一个测试文件：
 
-https://www.cnblogs.com/linhaifeng/p/16111733.html
+```
+# vi gpu-test.yaml
+```
 
-https://icloudnative.io/posts/add-nvidia-gpu-support-to-k8s-with-containerd/
+文件内容如下：
 
-## 监控 GPU 资源的使用
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-test
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: gpu-test
+      image: tensorflow/tensorflow:2.6.0-gpu
+      command:
+        - python3
+        - /app/test.py
+      volumeMounts:
+        - name: gpu-test-script
+          mountPath: /app/
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+  volumes:
+    - name: gpu-test-script
+      configMap:
+        name: gpu-test-script
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpu-test-script
+data:
+  test.py: |
+    import tensorflow as tf
+    print(tf.test.gpu_device_name())
+```
 
-https://blog.kubecost.com/blog/nvidia-gpu-usage/
+这里我们仍然使用 `tensorflow/tensorflow:2.6.0-gpu` 这个镜像来测试 GPU 功能，我们通过 ConfigMap 将一段 Python 测试脚本挂载到容器中并运行，另外通过 `resources.limits.nvidia.com/gpu: 1` 这样的配置告诉 Kubernetes，容器的运行需要使用一张 GPU 显卡资源，Kubernetes 会自动根据 NVIDIA 设备插件汇报的情况找到符合条件的节点，然后在该节点上启动 Pod，启动 Pod 时，由于 containerd 的默认运行时是 `nvidia-container-runtime`，所以会将 NVIDIA GPU 挂载到容器中。
+
+运行 `kubectl apply` 命令创建 Pod 和 ConfigMap：
+
+```
+# kubectl apply -f gpu-test.yaml
+pod/gpu-test created
+configmap/gpu-test-script created
+```
+
+运行 `kubectl get pods` 命令查看 Pod 的运行状态：
+
+```
+# kubectl get pods
+NAME       READY   STATUS             RESTARTS      AGE
+gpu-test   0/1     Pending            0             5s
+```
+
+如果像上面这样一直处理 Pending 状态，可以运行 `kubectl describe pod` 命令查看 Pod 的详细情况：
+
+```
+# kubectl describe pod gpu-test
+Name:             gpu-test
+Namespace:        default
+Priority:         0
+Service Account:  default
+...
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  19s   default-scheduler  0/1 nodes are available: 1 Insufficient nvidia.com/gpu. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod.
+```
+
+出现上面这样的情况可能有两种原因：
+
+1. 显卡资源已经被其他 Pod 所占用，默认情况下 NVIDIA 设备插件只支持卡级别的调度，并且显卡资源是独占的，我的这台服务器上只有一张显卡，如果已经有 Pod 占用了一张卡，那么其他的 Pod 就不能再使用该卡了；如果希望多个 Pod 共享一张卡，可以参考官方文档中的 [Shared Access to GPUs with CUDA Time-Slicing](https://github.com/NVIDIA/k8s-device-plugin#shared-access-to-gpus-with-cuda-time-slicing)；
+2. NVIDIA 设备插件未成功安装，请参考上面的章节确认 NVIDIA 设备插件已经成功启动。
+
+如果一切正常，Pod 的状态应该是 Completed：
+
+```
+# kubectl get pods
+NAME       READY   STATUS      RESTARTS   AGE
+gpu-test   0/1     Completed   0          7s
+```
+
+运行 `kubectl logs` 命令查看 Pod 日志：
+
+```
+# kubectl logs gpu-test
+2023-11-26 05:05:14.779693: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-11-26 05:05:16.508041: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2023-11-26 05:05:16.508166: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1510] Created device /device:GPU:0 with 1218 MB memory:  -> device: 0, name: NVIDIA A10-2Q, pci bus id: 0000:00:07.0, compute capability: 8.6
+/device:GPU:0
+```
+
+可以看到脚本成功打印出了 GPU 的设备名称，说明现在我们已经可以在 Kubernetes 中使用 GPU 资源了。
 
 ## 参考
 
@@ -328,5 +541,16 @@ https://blog.kubecost.com/blog/nvidia-gpu-usage/
 * [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin#quick-start)
 * [Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
 * [调度 GPU | Kuboard](https://kuboard.cn/learning/k8s-practice/gpu/gpu.html)
-* [Monitoring NVIDIA GPU Usage in Kubernetes with Prometheus](https://blog.kubecost.com/blog/nvidia-gpu-usage/)
 * [Kubernetes 教程：在 Containerd 容器中使用 GPU](https://icloudnative.io/posts/add-nvidia-gpu-support-to-k8s-with-containerd/)
+* [容器中使用 GPU 的基础环境搭建](https://www.lxkaka.wang/docker-nvidia/)
+
+## 更多
+
+### 监控 GPU 资源的使用
+
+* [Monitoring NVIDIA GPU Usage in Kubernetes with Prometheus](https://blog.kubecost.com/blog/nvidia-gpu-usage/)
+
+### 设备插件原理
+
+* [实现自己的设备插件](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/#device-plugin-implementation)
+* [Kubernetes Device Plugin 原理讲解](https://blog.magichc7.com/post/Kubernetes-Device-Plugin.html)

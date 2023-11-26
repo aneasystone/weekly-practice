@@ -966,6 +966,32 @@ node/localhost.localdomain untainted
 
 到这里一个单机版的 Kubernetes 最小集群就搭建好了。
 
+## 使用 sealos 安装 Kubernetes
+
+[Sealos](https://sealos.run) 是一款以 Kubernetes 为内核的云操作系统发行版。它以云原生的方式，抛弃了传统的云计算架构，转向以 Kubernetes 为云内核的新架构，使企业能够像使用个人电脑一样简单地使用云。它既提供了公有云服务，也支持私有化部署，使用 `sealos` 命令可以快速安装 Kubernetes 集群，以及在 Kubernetes 集群中部署应用。
+
+### 安装 sealos
+
+```
+$ curl -LO https://github.com/labring/sealos/releases/download/v4.3.7/sealos_4.3.7_linux_amd64.tar.gz
+$ tar zxvf sealos_4.3.7_linux_amd64.tar.gz
+$ chmod +x sealos && mv sealos /usr/bin
+```
+
+### 单机安装 Kuberentes
+
+```
+$ sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:v3.24.1 --single
+```
+
+### 集群安装 Kuberentes
+
+```
+$ sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:v3.24.1 \
+     --masters 192.168.1.40 \
+     --nodes 192.168.1.41,192.168.1.42 -p [your-ssh-passwd]
+```
+
 ## 参考
 
 1. [kubectl 安装文档](https://kubernetes.io/docs/reference/kubectl/)
@@ -1049,7 +1075,6 @@ Environment=HTTP_PROXY=192.168.1.36:10809 HTTPS_PROXY=192.168.1.36:10809
 
 #### 部署工具
 
-* [sealos](https://github.com/labring/sealos)
 * [easzlab/kubeasz](https://github.com/easzlab/kubeasz) - 使用Ansible脚本安装K8S集群
 * [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray) - Deploy a Production Ready Kubernetes Cluster
 * [K8E - Simple Kubernetes Distribution](https://getk8e.com/)
