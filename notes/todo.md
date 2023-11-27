@@ -39,13 +39,6 @@
 
 ## Java
 
-### Java 21
-
-* [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
-* [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
-* [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
-* [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
-
 ### GraalVM
 
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
@@ -238,6 +231,13 @@
 ### 虚拟线程
 
 * [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
+
+### 限流
+
+* [3步让 Dubbo 项目快速集成 Sentinel](http://www.mangod.top/articles/2023/09/22/1695364279992.html)
+* [Resilience4j Events Endpoints](https://www.baeldung.com/resilience4j-events-endpoints)
+* [Sentinel夺命连环 17 问](https://mp.weixin.qq.com/s/gTLDPxlEdDkD-Bdua5qyNQ)
+* [Sentinel为什么这么强，我扒了扒背后的实现原理](https://mp.weixin.qq.com/s/ETghXbTV5GAs78GsqB86XQ)
 
 ## Docker
 

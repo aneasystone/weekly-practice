@@ -210,16 +210,14 @@ Sat Nov 25 02:31:58 2023
 +-----------------------------------------------------------------------------+
 ```
 
-此时我换成了一台共享型 GPU 实例，所以显示的是 A10，驱动版本和 CUDA 版本要低一点，命令的输出表明我们在容器中已经可以访问 GPU 资源了。
+此时我换成了一台共享型 GPU 实例，所以显示的是 A10，驱动版本和 CUDA 版本要低一点，命令的输出表明我们在容器中已经可以访问 GPU 资源了。值得注意的是，我们运行的 `centos:latest` 镜像里本来是没有 `nvidia-smi` 命令的：
 
-> 值得注意的是，我们运行的 `centos:latest` 镜像里本来是没有 `nvidia-smi` 命令的：
->
-> ```
-> # docker run --rm centos:latest nvidia-smi
-> exec: "nvidia-smi": executable file not found in $PATH: unknown.
-> ```
->
-> 但是加上 `--gpus all` 参数之后就有这个命令了。
+```
+# docker run --rm centos:latest nvidia-smi
+exec: "nvidia-smi": executable file not found in $PATH: unknown.
+```
+
+但是加上 `--gpus all` 参数之后就有这个命令了，真是神奇。
 
 使用 `--gpus all` 参数可以让容器内访问宿主机上的所有显卡，也可以指定某张卡在容器中使用：
 
