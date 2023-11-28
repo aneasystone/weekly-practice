@@ -408,17 +408,20 @@
 * [Web LLM](https://mlc.ai/web-llm/)
 * [MiniRBT](https://github.com/iflytek/MiniRBT) - 中文小型预训练模型系列
 * [OpenBMB/CPM-Bee](https://github.com/OpenBMB/CPM-Bee) - 百亿参数的中英文双语基座大模型
-* [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
 * [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
 * [LongLoRA](https://github.com/dvlab-research/LongLoRA) - LongLoRA and LongAlpaca for Long-context LLMs
 
 ### 多模态
 
+* [LLaVA](https://llava-vl.github.io/) - Large Language and Vision Assistant
+    * [haotian-liu/LLaVA](https://github.com/haotian-liu/LLaVA) - [NeurIPS'23 Oral] Visual Instruction Tuning: LLaVA built towards GPT-4V level capabilities.
 * [TaskMatrix](https://github.com/microsoft/TaskMatrix) - Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
 * [NExT-GPT](https://next-gpt.github.io/) - Any-to-Any Multimodal Large Language Model
 * [Qwen-VL](https://github.com/QwenLM/Qwen-VL) - Qwen Large Vision Language Model
 * [InternLM-XComposer](https://github.com/InternLM/InternLM-XComposer) - 浦语·灵笔
+* [THUDM/CogVLM](https://github.com/THUDM/CogVLM) - a state-of-the-art-level open visual language model | 多模态预训练模型
+* [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 
 ## 大模型应用
 
