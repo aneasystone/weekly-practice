@@ -176,6 +176,7 @@
 #### PPT
 
 * [MindShow](https://www.mindshow.fun/) - 输入内容自动生成 PPT，让想法快速展示
+* [爱设计PPT](https://ppt.isheji.com/) - 全智能AI一键生成PPT
 
 #### Excel
 
@@ -335,9 +336,11 @@
 * [序列猴子](https://openapi.moyin.com/index) - 出门问问
 * [ChatGLM](https://chatglm.cn/) - [智谱AI](https://www.zhipuai.cn/)
 	* [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) - 开源双语对话语言模型
+    * [ChatGLM3](https://github.com/THUDM/ChatGLM3)
 * [天河天元大模型](https://www.tj.gov.cn/sy/tjxw/202305/t20230520_6244902.html) - 国家超算天津中心
 * [MOSS](https://github.com/OpenLMLab/MOSS) - 复旦大学
 * [天工](https://tiangong.kunlun.com/) - 昆仑万维
+    * [SkyworkAI/Skywork](https://github.com/SkyworkAI/Skywork)
 * [DriveGPT 雪湖·海若](https://drivegpt.haomoai.com/) - 毫末智行
 * [竹间智能](https://www.emotibot.com/)
 * 知海图AI - 知乎
@@ -366,12 +369,14 @@
 * [TransGPT](https://github.com/DUOMO/TransGPT) - 交通大模型
 * [MathGLM](https://github.com/THUDM/MathGLM) - GPT Can Solve Mathematical Problems Without a Calculator
 * [OpenBioMed](https://github.com/PharMolix/OpenBioMed) - 多模态生物医药大模型
+* [HyenaDNA](https://github.com/HazyResearch/hyena-dna) - a long-range genomic foundation model built with Hyena
 
 ### 国外大模型
 
 * [GPT-4](https://openai.com/gpt-4) - OpenAI
 * [LLaMa](https://github.com/facebookresearch/llama) - Meta
 	* [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
+    * [OpenGVLab/LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapter) - Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters
 * [Alpaca](https://github.com/tatsu-lab/stanford_alpaca) - Stanford University
 	* [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
 * [Claude](https://www.anthropic.com/index/introducing-claude) - Anthropic
@@ -391,6 +396,8 @@
 	* [DeepSpeed-Chat：最强ChatGPT训练框架，一键完成RLHF训练！](https://mp.weixin.qq.com/s/uuquavhwNg1P9AaIMXOE_A)
 * [Mistral](https://docs.mistral.ai/)
 * [Gorilla](https://github.com/ShishirPatil/gorilla) - An API store for LLMs
+* [nanoGPT](https://github.com/karpathy/nanoGPT) - The simplest, fastest repository for training/finetuning medium-sized GPTs.
+* [Lit-GPT](https://github.com/Lightning-AI/lit-gpt) - Hackable implementation of state-of-the-art open-source LLMs based on nanoGPT. Supports flash attention, 4-bit and 8-bit quantization, LoRA and LLaMA-Adapter fine-tuning, pre-training. Apache 2.0-licensed.
 
 ### 其他大模型
 
@@ -403,7 +410,6 @@
 * [Mesh Transformer JAX](https://github.com/kingoflolz/mesh-transformer-jax)
 * [GPT-NeoX](https://github.com/EleutherAI/gpt-neox)
 * [JARVIS](https://github.com/microsoft/JARVIS)
-* [RWKV LM](https://github.com/BlinkDL/RWKV-LM)
 * [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
 * [Web LLM](https://mlc.ai/web-llm/)
 * [MiniRBT](https://github.com/iflytek/MiniRBT) - 中文小型预训练模型系列
@@ -411,9 +417,13 @@
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
 * [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
 * [LongLoRA](https://github.com/dvlab-research/LongLoRA) - LongLoRA and LongAlpaca for Long-context LLMs
+* [RWKV](https://github.com/BlinkDL/RWKV-LM) - Parallelizable RNN with Transformer-level LLM Performance
 
 ### 多模态
 
+* [MiniGPT-4](https://minigpt-4.github.io/) - Enhancing Vision-language Understanding with Advanced Large Language Models
+    * [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4)
+* [CLIP](https://github.com/openai/CLIP) - Contrastive Language-Image Pretraining, Predict the most relevant text snippet given an image
 * [LLaVA](https://llava-vl.github.io/) - Large Language and Vision Assistant
     * [haotian-liu/LLaVA](https://github.com/haotian-liu/LLaVA) - [NeurIPS'23 Oral] Visual Instruction Tuning: LLaVA built towards GPT-4V level capabilities.
 * [TaskMatrix](https://github.com/microsoft/TaskMatrix) - Visual ChatGPT: Talking, Drawing and Editing with Visual Foundation Models
@@ -422,6 +432,8 @@
 * [InternLM-XComposer](https://github.com/InternLM/InternLM-XComposer) - 浦语·灵笔
 * [THUDM/CogVLM](https://github.com/THUDM/CogVLM) - a state-of-the-art-level open visual language model | 多模态预训练模型
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
+* [Fuyu-8B](https://www.adept.ai/blog/fuyu-8b) - A Multimodal Architecture for AI Agents
+    * [adept/fuyu-8b](https://huggingface.co/adept/fuyu-8b)
 
 ## 大模型应用
 
@@ -434,11 +446,6 @@
 * [gd3kr/BlenderGPT](https://github.com/gd3kr/BlenderGPT) - Use commands in English to control Blender with OpenAI's GPT-4
 * [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
 * [yakGPT/yakGPT](https://github.com/yakGPT/yakGPT) - Locally running, hands-free ChatGPT UI
-
-#### MiniGPT
-
-* [Vision-CAIR/MiniGPT-4](https://github.com/Vision-CAIR/MiniGPT-4) - Enhancing Vision-language Understanding with Advanced Large Language Models
-* [MiniGPT-4，开源了！](https://cuijiahua.com/blog/2023/04/ai-32.html)
 
 #### ChatGPT 资源
 
@@ -485,7 +492,8 @@
 * [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
-* [SuperAGI](https://github.com/TransformerOptimus/SuperAGI) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
+* [SuperAGI](https://superagi.com/) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
+    * [TransformerOptimus/SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 * [Generative Agents](https://github.com/joonspk-research/generative_agents) - Interactive Simulacra of Human Behavior
 * [XAgent](https://github.com/OpenBMB/XAgent) - An Autonomous LLM Agent for Complex Task Solving
@@ -506,8 +514,10 @@
 
 ### 模型推理 & 部署
 
+* [Text Generation Inference](https://github.com/huggingface/text-generation-inference) - Large Language Model Text Generation Inference
 * [vllm-project/vllm](https://github.com/vllm-project/vllm) - A high-throughput and memory-efficient inference and serving engine for LLMs
-* [jmorganca/ollama](https://github.com/jmorganca/ollama) - Get up and running with Llama 2 and other large language models locally
+* [Ollama](https://ollama.ai/) - Get up and running with Llama 2 and other large language models locally
+    * [jmorganca/ollama](https://github.com/jmorganca/ollama)
 * [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
 * [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
 * [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
@@ -603,6 +613,10 @@
 * [BERT](https://github.com/google-research/bert)
 * [SentenceTransformers](https://www.sbert.net/)
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models
+
+### ANN
+
+* [Puck](https://github.com/baidu/puck) - a high-performance ANN search engine
 
 ## 记忆管理
 

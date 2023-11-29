@@ -180,6 +180,7 @@
 
 #### OpenTelemetry
 
+* [How to integrate a Spring Boot app with Grafana using OpenTelemetry standards](https://grafana.com/blog/2023/10/30/how-to-integrate-a-spring-boot-app-with-grafana-using-opentelemetry-standards/)
 * [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
 * [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
 * [A practical guide to data collection with OpenTelemetry and Prometheus](https://grafana.com/blog/2023/07/20/a-practical-guide-to-data-collection-with-opentelemetry-and-prometheus/)
