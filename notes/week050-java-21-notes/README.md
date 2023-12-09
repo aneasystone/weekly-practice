@@ -188,7 +188,61 @@ String json2 = """
                """;
 ```
 
+文本块以三个双引号 `"""` 开始，同样以三个双引号结束，看上去和 Python 的多行字符串类似，不过 Java 的文本块会自动处理换行和缩进，使用起来更方便。上面的文本块在 Java 中输出如下：
+
+```
+{
+  "name": "zhangsan",
+  "age": 18
+}
+
+```
+
+注意开头没有换行，结尾有一个换行。而在 Python 中输出如下：
+
+```
+
+               {
+                 "name": "zhangsan",
+                 "age": 18
+               }
+
+```
+
+不仅开头和结尾都有换行，而且每一行有很多缩进，这里可以看出 Python 的处理很简单，它直接把 `"""` 之间的内容原样输出了，而 Java 是根据最后一个 `"""` 和内容之间的相对缩进来决定输出。很显然，我们更喜欢 Java 这样的输出结果，如果希望 Python 有同样的输出结果，就得这样写：
+
+```
+json = """{
+  "name": "zhangsan",
+  "age": 18
+}
+"""
+```
+
+这在代码的可读性上就比不上 Java 了，这里不得不感叹 Java 的设计，在细节的处理上做的确实不错。
+
+言归正传，说回字符串模板这个特性，我们也可以在文本块中使用，如下：
+
+```
+String json3 = STR."""
+               {
+                 "name": "\{name}",
+                 "age": \{age}
+               }
+               """;
+```
+
 #### `FMT` 模板处理器
+
+`FMT` 是 Java 21 内置的另一个模版处理器，它不仅有 `STR` 模版处理器的插值功能，还可以对输出进行格式化操作。**格式说明符（format specifiers）** 放在嵌入表达式的左侧，如下所示：
+
+```
+%7.2f\{price}
+```
+
+支持的格式说明符参见 [java.util.Formatter](https://cr.openjdk.org/~jlaskey/templates/docs/api/java.base/java/util/Formatter.html) 文档。
+
+> 不过在我的环境里编译时，会报错 `cannot find symbol: variable FMT`，就算是把镜像更换成 `openjdk:22-jdk` 也是一样的错，不清楚是为什么。
 
 ### 有序集合
 
