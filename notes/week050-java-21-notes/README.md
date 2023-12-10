@@ -246,7 +246,79 @@ String json3 = STR."""
 
 ### 有序集合
 
-https://openjdk.org/jeps/431
+[Java 集合框架（Java Collections Framework，JCF）](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/doc-files/coll-index.html) 为集合的表示和操作提供了一套统一的体系架构，让开发人员可以使用标准的接口来组织和操作集合，而不必关心底层的数据结构或实现方式。JCF 的接口大致可以分为 `Collection` 和 `Map` 两组，一共 15 个：
+
+![](./images/jcf-interfaces.png)
+
+在过去的 20 个版本里，这些接口已经被证明非常有用，在日常开发中发挥了重要的作用。那么 Java 21 为什么又要增加一个新的 **有序集合（Sequenced Collections）** 接口呢？
+
+#### 不一致的顺序操作
+
+这是因为这些接口在处理集合顺序问题时很不一致，导致了无谓的复杂性，比如要获取集合的第一个元素：
+
+|               | 获取第一个元素                   |
+| ------------- | ------------------------------- |
+| List          | list.get(0)                     |
+| Deque         | deque.getFirst()                |
+| SortedSet     | sortedSet.first()               |
+| LinkedHashSet | linkedHashSet.iterator().next() |
+
+可以看到，不同的集合有着不同的实现。再比如获取集合的最后一个元素：
+
+|               | 获取最后一个元素           |
+| ------------- | ------------------------- |
+| List          | list.get(list.size() - 1) |
+| Deque         | deque.getLast()           |
+| SortedSet     | sortedSet.last()          |
+| LinkedHashSet | -                         |
+
+List 的实现显得非常笨重，而 LinkedHashSet 根本没有提供直接的方法，只能将整个集合遍历一遍才能获取最后一个元素。
+
+除了获取集合的第一个元素和最后一个元素，对集合进行逆序遍历也是各不相同，比如 `NavigableSet` 提供了 `descendingSet()` 方法来逆序遍历：
+
+```
+for (var e : navSet.descendingSet()) {
+    process(e);
+}
+```
+
+`Deque` 通过 `descendingIterator()` 来逆序遍历：
+
+```
+for (var it = deque.descendingIterator(); it.hasNext();) {
+    var e = it.next();
+    process(e);
+}
+```
+
+而 `List` 则是通过 `listIterator()` 来逆序遍历：
+
+```
+for (var it = list.listIterator(list.size()); it.hasPrevious();) {
+    var e = it.previous();
+    process(e);
+}
+```
+
+由此可见，与顺序相关的处理方法散落在 JCF 的不同地方，使用起来极为不便。于是，Java 21 为我们提供了一个描述和操作有序集合的新接口，这个接口定义了一些与顺序相关的方法，将这些散落在各个地方的逻辑集中起来，让我们更方便地处理有序集合。
+
+#### 统一的有序集合接口
+
+与顺序相关的操作主要包括三个方面：
+
+* 获取集合的第一个或最后一个元素
+* 向集合的最前面或最后面插入或删除元素
+* 按照逆序遍历集合
+
+Java 21 新增了下面三个有序接口：
+
+* `SequencedCollection`
+* `SequencedMap`
+* `SequencedSet`
+
+他们在 JCF 大家庭中的位置如下图所示：
+
+![](./images/sequenced-collection.png)
 
 ### 分代式 ZGC
 
