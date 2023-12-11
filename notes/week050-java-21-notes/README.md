@@ -310,15 +310,53 @@ for (var it = list.listIterator(list.size()); it.hasPrevious();) {
 * 向集合的最前面或最后面插入或删除元素
 * 按照逆序遍历集合
 
-Java 21 新增了下面三个有序接口：
+为此，Java 21 新增了三个有序接口：`SequencedCollection`、`SequencedSet` 和 `SequencedMap`，他们的定义如下：
 
-* `SequencedCollection`
-* `SequencedMap`
-* `SequencedSet`
+```
+interface SequencedCollection<E> extends Collection<E> {
+    SequencedCollection<E> reversed();
+    void addFirst(E);
+    void addLast(E);
+    E getFirst();
+    E getLast();
+    E removeFirst();
+    E removeLast();
+}
+
+interface SequencedSet<E> extends Set<E>, SequencedCollection<E> {
+    SequencedSet<E> reversed();
+}
+
+interface SequencedMap<K,V> extends Map<K,V> {
+    SequencedMap<K,V> reversed();
+    SequencedSet<K> sequencedKeySet();
+    SequencedCollection<V> sequencedValues();
+    SequencedSet<Entry<K,V>> sequencedEntrySet();
+    V putFirst(K, V);
+    V putLast(K, V);
+    Entry<K, V> firstEntry();
+    Entry<K, V> lastEntry();
+    Entry<K, V> pollFirstEntry();
+    Entry<K, V> pollLastEntry();
+}
+```
 
 他们在 JCF 大家庭中的位置如下图所示：
 
 ![](./images/sequenced-collection.png)
+
+有了这些接口，对于所有的有序集合，我们都可以通过下面的方法来获取第一个和最后一个元素：
+
+```
+System.out.println("The first element is: " + list.getFirst());
+System.out.println("The last element is: " + list.getLast());
+```
+
+逆序遍历也变得格外简单：
+
+```
+list.reversed().forEach(it -> System.out.println(it));
+```
 
 ### 分代式 ZGC
 
