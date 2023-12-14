@@ -153,14 +153,6 @@
 * [External Debugging With JMXTerm](https://www.baeldung.com/java-jmxterm-external-debugging)
 * [Calling JMX MBean Method From a Shell Script](https://www.baeldung.com/jmx-mbean-shell-access)
 
-#### 垃圾回收
-
-* [7 kinds of garbage collection for Java](https://opensource.com/article/22/7/garbage-collection-java)
-* [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
-* [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
-* [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
-* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
-
 #### 内存分析
 
 * [Eclipse Memory Analyzer](https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.mat.ui.help%2Fwelcome.html)

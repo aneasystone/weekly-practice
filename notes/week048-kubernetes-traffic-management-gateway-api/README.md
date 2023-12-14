@@ -13,3 +13,4 @@ https://gateway-api.sigs.k8s.io/
 * [Kubernetes Gateway API 深入解读和落地指南](https://cloudnative.to/blog/kubernetes-gateway-api-explained/)
 * [Kubernetes Ingress Vs Gateway API](https://medium.com/google-cloud/kubernetes-ingress-vs-gateway-api-647ee233693d)
 * [Introducing ingress2gateway; Simplifying Upgrades to Gateway API](https://kubernetes.io/blog/2023/10/25/introducing-ingress2gateway/)
+* [Kubernetes Gateway API 正式发布并引入 ingress2gateway 项目用于简化 Gateway API 升级](https://cloudnative.to/blog/gateway-api-ingress2gateway/)

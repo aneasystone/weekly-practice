@@ -360,7 +360,42 @@ list.reversed().forEach(it -> System.out.println(it));
 
 ### 分代式 ZGC
 
-https://openjdk.org/jeps/439
+想要搞清楚 Java 21 中的 **分代式 ZGC（Generational ZGC）** 这个特性，我们需要先搞清楚什么是 ZGC。
+
+#### ZGC 简介
+
+[ZGC（The Z Garbage Collector）](https://wiki.openjdk.org/display/zgc) 是由 Oracle 开发的一款垃圾回收器，最初在 Java 11 中以实验性功能推出，并经过几个版本的迭代，最终在 Java 15 中被宣布为 [Production Ready](https://openjdk.org/jeps/377)，相比于其他的垃圾回收器，ZGC 更适用于大内存、低延迟服务的内存管理和回收。下图展示的是不同的垃圾回收器所专注的目标也各不相同：
+
+![](./images/gc-landscape.png)
+
+低延迟服务的最大敌人是 GC 停顿，所谓 GC 停顿指的是垃圾回收期间的 **STW（Stop The World）**，当 STW 时，所有的应用线程全部暂停，等待 GC 结束后才能继续运行。要想实现低延迟，就要想办法减少 GC 的停顿时间，根据 [JEP 333](https://openjdk.org/jeps/333) 的介绍，最初 ZGC 的目标是：
+
+* GC 停顿时间不超过 10ms；
+* 支持处理小到几百 MB，大到 TB 量级的堆；
+* 相对于使用 G1，应用吞吐量的降低不超过 15%；
+
+经过几年的发展，目前 ZGC 的最大停顿时间已经优化到了不超过 1 毫秒（Sub-millisecond，亚毫秒级），且停顿时间不会随着堆的增大而增加，甚至不会随着 live-set 或 root-set 的增大而增加（通过 [JEP 376 Concurrent Thread-Stack Processing](https://openjdk.org/jeps/376) 实现），支持处理最小 8MB，最大 16TB 的堆：
+
+![](./images/zgc-goals.png)
+
+ZGC 之所以能实现这么快的速度，不仅是因为它在算法上做了大量的优化和改进，而且还革命性的使用了大量的创新技术，包括：
+
+* Concurrent：全链路并发，ZGC 在整个垃圾回收阶段几乎全部实现了并发；
+* Region-based：和 G1 类似，ZGC 是一种基于区域的垃圾回收器；
+* Compacting：和 CMS、G1 一样，ZGC 使用了 **标记-复制算法**，该算法会产生内存碎片，所以要进行内存整理；
+* NUMA-aware：NUMA 全称 Non-Uniform Memory Access（非一致内存访问），是一种多内存访问技术，使用 NUMA，CPU 会访问离它最近的内存，提升读写效率；
+* Using colored pointers：染色指针是一种将数据存放在指针里的技术，JVM 是通过染色指针来标识某个对象是否需要被回收；
+* Using load barriers：当应用程序从堆中读取对象引用时，JIT 会向应用代码中注入一小段代码，这就是读屏障；通过读屏障操作，当对象地址发生转移时，不仅赋值的引用更改为最新值，自身引用也被修正了，整个过程看起来像是自愈；
+
+关于这些技术点，网上的参考资料有很多，有兴趣的同学可以通过本文的更多部分进一步学习。
+
+#### ZGC 工作流程
+
+https://www.yuanjava.cn/posts/ZGC/
+
+#### ZGC 实践
+
+
 
 ### 记录模式
 
@@ -422,6 +457,19 @@ https://openjdk.org/jeps/453
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
 
 ## 更多
+
+### 垃圾回收
+
+* [7 kinds of garbage collection for Java](https://opensource.com/article/22/7/garbage-collection-java)
+* [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
+* [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
+* [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
+* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
+* [Per Liden 的博客](https://malloc.se/)
+
+#### ZGC
+
+* [An Introduction to ZGC: A Scalable and Experimental Low-Latency JVM Garbage Collector](https://www.baeldung.com/jvm-zgc-garbage-collector)
 
 ### Java 历史版本特性一览
 
