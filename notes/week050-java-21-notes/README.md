@@ -129,6 +129,12 @@ $ java --enable-preview StringTemplates
 My name is zhangsan, I'm 18 years old.
 ```
 
+从 Java 11 开始，我们可以直接运行 `.java` 文件了，参见 [JEP 330](https://openjdk.org/jeps/330)，所以上面的两个命令也可以省略成一个命令：
+
+```
+$ java --enable-preview --source 21 StringTemplates.java
+```
+
 #### `STR` 模版处理器
 
 `STR` 模板处理器中的内嵌表达式还有很多其他写法，比如执行数学运算：
@@ -374,7 +380,7 @@ list.reversed().forEach(it -> System.out.println(it));
 * 支持处理小到几百 MB，大到 TB 量级的堆；
 * 相对于使用 G1，应用吞吐量的降低不超过 15%；
 
-经过几年的发展，目前 ZGC 的最大停顿时间已经优化到了不超过 1 毫秒（Sub-millisecond，亚毫秒级），且停顿时间不会随着堆的增大而增加，甚至不会随着 live-set 或 root-set 的增大而增加（通过 [JEP 376 Concurrent Thread-Stack Processing](https://openjdk.org/jeps/376) 实现），支持处理最小 8MB，最大 16TB 的堆：
+经过几年的发展，目前 ZGC 的最大停顿时间已经优化到了不超过 1 毫秒（Sub-millisecond，亚毫秒级），且停顿时间不会随着堆的增大而增加，甚至不会随着 root-set 或 live-set 的增大而增加（通过 [JEP 376 Concurrent Thread-Stack Processing](https://openjdk.org/jeps/376) 实现），支持处理最小 8MB，最大 16TB 的堆：
 
 ![](./images/zgc-goals.png)
 
@@ -382,12 +388,52 @@ ZGC 之所以能实现这么快的速度，不仅是因为它在算法上做了�
 
 * Concurrent：全链路并发，ZGC 在整个垃圾回收阶段几乎全部实现了并发；
 * Region-based：和 G1 类似，ZGC 是一种基于区域的垃圾回收器；
-* Compacting：和 CMS、G1 一样，ZGC 使用了 **标记-复制算法**，该算法会产生内存碎片，所以要进行内存整理；
+* Compacting：垃圾回收的过程中，ZGC 会产生内存碎片，所以要进行内存整理；
 * NUMA-aware：NUMA 全称 Non-Uniform Memory Access（非一致内存访问），是一种多内存访问技术，使用 NUMA，CPU 会访问离它最近的内存，提升读写效率；
-* Using colored pointers：染色指针是一种将数据存放在指针里的技术，JVM 是通过染色指针来标识某个对象是否需要被回收；
-* Using load barriers：当应用程序从堆中读取对象引用时，JIT 会向应用代码中注入一小段代码，这就是读屏障；通过读屏障操作，当对象地址发生转移时，不仅赋值的引用更改为最新值，自身引用也被修正了，整个过程看起来像是自愈；
+* Using colored pointers：染色指针是一种将数据存放在指针里的技术，ZGC 通过染色指针来标记对象，以及实现对象的多重视图；
+* Using load barriers：当应用程序从堆中读取对象引用时，JIT 会向应用代码中注入一小段代码，这就是读屏障；通过读屏障操作，不仅可以让应用线程帮助完成对象的标记，而且当对象地址发生变化时，还能自动实现对象转移和重定位；
 
-关于这些技术点，网上的参考资料有很多，有兴趣的同学可以通过本文的更多部分进一步学习。
+关于这些技术点，网上的参考资料有很多，有兴趣的同学可以通过本文的更多部分进一步学习，其中最有意思的莫过于 **染色指针** 和 **读屏障**，下面重点介绍这两项。
+
+#### 染色指针
+
+在 64 位的操作系统中，一个指针有 64 位，但是由于内存大小限制，其实有很多高阶位是用不上的，所以我们可以在指针的高阶位中嵌入一些元数据，这种在指针中存储元数据的技术就叫做 **染色指针（Colored Pointers）**。染色指针是 ZGC 的核心设计之一，以前的垃圾回收器都是使用对象头来标记对象，而 ZGC 则通过染色指针来标记对象。ZGC 将一个 64 位的指针划分成三个部分：
+
+![](./images/colored-pointers.png)
+
+其中，前面的 16 位暂时没用，预留给以后使用；后面的 44 位表示对象的地址，所以 ZGC 最大可以支持 2^44=16T 内存；中间的 4 位即染色位，分别是：
+
+* Finalizable：标识这个对象只能通过 Finalizer 才能访问；
+* Remapped：标识这个对象是否在转移集（Relocation Set）中；
+* Marked1：用于标记可到达的对象（活跃对象）；
+* Marked0：用于标记可到达的对象（活跃对象）；
+
+此外，染色指针不仅用来标记对象，还可以实现对象地址的多重视图，上述 Marked0、Marked1、Remapped 三个染色位其实代表了三种地址视图，分别对应三个虚拟地址，这三个虚拟地址指向同一个物理地址，并且在同一时间，三个虚拟地址有且只有一个有效，整个视图映射关系如下：
+
+![](./images/zgc-mmap.png)
+
+这三个地址视图的切换是由垃圾回收的不同阶段触发的：
+
+* 初始化阶段：初始化时，整个堆内存空间的地址视图被设置为 Remapped；
+* 标记阶段：当进入标记阶段时，视图转变为 Marked0 或者 Marked1；
+* 转移阶段：从标记阶段结束进入转移阶段时，视图再次被设置为 Remapped；
+
+#### 读屏障
+
+**读屏障（Load Barriers）** 是 ZGC 的另一项核心技术，当应用程序从堆中读取对象引用时，JIT 会向应用代码中注入一小段代码：
+
+![](./images/load-barriers.png)
+
+在上面的代码示例中，只有第一行是从堆中读取对象引用，所以只会在第一行后面注入代码，注入的代码类似于这样：
+
+```
+String n = person.name; // Loading an object reference from heap
+if (n & bad_bit_mask) {
+    slow_path(register_for(n), address_of(person.name));
+}
+```
+
+这行代码虽然简单，但是用途却很大，在垃圾回收的不同阶段，触发的逻辑也有所不同：在标记阶段，通过读屏障操作，可以让应用线程帮助 GC 线程一起完成对象的标记或重定位；在转移阶段，如果对象地址发生变化，还能自动实现对象转移。
 
 #### ZGC 工作流程
 
@@ -460,16 +506,33 @@ https://openjdk.org/jeps/453
 
 ### 垃圾回收
 
+* [常见的 GC 算法（GC 的背景与原理）](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/JVM%20%e6%a0%b8%e5%bf%83%e6%8a%80%e6%9c%af%2032%20%e8%ae%b2%ef%bc%88%e5%ae%8c%ef%bc%89/13%20%e5%b8%b8%e8%a7%81%e7%9a%84%20GC%20%e7%ae%97%e6%b3%95%ef%bc%88GC%20%e7%9a%84%e8%83%8c%e6%99%af%e4%b8%8e%e5%8e%9f%e7%90%86%ef%bc%89.md)
 * [7 kinds of garbage collection for Java](https://opensource.com/article/22/7/garbage-collection-java)
-* [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
-* [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
-* [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
-* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
 * [Per Liden 的博客](https://malloc.se/)
+* [Stefan Johansson 的博客](https://kstefanj.github.io/)
+    * [GC progress from JDK 8 to JDK 17](https://kstefanj.github.io/2021/11/24/gc-progress-8-17.html)
+    * [JDK 21: The GCs keep getting better](https://kstefanj.github.io/2023/12/13/jdk-21-the-gcs-keep-getting-better.html)
+    * [Hazelcast Jet on Generational ZGC](https://kstefanj.github.io/2023/11/07/hazelcast-on-generational-zgc.html)
 
 #### ZGC
 
 * [An Introduction to ZGC: A Scalable and Experimental Low-Latency JVM Garbage Collector](https://www.baeldung.com/jvm-zgc-garbage-collector)
+* [ZGC - Low Latency GC for OpenJDK](https://www.jfokus.se/jfokus18/preso/ZGC--Low-Latency-GC-for-OpenJDK.pdf)
+* [ZGC - The Next Generation Low-Latency Garbage Collector](https://cr.openjdk.org/~pliden/slides/ZGC-OracleDevLive-2020.pdf)
+* [一文读懂Java 11的ZGC为何如此高效](https://zhuanlan.zhihu.com/p/43608166)
+* [代表Java未来的ZGC深度剖析，牛逼！](https://heapdump.cn/article/679812)
+* [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
+* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
+
+#### G1
+
+* [G1 垃圾收集器原理详解](https://blog.csdn.net/a745233700/article/details/121724998)
+* [深入分析G1垃圾收集器实现原理](https://juejin.cn/post/7050324680875442183)
+* [Java 垃圾回收器之G1详解](https://pdai.tech/md/java/jvm/java-jvm-gc-g1.html)
+
+#### CMS
+
+* [Java中9种常见的CMS GC问题分析与解决](https://tech.meituan.com/2020/11/12/java-9-cms-gc.html)
 
 ### Java 历史版本特性一览
 
