@@ -489,6 +489,150 @@ ZGC 的后三个阶段统称为 **转移（Relocation）阶段**（也叫重定�
 
 #### ZGC 实践
 
+使用 `-XX:+PrintCommandLineFlags`，可以打印出 Java 的默认命令行参数：
+
+```
+$ java -XX:+PrintCommandLineFlags -version
+-XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=4 -XX:GCDrainStackTargetSize=64 -XX:InitialHeapSize=128639872 -XX:MarkStackSize=4194304 -XX:MaxHeapSize=2058237952 -XX:MinHeapSize=6815736 -XX:+PrintCommandLineFlags -XX:ReservedCodeCacheSize=251658240 -XX:+SegmentedCodeCache -XX:+UseCompressedOops -XX:+UseG1GC 
+openjdk version "21" 2023-09-19
+OpenJDK Runtime Environment (build 21+35-2513)
+OpenJDK 64-Bit Server VM (build 21+35-2513, mixed mode, sharing)
+```
+
+从上面的结果可以看出，Java 21 默认使用的仍然是 G1 垃圾回收器，它从 Java 9 就开始做为默认垃圾回收器了。
+
+> 注意：Java 8 中默认的垃圾回收器是 Parallel GC。
+
+如果想开启 ZGC，我们需要加上 `-XX:+UseZGC` 参数：
+
+```
+$ java -XX:+UseZGC -Xmx100M -Xlog:gc ZgcTest.java
+```
+
+其中 `-Xlog:gc` 参数表示打印出 GC 过程中的日志（就是 Java 8 的 `-XX:+PrintGC` 参数），输出结果如下：
+
+```
+[0.157s][info][gc] Using The Z Garbage Collector
+[0.420s][info][gc] GC(0) Garbage Collection (Warmup) 14M(14%)->12M(12%)
+[0.472s][info][gc] GC(1) Garbage Collection (System.gc()) 18M(18%)->8M(8%)
+```
+
+也可以使用 `-Xlog:gc*` 参数打印出 GC 过程中的详细日志（就是 Java 8 的 `-XX+PrintGCDetails` 参数），输出结果如下：
+
+```
+$ java -XX:+UseZGC -Xmx100M -Xlog:gc* ZgcTest.java
+[0.010s][info][gc,init] Initializing The Z Garbage Collector
+[0.011s][info][gc,init] Version: 21+35-2513 (release)
+[0.011s][info][gc,init] Using legacy single-generation mode
+[0.011s][info][gc,init] Probing address space for the highest valid bit: 47
+[0.011s][info][gc,init] NUMA Support: Disabled
+[0.011s][info][gc,init] CPUs: 4 total, 4 available
+[0.011s][info][gc,init] Memory: 7851M
+[0.011s][info][gc,init] Large Page Support: Disabled
+[0.011s][info][gc,init] GC Workers: 1 (dynamic)
+[0.011s][info][gc,init] Address Space Type: Contiguous/Unrestricted/Complete
+[0.011s][info][gc,init] Address Space Size: 1600M x 3 = 4800M
+[0.011s][info][gc,init] Heap Backing File: /memfd:java_heap
+[0.011s][info][gc,init] Heap Backing Filesystem: tmpfs (0x1021994)
+[0.012s][info][gc,init] Min Capacity: 8M
+[0.012s][info][gc,init] Initial Capacity: 100M
+[0.012s][info][gc,init] Max Capacity: 100M
+[0.012s][info][gc,init] Medium Page Size: N/A
+[0.012s][info][gc,init] Pre-touch: Disabled
+[0.012s][info][gc,init] Available space on backing filesystem: N/A
+[0.014s][info][gc,init] Uncommit: Enabled
+[0.014s][info][gc,init] Uncommit Delay: 300s
+[0.134s][info][gc,init] Runtime Workers: 1
+[0.134s][info][gc     ] Using The Z Garbage Collector
+[0.149s][info][gc,metaspace] CDS archive(s) mapped at: [0x0000006800000000-0x0000006800cb0000-0x0000006800cb0000), size 13303808, SharedBaseAddress: 0x0000006800000000, ArchiveRelocationMode: 1.
+[0.149s][info][gc,metaspace] Compressed class space mapped at: 0x0000006801000000-0x0000006841000000, reserved size: 1073741824
+[0.149s][info][gc,metaspace] Narrow klass base: 0x0000006800000000, Narrow klass shift: 0, Narrow klass range: 0x100000000
+[0.357s][info][gc,start    ] GC(0) Garbage Collection (Warmup)
+[0.357s][info][gc,task     ] GC(0) Using 1 workers
+[0.357s][info][gc,phases   ] GC(0) Pause Mark Start 0.007ms
+[0.366s][info][gc,phases   ] GC(0) Concurrent Mark 8.442ms
+[0.366s][info][gc,phases   ] GC(0) Pause Mark End 0.005ms
+[0.366s][info][gc,phases   ] GC(0) Concurrent Mark Free 0.000ms
+[0.367s][info][gc,phases   ] GC(0) Concurrent Process Non-Strong References 1.092ms
+[0.367s][info][gc,phases   ] GC(0) Concurrent Reset Relocation Set 0.000ms
+[0.373s][info][gc,phases   ] GC(0) Concurrent Select Relocation Set 5.587ms
+[0.373s][info][gc,phases   ] GC(0) Pause Relocate Start 0.003ms
+[0.375s][info][gc,phases   ] GC(0) Concurrent Relocate 2.239ms
+[0.375s][info][gc,load     ] GC(0) Load: 0.65/0.79/0.63
+[0.375s][info][gc,mmu      ] GC(0) MMU: 2ms/99.7%, 5ms/99.9%, 10ms/99.9%, 20ms/99.9%, 50ms/100.0%, 100ms/100.0%
+[0.375s][info][gc,marking  ] GC(0) Mark: 1 stripe(s), 2 proactive flush(es), 1 terminate flush(es), 0 completion(s), 0 continuation(s) 
+[0.375s][info][gc,marking  ] GC(0) Mark Stack Usage: 32M
+[0.375s][info][gc,nmethod  ] GC(0) NMethods: 889 registered, 90 unregistered
+[0.375s][info][gc,metaspace] GC(0) Metaspace: 8M used, 8M committed, 1088M reserved
+[0.375s][info][gc,ref      ] GC(0) Soft: 142 encountered, 0 discovered, 0 enqueued
+[0.375s][info][gc,ref      ] GC(0) Weak: 747 encountered, 602 discovered, 224 enqueued
+[0.375s][info][gc,ref      ] GC(0) Final: 0 encountered, 0 discovered, 0 enqueued
+[0.375s][info][gc,ref      ] GC(0) Phantom: 146 encountered, 144 discovered, 143 enqueued
+[0.375s][info][gc,reloc    ] GC(0) Small Pages: 7 / 14M, Empty: 0M, Relocated: 3M, In-Place: 0
+[0.375s][info][gc,reloc    ] GC(0) Large Pages: 1 / 2M, Empty: 0M, Relocated: 0M, In-Place: 0
+[0.375s][info][gc,reloc    ] GC(0) Forwarding Usage: 1M
+[0.375s][info][gc,heap     ] GC(0) Min Capacity: 8M(8%)
+[0.375s][info][gc,heap     ] GC(0) Max Capacity: 100M(100%)
+[0.375s][info][gc,heap     ] GC(0) Soft Max Capacity: 100M(100%)
+[0.375s][info][gc,heap     ] GC(0)                Mark Start          Mark End        Relocate Start      Relocate End           High               Low         
+[0.375s][info][gc,heap     ] GC(0)  Capacity:      100M (100%)        100M (100%)        100M (100%)        100M (100%)        100M (100%)        100M (100%)   
+[0.375s][info][gc,heap     ] GC(0)      Free:       84M (84%)          82M (82%)          82M (82%)          88M (88%)          88M (88%)          78M (78%)    
+[0.375s][info][gc,heap     ] GC(0)      Used:       16M (16%)          18M (18%)          18M (18%)          12M (12%)          22M (22%)          12M (12%)    
+[0.375s][info][gc,heap     ] GC(0)      Live:         -                 6M (6%)            6M (6%)            6M (6%)             -                  -          
+[0.375s][info][gc,heap     ] GC(0) Allocated:         -                 2M (2%)            2M (2%)            3M (4%)             -                  -          
+[0.375s][info][gc,heap     ] GC(0)   Garbage:         -                 9M (10%)           9M (10%)           1M (2%)             -                  -          
+[0.375s][info][gc,heap     ] GC(0) Reclaimed:         -                  -                 0M (0%)            7M (8%)             -                  -          
+[0.375s][info][gc          ] GC(0) Garbage Collection (Warmup) 16M(16%)->12M(12%)
+[0.403s][info][gc,start    ] GC(1) Garbage Collection (System.gc())
+[0.403s][info][gc,task     ] GC(1) Using 1 workers
+[0.403s][info][gc,phases   ] GC(1) Pause Mark Start 0.006ms
+[0.410s][info][gc,phases   ] GC(1) Concurrent Mark 7.316ms
+[0.410s][info][gc,phases   ] GC(1) Pause Mark End 0.006ms
+[0.410s][info][gc,phases   ] GC(1) Concurrent Mark Free 0.001ms
+[0.412s][info][gc,phases   ] GC(1) Concurrent Process Non-Strong References 1.621ms
+[0.412s][info][gc,phases   ] GC(1) Concurrent Reset Relocation Set 0.001ms
+[0.414s][info][gc,phases   ] GC(1) Concurrent Select Relocation Set 2.436ms
+[0.414s][info][gc,phases   ] GC(1) Pause Relocate Start 0.003ms
+[0.415s][info][gc,phases   ] GC(1) Concurrent Relocate 0.865ms
+[0.415s][info][gc,load     ] GC(1) Load: 0.65/0.79/0.63
+[0.415s][info][gc,mmu      ] GC(1) MMU: 2ms/99.7%, 5ms/99.8%, 10ms/99.9%, 20ms/99.9%, 50ms/100.0%, 100ms/100.0%
+[0.415s][info][gc,marking  ] GC(1) Mark: 1 stripe(s), 2 proactive flush(es), 1 terminate flush(es), 0 completion(s), 0 continuation(s) 
+[0.415s][info][gc,marking  ] GC(1) Mark Stack Usage: 32M
+[0.415s][info][gc,nmethod  ] GC(1) NMethods: 983 registered, 129 unregistered
+[0.415s][info][gc,metaspace] GC(1) Metaspace: 9M used, 9M committed, 1088M reserved
+[0.415s][info][gc,ref      ] GC(1) Soft: 155 encountered, 0 discovered, 0 enqueued
+[0.415s][info][gc,ref      ] GC(1) Weak: 729 encountered, 580 discovered, 58 enqueued
+[0.415s][info][gc,ref      ] GC(1) Final: 0 encountered, 0 discovered, 0 enqueued
+[0.415s][info][gc,ref      ] GC(1) Phantom: 49 encountered, 47 discovered, 46 enqueued
+[0.415s][info][gc,reloc    ] GC(1) Small Pages: 6 / 12M, Empty: 0M, Relocated: 1M, In-Place: 0
+[0.415s][info][gc,reloc    ] GC(1) Large Pages: 2 / 4M, Empty: 2M, Relocated: 0M, In-Place: 0
+[0.415s][info][gc,reloc    ] GC(1) Forwarding Usage: 0M
+[0.415s][info][gc,heap     ] GC(1) Min Capacity: 8M(8%)
+[0.415s][info][gc,heap     ] GC(1) Max Capacity: 100M(100%)
+[0.415s][info][gc,heap     ] GC(1) Soft Max Capacity: 100M(100%)
+[0.415s][info][gc,heap     ] GC(1)                Mark Start          Mark End        Relocate Start      Relocate End           High               Low         
+[0.415s][info][gc,heap     ] GC(1)  Capacity:      100M (100%)        100M (100%)        100M (100%)        100M (100%)        100M (100%)        100M (100%)   
+[0.415s][info][gc,heap     ] GC(1)      Free:       84M (84%)          84M (84%)          84M (84%)          92M (92%)          92M (92%)          82M (82%)    
+[0.415s][info][gc,heap     ] GC(1)      Used:       16M (16%)          16M (16%)          16M (16%)           8M (8%)           18M (18%)           8M (8%)     
+[0.415s][info][gc,heap     ] GC(1)      Live:         -                 4M (5%)            4M (5%)            4M (5%)             -                  -          
+[0.415s][info][gc,heap     ] GC(1) Allocated:         -                 0M (0%)            2M (2%)            2M (2%)             -                  -          
+[0.415s][info][gc,heap     ] GC(1)   Garbage:         -                11M (11%)           9M (9%)            1M (1%)             -                  -          
+[0.415s][info][gc,heap     ] GC(1) Reclaimed:         -                  -                 2M (2%)           10M (10%)            -                  -          
+[0.415s][info][gc          ] GC(1) Garbage Collection (System.gc()) 16M(16%)->8M(8%)
+[0.416s][info][gc,heap,exit] Heap
+[0.416s][info][gc,heap,exit]  ZHeap           used 8M, capacity 100M, max capacity 100M
+[0.416s][info][gc,heap,exit]  Metaspace       used 9379K, committed 9600K, reserved 1114112K
+[0.416s][info][gc,heap,exit]   class space    used 1083K, committed 1216K, reserved 1048576K
+```
+
+从日志中可以看到 ZGC 的整个过程。默认情况下并没有开启分代式 ZGC，如果想开启分代式 ZGC，我们还需要加上 `-XX:+ZGenerational` 参数：
+
+```
+$ java -XX:+UseZGC -XX:+ZGenerational -Xmx100M -Xlog:gc* ZgcTest.java
+```
+
+这个输出比较多，此处就省略了，从输出中可以看到不同分代的回收情况。关于 ZGC，还有很多微调参数，详细内容可参考 [ZGC 的官方文档](https://wiki.openjdk.org/display/zgc)。
+
 ### 记录模式
 
 https://openjdk.org/jeps/440
