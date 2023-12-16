@@ -82,7 +82,7 @@ OpenJDK 64-Bit Server VM (build 21+35-2513, mixed mode, sharing)
 * 452: [Key Encapsulation Mechanism API](https://openjdk.org/jeps/452)
 * 453: [Structured Concurrency (Preview)](https://openjdk.org/jeps/453)
 
-### 字符串模板
+### 字符串模板（预览版本）
 
 字符串模板是很多语言都具备的特性，它允许在字符串中使用占位符来动态替换变量的值，这种构建字符串的方式比传统的字符串拼接或格式化更为简洁和直观。相信学过 JavaScript 的同学对下面这个 [Template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) 的语法不陌生：
 
@@ -414,7 +414,7 @@ ZGC 之所以能实现这么快的速度，不仅是因为它在算法上做了�
 
 这三个地址视图的切换是由垃圾回收的不同阶段触发的：
 
-* 初始化阶段：初始化时，整个堆内存空间的地址视图被设置为 Remapped；
+* 初始化阶段：程序启动时，ZGC 完成初始化，整个堆内存空间的地址视图被设置为 Remapped；
 * 标记阶段：当进入标记阶段时，视图转变为 Marked0 或者 Marked1；
 * 转移阶段：从标记阶段结束进入转移阶段时，视图再次被设置为 Remapped；
 
@@ -437,11 +437,23 @@ if (n & bad_bit_mask) {
 
 #### ZGC 工作流程
 
-https://www.yuanjava.cn/posts/ZGC/
+整个 ZGC 可以划分成下面六个阶段：
+
+![](./images/zgc-phases.png)
+
+其中有三个是 STW 阶段，尽管如此，但是 ZGC 对 STW 的停顿时间有着严格的要求，一般不会超过 1 毫秒。这六个阶段的前三个可以统称为 **标记（Mark）阶段**：
+
+* Pause Mark Start - 标记开始阶段，将地址视图被设置成 Marked0 或 Marked1（交替设置）；这个阶段会 STW，它只标记 GC Roots 直接可达的对象，GC Roots 类似于局部变量，通过它可以访问堆上其他对象，这样的对象不会太多，所以 STW 时间很短；
+* Concurrent Mark/Remap - 并发标记阶段，GC 线程和应用线程是并发执行的，在第一步的基础上，继续往下标记存活的对象；另外，这个阶段还会对上一个 GC 周期留下来的失效指针进行重定位修复；
+* Pause Mark End - 标记结束阶段，由于并发标记阶段应用线程还在运行，所以可能会修改对象的引用，导致漏标，这个阶段会标记这些漏标的对象；
+
+ZGC 的后三个阶段统称为 **转移（Relocation）阶段**：
+
+* Concurrent Prepare for Relocate - 为转移阶段做准备，比如筛选所有可以被回收的页面，将垃圾比较多的页面作为接下来转移候选集（EC）；
+* Pause Relocate Start - 转移开始阶段，将地址视图从 Marked0 或者 Marked1 调整为 Remapped，从 GC Roots 出发，遍历根对象的直接引用的对象，对这些对象进行转移；
+* Concurrent Relocate - 并发转移阶段，将之前选中的转移集中存活的对象移到新的页面，转移完成的页面即可被回收掉，并发转移完成之后整个 ZGC 周期完成。注意这里只转移了对象，并没有对失效指针进行重定位，ZGC 通过转发表存储旧地址到新地址的映射，如果这个阶段应用线程访问这些失效指针，会触发读屏障机制自动修复，对于没有访问到的失效指针，要到下一个 GC 周期的并发标记阶段才会被修复。
 
 #### ZGC 实践
-
-
 
 ### 记录模式
 
@@ -451,11 +463,11 @@ https://openjdk.org/jeps/440
 
 https://openjdk.org/jeps/441
 
-### 外部函数和内存 API
+### 外部函数和内存 API（第三次预览版本）
 
 https://openjdk.org/jeps/442
 
-### 未命名模式和变量
+### 未命名模式和变量（预览版本）
 
 https://openjdk.org/jeps/443
 
@@ -463,15 +475,15 @@ https://openjdk.org/jeps/443
 
 https://openjdk.org/jeps/444
 
-### 未命名类和实例的 Main 方法
+### 未命名类和实例的 Main 方法（预览版本）
 
 https://openjdk.org/jeps/445
 
-### 作用域值
+### 作用域值（预览版本）
 
 https://openjdk.org/jeps/446
 
-### 向量 API
+### 向量 API（第六次孵化）
 
 https://openjdk.org/jeps/448
 
@@ -487,7 +499,7 @@ https://openjdk.org/jeps/451
 
 https://openjdk.org/jeps/452
 
-### 结构化并发
+### 结构化并发（预览版本）
 
 https://openjdk.org/jeps/453
 
@@ -507,6 +519,7 @@ https://openjdk.org/jeps/453
 ### 垃圾回收
 
 * [常见的 GC 算法（GC 的背景与原理）](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/JVM%20%e6%a0%b8%e5%bf%83%e6%8a%80%e6%9c%af%2032%20%e8%ae%b2%ef%bc%88%e5%ae%8c%ef%bc%89/13%20%e5%b8%b8%e8%a7%81%e7%9a%84%20GC%20%e7%ae%97%e6%b3%95%ef%bc%88GC%20%e7%9a%84%e8%83%8c%e6%99%af%e4%b8%8e%e5%8e%9f%e7%90%86%ef%bc%89.md)
+* [常见的 GC 算法（ParallelCMSG1）](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/JVM%20%e6%a0%b8%e5%bf%83%e6%8a%80%e6%9c%af%2032%20%e8%ae%b2%ef%bc%88%e5%ae%8c%ef%bc%89/14%20%e5%b8%b8%e8%a7%81%e7%9a%84%20GC%20%e7%ae%97%e6%b3%95%ef%bc%88ParallelCMSG1%ef%bc%89.md)
 * [7 kinds of garbage collection for Java](https://opensource.com/article/22/7/garbage-collection-java)
 * [Per Liden 的博客](https://malloc.se/)
 * [Stefan Johansson 的博客](https://kstefanj.github.io/)
@@ -522,7 +535,8 @@ https://openjdk.org/jeps/453
 * [一文读懂Java 11的ZGC为何如此高效](https://zhuanlan.zhihu.com/p/43608166)
 * [代表Java未来的ZGC深度剖析，牛逼！](https://heapdump.cn/article/679812)
 * [亚毫秒GC暂停到底有多香？JDK17+ZGC初体验](https://tech.dewu.com/article?id=59)
-* [ZGC关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
+* [ZGC 关键技术分析](https://my.oschina.net/u/5783135/blog/10120461)
+* [ZGC 最新一代垃圾回收器 | 程序员进阶](https://it-blog-cn.com/blogs/jvm/zgc.html)
 
 #### G1
 
