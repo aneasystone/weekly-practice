@@ -737,7 +737,48 @@ public class Point {
 
 #### 什么是记录模式（Record Patterns）？
 
-记录模式也经过了三个版本的迭代（[JEP 405](https://openjdk.org/jeps/405)、[JEP 432](https://openjdk.org/jeps/432)、[JEP 440](https://openjdk.org/jeps/440)）最终在 Java 21 中发布了正式版本。
+相信很多人都写过类似下面这样的代码：
+
+```
+if (obj instanceof Integer) {
+    int intValue = ((Integer) obj).intValue();
+    System.out.println(intValue);
+}
+```
+
+这段代码实际上做了三件事：
+
+* **Test**：测试 `obj` 的类型是否为 `Integer`；
+* **Conversion**：将 `obj` 的类型转换为 `Integer`；
+* **Destructuring**：从 `Integer` 类中提取出 `int` 值；
+
+这三个步骤构成了一种通用的模式：测试并进行强制类型转换，这种模式被称为 [模式匹配（Pattern Matching）](https://openjdk.org/projects/amber/design-notes/patterns/pattern-matching-for-java)。虽然简单，但是却很繁琐。Java 16 在 [JEP 394](https://openjdk.org/jeps/394) 中正式发布了 `instanceof` 模式匹配的特性，帮我们减少这种繁琐的条件状态提取：
+
+```
+if (obj instanceof Integer intValue) {
+    System.out.println(intValue);
+}
+```
+
+当它所匹配的类型是记录类时：
+
+```
+if (obj instanceof Point p) {
+    int x = p.x();
+    int y = p.y();
+    System.out.println(x + y);
+}
+```
+
+这里的测试和转换代码得到了简化，但是从记录类中提取值仍然不是很方便，但是从 Java 21 开始，我们可以进一步简化这行代码：
+
+```
+if (obj instanceof Point(int x, int y)) {
+    System.out.println(x + y);
+}
+```
+
+这就是 Java 21 中的 **记录模式（Record Patterns）** 特性，可以说它是 `instanceof` 模式匹配的一个特例，记录模式也经过了三个版本的迭代（[JEP 405](https://openjdk.org/jeps/405)、[JEP 432](https://openjdk.org/jeps/432)、[JEP 440](https://openjdk.org/jeps/440)）现在终于在 Java 21 中发布了正式版本。
 
 ### `switch` 模式匹配
 

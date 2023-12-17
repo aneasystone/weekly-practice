@@ -8,6 +8,8 @@ public class RecordPattern {
 
     public static void main(String[] args) {
         test_records();
+        test_instanceof_pattern_matching(100);
+        test_record_pattern(new Point(10, 20));
     }
 
     private static void test_records() {
@@ -19,5 +21,26 @@ public class RecordPattern {
         System.out.println("p2 is " + p2);
         System.out.println("p1 " + (p1.equals(p2) ? "==" : "!=") + " p2");
         System.out.println(p1.isOrigin());
+    }
+
+    private static void test_instanceof_pattern_matching(Object obj) {
+        if (obj instanceof Integer) {
+            int intValue = ((Integer) obj).intValue();
+            System.out.println(intValue);
+        }
+        if (obj instanceof Integer intValue) {
+            System.out.println(intValue);
+        }
+    }
+
+    private static void test_record_pattern(Object obj) {
+        if (obj instanceof Point p) {
+            int x = p.x();
+            int y = p.y();
+            System.out.println(x + y);
+        }
+        if (obj instanceof Point(int x, int y)) {
+            System.out.println(x + y);
+        }
     }
 }
