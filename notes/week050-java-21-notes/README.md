@@ -635,7 +635,109 @@ $ java -XX:+UseZGC -XX:+ZGenerational -Xmx100M -Xlog:gc* ZgcTest.java
 
 ### 记录模式
 
-https://openjdk.org/jeps/440
+**记录模式（Record Patterns）** 是对 **记录类（Records）** 这个特性的延伸，所以，我们先大致了解下什么是记录类，然后再来看看什么是记录模式。
+
+#### 什么是记录类（Records）？
+
+记录类早在 Java 14 就已经引入了，它类似于 Tuple，提供了一种更简洁、更紧凑的方式来表示不可变数据，记录类经过三个版本的迭代（[JEP 359](https://openjdk.org/jeps/359)、[JEP 384](https://openjdk.org/jeps/384)、[JEP 395](https://openjdk.org/jeps/395)），最终在 Java 16 中发布了正式版本。
+
+记录类的概念在其他编程语言中其实早已有之，比如 Kotlin 的 [Data class](https://kotlinlang.org/docs/data-classes.html) 或者 Scala 的 [Case class](https://docs.scala-lang.org/tour/case-classes.html)。它本质上依然是一个类，只不过使用关键字 `record` 来定义：
+
+```
+record Point(int x, int y) { }
+```
+
+记录类的定义非常灵活，我们可以在单独文件中定义，也可以在类内部定义，甚至在函数内部定义。记录类的使用和普通类无异，使用 `new` 创建即可：
+
+```
+Point p1 = new Point(10, 20);
+System.out.println("x = " + p1.x());
+System.out.println("y = " + p1.y());
+System.out.println("p1 is " + p1.toString());
+```
+
+记录类具备如下特点：
+
+* 它是一个 `final` 类；
+* 它不能继承其他类，也不能继承其他记录类；
+* 它的所有字段也是 `final` 的，所以一旦创建就不能修改；
+* 它内置实现了构造函数，函数参数就是所有的字段；
+* 它内置实现了所有字段的 `getter` 方法，没有 `setter` 方法；
+* 它内置实现了 `equals()`、`hashCode()` 和 `toString()` 函数；
+
+所以上面的示例和下面的 `Point` 类是等价的：
+
+```
+public final class Point {
+    final int x;
+    final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int x() {
+        return x;
+    }
+
+    public int y() {
+        return y;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Point{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
+}
+```
+
+我们也可以在记录类中声明新的方法：
+
+```
+record Point(int x, int y) {
+    boolean isOrigin() {
+        return x == 0 && y == 0;
+    }
+}
+```
+
+记录类的很多特性和 [Lombok](https://projectlombok.org/) 非常类似，比如下面通过 Lombok 的 `@Value` 注解创建一个不可变对象：
+
+```
+@Value
+public class Point {
+    int x;
+    int y;
+}
+```
+
+不过记录类和 Lombok 还是有一些区别的：
+
+* 根据 [JEP 395](https://openjdk.org/jeps/395) 的描述，记录类是作为不可变数据的透明载体，也就是说记录类无法隐藏字段；然而，Lombok 允许我们修改字段名称和访问级别；
+* 记录类适合创建小型对象，当类中存在很多字段时，记录类会变得非常臃肿；使用 Lombok 的 `@Builder` 构建器模式可以写出更干净的代码；
+* 记录类只能创建不可变对象，而 Lombok 的 `@Data` 可以创建可变对象；
+* 记录类不支持继承，但是 Lombok 创建的类可以继承其他类或被其他类继承；
+
+#### 什么是记录模式（Record Patterns）？
+
+记录模式也经过了三个版本的迭代（[JEP 405](https://openjdk.org/jeps/405)、[JEP 432](https://openjdk.org/jeps/432)、[JEP 440](https://openjdk.org/jeps/440)）最终在 Java 21 中发布了正式版本。
 
 ### `switch` 模式匹配
 
@@ -691,6 +793,7 @@ https://openjdk.org/jeps/453
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
 * [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
+* [Java record vs Lombok，谁更胜一筹？](https://www.51cto.com/article/714379.html)
 
 ## 更多
 
