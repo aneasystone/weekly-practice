@@ -4,12 +4,17 @@ record Point(int x, int y) {
     }
 }
 
+record Address(String province, String city) {}
+record Person(String name, Integer age, Address address) {}
+
 public class RecordPattern {
 
     public static void main(String[] args) {
         test_records();
         test_instanceof_pattern_matching(100);
         test_record_pattern(new Point(10, 20));
+        test_record_pattern_nested(new Person("Zhangsan", 18, new Address("Anhui", "Hefei")));
+        test_record_pattern_nested(new Person("Lisi", 20, null));
     }
 
     private static void test_records() {
@@ -41,6 +46,18 @@ public class RecordPattern {
         }
         if (obj instanceof Point(int x, int y)) {
             System.out.println(x + y);
+        }
+    }
+
+    private static void test_record_pattern_nested(Object obj) {
+        if (obj instanceof Person(String name, Integer age, Address address)) {
+            System.out.println("Name: " + name);
+            System.out.println("Age: " + age);
+        }
+        if (obj instanceof Person(String name, Integer age, Address(String province, String city))) {
+            System.out.println("Name: " + name);
+            System.out.println("Age: " + age);
+            System.out.println("Address: " + province + " " + city);
         }
     }
 }

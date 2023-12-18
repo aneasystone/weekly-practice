@@ -752,7 +752,7 @@ if (obj instanceof Integer) {
 * **Conversion**：将 `obj` 的类型转换为 `Integer`；
 * **Destructuring**：从 `Integer` 类中提取出 `int` 值；
 
-这三个步骤构成了一种通用的模式：测试并进行强制类型转换，这种模式被称为 [模式匹配（Pattern Matching）](https://openjdk.org/projects/amber/design-notes/patterns/pattern-matching-for-java)。虽然简单，但是却很繁琐。Java 16 在 [JEP 394](https://openjdk.org/jeps/394) 中正式发布了 `instanceof` 模式匹配的特性，帮我们减少这种繁琐的条件状态提取：
+这三个步骤构成了一种通用的模式：测试并进行强制类型转换，这种模式被称为 [模式匹配（Pattern Matching）](https://openjdk.org/projects/amber/design-notes/patterns/pattern-matching-for-java)。虽然简单，但是却很繁琐。Java 16 在 [JEP 394](https://openjdk.org/jeps/394) 中正式发布了 **`instanceof` 模式匹配** 的特性，帮我们减少这种繁琐的条件状态提取：
 
 ```
 if (obj instanceof Integer intValue) {
@@ -760,7 +760,9 @@ if (obj instanceof Integer intValue) {
 }
 ```
 
-当它所匹配的类型是记录类时：
+这里的 `Integer intValue` 被称为 **类型模式（Type Patterns）**，其中 `Integer` 是匹配的断言，`intValue` 是匹配成功后的变量，这个变量可以直接使用，不需要再进行类型转换了。
+
+匹配的断言也支持记录类：
 
 ```
 if (obj instanceof Point p) {
@@ -770,7 +772,7 @@ if (obj instanceof Point p) {
 }
 ```
 
-这里的测试和转换代码得到了简化，但是从记录类中提取值仍然不是很方便，但是从 Java 21 开始，我们可以进一步简化这行代码：
+不过，这里虽然测试和转换代码得到了简化，但是从记录类中提取值仍然不是很方便，我们还可以进一步简化这段代码：
 
 ```
 if (obj instanceof Point(int x, int y)) {
@@ -778,7 +780,26 @@ if (obj instanceof Point(int x, int y)) {
 }
 ```
 
-这就是 Java 21 中的 **记录模式（Record Patterns）** 特性，可以说它是 `instanceof` 模式匹配的一个特例，记录模式也经过了三个版本的迭代（[JEP 405](https://openjdk.org/jeps/405)、[JEP 432](https://openjdk.org/jeps/432)、[JEP 440](https://openjdk.org/jeps/440)）现在终于在 Java 21 中发布了正式版本。
+这里的 `Point(int x, int y)` 就是 Java 21 中的 **记录模式（Record Patterns）**，可以说它是 `instanceof` 模式匹配的一个特例，专门用于从记录类中提取数据；记录模式也经过了三个版本的迭代：[JEP 405](https://openjdk.org/jeps/405)、[JEP 432](https://openjdk.org/jeps/432) 和 [JEP 440](https://openjdk.org/jeps/440)，现在终于在 Java 21 中发布了正式版本。
+
+此外，记录模式还支持嵌套，我们可以在记录模式中嵌套另一个模式，假设有下面两个记录类：
+
+```
+record Address(String province, String city) {}
+record Person(String name, Integer age, Address address) {}
+```
+
+我们可以一次性提取出外部记录和内部记录的值：
+
+```
+if (obj instanceof Person(String name, Integer age, Address(String province, String city))) {
+    System.out.println("Name: " + name);
+    System.out.println("Age: " + age);
+    System.out.println("Address: " + province + " " + city);
+}
+```
+
+仔细体会上面的代码，是不是非常优雅？
 
 ### `switch` 模式匹配
 
@@ -835,6 +856,7 @@ https://openjdk.org/jeps/453
 * [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
 * [Java record vs Lombok，谁更胜一筹？](https://www.51cto.com/article/714379.html)
+* [Record Patterns in Java 21 - Sip of Java](https://inside.java/2023/11/06/sip087/)
 
 ## 更多
 
