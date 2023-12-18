@@ -803,7 +803,49 @@ if (obj instanceof Person(String name, Integer age, Address(String province, Str
 
 ### `switch` 模式匹配
 
-https://openjdk.org/jeps/441
+上面学习了 **`instanceof` 模式匹配**，其实还有另一种模式匹配叫做 **`switch` 模式匹配**，这个特性经历了 [JEP 406](https://openjdk.org/jeps/406)、[JEP 420](https://openjdk.org/jeps/420)、[JEP 427](https://openjdk.org/jeps/427)、[JEP 433](https://openjdk.org/jeps/433)  和 [JEP 441](https://openjdk.org/jeps/441) 五个版本的迭代，从 Java 17 开始首个预览版本到 Java 21 正式发布足足开发了 2 年时间。
+
+在介绍这个功能之前，有一个前置知识点需要复习一下：在 Java 14 中发布了一个特性叫做 [Switch Expressions](https://openjdk.org/jeps/361)，这个特性允许我们在 `case` 中使用 Lambda 表达式来简化 `switch` 语句的写法：
+
+```
+int result = switch (type) {
+    case "child" -> 0;
+    case "adult" -> 1;
+    default -> -1;
+};
+System.out.println(result);
+```
+
+这种写法不仅省去了繁琐的 `break` 关键词，而且 `switch` 作为表达式可以直接赋值给一个变量。**`switch` 模式匹配** 则更进一步，允许我们在 `case` 语句中进行类型的测试和转换，下面是 `switch` 模式匹配的一个示例：
+
+```
+String formatted = switch (obj) {
+    case Integer i -> String.format("int %d", i);
+    case Long l    -> String.format("long %d", l);
+    case Double d  -> String.format("double %f", d);
+    case String s  -> String.format("string %s", s);
+    default        -> "unknown";
+};
+System.out.println(formatted);
+```
+
+作为对比，如果不使用 `switch` 模式匹配，我们只能写出下面这样的面条式代码：
+
+```
+String formatted;
+if (obj instanceof Integer i) {
+    formatted = String.format("int %d", i);
+} else if (obj instanceof Long l) {
+    formatted = String.format("long %d", l);
+} else if (obj instanceof Double d) {
+    formatted = String.format("double %f", d);
+} else if (obj instanceof String s) {
+    formatted = String.format("string %s", s);
+} else {
+    formatted = "unknown";
+}
+System.out.println(formatted);
+```
 
 ### 外部函数和内存 API（第三次预览版本）
 
