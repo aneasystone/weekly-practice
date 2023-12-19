@@ -43,6 +43,9 @@
 
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
+* [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
+* [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
+* [初步探索GraalVM--云原生时代JVM黑科技](https://developer.jdcloud.com/article/2446)
 
 ### Java Agent
 
@@ -134,11 +137,15 @@
 
 ### gRPC
 
-* [ProtoBuf 教程](https://www.wdbyte.com/tool/protobuf/)
 * [理解 gRPC 协议](https://taoshu.in/grpc.html)
-* [Protocol Buffers 编码](https://taoshu.in/pb-encoding.html)
 * [Introduction to gRPC with Spring Boot](https://piotrminkowski.com/2023/08/29/introduction-to-grpc-with-spring-boot/)
 * [在 kubernetes 环境中实现 gRPC 负载均衡](https://crossoverjie.top/2023/10/16/ob/k8s-grpc-lb/)
+
+### Protocol Buffers
+
+* [ProtoBuf 教程](https://www.wdbyte.com/tool/protobuf/)
+* [Protocol Buffers 编码](https://taoshu.in/pb-encoding.html)
+* [数据序列化组件PB与FB对比](https://juzii.gitee.io/2020/03/02/protobuf-vs-flatbuffer/)
 
 ### 零拷贝
 
@@ -426,6 +433,7 @@
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
 * [Linux 网络延迟故障排查](https://z.itpub.net/article/detail/B4C1A280915C008AFE190AACAB45A5CB)
 * [生产Nginx现大量TIME-WAIT，连接耗尽，该如何处理？](https://mp.weixin.qq.com/s/U3ukNQOmsKmfHI20TFSxoQ)
+* [如何分析系统的负载？生产排错必备技能](https://www.yuanjava.cn/posts/load-average/)
 
 ### 网络
 

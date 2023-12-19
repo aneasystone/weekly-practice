@@ -129,6 +129,8 @@
 
 ### 日常办公
 
+* [WPS AI](https://ai.wps.cn/)
+
 #### 写作助手
 
 * [Notion AI](https://www.notion.so/product/ai) - Work faster. Write better. Think bigger.
@@ -357,6 +359,7 @@
 * [EduChat](https://github.com/icalk-nlp/EduChat) - 华东师范大学
 * [Linly](https://github.com/CVI-SZU/Linly) - 深圳大学计算机视觉研究所
 * [MiLM-6B](https://github.com/XiaoMi/MiLM-6B) - 小米
+* [蓝心大模型](https://developers.vivo.com/product/ai/bluelm) - vivo
 
 ### 领域大模型
 
@@ -610,6 +613,7 @@
 
 ## 词嵌入
 
+* [GloVe](https://nlp.stanford.edu/projects/glove/) - Global Vectors for Word Representation
 * [BERT](https://github.com/google-research/bert)
 * [SentenceTransformers](https://www.sbert.net/)
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models
