@@ -11,12 +11,6 @@
 
 * [ChatGPT平替模型：LLaMA](https://zhuanlan.zhihu.com/p/614118339)
 
-### 提示工程
-
-* [Prompt Engineering | Lil'Log](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
-* [The Prompt Landscape](https://blog.langchain.dev/the-prompt-landscape/)
-* [检索增强生成 (RAG) | Prompt Engineering Guide](https://www.promptingguide.ai/zh/techniques/rag)
-
 ### Structured Extraction
 
 * [Instructor (openai_function_call)](https://jxnl.github.io/instructor/)
