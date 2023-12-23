@@ -265,12 +265,6 @@
 * [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
 * [Uberduck](https://www.uberduck.ai/) - Make Music with AI Vocals
 
-#### 语音合成
-
-* [Coqui](https://coqui.ai/) - Clone your voice in seconds or choose from our available AI voices
-* [Resemble](https://www.resemble.ai/) - AI Voice Generator with Text-to-Speech and Speech-to-Speech
-* [voice.ai](https://voice.ai/) - Free Real Time Voice Changer
-
 #### 语音识别
 
 * [openai/whisper](https://github.com/openai/whisper) - Robust Speech Recognition via Large-Scale Weak Supervision
@@ -311,6 +305,13 @@
 * [Hugging Face](https://huggingface.co/)
 * [Civitai](https://civitai.com/)
 * [魔搭社区 ModelScope](https://modelscope.cn/home)
+* [DeviantArt](https://www.deviantart.com/) - The Largest Online Art Gallery and Community
+* [CodeWithGPU](https://www.codewithgpu.com/image) - 能复现才是好算法
+    * [CG文档中心](https://www.codewithgpu.com/docs/)
+
+### GPU 租用
+
+* [AutoDL 算力云](https://www.autodl.com/home) - 弹性、好用、省钱，租 GPU 就上 AutoDL
 
 ## 大语言模型
 
@@ -359,7 +360,9 @@
 * [EduChat](https://github.com/icalk-nlp/EduChat) - 华东师范大学
 * [Linly](https://github.com/CVI-SZU/Linly) - 深圳大学计算机视觉研究所
 * [MiLM-6B](https://github.com/XiaoMi/MiLM-6B) - 小米
+* [LingoWhale-8B](https://github.com/DeepLangAI/LingoWhale-8B) - 深言科技联合清华大学NLP实验室开源语鲸-8B模型
 * [蓝心大模型](https://developers.vivo.com/product/ai/bluelm) - vivo
+* [零一万物](https://www.01.ai/)
 
 ### 领域大模型
 
@@ -481,6 +484,8 @@
 * [LangKit](https://github.com/whylabs/langkit) - An open-source toolkit for monitoring Language Learning Models.
 * [Rivet](https://github.com/Ironclad/rivet) - The open-source visual AI programming environment and TypeScript library
 * [Semantic Kernel](https://github.com/microsoft/semantic-kernel) - Integrate cutting-edge LLM technology quickly and easily into your apps
+* [Embedchain](https://github.com/embedchain/embedchain) - The Open Source RAG framework
+    * [EmbedChain：比LangChain更加轻量化的LLM框架](https://zhuanlan.zhihu.com/p/662973975)
 
 ### 工作流
 
@@ -524,9 +529,11 @@
 * [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
 * [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
 * [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
+* [SkyPilot](https://github.com/skypilot-org/skypilot) - Run LLMs, AI, and Batch jobs on any cloud
 
 ### 模型评估
 
+* [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
 * [SuperCLUE琅琊榜](https://www.superclueai.com/) - 中文通用大模型匿名对战评价基准
 
 ### 理论学习
@@ -613,10 +620,12 @@
 
 ## 词嵌入
 
+* [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings)
+* [Voyage](https://www.voyageai.com/) - Voyage AI provides cutting-edge embedding/vectorizations models.
+* [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Dense Retrieval and Retrieval-augmented LLMs
 * [GloVe](https://nlp.stanford.edu/projects/glove/) - Global Vectors for Word Representation
 * [BERT](https://github.com/google-research/bert)
 * [SentenceTransformers](https://www.sbert.net/)
-* [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Open-source Embedding Models and Ranking Models
 
 ### ANN
 

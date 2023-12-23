@@ -6,6 +6,9 @@
 
 * [Query Transformations](https://blog.langchain.dev/query-transformations/)
 * [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
+* [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
+* [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
+* [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 
 ### 实战 LLaMA
 
