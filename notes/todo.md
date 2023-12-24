@@ -251,6 +251,10 @@
 
 * [要魔改Kubernetes，我们可以从哪里扩展](https://mp.weixin.qq.com/s/AtrluQNkKHpLFjVvp_BYBg)
 
+### Kubernetes Operator
+
+* [How to create a Kubernetes Operator ?](https://blog.devgenius.io/how-to-create-a-kubernetes-operator-e2fb3c215e5b)
+
 ### 学习 Kubernetes 的用户认证
 
 * [Using RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)

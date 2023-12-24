@@ -362,20 +362,28 @@
 * [MiLM-6B](https://github.com/XiaoMi/MiLM-6B) - 小米
 * [LingoWhale-8B](https://github.com/DeepLangAI/LingoWhale-8B) - 深言科技联合清华大学NLP实验室开源语鲸-8B模型
 * [蓝心大模型](https://developers.vivo.com/product/ai/bluelm) - vivo
+    * [vivo-ai-lab/BlueLM](https://github.com/vivo-ai-lab/BlueLM)
 * [零一万物](https://www.01.ai/)
+* [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
 
 ### 领域大模型
 
 * 学而思 [MathGPT](https://www.mathgpt.com/) - 教育
 * 彭博社 [BloombergGPT](https://arxiv.org/abs/2303.17564) - 金融
 * 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
-* [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 法律
 * [MediaGPT](https://github.com/IMOSR/MediaGPT) - 中文自媒体大模型
 * [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
 * [TransGPT](https://github.com/DUOMO/TransGPT) - 交通大模型
 * [MathGLM](https://github.com/THUDM/MathGLM) - GPT Can Solve Mathematical Problems Without a Calculator
 * [OpenBioMed](https://github.com/PharMolix/OpenBioMed) - 多模态生物医药大模型
 * [HyenaDNA](https://github.com/HazyResearch/hyena-dna) - a long-range genomic foundation model built with Hyena
+
+#### 法律
+
+* [LaWGPT](https://github.com/pengxiao-song/LaWGPT/) - 基于中文法律知识的大语言模型
+* [ChatLaw](https://chatlaw.cloud/) - 面向未来的法律人工智能
+    * [PKU-YuanGroup/ChatLaw](https://github.com/PKU-YuanGroup/ChatLaw)
+* [LexiLaw](https://github.com/CSHaitao/LexiLaw) - 中文法律大模型
 
 ### 国外大模型
 
@@ -505,6 +513,7 @@
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 * [Generative Agents](https://github.com/joonspk-research/generative_agents) - Interactive Simulacra of Human Behavior
 * [XAgent](https://github.com/OpenBMB/XAgent) - An Autonomous LLM Agent for Complex Task Solving
+* [OpenAgents](https://github.com/xlang-ai/OpenAgents) - An Open Platform for Language Agents in the Wild
 
 ### RPA
 
