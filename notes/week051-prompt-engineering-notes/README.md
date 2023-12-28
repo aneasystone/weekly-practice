@@ -84,7 +84,7 @@ The OpenAI API can be applied to virtually any task that involves understanding 
 使用 3 到 5 句话描述该产品。
 ```
 
-### 通过示例输出格式
+### 通过示例明确输出的格式
 
 我们如果对模型的输出格式有特殊要求，最好提供几个示例，比如下面这个例子：
 
@@ -104,11 +104,81 @@ The OpenAI API can be applied to virtually any task that involves understanding 
 
 这样的输出格式有一个好处，我们可以在程序中对大模型的输出进行可靠地解析。
 
-https://www.learnprompt.pro/article/gptUseCase
+### 避免说不要做什么
 
-https://www.promptingguide.ai/zh/introduction/tips
+设计提示词的另一个常见技巧是避免说不要做什么，而是说要做什么。下面是一个反例：
 
-https://platform.openai.com/docs/guides/prompt-engineering
+```
+下面是客户和代理商之间的对话。不要问客户的用户名和密码。不要重复回复的内容。
+
+客户：我登录不了我的账号
+代理商：
+```
+
+改成下面这样会更好：
+
+```
+下面是客户和代理商之间的对话。代理商将尝试诊断问题并给出解决方案，同时避免询问客户的个人信息（如用户名和密码），当涉及到这些信息时，建议用户访问帮助文档：www.samplewebsite.com/help/faq
+
+客户：我登录不了我的账号
+代理商：
+```
+
+### 角色扮演
+
+当我们使用大模型构建一个客服聊天机器人之类的对话系统时，可以在提示词中明确它的身份和意图，就像玩角色扮演一样，比如：
+
+```
+我希望你扮演面试官的角色。我会充当一名 Java 开发工程师的候选人，然后你要问我关于这个职位的面试问题。你要像面试官一样说话。
+不要一次写下所有的对话，不要写解释，像面试官一样一个接一个地问我问题，然后等待我的答复。我的第一句话是 “你好”。
+```
+
+这时大模型就变成了一位 Java 面试官，这种技巧有时也被称为 **角色提示（Role Prompting）**。你也可以尝试其他角色，比如教师、小说家、医生、足球评论员，甚至可以让它扮演 Linux 终端、浏览器、Python 执行器等等，这里有大量案例可供参考：[Awesome ChatGPT Prompts](https://github.com/f/awesome-chatgpt-prompts)。
+
+## 提示词框架
+
+上面提到，一个提示词是由指令、上下文、输入数据和输出指示这几个要素中的一个或多个组成的，这其实就为如何编写提示词提供了一个基础框架，最初由 Elavis Saravia 在 [《Prompt Engineering Guide》](https://www.promptingguide.ai/introduction/elements) 中总结的。
+
+除此之外，还有一些提示词框架对提示词的格式和内容做了更明确的定义，比如 Matt Nigh 的 [CRISPE 框架](https://github.com/mattnigh/ChatGPT3-Free-Prompt-List)：
+
+* CR： Capacity and Role（能力与角色）。你希望 ChatGPT 扮演怎样的角色。
+* I： Insight（洞察力），背景信息和上下文。
+* S： Statement（指令），你希望 ChatGPT 做什么。
+* P： Personality（个性），你希望 ChatGPT 以什么风格或方式回答你。
+* E： Experiment（实验），要求 ChatGPT 为你提供多个答案。
+
+云中江树的 [结构化提示词](https://github.com/EmbraceAGI/LangGPT)：
+
+```
+# Role: Your_Role_Name
+
+## Profile
+
+- Author: YZFly
+- Version: 0.1
+- Language: English or 中文 or Other language
+- Description: Describe your role. Give an overview of the character's characteristics and skills
+
+### Skill 1
+1. xxx
+2. xxx
+
+### Skill 2
+1. xxx
+2. xxx
+
+## Rules
+1. Don't break character under any circumstance.
+2. Don't talk nonsense and make up facts.
+
+## Workflow
+1. First, xxx
+2. Then, xxx
+3. Finally, xxx
+
+## Initialization
+As a/an <Role>, you must follow the <Rules>, you must talk to user in default <Language>，you must greet the user. Then introduce yourself and introduce the <Workflow>.
+```
 
 ## 提示工程技术
 
@@ -171,15 +241,26 @@ https://www.promptingguide.ai/zh/techniques/graph
 ## 参考
 
 * [提示工程指南](https://www.promptingguide.ai/zh/)
+* [Learn Prompt](https://www.learnprompt.pro/)
+* [Learn Prompting](https://learnprompting.org/zh-Hans/docs/intro)
+* [Learning Prompt](https://learningprompt.wiki/)
 * [Prompt Engineering | Lil'Log](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
 * [Brex's Prompt Engineering Guide](https://github.com/brexhq/prompt-engineering)
 * [The Prompt Landscape](https://blog.langchain.dev/the-prompt-landscape/)
-* [Learn Prompt](https://www.learnprompt.pro/)
-* [Learning Prompt](https://learningprompt.wiki/)
 * [HuggingLLM](https://github.com/datawhalechina/hugging-llm)
 * [OpenAI Cookbook](https://github.com/openai/openai-cookbook)
+* [Best practices for prompt engineering with OpenAI API](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api)
+* [OpenAI 官方提示工程指南 [译]](https://baoyu.io/translations/openai/openai-prompt-engineering-guides)
 
 ## 更多
+
+### 结构化 Prompt
+
+* [如何写好Prompt: 结构化](https://www.lijigang.com/posts/chatgpt-prompt-structure/)
+* [LangGPT 结构化提示词](https://aq92z6vors3.feishu.cn/wiki/RXdbwRyASiShtDky381ciwFEnpe)
+* [LangGPT — Empowering everyone to create high-quality prompts!](https://github.com/EmbraceAGI/LangGPT)
+* [Mr. Ranedeer: Your personalized AI Tutor!](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor)
+* [CRISPE Prompt Framework](https://github.com/mattnigh/ChatGPT3-Free-Prompt-List)
 
 ### 应用产品
 
