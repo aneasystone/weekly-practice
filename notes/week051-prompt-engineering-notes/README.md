@@ -8,17 +8,18 @@
 
 所谓提示词，说白了就是我们给大模型下发的指令，提示词写对了，大模型才能输出相应的结果，提示词写的越好，大模型输出的结果就越准确。提示词由下面的一个或多个要素组成：
 
-* **指令**：给模型下达指令，或者描述要执行的任务；
-* **上下文**：给模型提供额外的上下文信息，引导模型更好地响应；
-* **输入数据**：用户输入的内容或问题；
-* **输出指示**：指定输出的类型或格式；
+* **指令（Instruction）**：给模型下达指令，或者描述要执行的任务；
+* **上下文（Context）**：给模型提供额外的上下文信息，引导模型更好地响应；
+* **输入数据（Input Data）**：用户输入的内容或问题；
+* **输出指示（Output Indicator）**：指定输出的类型或格式；
 
 提示词所需的格式取决于你完成的任务类型，并非所有以上要素都是必须的。比如在前面的笔记中，我通过下面的提示词实现了英汉翻译：
 
 ```
 Translate this into Simplified Chinese:
 
-The OpenAI API can be applied to virtually any task that involves understanding or generating natural language, code, or images.
+The OpenAI API can be applied to virtually any task that involves understanding or generating natural language, 
+code, or images.
 ```
 
 这个提示词只包含了 **指令** 和 **输入数据** 两个部分。我还通过下面的提示词实现了基于文档的问答：
@@ -118,7 +119,8 @@ The OpenAI API can be applied to virtually any task that involves understanding 
 改成下面这样会更好：
 
 ```
-下面是客户和代理商之间的对话。代理商将尝试诊断问题并给出解决方案，同时避免询问客户的个人信息（如用户名和密码），当涉及到这些信息时，建议用户访问帮助文档：www.samplewebsite.com/help/faq
+下面是客户和代理商之间的对话。代理商将尝试诊断问题并给出解决方案，同时避免询问客户的个人信息（如用户名和密码），
+当涉及到这些信息时，建议用户访问帮助文档：www.samplewebsite.com/help/faq
 
 客户：我登录不了我的账号
 代理商：
@@ -177,8 +179,11 @@ The OpenAI API can be applied to virtually any task that involves understanding 
 3. Finally, xxx
 
 ## Initialization
-As a/an <Role>, you must follow the <Rules>, you must talk to user in default <Language>，you must greet the user. Then introduce yourself and introduce the <Workflow>.
+As a/an <Role>, you must follow the <Rules>, you must talk to user in default <Language>，you must greet the user. 
+Then introduce yourself and introduce the <Workflow>.
 ```
+
+感兴趣的同学可以尝试一下。
 
 ## 提示工程技术
 
@@ -202,7 +207,8 @@ As a/an <Role>, you must follow the <Rules>, you must talk to user in default <L
 有些模型还会输出一些解释性的内容：
 
 ```
-您的文本：“今天的天气真不错！”表示的是一种积极或正面的情感。这种表达通常反映出满足、愉悦或幸福的情绪。因此，情感分类可以是“正面”或“积极”。
+您的文本：“今天的天气真不错！”表示的是一种积极或正面的情感。
+这种表达通常反映出满足、愉悦或幸福的情绪。因此，情感分类可以是“正面”或“积极”。
 ```
 
 这可能并不是我们所想要的，这时，我们就可以通过少样本提示来引导大模型输出我们期望的格式：
@@ -222,6 +228,41 @@ As a/an <Role>, you must follow the <Rules>, you must talk to user in default <L
 ```
 
 少样本提示通过提供一些包含输入和期望输出的示例，让大模型更好地理解我们的意图，因此，少样本提示通常比零样本提示有更好的表现，然而它是以消耗更多的 token 为代价的，并且当输入和输出文本很长时可能会达到上下文长度限制。
+
+少样本提示利用了大模型的 **上下文学习（In-context Learning）** 能力，即它们可以从少量的示例数据中学习新任务，而无需进行任何参数更新。不过对于如何构建少样本提示中的示例则又是另一个值得探讨的课题，目前已经有很多论文对此进行了研究。Tony Z. Zhao 等人在 [[2102.09690] Calibrate Before Use: Improving Few-Shot Performance of Language Models](https://arxiv.org/abs/2102.09690) 这篇论文中提出：**提示词的格式、示例数据的选择以及示例数据的顺序都可能导致截然不同的性能。**
+
+论文中进一步指出，出现这种现象的原因可以归结为如下几种偏差：
+
+* **多数标签偏差（Majority label bias）**：当示例中的标签分布不平衡时会出现；
+* **近因效应偏差（Recency bias）**：模型可能会出现在末尾重复标签的倾向；
+* **常见令牌偏差（Common token bias）**：模型更倾向于生成常见令牌而不是罕见令牌；
+
+为了克服这些偏差，论文中提出了一种方法，使用一个无内容的输入（如：`N/A`）来估计模型对每个答案的偏差，然后调整参数，使得对于这个输入的预测在所有答案上均衡。
+
+关于示例数据的选择有几个普遍建议可供参考：
+
+* 保持示例数据的多样化
+* 与测试样本相关
+* 并且以随机顺序排列
+
+如果想更深入地学习相关的内容，下面这些论文可供参考：
+
+* [[2101.06804] What Makes Good In-Context Examples for GPT-$3$?](https://arxiv.org/abs/2101.06804)
+    * 在嵌入空间中使用 kNN  聚类，选择与测试示例在语义上相似的示例
+* [[2209.01975] Selective Annotation Makes Language Models Better Few-Shot Learners](https://arxiv.org/abs/2209.01975)
+    * 提出了一种无监督的基于图的选择性注释方法
+* [[2112.08633] Learning To Retrieve Prompts for In-Context Learning](https://arxiv.org/abs/2112.08633)
+    * 使用 **对比学习（Contrastive Learning）** 来训练嵌入，以进行上下文学习样本选择
+* [[2211.04486] Active Example Selection for In-Context Learning](https://arxiv.org/abs/2211.04486)
+    * 使用 **强化学习（Reinforcement Learning, RL）** 中的 Q-learning 来做示例数据的选择
+* [[2302.12246] Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)
+    * 通过借鉴基于不确定性的 **主动学习（Active Learning）** 的思想，论文提出了一种新的示例选择方法，**Active Prompting**，引入度量标准来表征不确定性，然后选择最不确定的问题作为示例数据
+* [[2104.08786] Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity](https://arxiv.org/abs/2104.08786)
+    * 这篇论文论述了示例数据的顺序对模型效果的影响，并且证明了增加模型大小或包含更多的训练样本也不能保证降低方差，于是提出了一种基于熵的统计方法对候选数据进行排列
+
+### 指令提示（Instruction Prompting）
+
+
 
 ### 思维链（CoT）
 
