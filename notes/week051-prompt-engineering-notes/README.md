@@ -229,7 +229,12 @@ Then introduce yourself and introduce the <Workflow>.
 
 少样本提示通过提供一些包含输入和期望输出的示例，让大模型更好地理解我们的意图，因此，少样本提示通常比零样本提示有更好的表现，然而它是以消耗更多的 token 为代价的，并且当输入和输出文本很长时可能会达到上下文长度限制。
 
-少样本提示利用了大模型的 **上下文学习（In-context Learning）** 能力，即它们可以从少量的示例数据中学习新任务，而无需进行任何参数更新。不过对于如何构建少样本提示中的示例则又是另一个值得探讨的课题，目前已经有很多论文对此进行了研究。Tony Z. Zhao 等人在 [[2102.09690] Calibrate Before Use: Improving Few-Shot Performance of Language Models](https://arxiv.org/abs/2102.09690) 这篇论文中提出：**提示词的格式、示例数据的选择以及示例数据的顺序都可能导致截然不同的性能。**
+少样本提示利用了大模型的 **上下文学习（In-context Learning）** 能力，即它们可以从少量的示例数据中学习新任务，而无需进行任何参数更新。少样本提示相关的论文有：
+
+* [Brown et al. 2020, Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+* [Min et al. 2022, Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?](https://arxiv.org/abs/2202.12837)
+
+不过对于如何构建少样本提示中的示例则又是另一个值得探讨的课题，目前已经有很多论文对此进行了研究。Tony Z. Zhao 等人在 [Calibrate Before Use: Improving Few-Shot Performance of Language Models](https://arxiv.org/abs/2102.09690) 这篇论文中提出：**提示词的格式、示例数据的选择以及示例数据的顺序都可能导致截然不同的性能。**
 
 论文中进一步指出，出现这种现象的原因可以归结为如下几种偏差：
 
@@ -247,22 +252,63 @@ Then introduce yourself and introduce the <Workflow>.
 
 如果想更深入地学习相关的内容，下面这些论文可供参考：
 
-* [[2101.06804] What Makes Good In-Context Examples for GPT-$3$?](https://arxiv.org/abs/2101.06804)
+* [Liu et al. 2021, What Makes Good In-Context Examples for GPT-$3$?](https://arxiv.org/abs/2101.06804)
     * 在嵌入空间中使用 kNN  聚类，选择与测试示例在语义上相似的示例
-* [[2209.01975] Selective Annotation Makes Language Models Better Few-Shot Learners](https://arxiv.org/abs/2209.01975)
+* [Su et al. 2021, Selective Annotation Makes Language Models Better Few-Shot Learners](https://arxiv.org/abs/2209.01975)
     * 提出了一种无监督的基于图的选择性注释方法
-* [[2112.08633] Learning To Retrieve Prompts for In-Context Learning](https://arxiv.org/abs/2112.08633)
+* [Rubin et al. 2021, Learning To Retrieve Prompts for In-Context Learning](https://arxiv.org/abs/2112.08633)
     * 使用 **对比学习（Contrastive Learning）** 来训练嵌入，以进行上下文学习样本选择
-* [[2211.04486] Active Example Selection for In-Context Learning](https://arxiv.org/abs/2211.04486)
+* [Zhang et al. 2022, Active Example Selection for In-Context Learning](https://arxiv.org/abs/2211.04486)
     * 使用 **强化学习（Reinforcement Learning, RL）** 中的 Q-learning 来做示例数据的选择
-* [[2302.12246] Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)
+* [Diao et al. 2023, Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)
     * 通过借鉴基于不确定性的 **主动学习（Active Learning）** 的思想，论文提出了一种新的示例选择方法，**Active Prompting**，引入度量标准来表征不确定性，然后选择最不确定的问题作为示例数据
-* [[2104.08786] Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity](https://arxiv.org/abs/2104.08786)
+* [Lu et al. 2021, Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity](https://arxiv.org/abs/2104.08786)
     * 这篇论文论述了示例数据的顺序对模型效果的影响，并且证明了增加模型大小或包含更多的训练样本也不能保证降低方差，于是提出了一种基于熵的统计方法对候选数据进行排列
 
 ### 指令提示（Instruction Prompting）
 
+在少样本提示中，我们提供少量示例数据的目的是向大模型解释我们的意图，那么，为什么我们不直接将我们的意图告诉大模型呢？
 
+```
+对下面的文本进行情感分类，分类结果可以是“积极”、“消极”或“中性”。
+
+文本：今天的天气真不错！
+情感分类：
+```
+
+能从指令中理解用户意图的模型我们称之为 **指令模型（Instructed LM）**，这些模型通过高质量的数据（包括指令、输入和输出）对预训练模型进行微调，以使语言模型更好地理解用户意图并遵循指令，这个过程叫做 **指令微调（Instruction Tuning）**。
+
+Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解能力，并发布了 [FLAN 模型](https://github.com/google-research/FLAN)；BigScience 紧随其后，发布了 [T0 模型](https://github.com/bigscience-workshop/t-zero)，相对 FLAN 来说，它的指令数据集更加丰富多样；正当 Google 和 BigScience 还在各种不同的标准任务上评估大模型能力提升时，OpenAI 却开始从另一个角度来评估人工智能，那就是如何更好地帮助人类解决问题，它将数据集从标准的 NLP 任务改成用户提交的真实问题，最终在 2022 年发布了 [InstructGPT 模型](https://github.com/openai/following-instructions-human-feedback)，并在 InstructGPT 的基础上训练出了风靡全球的 ChatGPT；之后还有 AllenAI 发布的 [TK-Instruct 模型](https://github.com/yizhongw/Tk-Instruct)，它使用了更大规模的指令数据集进行训练，并将 [指令集完全开源](https://github.com/allenai/natural-instructions)，推动了指令模型的发展。
+
+这些指令模型都有对应的论文：
+
+* **FLAN** - [Wei et al. 2021, Finetuned Language Models Are Zero-Shot Learners](https://arxiv.org/abs/2109.01652)
+* **FLAN-T5** - [Chung et al. 2022, Scaling Instruction-Finetuned Language Models](https://arxiv.org/abs/2210.11416)
+* **T0** - [Sanh et al. 2021, Multitask Prompted Training Enables Zero-Shot Task Generalization](https://arxiv.org/abs/2110.08207)
+* **InstructGPT** - [Ouyang et al. 2022, Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)
+* **TK-Instruct** - [Wang et al. 2022, Super-NaturalInstructions: Generalization via Declarative Instructions on 1600+ NLP Tasks](https://arxiv.org/abs/2204.07705)
+
+此外，指令微调常见的方法是 [RLHF](https://arxiv.org/abs/1706.03741)（Reinforcement Learning Human Feedback，来自人类反馈的强化学习），可以让模型被调整得更好地适应人类的偏好。
+
+目前市面上的大语言模型基本上都是指令模型，在与指令模型交互时，我们要遵守上一节中介绍的基本原则，指令要求要详细，尽量具体和准确，避免说不做什么，而是说明要做什么。
+
+指令提示和少样本提示可以组合使用，Seonghyeon Ye 等人在 [Investigating the Effectiveness of Task-Agnostic Prefix Prompt for Instruction Following](https://arxiv.org/abs/2302.14691) 论文中提出一种 **In-context Instruction Learning** 的方法，他们在提示词中包含了不同任务的多个示例：
+
+```
+任务：确定对话的发言人是 “代理商” 还是 “客户”
+输入：我已经成功为你预定了机票。
+输出：代理商
+
+任务：确定问题所属的类别是 “数量” 还是 “位置”
+输入：美国最古老的建筑是什么？
+输出：位置
+
+任务：对给定的电影评论进行分类，“积极” 还是 “消极”
+输入：我猜视频游戏一定比电影有趣多了。
+输出：
+```
+
+通过这种方式可以显著提高预训练模型和指令微调模型的零样本任务泛化性能。
 
 ### 思维链（CoT）
 
@@ -325,6 +371,8 @@ https://www.promptingguide.ai/zh/techniques/graph
 * [OpenAI Cookbook](https://github.com/openai/openai-cookbook)
 * [Best practices for prompt engineering with OpenAI API](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api)
 * [OpenAI 官方提示工程指南 [译]](https://baoyu.io/translations/openai/openai-prompt-engineering-guides)
+* [Instruction Tuning（FLAN、instructGPT、chatGPT）](https://blog.csdn.net/qq_39388410/article/details/128265846)
+* [解密Prompt系列4. 升级Instruction Tuning：Flan/T0/InstructGPT/TKInstruct](https://cloud.tencent.com/developer/article/2245094)
 
 ## 更多
 
