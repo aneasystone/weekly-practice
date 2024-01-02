@@ -252,7 +252,7 @@ Then introduce yourself and introduce the <Workflow>.
 
 如果想更深入地学习相关的内容，下面这些论文可供参考：
 
-* [Liu et al. 2021, What Makes Good In-Context Examples for GPT-$3$?](https://arxiv.org/abs/2101.06804)
+* [Liu et al. 2021, What Makes Good In-Context Examples for GPT-3?](https://arxiv.org/abs/2101.06804)
     * 在嵌入空间中使用 kNN  聚类，选择与测试示例在语义上相似的示例
 * [Su et al. 2021, Selective Annotation Makes Language Models Better Few-Shot Learners](https://arxiv.org/abs/2209.01975)
     * 提出了一种无监督的基于图的选择性注释方法
@@ -312,7 +312,21 @@ Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解�
 
 ### 思维链（CoT）
 
-https://www.promptingguide.ai/zh/techniques/cot
+传统的少样本提示可以显著提高大模型在分类、翻译、生成等任务中的性能，但是在处理算术、常识、符号推理等任务时却不那么明显。Jason Wei 等人于 2022 年发表论文 [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903)，提出了一种新的名为 **思维链（Chain of Thought, CoT）** 的提示技术，通过向大模型展示中间推理步骤实现了复杂的推理能力，结合少样本提示还可以获得更好的结果。
+
+下面是思维链的一个经典示例：
+
+![](./images/cot.png)
+
+左边是传统的提示技术，首先向大模型展示一个问题样例以及该问题的答案，我们希望大模型能直接给出答案，但是很可惜，结果是错的；右边是使用思维链提示技术，和左边一样，也是向大模型展示一个问题样例，但是接下来我们不是直接给出问题的答案，而是给出解答该问题的推理过程，这样大模型就会模仿你的推理步骤，并成功解决新的未知问题。
+
+在 Jason Wei 等人的论文发表后不久，Takeshi Kojima 等人也发表了一篇关于思维链的论文：[Large Language Models are Zero-Shot Reasoners](https://arxiv.org/abs/2205.11916)，论文中介绍了 **零样本思维链（Zero-Shot-CoT）** 技术，而 Jason Wei 等人提出的技术被称为 **少样本思维链（Few-Shot-CoT）**，和之前的思维链不同的是，零样本思维链不需要在提示词中给出解决问题的推理过程，而是直接在提示词中加上一句 **让我们逐步思考（Let's think step by step.）** 这样的话即可：
+
+![](./images/zero-cot.png)
+
+这么简单的一句话，竟然可以起到这么大的作用，着实让人意想不到。当你没有太多的示例数据时不妨尝试一下。
+
+虽然思维链很强大，但是要注意的是，这种能力只有在足够大的语言模型上才会涌现。
 
 ### 自我一致性
 
