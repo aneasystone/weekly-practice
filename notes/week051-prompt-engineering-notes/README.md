@@ -229,12 +229,30 @@ Then introduce yourself and introduce the <Workflow>.
 
 少样本提示通过提供一些包含输入和期望输出的示例，让大模型更好地理解我们的意图，因此，少样本提示通常比零样本提示有更好的表现，然而它是以消耗更多的 token 为代价的，并且当输入和输出文本很长时可能会达到上下文长度限制。
 
-少样本提示利用了大模型的 **上下文学习（In-context Learning）** 能力，即它们可以从少量的示例数据中学习新任务，而无需进行任何参数更新。少样本提示相关的论文有：
+少样本提示技术由 Tom Brown 等人 2020 年在 [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) 这篇论文中提出，这项技术利用了大模型的 **上下文学习（In-context Learning）** 能力，即大模型可以从少量的示例数据中学习新任务，而无需进行任何参数更新。Sewon Min 等人在 [Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?](https://arxiv.org/abs/2202.12837) 这篇论文中做了更深入的研究，探讨了少样本提示是如何工作的？以及它为什么是有效的？论文中还总结了一些有趣的结论：
 
-* [Brown et al. 2020, Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
-* [Min et al. 2022, Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?](https://arxiv.org/abs/2202.12837)
+* 示例数据中的标签空间和输入文本的分布对于上下文学习至关重要，就算标签是错的也所谓；
+* 整体格式也至关重要，当标签空间未知时，使用随机的单词作为标签也比不使用标签要好得多；
 
-不过对于如何构建少样本提示中的示例则又是另一个值得探讨的课题，目前已经有很多论文对此进行了研究。Tony Z. Zhao 等人在 [Calibrate Before Use: Improving Few-Shot Performance of Language Models](https://arxiv.org/abs/2102.09690) 这篇论文中提出：**提示词的格式、示例数据的选择以及示例数据的顺序都可能导致截然不同的性能。**
+比如将上面的例子改成下面这样：
+
+```
+文本：这是我读过最精彩的一本小说！
+情感分类：消极
+
+文本：这部电影内容一般般啊！
+情感分类：中性
+
+文本：这是一部关于友谊的电影。
+情感分类：积极
+
+文本：今天的天气真不错！
+情感分类：
+```
+
+尽管示例数据中的分类结果都是错的，但是大模型依然可以输出正确的结果。
+
+如何构建少样本提示中的示例数据是另一个值得探讨的课题，目前已经有很多论文对此进行了研究。Tony Z. Zhao 等人在 [Calibrate Before Use: Improving Few-Shot Performance of Language Models](https://arxiv.org/abs/2102.09690) 这篇论文中提出：**提示词的格式、示例数据的选择以及示例数据的顺序都可能导致截然不同的性能。**
 
 论文中进一步指出，出现这种现象的原因可以归结为如下几种偏差：
 
@@ -320,17 +338,36 @@ Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解�
 
 左边是传统的提示技术，首先向大模型展示一个问题样例以及该问题的答案，我们希望大模型能直接给出答案，但是很可惜，结果是错的；右边是使用思维链提示技术，和左边一样，也是向大模型展示一个问题样例，但是接下来我们不是直接给出问题的答案，而是给出解答该问题的推理过程，这样大模型就会模仿你的推理步骤，并成功解决新的未知问题。
 
+虽然思维链很强大，但是要注意的是，这种能力只有在足够大的语言模型上才会涌现（大于等于 100B），在较小的模型上使用思维链效果可能比标准提示更差。
+
 在 Jason Wei 等人的论文发表后不久，Takeshi Kojima 等人也发表了一篇关于思维链的论文：[Large Language Models are Zero-Shot Reasoners](https://arxiv.org/abs/2205.11916)，论文中介绍了 **零样本思维链（Zero-Shot-CoT）** 技术，而 Jason Wei 等人提出的技术被称为 **少样本思维链（Few-Shot-CoT）**，和之前的思维链不同的是，零样本思维链不需要在提示词中给出解决问题的推理过程，而是直接在提示词中加上一句 **让我们逐步思考（Let's think step by step.）** 这样的话即可：
 
 ![](./images/zero-cot.png)
 
-这么简单的一句话，竟然可以起到这么大的作用，着实让人意想不到。当你没有太多的示例数据时不妨尝试一下。
+这么简单的一句话，竟然可以起到这么大的作用，着实让人意想不到。不过，它通常不如少样本思维链有效，当你没有太多的示例数据时可以尝试一下。此外，这个技巧除了用于解决复杂的推理问题，还适合生成一些连贯主题的内容，比如写长篇文章、电影剧本等。
 
-虽然思维链很强大，但是要注意的是，这种能力只有在足够大的语言模型上才会涌现。
+### 自我一致性（Self-Consistency）
 
-### 自我一致性
+根据上面的学习我们知道，思维链提示是让大模型模仿示例数据生成一系列的推理步骤，最终解决用户问题，但是很显然，大模型在生成中间步骤时仍然是可能出错的。Xuezhi Wang 等人在 2022 年提出的一种改进思维链的方法，即 **自我一致性（Self-Consistency）**，参见论文 [Self-Consistency Improves Chain of Thought Reasoning in Language Models](https://arxiv.org/abs/2203.11171)。
 
-https://www.promptingguide.ai/zh/techniques/consistency
+自我一致性的想法很简单，通过多次执行 CoT 得到多个推理路径，然后在多个结果中投票选择最一致的答案：
+
+![](./images/self-consistency.png)
+
+从上图可以看出自我一致性方法整体包括三个步骤：
+
+1. 构造 CoT 示例数据；
+2. 通过大模型生成多个不同的推理路径（reasoning path）；
+3. 使用多数投票（majority vote）的方法选出最一致的答案；
+
+虽然这种方式有点大力出奇迹的感觉，但是它确实可以提高思维链在算术和常识推理等任务中的性能。在具体的使用过程中，还有两个问题值得注意：
+
+1. 在生成多个推理路径时，一般将模型的温度值设置为 0.5，因为这个值如果设置过小会导致答案基本都一样，过大又会导致答案全都不一样，都会影响到最终的效果；
+2. 需要生成多少个推理路径（也就是采样次数）也是一个问题，从论文结果来看，候选样本数越多，最终效果越好，论文中一共采样了 40 次，但在实际应用中不可能这样豪横，一般采样 5 次以上就能超过普通的思维链提示；
+
+### Least-to-Most Prompting
+
+Denny Zhou 等人 [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/abs/2205.10625)
 
 ### 生成知识提示
 
