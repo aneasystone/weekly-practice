@@ -189,9 +189,9 @@ Then introduce yourself and introduce the <Workflow>.
 
 上面介绍了设计提示词时应该注意的基本原则，遵守这些原则有助于让大模型输出你期望的结果，另外，还有一些提示技术或技巧，也可以大大提高大模型的效果。
 
-### 零样本 vs. 少样本提示
+### 零样本提示（Zero-shot Prompting） vs. 少样本提示（Few-shot Prompting）
 
-**零样本（Zero-shot）** 与 **少样本（Few-shot）** 是最基础的提示技术。零样本提示就是直接向模型输入文本以获取回答，比如：
+**零样本提示（Zero-shot Prompting）** 与 **少样本提示（Few-shot Prompting）** 是最基础的提示技术。零样本提示就是直接向模型输入文本以获取回答，比如：
 
 ```
 文本：今天的天气真不错！
@@ -365,13 +365,11 @@ Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解�
 1. 在生成多个推理路径时，一般将模型的温度值设置为 0.5，因为这个值如果设置过小会导致答案基本都一样，过大又会导致答案全都不一样，都会影响到最终的效果；
 2. 需要生成多少个推理路径（也就是采样次数）也是一个问题，从论文结果来看，候选样本数越多，最终效果越好，论文中一共采样了 40 次，但在实际应用中不可能这样豪横，一般采样 5 次以上就能超过普通的思维链提示；
 
-### Least-to-Most Prompting
+### 最少到最多提示（Least-to-Most Prompting）
 
-Denny Zhou 等人 [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/abs/2205.10625)
+**最少到最多提示（Least-to-Most Prompting，LtM）** 也是一种改进思维链提示的方法，它首先将问题分解为子问题，然后逐个解决，由 Denny Zhou 等人在 [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/abs/2205.10625) 这篇论文中提出。
 
-### 生成知识提示
-
-https://www.promptingguide.ai/zh/techniques/knowledge
+![](./images/ltm.png)
 
 ### 思维树 (ToT)
 
@@ -380,6 +378,17 @@ https://www.promptingguide.ai/zh/techniques/tot
 ### 检索增强生成 (RAG)
 
 https://www.promptingguide.ai/zh/techniques/rag
+
+#### 生成知识提示（Generated Knowledge Prompting）
+
+**生成知识提示（Generated Knowledge Prompting）** 是一种新型的提示工程技术，由 Jiacheng Liu 等人在论文 [Generated Knowledge Prompting for Commonsense Reasoning](https://arxiv.org/abs/2110.08387) 中首次提出。我们知道，整合外部知识可以改善大模型的表现，而使用生成知识提示却不需要整合外部知识，相反，它直接从通用语言模型中生成知识，然后将这些知识作为上下文来回答用户的问题。
+
+![](./images/knowledge.png)
+
+它的核心思想如上图所示，包含了两个步骤：
+
+* 知识生成：在这个步骤中，我们提供少量的示例数据，要求大模型生成有关用户问题的一组事实，也就是知识；
+* 知识集成：然后将这些生成的知识作为上下文来回答用户的问题；
 
 ### 自动推理并使用工具 (ART)
 
