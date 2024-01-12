@@ -344,7 +344,11 @@ Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解�
 
 ![](./images/zero-cot.png)
 
-这么简单的一句话，竟然可以起到这么大的作用，着实让人意想不到。不过，它通常不如少样本思维链有效，当你没有太多的示例数据时可以尝试一下。此外，这个技巧除了用于解决复杂的推理问题，还适合生成一些连贯主题的内容，比如写长篇文章、电影剧本等。
+这么简单的一句话，竟然可以起到这么大的作用，着实让人意想不到。有趣的是，论文中还尝试了不少其他的提示词，最终发现 Let's think step by step. 效果最好：
+
+![](./images/zero-cot-exaples.png)
+
+不过，零样本思维链通常不如少样本思维链有效，只有当你没有太多的示例数据时可以尝试一下。此外，这个技巧除了用于解决复杂的推理问题，还适合生成一些连贯主题的内容，比如写长篇文章、电影剧本等。
 
 ### 自我一致性（Self-Consistency）
 
@@ -365,21 +369,50 @@ Google 在 2021 年首次提出指令微调可以解锁大模型的指令理解�
 1. 在生成多个推理路径时，一般将模型的温度值设置为 0.5，因为这个值如果设置过小会导致答案基本都一样，过大又会导致答案全都不一样，都会影响到最终的效果；
 2. 需要生成多少个推理路径（也就是采样次数）也是一个问题，从论文结果来看，候选样本数越多，最终效果越好，论文中一共采样了 40 次，但在实际应用中不可能这样豪横，一般采样 5 次以上就能超过普通的思维链提示；
 
+自我一致性本质上是一种集成学习方法，Xuezhi Wang 等人后来又对其进行了优化，提出了 **推理增强集成（Rationale-Augmented Ensembles）** 方法，通过改变示例顺序或使用模型生成的推理链来替换人工编写的推理链，在多个样本试验中引入随机性，然后通过多数投票来聚合模型输出，得到最终答案，参见论文 [Rationale-Augmented Ensembles in Language Models](https://arxiv.org/abs/2207.00747)。
+
 ### 最少到最多提示（Least-to-Most Prompting）
 
-**最少到最多提示（Least-to-Most Prompting，LtM）** 也是一种改进思维链提示的方法，它首先将问题分解为子问题，然后逐个解决，由 Denny Zhou 等人在 [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/abs/2205.10625) 这篇论文中提出。
+在 **零样本思维链（Zero-Shot-CoT）** 那篇论文中，作者提出了一种利用大模型进行两阶段推理的设想：
+
+![](./images/zero-cot-stages.png)
+
+第一个阶段先进行问题的拆分并分段解答问题（Reasoning Extraction），然后第二阶段再进行答案的汇总（Answer Extraction），这给了最少到最多提示很大的启发。
+
+**最少到最多提示（Least-to-Most Prompting，LtM）** 也是一种改进思维链提示的方法，由 Denny Zhou 等人在 [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/abs/2205.10625) 这篇论文中提出。
 
 ![](./images/ltm.png)
 
+LtM 提出的初衷是为了解决 CoT 泛化能力不足的问题：即通过人工编写的示例数据可能并不能够很好的迁移到别的问题当中去，这种泛化能力的不足会导致新的问题无法使用老的模板进行解决。所以一个思想就是：让大模型自己找到解决当前问题的思维链。
+
+相比于自我一致性，LtM 明显更优雅一些，它的思路使用了分治的思想，首先将大问题拆分成小问题，然后依次解决小问题，最后解决大问题：
+
+1. **问题拆解（Problem Reducing）**：第一步自上而下的分解问题，引导模型把问题拆分成子问题；
+2. **子问题有序解答（Sequentially Solve Subquestions）**：第二步自下而上的依次解决问题，逐一回答子问题，并把子问题的回答作为下一个子问题回答的上文，循序渐进地解决问题，直到给出最终答案；在这个依次回答问题的过程中，问题由少变多，这也是 Least-to-Most 一词的来源。
+
 ### 思维树 (ToT)
 
-https://www.promptingguide.ai/zh/techniques/tot
+对于需要探索或预判战略的复杂任务来说，传统或简单的提示技巧是不够的。
+
+Shunyu Yao 等人在 2023 年 5 月发表了一篇论文 [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601)，提出了 **思维树（Tree of Thoughts，ToT）** 的框架，该框架基于思维链提示进行了总结，引导语言模型探索把思维作为中间步骤来解决通用问题。
+
+ToT 维护着一棵思维树，思维由连贯的语言序列表示，这个序列就是解决问题的中间步骤。使用这种方法，大模型能够自己对严谨推理过程的中间思维进行评估。大模型将生成及评估思维的能力与搜索算法（如广度优先搜索和深度优先搜索）相结合，在系统性探索思维的时候可以向前验证和回溯。
+
+![](./images/tot.png)
+
+https://github.com/princeton-nlp/tree-of-thought-llm
+
+Jieyi Long
+
+[Large Language Model Guided Tree-of-Thought](https://arxiv.org/abs/2305.08291)
+
+https://github.com/jieyilong/tree-of-thought-puzzle-solver
 
 ### 检索增强生成 (RAG)
 
 https://www.promptingguide.ai/zh/techniques/rag
 
-#### 生成知识提示（Generated Knowledge Prompting）
+### 生成知识提示（Generated Knowledge Prompting）
 
 **生成知识提示（Generated Knowledge Prompting）** 是一种新型的提示工程技术，由 Jiacheng Liu 等人在论文 [Generated Knowledge Prompting for Commonsense Reasoning](https://arxiv.org/abs/2110.08387) 中首次提出。我们知道，整合外部知识可以改善大模型的表现，而使用生成知识提示却不需要整合外部知识，相反，它直接从通用语言模型中生成知识，然后将这些知识作为上下文来回答用户的问题。
 
@@ -433,6 +466,7 @@ https://www.promptingguide.ai/zh/techniques/graph
 * [OpenAI 官方提示工程指南 [译]](https://baoyu.io/translations/openai/openai-prompt-engineering-guides)
 * [Instruction Tuning（FLAN、instructGPT、chatGPT）](https://blog.csdn.net/qq_39388410/article/details/128265846)
 * [解密Prompt系列4. 升级Instruction Tuning：Flan/T0/InstructGPT/TKInstruct](https://cloud.tencent.com/developer/article/2245094)
+* [解密Prompt系列9. 模型复杂推理-思维链基础和进阶玩法](https://cloud.tencent.com/developer/article/2296079)
 
 ## 更多
 
