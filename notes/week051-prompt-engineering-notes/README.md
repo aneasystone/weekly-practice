@@ -392,21 +392,62 @@ LtM 提出的初衷是为了解决 CoT 泛化能力不足的问题：即通过�
 
 ### 思维树 (ToT)
 
-对于需要探索或预判战略的复杂任务来说，传统或简单的提示技巧是不够的。
+传统的思维链提示，以及基于思维链的改进方法比如自我一致性，都存在着明显的缺陷：
 
-Shunyu Yao 等人在 2023 年 5 月发表了一篇论文 [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601)，提出了 **思维树（Tree of Thoughts，ToT）** 的框架，该框架基于思维链提示进行了总结，引导语言模型探索把思维作为中间步骤来解决通用问题。
+* 对于局部，并没有对思考过程的不同分支进行探索，生成的思维链都是一条路走到黑，不会去思考每一步有没有其他分支的解决方案；
+* 对于全局，没有利用任何类型的规划、前瞻以及回溯来帮助评估不同的选择，而这种启发式的探索正是人类解决问题的特性；真正的问题解决过程涉及反复利用可用信息来启动探索，进一步揭示更多信息，直到最终发现解决方法；
 
-ToT 维护着一棵思维树，思维由连贯的语言序列表示，这个序列就是解决问题的中间步骤。使用这种方法，大模型能够自己对严谨推理过程的中间思维进行评估。大模型将生成及评估思维的能力与搜索算法（如广度优先搜索和深度优先搜索）相结合，在系统性探索思维的时候可以向前验证和回溯。
+为解决这些不足，Shunyu Yao 等人在 2023 年 5 月发表了一篇论文 [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601)，提出了 **思维树（Tree of Thoughts，ToT）** 的框架，让语言模型可以探索多个推理路径，把解决问题视作在一棵树上的搜索，树上的每个节点代表问题以及到目前为止的思考过程：
 
 ![](./images/tot.png)
 
-https://github.com/princeton-nlp/tree-of-thought-llm
+ToT 允许语言模型在解决问题的中间过程进行探索，通过考虑多种不同推理路径并进行评估，同时具备向前看跟向后回溯的能力以获得更佳决策选择。一个完整的 ToT 包括下面四个过程：
 
-Jieyi Long
+1. **思考分解（Thought deconposition）** - 如何将推理中间过程分解成多个想法步骤
 
-[Large Language Model Guided Tree-of-Thought](https://arxiv.org/abs/2305.08291)
+ToT 会根据问题属性去设计和分解中间的想法过程，每个想法应该足够小，使得语言模型可以生成有潜力跟多样的样本，同时又应该足够大，使得语言模型可以评估该想法解决问题的潜力；
 
-https://github.com/jieyilong/tree-of-thought-puzzle-solver
+2. **想法生成器（Thought generator）** - 如何根据当前状态生成候选想法
+
+文中提供了 Sample 和 Propose 两个想法生成策略，前者利用 CoT prompt 多次采样，这种方式能保证多样性，在想法空间更宽泛时效果更佳，后者依据 "propose prompt" 依次生成想法，可以避免同一个上下文生成重复的想法，更适用于思维空间受限的场景；
+
+3. **状态评估器（State evaluator）** - 如何启发性地评估状态
+
+给定不同的当前状态，让状态评估器评估它们对于解决问题的帮助，以确定哪些状态值得继续探索，以及以何种方式探索；
+
+4. **搜索算法（Search algorithm）** - 使用什么搜索算法
+
+在 ToT 框架中，可以根据树形结构插入和使用不同的搜索算法，文中探索了两种相对简单的搜索算法：BFS 广度优先算法，每一步中保留最优潜力的 K 个状态；DFS 深度优先算法，优先探索最优潜力的状态，直到得到最终结果，或者超过当前状态被评估不可能解决问题就停止，如果是后者的话可以退回父节点，继续进行探索。
+
+论文中使用 ToT 开展了三个不同的实验：24 点游戏、迷你填字游戏 和 创意文本生成，都取得了非常好的表现，论文作者还在 GitHub 上开源了他们的代码 [princeton-nlp/tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm)，感兴趣的同学可以尝试下。
+
+另外，除了 Shunyu Yao 等人发表的这篇关于思维树的论文外，Jieyi Long 也发表了一篇类似的论文 [Large Language Model Guided Tree-of-Thought](https://arxiv.org/abs/2305.08291)，他提出由强化学习（Reinforcement Learning）训练出的 “ToT 控制器”（ToT Controller）来驱动树的搜索策略，这种方法的好处是可以从新的数据集学习，或是在自对弈的过程中学习，使得 ToT 系统可以不断进化。
+
+一般来说执行 ToT 的过程中会涉及到多次大模型的调用，在处理大型任务时 token 的消耗会非常大，于是就有人将 ToT 框架的主要概念概括成了一段简短的提示词，指导 LLM 在一次提示中对中间思维做出评估，下面是一些示例。
+
+[示例一](https://github.com/dave1010/tree-of-thought-prompting)：
+
+```
+Imagine three different experts are answering this question.
+All experts will write down 1 step of their thinking,
+then share it with the group.
+Then all experts will go on to the next step, etc.
+If any expert realises they're wrong at any point then they leave.
+The question is...
+```
+
+[示例二](https://github.com/kyegomez/tree-of-thoughts)：
+
+```
+Three experts with exceptional logical thinking skills are 
+collaboratively answering a question using the tree of thoughts method. 
+Each expert will share their thought process in detail, 
+taking into account the previous thoughts of others and admitting any errors.
+They will iteratively refine and expand upon each other's ideas, giving credit where it's due.
+The process continues until a conclusive answer is found.
+Organize the entire response in a markdown table format.
+The task is:
+```
 
 ### 检索增强生成 (RAG)
 
