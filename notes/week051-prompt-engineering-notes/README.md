@@ -451,11 +451,28 @@ The task is:
 
 ### 检索增强生成 (RAG)
 
-https://www.promptingguide.ai/zh/techniques/rag
+实验表明，大型语言模型能够从海量数据中学习到广泛的世界知识，这些知识以参数的形式存储在模型中，经过适当的微调就能在下游任务中取得 SOTA 表现。但是模型容量再大，也很难记住所有知识，这类通用语言模型在处理 *知识密集型（knowledge-intensive）* 任务时仍旧存在一定的局限性，比如知识更新不及时、生成虚假信息以及对不存在来源的引用等问题，也就是我们所说的 *幻觉（hallucination）*。
+
+治理幻觉的方式有很多，比如：在训练时提供更高质量的数据，对模型进行微调补充领域知识，在 RLHF 时给予奖励模型对数据真实性更高的倾向性，通过 Prompt 引导大模型避免生成缺乏依据的信息，以及这一节所介绍的 **检索增强生成（RAG，Retrieval Augment Generation）**。
+
+> 大模型的幻觉并非一无是处，有研究者指出幻觉是让大模型产出创意的基础。
+
+RAG 早在 GPT 等大模型出来之前就有了相关的研究，例如 [Facebook 在 2020 年](https://ai.facebook.com/blog/retrieval-augmented-generation-streamlining-the-creation-of-intelligent-natural-language-processing-models/) 的研究提出，将模型知识分为 *参数记忆（parametric memory）* 和 *非参数记忆（nonparametric memory）*，也就是内部信息和外部信息，同时结合这两类信息来回答用户问题可以提供更准确的回复，而且可以减少模型的幻觉。这里的外部信息可以是文档、数据库、网页、笔记、日志、图片、视频、甚至可以是从 API 获取的数据等等，通常我们将这些外部信息切块后保存在向量数据库中，然后基于用户输入的问题做检索。
+
+一个典型的 RAG 包含两个主要的部分：
+
+* 索引构建：首先准备和加载数据，将数据划分成小的数据块，然后对每个小数据块做向量表征存储，方便后续做语义检索；
+* 检索和生成：基于用户输入的问题，尽可能地检索出最相关的数据块，将检索出的数据块作为上下文和用户问题一起组合成 prompt 让大模型生成回答。
+
+![](./images/rag.png)
+
+Yunfan Gao 等人在 [Retrieval-Augmented Generation for Large Language Models: A Survey](https://arxiv.org/abs/2312.10997) 这篇论文中对 RAG 技术做了一个全面的总结，推荐阅读。
+
+目前有很多开源的工具可以用来打造 RAG 系统，比如 [LangChain](https://python.langchain.com/docs/use_cases/question_answering/) 和 [LlamaIndex](https://docs.llamaindex.ai/en/stable/optimizing/production_rag.html) 的官方文档中都有很多关于 RAG 的示例可供参考。
 
 ### 生成知识提示（Generated Knowledge Prompting）
 
-**生成知识提示（Generated Knowledge Prompting）** 是一种新型的提示工程技术，由 Jiacheng Liu 等人在论文 [Generated Knowledge Prompting for Commonsense Reasoning](https://arxiv.org/abs/2110.08387) 中首次提出。我们知道，整合外部知识可以改善大模型的表现，而使用生成知识提示却不需要整合外部知识，相反，它直接从通用语言模型中生成知识，然后将这些知识作为上下文来回答用户的问题。
+使用检索增强生成（RAG）可以让大模型根据外部知识回答用户问题，由此可见，整合外部知识可以改善大模型的表现，有趣的是，我们也可以通过大模型生成知识来提高它自身的能力。这是由 Jiacheng Liu 等人所提出的一种新型的提示工程技术，叫做 **生成知识提示（Generated Knowledge Prompting）**，在论文 [Generated Knowledge Prompting for Commonsense Reasoning](https://arxiv.org/abs/2110.08387) 中首次提出，使用生成知识提示不需要整合外部知识，相反，它直接从通用语言模型中生成知识，然后将这些知识作为上下文来回答用户的问题。
 
 ![](./images/knowledge.png)
 
