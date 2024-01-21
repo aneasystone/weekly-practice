@@ -278,8 +278,6 @@ Then introduce yourself and introduce the <Workflow>.
     * 使用 **对比学习（Contrastive Learning）** 来训练嵌入，以进行上下文学习样本选择
 * [Zhang et al. 2022, Active Example Selection for In-Context Learning](https://arxiv.org/abs/2211.04486)
     * 使用 **强化学习（Reinforcement Learning, RL）** 中的 Q-learning 来做示例数据的选择
-* [Diao et al. 2023, Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)
-    * 通过借鉴基于不确定性的 **主动学习（Active Learning）** 的思想，论文提出了一种新的示例选择方法，**Active Prompting**，引入度量标准来表征不确定性，然后选择最不确定的问题作为示例数据
 * [Lu et al. 2021, Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity](https://arxiv.org/abs/2104.08786)
     * 这篇论文论述了示例数据的顺序对模型效果的影响，并且证明了增加模型大小或包含更多的训练样本也不能保证降低方差，于是提出了一种基于熵的统计方法对候选数据进行排列
 
@@ -487,17 +485,17 @@ Yunfan Gao 等人在 [Retrieval-Augmented Generation for Large Language Models: 
 
 其实，提示的本质就是通过输入一系列的前缀文本，增加获取所需输出的概率。因此，我们可以将它们视为可训练的参数，并通过梯度下降直接在嵌入空间中进行优化，针对这个问题目前有很多相关的研究，例如 [AutoPrompt](https://arxiv.org/abs/2010.15980)、[Prefix-Tuning](https://arxiv.org/abs/2101.00190)、[P-tuning](https://arxiv.org/abs/2103.10385) 和 [Prompt-Tuning](https://arxiv.org/abs/2104.08691) 等。
 
-Yongchao Zhou 等人在论文 [Large Language Models Are Human-Level Prompt Engineers](https://arxiv.org/abs/2211.01910) 中提出了一种更简单的方法：**自动提示工程师（APE，Automatic Prompt Engineer）**。
+Yongchao Zhou 等人在论文 [Large Language Models Are Human-Level Prompt Engineers](https://arxiv.org/abs/2211.01910) 中提出了一种更简单的方法：**自动提示工程师（Automatic Prompt Engineer，APE）**。
 
-APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令，将这些生成的指令放到一个指令池中，选择一个打分函数对这些指令进行打分，然后选择出分数最高的指令，工作流如下所示：
-
-![](./images/ape.png)
-
-该过程可以概括为 3 个阶段：
+APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令，将这些生成的指令放到一个指令池中，选择一个打分函数对这些指令进行打分，然后选择出分数最高的指令。整个过程可以概况为三步：
 
 1. 给定一组输入输出对形式的示例数据，让 LLM 生成候选指令，比如：`{{Given desired input-output pairs}}\n\nThe instruction is`；
 2. 对于给定数据集，制定一个打分函数，比如准确率或对数概率，我们希望找到一个指令能够令其最大化；
 3. 使用迭代的蒙特卡洛搜索方法，通过提供类似语义的变体提示来改进最佳候选者，比如：`Generate a variation of the following instruction while keeping the semantic meaning.\n\nInput: ...\n\nOutput:...`
+
+可以将整个工作流分为 **推理（Inference）**、**评分（Scoring）** 和 **采样（Resampling）** 三步，其最大的特点是三步都是基于 LLM 实现的，如下所示：
+
+![](./images/ape.png)
 
 有趣的是，作者通过 APE 方法还发现了一个比人工设计的零样本 CoT 更好的提示：
 
@@ -514,6 +512,21 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Automatic Chain of Thought Prompting in Large Language Models](https://arxiv.org/abs/2210.03493)
     * 论文提出了一种 Auto-CoT 提示方法，采用聚类技术对问题进行多样性抽样并生成推理链来构建示例
 
+### 主动提示（Active Prompting）
+
+通过借鉴基于不确定性的 **主动学习（Active Learning）** 的思想，Shizhe Diao 等人提出了一种新的示例选择方法 **Active Prompting**，引入度量标准来表征不确定性，然后选择最不确定的问题作为示例数据，论文地址 [Diao et al. 2023, Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)。
+
+和 APE 一样，Active Prompting 也是一种自动生成提示的技术，它的流程图如下：
+
+![](./images/active-prompt.png)
+
+主要分四个阶段：
+
+1. **不确定性评估（Uncertainty Estimation）**：针对数据集中的所有问题，向 LLM 重复请求 k 次，通过一定的算法对产生的答案计算不确定性；我们知道 LLM 的输出有一定的随机性，同一个问题得到的结果可能是稳定的也可能是不稳定的，第一步就是要找到数据集中的最不稳定的问题；
+2. **选择阶段（Selection）**：选择不确定性指标最高的问题用于后续标注；
+3. **标注阶段（Annotation）**：人工参与对选择的问题进行标注；
+4. **推理阶段（Inference）**：使用这些人工标注的问题作为 CoT 的示例进行推理；
+
 ## 总结
 
 提示工程是一门实践性很强的学科，需要针对不同的任务，采取不同的策略，不断尝试和探索，才能达到理想的效果。在这篇笔记中，我们学习了提示工程的概念和基本原则，以及一堆的提示工程技术或技巧，如少样本提示和思维链提示等，大大改善了大模型的推理能力。不过大模型在其他方面仍然存在很多不足，比如不擅长数值计算，无法求解复杂方程，不能访问外部知识和工具等，因此研究人员又提出很多想法希望对语言模型进行增强，比如检索增强、编程增强、工具增强等，这样的语言模型被称为 [增强语言模型（Augmented Language Models）](https://arxiv.org/abs/2302.07842)。通过结合外部知识和工具，我们就可以打造出更高级的智能体应用，我们将在下一篇笔记中继续学习相关的知识。
@@ -525,6 +538,7 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Learn Prompting](https://learnprompting.org/zh-Hans/docs/intro)
 * [Learning Prompt](https://learningprompt.wiki/)
 * [Prompt Engineering | Lil'Log](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
+* [NLP（十三）：Prompt Engineering 面面观](https://zhuanlan.zhihu.com/p/632369186)
 * [Brex's Prompt Engineering Guide](https://github.com/brexhq/prompt-engineering)
 * [The Prompt Landscape](https://blog.langchain.dev/the-prompt-landscape/)
 * [HuggingLLM](https://github.com/datawhalechina/hugging-llm)
@@ -555,7 +569,18 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 
 ### 其他
 
-* [Active-Prompt](https://www.promptingguide.ai/zh/techniques/activeprompt)
-* [方向性刺激提示](https://www.promptingguide.ai/zh/techniques/dsp)
-* [多模态思维链](https://www.promptingguide.ai/zh/techniques/multimodalcot)
-* [基于图的提示](https://www.promptingguide.ai/zh/techniques/graph)
+#### 定向刺激提示（Directional Stimulus Prompting）
+
+[Guiding Large Language Models via Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520)
+
+**定向刺激提示（Directional Stimulus Prompting，DSP）**
+
+[定向刺激提示](https://www.promptingguide.ai/zh/techniques/dsp)
+
+#### 多模态思维链
+
+[多模态思维链](https://www.promptingguide.ai/zh/techniques/multimodalcot)
+
+#### 基于图的提示
+
+[基于图的提示](https://www.promptingguide.ai/zh/techniques/graph)
