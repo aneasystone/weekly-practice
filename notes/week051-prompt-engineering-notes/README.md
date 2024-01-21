@@ -481,33 +481,42 @@ Yunfan Gao 等人在 [Retrieval-Augmented Generation for Large Language Models: 
 * 知识生成：在这个步骤中，我们提供少量的示例数据，要求大模型生成有关用户问题的一组事实，也就是知识；
 * 知识集成：然后将这些生成的知识作为上下文来回答用户的问题；
 
-### 自动推理并使用工具 (ART)
-
-https://www.promptingguide.ai/zh/techniques/art
-
 ### 自动提示工程师（APE）
 
-https://www.promptingguide.ai/zh/techniques/ape
+通过上面的学习我们知道，任务性能在很大程度上取决于用于引导模型的提示的质量，而大多数有效的提示都是由人工手工制作的，那么有没有一种方法能自动生成提示呢？
 
-### Active-Prompt
+其实，提示的本质就是通过输入一系列的前缀文本，增加获取所需输出的概率。因此，我们可以将它们视为可训练的参数，并通过梯度下降直接在嵌入空间中进行优化，针对这个问题目前有很多相关的研究，例如 [AutoPrompt](https://arxiv.org/abs/2010.15980)、[Prefix-Tuning](https://arxiv.org/abs/2101.00190)、[P-tuning](https://arxiv.org/abs/2103.10385) 和 [Prompt-Tuning](https://arxiv.org/abs/2104.08691) 等。
 
-https://www.promptingguide.ai/zh/techniques/activeprompt
+Yongchao Zhou 等人在论文 [Large Language Models Are Human-Level Prompt Engineers](https://arxiv.org/abs/2211.01910) 中提出了一种更简单的方法：**自动提示工程师（APE，Automatic Prompt Engineer）**。
 
-### 方向性刺激提示
+APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令，将这些生成的指令放到一个指令池中，选择一个打分函数对这些指令进行打分，然后选择出分数最高的指令，工作流如下所示：
 
-https://www.promptingguide.ai/zh/techniques/dsp
+![](./images/ape.png)
 
-### ReAct 框架
+该过程可以概括为 3 个阶段：
 
-https://www.promptingguide.ai/zh/techniques/react
+1. 给定一组输入输出对形式的示例数据，让 LLM 生成候选指令，比如：`{{Given desired input-output pairs}}\n\nThe instruction is`；
+2. 对于给定数据集，制定一个打分函数，比如准确率或对数概率，我们希望找到一个指令能够令其最大化；
+3. 使用迭代的蒙特卡洛搜索方法，通过提供类似语义的变体提示来改进最佳候选者，比如：`Generate a variation of the following instruction while keeping the semantic meaning.\n\nInput: ...\n\nOutput:...`
 
-### 多模态思维链
+有趣的是，作者通过 APE 方法还发现了一个比人工设计的零样本 CoT 更好的提示：
 
-https://www.promptingguide.ai/zh/techniques/multimodalcot
+**Let’s work this out in a step by step way to be sure we have the right answer.**
 
-### 基于图的提示
+该提示在 MultiArith 上获得了 82.0 的性能得分：
 
-https://www.promptingguide.ai/zh/techniques/graph
+![](./images/ape-zero-shot-cot.png)
+
+另外，除了 APE，还有很多论文也对自动生成提示做了更深入的研究，比如：
+
+* [Automatic Prompt Augmentation and Selection with Chain-of-Thought from Labeled Data](https://arxiv.org/abs/2302.12822)
+    * 论文介绍了如何使用增强-修剪-选择的三步过程，自动构建思维链提示
+* [Automatic Chain of Thought Prompting in Large Language Models](https://arxiv.org/abs/2210.03493)
+    * 论文提出了一种 Auto-CoT 提示方法，采用聚类技术对问题进行多样性抽样并生成推理链来构建示例
+
+## 总结
+
+提示工程是一门实践性很强的学科，需要针对不同的任务，采取不同的策略，不断尝试和探索，才能达到理想的效果。在这篇笔记中，我们学习了提示工程的概念和基本原则，以及一堆的提示工程技术或技巧，如少样本提示和思维链提示等，大大改善了大模型的推理能力。不过大模型在其他方面仍然存在很多不足，比如不擅长数值计算，无法求解复杂方程，不能访问外部知识和工具等，因此研究人员又提出很多想法希望对语言模型进行增强，比如检索增强、编程增强、工具增强等，这样的语言模型被称为 [增强语言模型（Augmented Language Models）](https://arxiv.org/abs/2302.07842)。通过结合外部知识和工具，我们就可以打造出更高级的智能体应用，我们将在下一篇笔记中继续学习相关的知识。
 
 ## 参考
 
@@ -543,3 +552,10 @@ https://www.promptingguide.ai/zh/techniques/graph
 * [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
 * [Knit](https://promptknit.com/) - A better playground for prompt designers
+
+### 其他
+
+* [Active-Prompt](https://www.promptingguide.ai/zh/techniques/activeprompt)
+* [方向性刺激提示](https://www.promptingguide.ai/zh/techniques/dsp)
+* [多模态思维链](https://www.promptingguide.ai/zh/techniques/multimodalcot)
+* [基于图的提示](https://www.promptingguide.ai/zh/techniques/graph)
