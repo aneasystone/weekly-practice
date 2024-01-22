@@ -527,6 +527,23 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 3. **标注阶段（Annotation）**：人工参与对选择的问题进行标注；
 4. **推理阶段（Inference）**：使用这些人工标注的问题作为 CoT 的示例进行推理；
 
+### 定向刺激提示（Directional Stimulus Prompting）
+
+这是一种相对比较简单的提示方法，由 Zekun Li 等人发表在论文 [Guiding Large Language Models via Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520) 中，它通过训练一个可调节的 *策略语言模型（Policy LM）* 来生成关键词或其他提示信息，然后将其和用户输入组合在一起作为下游的 LLM 的输入，这种方法对大模型的特定方向给予刺激，所以被称为 **定向刺激提示（Directional Stimulus Prompting，DSP）**，它在内容总结或内容创作任务中可以实现更好的效果。
+
+![](./images/dsp.png)
+
+整个流程如下：
+
+1. 首先通过人工标注的数据（输入和刺激）训练出一个策略模型，这个策略模型可以很小，比如 T5；
+2. 根据用户输入使用策略模型生成刺激，作为指导下游 LLM 的提示；
+3. 将生成的刺激与原始输入相结合，作为下游 LLM 的输入，以引导其向刺激的方向生成文本；
+4. 生成的结果可以通过强化学习对策略模型再次进行训练，使 LLM 与人工偏好更好地结合起来；
+
+下图是论文中的一个示例，对比了普通提示和定向刺激提示的差异：
+
+![](./images/dsp-example.png)
+
 ## 总结
 
 提示工程是一门实践性很强的学科，需要针对不同的任务，采取不同的策略，不断尝试和探索，才能达到理想的效果。在这篇笔记中，我们学习了提示工程的概念和基本原则，以及一堆的提示工程技术或技巧，如少样本提示和思维链提示等，大大改善了大模型的推理能力。不过大模型在其他方面仍然存在很多不足，比如不擅长数值计算，无法求解复杂方程，不能访问外部知识和工具等，因此研究人员又提出很多想法希望对语言模型进行增强，比如检索增强、编程增强、工具增强等，这样的语言模型被称为 [增强语言模型（Augmented Language Models）](https://arxiv.org/abs/2302.07842)。通过结合外部知识和工具，我们就可以打造出更高级的智能体应用，我们将在下一篇笔记中继续学习相关的知识。
@@ -569,18 +586,12 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 
 ### 其他
 
-#### 定向刺激提示（Directional Stimulus Prompting）
+#### 多模态提示
 
-[Guiding Large Language Models via Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520)
-
-**定向刺激提示（Directional Stimulus Prompting，DSP）**
-
-[定向刺激提示](https://www.promptingguide.ai/zh/techniques/dsp)
-
-#### 多模态思维链
-
-[多模态思维链](https://www.promptingguide.ai/zh/techniques/multimodalcot)
+* [Language Is Not All You Need: Aligning Perception with Language Models](https://arxiv.org/abs/2302.14045)
+* [Multimodal Chain-of-Thought Reasoning in Language Models](https://arxiv.org/abs/2302.00923)
 
 #### 基于图的提示
 
-[基于图的提示](https://www.promptingguide.ai/zh/techniques/graph)
+* [A Survey of Graph Prompting Methods: Techniques, Applications, and Challenges](https://arxiv.org/abs/2303.07275)
+* [GraphPrompt: Unifying Pre-Training and Downstream Tasks for Graph Neural Networks](https://arxiv.org/abs/2302.08043)
