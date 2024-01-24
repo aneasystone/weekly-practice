@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK052 - [提示工程学习笔记（二）](./notes/week052-prompt-engineering-notes-2/README.md)
 * WEEK051 - [提示工程学习笔记](./notes/week051-prompt-engineering-notes/README.md)
 * WEEK050 - [Java 21 初体验](./notes/week050-java-21-notes/README.md)
 * WEEK049 - [在 Kubernetes 中调度 GPU 资源](./notes/week049-scheduling-gpus-in-kubernetes/README.md)
