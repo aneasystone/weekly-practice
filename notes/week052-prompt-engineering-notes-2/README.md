@@ -26,11 +26,19 @@ PAL 与 CoT 提示的另一个区别是，PAL 使用的少样本示例中不包�
 
 论文作者还给出了 PAL 的数据集和代码，有兴趣的可以 [研究一下](https://reasonwithpal.com/)。
 
-https://www.promptingguide.ai/techniques/pal
-
 ### 思维程序提示（PoT）
 
-[Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks](https://arxiv.org/abs/2211.12588)
+几乎在同一时间，Wenhu Chen 等人发表了论文 [Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks](https://arxiv.org/abs/2211.12588)，提出了 **思维程序提示（PoT）** 技术，它和 PAL 非常相似。论文的作者同样意识到，尽管大模型擅长复杂的推理，但是却往往在简单的算术计算上栽跟头，从而导致回答错误，通过引入代码增强提示方法可以改善这个问题，使得大模型能够准确地解决复杂的数值任务。
+
+和 PAL 一样，PoT 也是利用 LLM 来生成包含自然语言语句和 Python 代码的混合逻辑步骤，然后，将代码部分放到 Python 解释器中执行，从而实现推理和计算的解耦：
+
+![](./images/pot.png)
+
+从上图中可以看到，CoT 提示无法解决斐波那契数列这种迭代问题，也求解不了简单的三次方程，PoT 通过程序就可以轻松解决这些问题！
+
+PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot PoT）** 两种，而且作者发现，零样本 PoT 提示也可以达到很好的效果：
+
+![](./images/pot-few-zero.png)
 
 ## 工具使用
 
