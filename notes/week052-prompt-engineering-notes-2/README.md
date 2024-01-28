@@ -42,6 +42,8 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 
 ## 工具使用
 
+检索增强扩展了模型获取信息的能力，编程增强扩展了模型解决问题的能力，如果抽象来看，他们实际上都是外部工具的调用，让模型负责推理，推理之外的事通过调用外部工具来实现。
+
 ### TALM
 
 [TALM: Tool Augmented Language Models](https://arxiv.org/abs/2205.12255)
@@ -55,6 +57,16 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 [ART: Automatic multi-step reasoning and tool-use for large language models](https://arxiv.org/abs/2303.09014)
 
 https://www.promptingguide.ai/zh/techniques/art
+
+这种方式利用自动推理和工具来解决问题，是由 Paranjape 等人在 2023 年提出的一种新框架，该框架使用冻结的语言模型来自动生成包含中间推理步骤的程序。ART 的工作原理是在接到一个新任务时，从任务库中选择多步推理和使用工具的示范，然后在测试中，每当需要调用外部工具时，就暂停生成，将工具输出整合后再继续生成。ART 可以引导模型总结示范，将新任务进行拆分并在恰当的地方使用工具。
+
+在 BigBench 和 MMLU 基准测试中，ART 在未见任务上的表现超过了少样本提示和自动 CoT，并且配合人类反馈后，它的表现超过了手写的 CoT 提示。
+
+简单来说，ART 就是一种智能化的工具，它可以引导模型进行推理，同时还可以调用外部工具进行帮助，使得模型的性能得到提升。
+
+![](./images/art.png)
+
+https://github.com/bhargaviparanjape/language-programmes
 
 ## 推理框架
 
@@ -84,3 +96,9 @@ https://ofir.io/Self-ask-prompting/
 * [赋予大模型使用工具的能力：Toolformer与ART](https://blog.csdn.net/bqw18744018044/article/details/134489247)
 
 ## 更多
+
+### 论文集锦
+
+* [atfortes/LLM-Reasoning-Papers](https://github.com/atfortes/LLM-Reasoning-Papers)
+* [DSXiangLi/DecryptPrompt](https://github.com/DSXiangLi/DecryptPrompt)
+* [zjunlp/Prompt4ReasoningPapers](https://github.com/zjunlp/Prompt4ReasoningPapers)
