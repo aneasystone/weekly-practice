@@ -54,19 +54,15 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 
 ### 自动推理并使用工具 (ART)
 
-[ART: Automatic multi-step reasoning and tool-use for large language models](https://arxiv.org/abs/2303.09014)
-
-https://www.promptingguide.ai/zh/techniques/art
-
-这种方式利用自动推理和工具来解决问题，是由 Paranjape 等人在 2023 年提出的一种新框架，该框架使用冻结的语言模型来自动生成包含中间推理步骤的程序。ART 的工作原理是在接到一个新任务时，从任务库中选择多步推理和使用工具的示范，然后在测试中，每当需要调用外部工具时，就暂停生成，将工具输出整合后再继续生成。ART 可以引导模型总结示范，将新任务进行拆分并在恰当的地方使用工具。
-
-在 BigBench 和 MMLU 基准测试中，ART 在未见任务上的表现超过了少样本提示和自动 CoT，并且配合人类反馈后，它的表现超过了手写的 CoT 提示。
-
-简单来说，ART 就是一种智能化的工具，它可以引导模型进行推理，同时还可以调用外部工具进行帮助，使得模型的性能得到提升。
+**自动推理并使用工具 (Automatic Reasoning and Tool-use, ART)** 是 Bhargavi Paranjape 等人于 2023 年发表的论文 [ART: Automatic multi-step reasoning and tool-use for large language models](https://arxiv.org/abs/2303.09014) 中提出的一种提示框架，该框架的工作原理是在接到一个新任务时，从任务库中选择多步推理和使用工具的示范，然后在测试中，每当需要调用外部工具时，就暂停生成，将工具输出整合后再继续生成：
 
 ![](./images/art.png)
 
-https://github.com/bhargaviparanjape/language-programmes
+可以看出，ART 可以引导模型进行推理，同时还可以调用外部工具进行帮助，使得模型的性能得到提升。另外，ART 还支持手动扩展，只要简单地更新任务和工具库就可以修正推理步骤中的错误或是添加新的工具。
+
+在 BigBench 和 MMLU 基准测试中，ART 在未见任务上的表现超过了少样本提示和自动 CoT，并且配合人类反馈后，它的表现超过了手写的 CoT 提示。
+
+作者在 GitHub 上开源了 [ART 的实现代码](https://github.com/bhargaviparanjape/language-programmes)，有兴趣的可以参考一下。
 
 ## 推理框架
 
@@ -102,3 +98,4 @@ https://ofir.io/Self-ask-prompting/
 * [atfortes/LLM-Reasoning-Papers](https://github.com/atfortes/LLM-Reasoning-Papers)
 * [DSXiangLi/DecryptPrompt](https://github.com/DSXiangLi/DecryptPrompt)
 * [zjunlp/Prompt4ReasoningPapers](https://github.com/zjunlp/Prompt4ReasoningPapers)
+* [Papers | Prompt Engineering Guide](https://www.promptingguide.ai/papers)
