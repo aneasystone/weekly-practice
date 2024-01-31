@@ -40,13 +40,33 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 
 ![](./images/pot-few-zero.png)
 
-## 工具使用
+## 工具增强
 
-检索增强扩展了模型获取信息的能力，编程增强扩展了模型解决问题的能力，如果抽象来看，他们实际上都是外部工具的调用，让模型负责推理，推理之外的事通过调用外部工具来实现。
+检索增强扩展了模型获取信息的能力，编程增强扩展了模型解决问题的能力，如果抽象来看，他们实际上都是外部工具的调用，让模型负责推理，推理之外的事通过调用外部工具来实现。在 [大模型应用开发框架 LangChain 学习笔记（二）](../week044-llm-application-frameworks-langchain-2/README.md) 中，我们学习了 OpenAI 的插件机制和 Function Calling 功能，这些其实都是通过外部工具实现的。
+
+关于工具增强，目前已经有不少的论文对此进行了研究，比如上文提到的 PAL 和 PoT 将 Python 解释器作为工具，我们还可以将搜索引擎、浏览器、计算器、翻译系统等等作为工具，下面是一些相关的论文：
+
+* [Internet-Augmented Dialogue Generation](https://arxiv.org/abs/2107.07566)
+* [LaMDA: Language Models for Dialog Applications](https://arxiv.org/abs/2201.08239)
+* [Internet-augmented language models through few-shot prompting for open-domain question answering](https://arxiv.org/abs/2203.05115)
+* [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
+* [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
+* [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
+* [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
+
+不过这些方法要么是依赖于大量的人类监督，要么是事先通过少样本提示确定好什么任务中要使用什么工具，使用起来都不够灵活。相比之下，TALM 和 Toolformer 通过 **自我监督（self-supervised）** 机制，使语言模型能够学习如何以及何时使用工具，而不需要编写任务和工具的示例。
 
 ### TALM
 
-[TALM: Tool Augmented Language Models](https://arxiv.org/abs/2205.12255)
+2022 年 5 月，Aaron Parisi 等人发表论文 [TALM: Tool Augmented Language Models](https://arxiv.org/abs/2205.12255)，提出了 **工具增强语言模型** 的概念，算得上是工具增强技术的鼻祖了。TALM 和传统语言模型的区别在于，它会引导模型输出要调用的工具以及工具的参数，然后将工具调用的结果输入模型，得到最终的结果：
+
+![](./images/talm-vs-lm.png)
+
+具体来说，TALM 使用了一种 **文本到文本的 API 调用（text-to-text API calls）** 方式，首先模型根据问题输出 `|tool-call` 这种特殊的格式，其中 `tool-call` 表示所使用的工具，然后输出 `tool input text`，表示文本形式的工具参数，后面紧接着输出 `|result` 固定格式，此时停止模型的输出，开始调用外部工具，然后将调用结果追加到刚生成的文本后面，再加上 `|output` 送回语言模型，从而生成最终的结果。下面是使用 TALM 调用天气工具的一个示例：
+
+![](./images/talm-examples.png)
+
+此外，TALM 采用 **自我对弈（self-play）** 的方法来扩充工具使用示例的数据集，每次模型与工具的交互，通过一种方法判断其是否能改善模型的输出，如果有改善，就扩展到数据集中，并将其用于语言模型的微调。
 
 ### Toolformer
 
