@@ -4,6 +4,14 @@
 
 ## 检索增强
 
+* [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
+* [Retrieval-Augmented Generation for Large Language Models: A Survey](https://arxiv.org/abs/2312.10997)
+
+### Internet-Augmented Language Models
+
+* [Internet-augmented language models through few-shot prompting for open-domain question answering](https://arxiv.org/abs/2203.05115)
+* [Internet-Augmented Dialogue Generation](https://arxiv.org/abs/2107.07566)
+
 ## 编程增强
 
 正如前文所述，结合一些提示技术，语言模型能够准确地给出解决问题的推理步骤，但是，生成正确的推理步骤并不意味着它能正确的解决问题！推理过程中一个小小的算术错误都将导致最终结果的错误，这种错误通常被称为语言模型的 *组合性差距（Compositionality Gap）*，而且这个差距不会随着模型的增大和复杂度的增加而减小。
@@ -44,17 +52,7 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 
 检索增强扩展了模型获取信息的能力，编程增强扩展了模型解决问题的能力，如果抽象来看，他们实际上都是外部工具的调用，让模型负责推理，推理之外的事通过调用外部工具来实现。在 [大模型应用开发框架 LangChain 学习笔记（二）](../week044-llm-application-frameworks-langchain-2/README.md) 中，我们学习了 OpenAI 的插件机制和 Function Calling 功能，这些其实都是通过外部工具实现的。
 
-关于工具增强，目前已经有不少的论文对此进行了研究，比如上文提到的 PAL 和 PoT 将 Python 解释器作为工具，我们还可以将搜索引擎、浏览器、计算器、翻译系统等等作为工具，下面是一些相关的论文：
-
-* [Internet-Augmented Dialogue Generation](https://arxiv.org/abs/2107.07566)
-* [LaMDA: Language Models for Dialog Applications](https://arxiv.org/abs/2201.08239)
-* [Internet-augmented language models through few-shot prompting for open-domain question answering](https://arxiv.org/abs/2203.05115)
-* [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
-* [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
-* [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
-* [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
-
-不过这些方法要么是依赖于大量的人类监督，要么是事先通过少样本提示确定好什么任务中要使用什么工具，使用起来都不够灵活。相比之下，TALM 和 Toolformer 通过 **自我监督（self-supervised）** 机制，使语言模型能够学习如何以及何时使用工具，而不需要编写任务和工具的示例。
+关于工具增强，目前已经有不少的论文对此进行了研究，比如上文提到的 Internet-Augmented Language Models 将搜索引擎作为工具，PAL 和 PoT 将 Python 解释器作为工具，我们还可以将浏览器、计算器、QA 系统、翻译系统等等作为工具，比如 [LaMDA](https://arxiv.org/abs/2201.08239)、[BlenderBot 3](https://arxiv.org/abs/2208.03188)、[WebGPT](https://arxiv.org/abs/2112.09332) 等，不过这些方法要么是依赖于大量的人类监督，要么是事先通过少样本提示确定好什么任务中要使用什么工具，使用起来都不够灵活。相比之下，TALM 和 Toolformer 通过 **自我监督（self-supervised）** 机制，使语言模型能够学习如何以及何时使用工具，而不需要编写任务和工具的示例。
 
 ### TALM
 
@@ -70,11 +68,50 @@ PoT 也分为 **少样本 PoT（Few-shot PoT）** 和 **零样本 PoT（Few-shot
 
 ### Toolformer
 
-[Toolformer: Language Models Can Teach Themselves to Use Tools](https://arxiv.org/abs/2302.04761)
+Toolformer 是 Timo Schick 等人于论文 [Toolformer: Language Models Can Teach Themselves to Use Tools](https://arxiv.org/abs/2302.04761) 中提出的一种语言模型，和 TALM 一样，也是通过引导模型输出要调用的工具以及工具的参数，然后将工具调用的结果输入模型，最终得到期望的结果：
+
+![](./images/toolformer.png)
+
+Toolformer 支持下面 5 种不同的工具：
+
+* 计算器：让语言模型处理数学计算问题；
+* QA 系统：避免语言模型生成错误的内容和幻觉；
+* 搜索引擎：为语言模型提供最新的信息；
+* 翻译系统：提高低资源语言的性能；
+* 日历：让语言模型知道时间信息；
+
+Toolformer 和 TALM 非常类似，这里就不过多赘述了，我们重点关注它的训练过程：
+
+![](./images/toolformer-train.png)
+
+1. **LM Dataset**：首先我们需要有一批带有 API 调用标注的数据集，Toolformer 的方法很巧妙，它通过一段提示词和几个 API 调用示例，让语言模型自动生成这样的数据集；比如下面是生成 QA 系统 API 调用的示例：
+
+```
+Your task is to add calls to a Question Answering API to a piece of text. The questions should help you get
+information required to complete the text. You can call the API by writing "[QA(question)]" where "question" is the
+question you want to ask. Here are some examples of API calls:
+
+Input: Joe Biden was born in Scranton, Pennsylvania.
+Output: Joe Biden was born in [QA("Where was Joe Biden born?")] Scranton, [QA("In which state is Scranton?")] Pennsylvania.
+
+Input: Coca-Cola, or Coke, is a carbonated soft drink manufactured by the Coca-Cola Company.
+Output: Coca-Cola, or [QA("What other name is Coca-Cola known by?")] Coke, is a carbonated soft drink manufactured 
+by [QA("Who manufactures Coca-Cola?")] the Coca-Cola Company.
+
+Input: x
+Output:
+```
+
+2. **Sample API Calls**：将每一个 API 调用表示为一个二元组（API 的名称和相应的输入），对于同一个位置 `i`，我们进行多次采样，生成不同的 API 调用 `ci1`、`ci2` 等；
+3. **Excute API Calls**：执行上面生成的每个 API 调用得到结果 `ri1`、`ri2` 等；
+4. **Filter API Calls**：计算模型在标记上的 *加权交叉熵损失（weighted cross entropy loss）*，只有大于阈值的 API 调用被保留，这意味着添加这个 API 调用及其结果有助于模型预测未来的标记；
+5. **LM Dataset with API Calls**：至此就生成了一批带有 API 调用标注的数据集，然后在这个标注好的数据集上对语言模型进行微调，从而提高模型调用工具的性能。
+
+Toolformer 的创新之处在于，仅使用少量的人工标注样本制造大量的自监督样本，理论上可以支持任意的 API 调用，但 Toolformer 也有一些局限性，比如不支持链式工具使用（使用一个工具的输出作为另一个工具的输入）或以交互方式使用（人工选择后采用 API 响应）。
 
 ### 自动推理并使用工具 (ART)
 
-**自动推理并使用工具 (Automatic Reasoning and Tool-use, ART)** 是 Bhargavi Paranjape 等人于 2023 年发表的论文 [ART: Automatic multi-step reasoning and tool-use for large language models](https://arxiv.org/abs/2303.09014) 中提出的一种提示框架，该框架的工作原理是在接到一个新任务时，从任务库中选择多步推理和使用工具的示范，然后在测试中，每当需要调用外部工具时，就暂停生成，将工具输出整合后再继续生成：
+TALM 和 Toolformer 都是微调方案，相比于 Prompt 方案，在复杂问题规划上效果更好，但是很显然没有开箱即用的 Prompt 方案灵活。**自动推理并使用工具 (Automatic Reasoning and Tool-use, ART)** 是一种简单的工具增强的提示框架，由 Bhargavi Paranjape 等人于 2023 年发表的论文 [ART: Automatic multi-step reasoning and tool-use for large language models](https://arxiv.org/abs/2303.09014) 中提出，该框架的工作原理是在接到一个新任务时，从任务库中选择多步推理和使用工具的示范，然后在测试中，每当需要调用外部工具时，就暂停生成，将工具输出整合后再继续生成：
 
 ![](./images/art.png)
 
@@ -119,3 +156,10 @@ https://ofir.io/Self-ask-prompting/
 * [DSXiangLi/DecryptPrompt](https://github.com/DSXiangLi/DecryptPrompt)
 * [zjunlp/Prompt4ReasoningPapers](https://github.com/zjunlp/Prompt4ReasoningPapers)
 * [Papers | Prompt Engineering Guide](https://www.promptingguide.ai/papers)
+
+### 工具增强
+
+* [LaMDA: Language Models for Dialog Applications](https://arxiv.org/abs/2201.08239)
+* [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
+* [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
+* [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
