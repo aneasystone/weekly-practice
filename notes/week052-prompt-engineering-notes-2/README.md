@@ -115,13 +115,32 @@ TALM 和 Toolformer 都是微调方案，相比于 Prompt 方案，在复杂问�
 
 ![](./images/art.png)
 
-可以看出，ART 可以引导模型进行推理，同时还可以调用外部工具进行帮助，使得模型的性能得到提升。另外，ART 还支持手动扩展，只要简单地更新任务和工具库就可以修正推理步骤中的错误或是添加新的工具。
+可以看出，ART 可以引导模型进行推理，同时还可以调用外部工具进行帮助，使得模型的性能得到提升。ART 相比于 Toolformer，不仅使用上更简单，而且没有 Toolformer 的局限性，支持链式调用和人工反馈，另外，ART 还支持手动扩展，只要简单地更新任务和工具库就可以修正推理步骤中的错误或是添加新的工具。
 
 在 BigBench 和 MMLU 基准测试中，ART 在未见任务上的表现超过了少样本提示和自动 CoT，并且配合人类反馈后，它的表现超过了手写的 CoT 提示。
 
 作者在 GitHub 上开源了 [ART 的实现代码](https://github.com/bhargaviparanjape/language-programmes)，有兴趣的可以参考一下。
 
-## 推理框架
+### LLMs As Tool Makers（LATM）
+
+[Large Language Models as Tool Makers](https://arxiv.org/abs/2305.17126)
+
+[CREATOR: Tool Creation for Disentangling Abstract and Concrete Reasoning of Large Language Models](https://arxiv.org/abs/2305.14318)
+
+https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
+
+## 任务规划
+
+在上一篇笔记中，我们学习了不少改善大模型推理能力的提示技术，如思维链（CoT）、思维树（ToT）、最小到最多提示（Least-to-Most Prompting）等，在这一篇笔记中，我们又继续学习如何使用工具增强让大模型的能力得到更大的提升。尽量这两方面的研究都展示了令人印象深刻的效果，但是大模型在解决一些复杂任务时还是不尽如人意。于是研究人员开始将这两点结合起来，智能体的概念也随之浮出水面。
+
+去年 6 月 23 日，OpenAI 的应用研究主管 Lilian Weng 在她的博客上发表了一篇文章 [LLM Powered Autonomous Agents](https://lilianweng.github.io/posts/2023-06-23-agent/)，她提出 **智能体 = 大模型 + 记忆 + 任务规划 + 工具使用**，如下图所示:
+
+![](./images/agent-overview.png)
+
+其中，记忆可以分为 **短期记忆** 和 **长期记忆**，将所有的上下文都视为模型的短期记忆，而外部向量存储和快速检索则视为模型的长期记忆；工具使用表示的是模型通过调用外部 API 获取模型权重中缺失的额外信息，可以参考上文中介绍的内容；任务规划对应的是大模型的推理能力，具体表现在两个方面：
+
+* 任务分解：可以将大任务分解为多个更小的任务，生成行动计划，从而高效地处理复杂任务；
+* 反思和改善：可以对过去的行动进行自我批评和自我反思，从错误中吸取教训并为未来的步骤进行改进，从而提高最终结果的质量。
 
 ### ReAct
 
@@ -137,6 +156,10 @@ https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/
 
 https://ofir.io/Self-ask-prompting/
 
+### Plan-and-Solve Prompting
+
+[Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](https://arxiv.org/abs/2305.04091)
+
 ## 参考
 
 * [Augmented Language Models: a Survey](https://arxiv.org/abs/2302.07842)
@@ -147,6 +170,9 @@ https://ofir.io/Self-ask-prompting/
 * [从PaL到PoT，用程序辅助语言模型，释放大语言模型推理潜能](https://www.ai2news.com/blog/2965081/)
 * [LLM+Tools，几篇LLM使用工具文章速览](https://zhuanlan.zhihu.com/p/641402205)
 * [赋予大模型使用工具的能力：Toolformer与ART](https://blog.csdn.net/bqw18744018044/article/details/134489247)
+* [Teaching Language Models to use Tools](https://cameronrwolfe.substack.com/p/teaching-language-models-to-use-tools)
+* [Can language models make their own tools?](https://cameronrwolfe.substack.com/p/can-language-models-make-their-own)
+* [ReAct (Reason+Act) prompting in LLMs](https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/)
 
 ## 更多
 
