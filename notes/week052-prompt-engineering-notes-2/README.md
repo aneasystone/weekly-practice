@@ -144,11 +144,62 @@ https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
 
 ### ReAct
 
-[ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
+**推理和行动（Reasoning and Acting，ReAct）** 是 Shunyu Yao 等人在 [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) 这篇论文中提出的一种推理框架，作者通过语言模型以交错的方式生成 *推理轨迹* 和 *任务特定的行动*，从而在两者之间实现更大的协同效应：推理轨迹帮助模型诱导、跟踪和更新行动计划，并处理异常情况，而行动则使其能够与知识库或外部环境进行交互，以收集额外信息。
 
-https://www.promptingguide.ai/zh/techniques/react
+![](./images/react.png)
 
-https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/
+下图是 ReAct 和其他提示技术的一个对比：
+
+![](./images/react-hotspot-qa.png)
+
+我们向语言模型提出一个问题：
+
+```
+除了苹果遥控器，还有哪些设备可以控制苹果遥控器最初设计用来交互的程序?
+```
+
+可以看出无论是使用思维链提示（Reason Only）还是使用工具增强（Act-Only）得到的答案都是错的，只有将推理和行动两者结合起来，才能得到准确的答案，不仅如此，我们甚至可以看到模型一步步解决问题的轨迹（*task solving trajectories*），具有很好的可解释性。
+
+那么 ReAct 是如何工作的呢？其实还是通过少样本提示来实现的，ReAct 在提示中包含了少量的推理轨迹示例，推理轨迹由多个 **思考-操作-观察（Thought-Action-Observation）** 步骤组成，如下：
+
+```
+问题 科罗拉多造山带东部区域延伸到的区域的海拔范围是多少?
+思考 1 我需要搜索科罗拉多造山带，找到科罗拉多造山带东段延伸的区域，然后找到该区域的海拔范围。
+操作 1 搜索 [科罗拉多造山带]
+观察 1 科罗拉多造山带是科罗拉多及其周边地区造山运动的一段。
+思考 2 它没有提到东部地区。所以我需要查一下东部地区。
+操作 2 查找 [东部地区]
+观察 2 (结果 1 / 1) 东部区域延伸至高平原，称为中原造山带。
+思考 3 科罗拉多造山运动的东部区域延伸到高平原。所以我需要搜索高平原，找到它的海拔范围。
+操作 3 搜索 [高平原]
+观察 3 高平原指的是两个截然不同的陆地区域之一。
+思考 4 我需要搜索高平原（美国）
+操作 4 搜索 [高平原（美国）]
+观察 4 高平原是大平原的一个分区。从东到西，高平原的海拔从 1800 到 7000 英尺 (550 到 2130 米) 不等。
+思考 5 高平原海拔高度从 1800 到 7000 英尺，所以答案是 1800 到 7000 英尺。
+操作 5 结束 [1800 到 7000 英尺]
+```
+
+不同类型的任务可以使用不同的示例，比如对那些以推理为主要目标的任务，使用多个思考-操作-观察的步骤有助于任务的解决，而对于涉及许多操作步骤的决策任务来说，则较少使用思考。
+
+论文还给出了 ReAct 在不同任务上的表现结果，在知识密集型推理任务如问答（[HotpotQA](https://hotpotqa.github.io/)）和事实验证（[Fever](https://fever.ai/resources.html)）方面，ReAct 通过与维基百科 API 交互，克服了思维链推理中普遍存在的幻觉和错误传播问题，生成了比没有推理痕迹的基准更易解释的类人任务解决轨迹。
+
+论文结果显示，ReAct 在 Fever 上的表现优于 CoT，而在 HotpotQA 上落后于 CoT，作者对此进行了总结：
+
+* ReAct 的结构性约束降低了它在制定推理步骤方面的灵活性；
+* ReAct 在很大程度上依赖于它正在检索的信息，非信息性搜索结果阻碍了模型推理，并导致难以恢复和重新形成思想；
+
+将链式思考、自我一致性、ReAct 几种提示方法结合起来，通常优于所有其他提示方法。
+
+另外，在两个交互式决策型任务（[ALFWorld](https://alfworld.github.io/) 和 [WebShop](https://webshop-pnlp.github.io/)）上，只需一两个上下文示例的提示，ReAct 就实现了分别比模仿学习和强化学习方法高出 34% 和 10% 的成功率。不过要注意的是，尽管在这些类型的任务中，ReAct 的推理显露出优势，但目前基于提示的方法在这些任务上的表现与人类专家相差甚远。
+
+ReAct 的实现代码在 [GitHub](https://github.com/ysymyth/ReAct) 上开源了，有兴趣同学的可以尝试下。另外，LangChain 基于 ReAct 的思想实现了 [Zero-shot ReAct Agent](https://python.langchain.com/docs/modules/agents/agent_types/react)，关于它的使用方法可以参考我之前写的 [大模型应用开发框架 LangChain 学习笔记](../week044-llm-application-frameworks-langchain-2/README.md)。
+
+### MRKL
+
+[MRKL Systems: A modular, neuro-symbolic architecture that combines large language models, external knowledge sources and discrete reasoning](https://arxiv.org/abs/2205.00445)
+
+Modular Reasoning, Knowledge and Language (MRKL, pronounced "miracle")
 
 ### SelfAsk
 
