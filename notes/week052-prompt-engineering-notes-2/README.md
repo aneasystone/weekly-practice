@@ -146,6 +146,8 @@ https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
 
 **推理和行动（Reasoning and Acting，ReAct）** 是 Shunyu Yao 等人在 [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) 这篇论文中提出的一种推理框架，作者通过语言模型以交错的方式生成 *推理轨迹* 和 *任务特定的行动*，从而在两者之间实现更大的协同效应：推理轨迹帮助模型诱导、跟踪和更新行动计划，并处理异常情况，而行动则使其能够与知识库或外部环境进行交互，以收集额外信息。
 
+这类似于我们人类在处理复杂问题时的行为，通过推理和行动之间的紧密协同作用，使我们能够快速学习新任务并执行强大的推理和决策，即使面临不可预见的情况时，我们也能做到这一点。
+
 ![](./images/react.png)
 
 下图是 ReAct 和其他提示技术的一个对比：
@@ -158,7 +160,7 @@ https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
 除了苹果遥控器，还有哪些设备可以控制苹果遥控器最初设计用来交互的程序?
 ```
 
-可以看出无论是使用思维链提示（Reason Only）还是使用工具增强（Act-Only）得到的答案都是错的，只有将推理和行动两者结合起来，才能得到准确的答案，不仅如此，我们甚至可以看到模型一步步解决问题的轨迹（*task solving trajectories*），具有很好的可解释性。
+这个问题来自于 [HotpotQA](https://hotpotqa.github.io/)，这是一个需要复杂推理的问答数据集。可以看出无论是使用思维链提示（Reason Only）还是使用工具增强（Act-Only）得到的答案都是错的，只有将推理和行动两者结合起来，才能得到准确的答案。ReAct 首先通过推理明确下一步要做什么（Thought 1），接着执行一个动作（Act 1）发送查询请求，然后收到了一个观察（Obs 1），一直重复这个循环，直到达到结论（Act 4）。通过 ReAct 不仅得到了正常的答案，而且我们可以看到模型一步步解决问题的轨迹（*task solving trajectories*），具有很好的可解释性。
 
 那么 ReAct 是如何工作的呢？其实还是通过少样本提示来实现的，ReAct 在提示中包含了少量的推理轨迹示例，推理轨迹由多个 **思考-操作-观察（Thought-Action-Observation）** 步骤组成，如下：
 
@@ -201,11 +203,19 @@ ReAct 的实现代码在 [GitHub](https://github.com/ysymyth/ReAct) 上开源了
 
 Modular Reasoning, Knowledge and Language (MRKL, pronounced "miracle")
 
-### SelfAsk
+### Self-ask Prompting
 
-[Measuring and Narrowing the Compositionality Gap in Language Models](https://arxiv.org/abs/2210.03350)
+前面我们提到过一个概念叫 *组合性差距（Compositionality Gap）*，它表示语言模型能够准确地给出解决问题的推理步骤，但是最终回答却是错的这种现象。这一概念最早由 Ofir Press 等人在 [Measuring and Narrowing the Compositionality Gap in Language Models](https://arxiv.org/abs/2210.03350) 这篇论文中提出的，他们指出可以通过推理来缩小组合性差距，例如引发思维链，同时他们提出了一种新的方法，即 **自问自答（Self-ask）**，进一步改进了思维链的效果。
 
-https://ofir.io/Self-ask-prompting/
+Self-ask 的工作原理是，模型在回答初始问题之前，明确地向自己提出后续问题并回答，直到不需要再提问为止：
+
+![](./images/self-ask.png)
+
+Self-ask 有点类似于之前学过的 *最少到最多提示（Least-To-Most Prompting）*，将问题分解为更小的后续问题来解决。Self-ask 也依赖于少样本的思维链提示，但是不同于传统的思维链，Self-ask 在提示中不断的反问自己 `Are follow up questions needed here`，让模型生成后续问题，回答之后再继续反问自己，直到得到最终答案。得益于 Self-ask 的结构化提示，我们能够轻松地插入搜索引擎来回答后续问题，从而进一步提高准确性。
+
+Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub](https://github.com/ofirpress/self-ask) 上的源码。
+
+另外，Harsh Trivedi 等人提出的 [IRCoT（Interleaving Retrieval with Chain-of-Thought）](https://arxiv.org/abs/2212.10509) 方法，将 CoT 生成步骤和信息检索步骤交错使用，和 Self-ask 非常类似。
 
 ### Plan-and-Solve Prompting
 
@@ -224,6 +234,8 @@ https://ofir.io/Self-ask-prompting/
 * [Teaching Language Models to use Tools](https://cameronrwolfe.substack.com/p/teaching-language-models-to-use-tools)
 * [Can language models make their own tools?](https://cameronrwolfe.substack.com/p/can-language-models-make-their-own)
 * [ReAct (Reason+Act) prompting in LLMs](https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/)
+* [Self-ask Prompting – Ofir Press](https://ofir.io/Self-ask-prompting/)
+* [Techniques to improve reliability](https://github.com/openai/openai-cookbook/blob/main/articles/techniques_to_improve_reliability.md)
 
 ## 更多
 
@@ -233,6 +245,7 @@ https://ofir.io/Self-ask-prompting/
 * [DSXiangLi/DecryptPrompt](https://github.com/DSXiangLi/DecryptPrompt)
 * [zjunlp/Prompt4ReasoningPapers](https://github.com/zjunlp/Prompt4ReasoningPapers)
 * [Papers | Prompt Engineering Guide](https://www.promptingguide.ai/papers)
+* [Bibliography | Learn Prompting](https://learnprompting.org/zh-Hans/docs/bibliography)
 
 ### 工具增强
 
@@ -240,3 +253,8 @@ https://ofir.io/Self-ask-prompting/
 * [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
 * [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
 * [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
+
+### 提示工程安全
+
+* [对抗性提示](https://www.promptingguide.ai/zh/risks/adversarial)
+* [针对提示工程的破解技巧](https://learnprompting.org/zh-Hans/docs/category/-prompt-hacking)
