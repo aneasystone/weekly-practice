@@ -4,13 +4,32 @@
 
 ## 检索增强
 
+在处理 *知识密集型（knowledge-intensive）* 任务时，语言模型往往会出现 *幻觉（hallucination）* 现象，**检索增强生成（Retrieval Augmented Generation，RAG）** 是一种常见的解决幻觉的技术，它将信息检索技术和文本生成模型结合在一起，通过检索外部知识源，增强答案的可靠程度。
+
+一个典型的 RAG 包含两个主要的部分：
+
+* 索引构建：首先准备和加载数据，将数据划分成小的数据块，然后对每个小数据块做向量表征存储，方便后续做语义检索；
+* 检索和生成：基于用户输入的问题，尽可能地检索出最相关的数据块，将检索出的数据块作为上下文和用户问题一起组合成 prompt 让大模型生成回答。
+
+RAG 让语言模型不用重新训练就能够获取最新的信息，基于检索出的文档来回答用户问题，不仅提高了答案的可靠性，而且可以给出答案的引用来源，提高了模型的可解释性。
+
+我们也可以省去构建检索系统这一步，直接使用一些现成的搜索引擎，比如 Google、Bing、维基百科等，OpenAI 提出的 [WebGPT](https://arxiv.org/abs/2112.09332) 和 DeepMind 团队提出的 [Internet 增强语言模型](https://arxiv.org/abs/2203.05115) 是两个比较典型的示例。
+
+WebGPT 是一个基于 GPT-3 的微调模型，它可以搜索和浏览网页，并且通过人工反馈来优化回答问题的效果：
+
+![](./images/webgpt.png)
+
+相对的，Internet 增强语言模型不需要微调，通过少样本提示，就可以让模型从互联网上检索信息。为了提升信息检索的有效性，论文对搜索引擎返回的结果进行切分，每个段落包含 6 个句子，然后通过 TF-IDF 余弦相关性算法，计算段落与用户输入的相似性，选取最相关的段落加入到提示词中，输入给大模型获取答案。
+
+![](./images/internet-agumented-llm.png)
+
+下面是一些关于 RAG 的论文：
+
 * [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
 * [Retrieval-Augmented Generation for Large Language Models: A Survey](https://arxiv.org/abs/2312.10997)
-
-### Internet-Augmented Language Models
-
 * [Internet-augmented language models through few-shot prompting for open-domain question answering](https://arxiv.org/abs/2203.05115)
 * [Internet-Augmented Dialogue Generation](https://arxiv.org/abs/2107.07566)
+* [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
 
 ## 编程增强
 
@@ -229,6 +248,7 @@ Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://cloud.tencent.com/developer/article/2305421)
 * [解密Prompt系列13. LLM Agent指令微调方案: Toolformer & Gorilla](https://cloud.tencent.com/developer/article/2312674)
 * [从PaL到PoT，用程序辅助语言模型，释放大语言模型推理潜能](https://www.ai2news.com/blog/2965081/)
+* [Program-Aided Language Models - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/program-aided-language-models)
 * [LLM+Tools，几篇LLM使用工具文章速览](https://zhuanlan.zhihu.com/p/641402205)
 * [赋予大模型使用工具的能力：Toolformer与ART](https://blog.csdn.net/bqw18744018044/article/details/134489247)
 * [Teaching Language Models to use Tools](https://cameronrwolfe.substack.com/p/teaching-language-models-to-use-tools)
@@ -251,7 +271,6 @@ Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub
 
 * [LaMDA: Language Models for Dialog Applications](https://arxiv.org/abs/2201.08239)
 * [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
-* [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
 * [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
 
 ### 提示工程安全
