@@ -565,6 +565,9 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Instruction Tuning（FLAN、instructGPT、chatGPT）](https://blog.csdn.net/qq_39388410/article/details/128265846)
 * [解密Prompt系列4. 升级Instruction Tuning：Flan/T0/InstructGPT/TKInstruct](https://cloud.tencent.com/developer/article/2245094)
 * [解密Prompt系列9. 模型复杂推理-思维链基础和进阶玩法](https://cloud.tencent.com/developer/article/2296079)
+* [12 Prompt Engineering Techniques](https://cobusgreyling.medium.com/12-prompt-engineering-techniques-644481c857aa)
+* [Practical Prompt Engineering - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/practical-prompt-engineering-part)
+* [Prompt Ensembles Make LLMs More Reliable](https://cameronrwolfe.substack.com/p/prompt-ensembles-make-llms-more-reliable)
 
 ## 更多
 
@@ -578,13 +581,15 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 
 ### 应用产品
 
+* [Prompt Engineering Tools and IDEs](https://learnprompting.org/zh-Hans/docs/category/-tooling)
+* [Prompted Products](https://learnprompting.org/zh-Hans/docs/products)
 * [Open Prompt Studio](https://moonvy.com/apps/ops/) - AIGC 提示词可视化编辑器
 * [ChatGPT Shortcut](https://www.aishort.top/) - 让生产力加倍的 ChatGPT 快捷指令
 * [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
 * [Knit](https://promptknit.com/) - A better playground for prompt designers
 
-### 其他
+### 其他提示技术
 
 #### 多模态提示
 
@@ -595,3 +600,22 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 
 * [A Survey of Graph Prompting Methods: Techniques, Applications, and Challenges](https://arxiv.org/abs/2303.07275)
 * [GraphPrompt: Unifying Pre-Training and Downstream Tasks for Graph Neural Networks](https://arxiv.org/abs/2302.08043)
+
+#### Prompt Ensembling
+
+* [Making Large Language Models Better Reasoners with Step-Aware Verifier](https://arxiv.org/abs/2206.02336) - DIVERSE (Diverse Verifier on Reasoning Step)
+* [Enhancing Self-Consistency and Performance of Pre-Trained Language Models through Natural Language Inference](https://arxiv.org/abs/2211.11875) - ConCoRD (Consistency Correction through Relation Detection)
+* [Ask Me Anything: A simple strategy for prompting language models](https://arxiv.org/abs/2210.02441) - AMA Prompting
+* [Complexity-Based Prompting for Multi-Step Reasoning](https://arxiv.org/abs/2210.00720) - 复杂推理提示
+* [Progressive-Hint Prompting Improves Reasoning in Large Language Models](https://arxiv.org/abs/2304.09797) - 渐进提示
+
+#### 数学推理
+
+* [MathPrompter: Mathematical Reasoning using Large Language Models](https://arxiv.org/abs/2303.05398)
+
+#### 其他
+
+* [Meta-Prompt: A Simple Self-Improving Language Agent](https://noahgoodman.substack.com/p/meta-prompt-a-simple-self-improving) - 元提示
+* [Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding](https://arxiv.org/abs/2401.12954)
+* [Iteratively Prompt Pre-trained Language Models for Chain of Thought](https://arxiv.org/abs/2203.08383) - 迭代提示
+* [Large Language Models are Zero-Shot Rankers for Recommender Systems](https://arxiv.org/abs/2305.08845) - 顺序提示

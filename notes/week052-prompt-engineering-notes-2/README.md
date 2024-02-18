@@ -222,6 +222,8 @@ ReAct 的实现代码在 [GitHub](https://github.com/ysymyth/ReAct) 上开源了
 
 Modular Reasoning, Knowledge and Language (MRKL, pronounced "miracle")
 
+Zero-shot ReAct Agent 更像是一个通用的 [MRKL 系统](https://arxiv.org/abs/2205.00445)，MRKL 的全称是模块化推理、知识和语言系统，它是一种模块化的神经符号架构，结合了大型语言模型、外部知识源和离散推理，它最初 [由 AI21 Labs 提出](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system)，并实现了 Jurassic-X，对 MRKL 感兴趣的同学可以参考 [这篇博客](https://zhuanlan.zhihu.com/p/526713337)。
+
 ### Self-ask Prompting
 
 前面我们提到过一个概念叫 *组合性差距（Compositionality Gap）*，它表示语言模型能够准确地给出解决问题的推理步骤，但是最终回答却是错的这种现象。这一概念最早由 Ofir Press 等人在 [Measuring and Narrowing the Compositionality Gap in Language Models](https://arxiv.org/abs/2210.03350) 这篇论文中提出的，他们指出可以通过推理来缩小组合性差距，例如引发思维链，同时他们提出了一种新的方法，即 **自问自答（Self-ask）**，进一步改进了思维链的效果。
@@ -236,6 +238,24 @@ Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub
 
 另外，Harsh Trivedi 等人提出的 [IRCoT（Interleaving Retrieval with Chain-of-Thought）](https://arxiv.org/abs/2212.10509) 方法，将 CoT 生成步骤和信息检索步骤交错使用，和 Self-ask 非常类似。
 
+### HuggingGPT
+
+关于工具增强的另一个典型例子是由微软提出的 **HuggingGPT**，对应的论文为 [HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face](https://arxiv.org/abs/2303.17580)。
+
+HuggingGPT 将 ChatGPT 作为控制器，首先对用户的请求任务进行规划，拆分成不同的子任务，然后在 Hugging Face 提供的开源模型库中选择合适的 AI 模型来完成子任务，最终将结果汇总返回给用户。整个工作流程如下：
+
+![](./images/hugginggpt.png)
+
+HuggingGPT 最有意思的一点是它使用的所有工具都来自于 Hugging Face 的开源模型，由于模型非常多，所以在实际使用过程中，首先需要进行模型选择，例如根据模型下载量和任务相关性进行排序，选出 top-K 模型列表，将模型名称和描述等信息放到上下文提示词里，再由大模型选择合适的模型并执行。
+
+下面是一个更具体的任务示例：
+
+![](./images/hugginggpt-overview.jpeg)
+
+可以看到，这是一个比较复杂的任务，任务要求生成一张照片，照片中要包含一个小女孩在读书，且小女孩的姿势要和 example.jpg 中的男孩一样，然后使用语音描述下新生成的图片。HuggingGPT 将这个任务划分成了 6 个子任务，pose-control -> pose-to-image -> image-class -> object-det -> image-to-text -> text-to-speech，并依次执行。
+
+对 HuggingGPT 感兴趣的同学可以参考开源项目 [JARVIS](https://github.com/microsoft/JARVIS) 的实现。
+
 ### Plan-and-Solve Prompting
 
 [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](https://arxiv.org/abs/2305.04091)
@@ -245,6 +265,7 @@ Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub
 * [Augmented Language Models: a Survey](https://arxiv.org/abs/2302.07842)
 * [Prompt Engineering | Lil'Log](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
+* [LLM 提示词工程学习笔记](https://zhuanlan.zhihu.com/p/666572032)
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://cloud.tencent.com/developer/article/2305421)
 * [解密Prompt系列13. LLM Agent指令微调方案: Toolformer & Gorilla](https://cloud.tencent.com/developer/article/2312674)
 * [从PaL到PoT，用程序辅助语言模型，释放大语言模型推理潜能](https://www.ai2news.com/blog/2965081/)
