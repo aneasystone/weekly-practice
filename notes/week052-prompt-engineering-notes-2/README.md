@@ -19,7 +19,7 @@ WebGPT 是一个基于 GPT-3 的微调模型，它可以搜索和浏览网页，
 
 ![](./images/webgpt.png)
 
-相对的，Internet 增强语言模型不需要微调，通过少样本提示，就可以让模型从互联网上检索信息。为了提升信息检索的有效性，论文对搜索引擎返回的结果进行切分，每个段落包含 6 个句子，然后通过 TF-IDF 余弦相关性算法，计算段落与用户输入的相似性，选取最相关的段落加入到提示词中，输入给大模型获取答案。
+相对的，Internet 增强语言模型不需要微调，通过少样本提示，就可以让模型从互联网上检索信息。给定一个问题，从 Google 返回的 20 个 URL 中提取出干净的文本，从而得到一组文档，由于这些文档很长，论文将每个文档切分成一个个段落，每个段落包含 6 个句子，然后通过 TF-IDF 余弦相关性算法，计算段落与用户输入的相似性，选取最相关的段落加入到提示词中，输入给大模型获取答案。
 
 ![](./images/internet-agumented-llm.png)
 
@@ -238,9 +238,34 @@ Self-ask 的原理很简单，实现起来也比较容易，可以参考 [GitHub
 
 另外，Harsh Trivedi 等人提出的 [IRCoT（Interleaving Retrieval with Chain-of-Thought）](https://arxiv.org/abs/2212.10509) 方法，将 CoT 生成步骤和信息检索步骤交错使用，和 Self-ask 非常类似。
 
+### Plan-and-Solve Prompting
+
+对于 ReAct 和 Self-ask，工作原理基本上是一样的：给定一组工具，然后大模型根据用户的输入一步一步地选择工具来执行，每一步的结果都用于决定下一步操作，直到问题被解决。这种逐步执行的 Agent 通常被称为 **Action Agent**，这些 Agent 本质上使用的都是少样本的思维链提示，比较适合小型任务；如果要处理需要保持长期目标的复杂任务，使用 Action Agent 经常会出现推理跑偏的问题。
+
+为了解决这个问题，Lei Wang 等人提出了 **Plan-and-Solve Prompting** 提示技术，对应的论文为 [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](https://arxiv.org/abs/2305.04091)，这个提示会提前对问题制定好完整的执行计划，然后在不更新计划的情况下逐步执行，即先把用户的问题拆解成多个子任务，然后再执行各个子任务，直到用户的问题完全被解决。
+
+该提示技术其实和零样本思维链提示非常类似，只是将 `Let’s think step by step` 换成了下面的提示词：
+
+```
+Let's first understand the problem and devise a plan to solve the problem.
+Then, let's carry out the plan to solve the problem step by step.
+```
+
+下图是传统的零样本思维链提示和 PS 提示对比示例：
+
+![](./images/plan-and-solve.png)
+
+Plan-and-Solve Prompting 的实现代码可以在 [GitHub](https://github.com/AGI-Edgerunners/Plan-and-Solve-Prompting) 上找到，要注意的是它只是一种提示技术，并没有调用外部工具的能力，论文中为了让大模型能正确的处理数学计算问题，还列出了多种改善后的 PS+ 提示词，比如在提示词中添加 *pay attention to calculation* 要求大模型尽可能准确地进行计算，添加 *extract relevant variables and their corresponding numerals* 指示大模型不要忽略输入问题陈述中的相关信息，添加 *calculate intermediate results* 增强大模型生成推理步骤的能力。
+
+所以单独使用 Plan-and-Solve Prompting 在智能体中作用并不大，一般使用这种思想来将用户的问题拆解成子任务，然后每个子任务再使用传统的 Action Agent 进行处理。在 [大模型应用开发框架 LangChain 学习笔记（二）](../week044-llm-application-frameworks-langchain-2/README.md) 中，我们学习了 [Plan and execute Agent](https://blog.langchain.dev/plan-and-execute-agents/) 的概念和用法，它的基本思想就来自于此。
+
+![](./images/plan-and-execute.png)
+
+除此之外，[这篇博客](https://blog.langchain.dev/planning-agents/) 还介绍了另两种 Plan and execute Agent：[LLMCompiler](https://arxiv.org/abs/2312.04511) 和 [ReWOO](https://arxiv.org/abs/2305.18323)，并提供了基于 LangChain 的实现，有时间再深入研究下。
+
 ### HuggingGPT
 
-关于工具增强的另一个典型例子是由微软提出的 **HuggingGPT**，对应的论文为 [HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face](https://arxiv.org/abs/2303.17580)。
+关于任务规划和工具增强的另一个典型例子是由微软提出的 **HuggingGPT**，对应的论文为 [HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face](https://arxiv.org/abs/2303.17580)。
 
 HuggingGPT 将 ChatGPT 作为控制器，首先对用户的请求任务进行规划，拆分成不同的子任务，然后在 Hugging Face 提供的开源模型库中选择合适的 AI 模型来完成子任务，最终将结果汇总返回给用户。整个工作流程如下：
 
@@ -255,10 +280,6 @@ HuggingGPT 最有意思的一点是它使用的所有工具都来自于 Hugging 
 可以看到，这是一个比较复杂的任务，任务要求生成一张照片，照片中要包含一个小女孩在读书，且小女孩的姿势要和 example.jpg 中的男孩一样，然后使用语音描述下新生成的图片。HuggingGPT 将这个任务划分成了 6 个子任务，pose-control -> pose-to-image -> image-class -> object-det -> image-to-text -> text-to-speech，并依次执行。
 
 对 HuggingGPT 感兴趣的同学可以参考开源项目 [JARVIS](https://github.com/microsoft/JARVIS) 的实现。
-
-### Plan-and-Solve Prompting
-
-[Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](https://arxiv.org/abs/2305.04091)
 
 ## 参考
 
@@ -277,6 +298,7 @@ HuggingGPT 最有意思的一点是它使用的所有工具都来自于 Hugging 
 * [ReAct (Reason+Act) prompting in LLMs](https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/)
 * [Self-ask Prompting – Ofir Press](https://ofir.io/Self-ask-prompting/)
 * [Techniques to improve reliability](https://github.com/openai/openai-cookbook/blob/main/articles/techniques_to_improve_reliability.md)
+* [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
 
 ## 更多
 
