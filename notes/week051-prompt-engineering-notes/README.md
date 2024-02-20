@@ -386,7 +386,7 @@ LtM 提出的初衷是为了解决 CoT 泛化能力不足的问题：即通过�
 相比于自我一致性，LtM 明显更优雅一些，它的思路使用了分治的思想，首先将大问题拆分成小问题，然后依次解决小问题，最后解决大问题：
 
 1. **问题拆解（Problem Reducing）**：第一步自上而下的分解问题，引导模型把问题拆分成子问题；
-2. **子问题有序解答（Sequentially Solve Subquestions）**：第二步自下而上的依次解决问题，逐一回答子问题，并把子问题的回答作为下一个子问题回答的上文，循序渐进地解决问题，直到给出最终答案；在这个依次回答问题的过程中，问题由少变多，这也是 Least-to-Most 一词的来源。
+2. **子问题有序解答（Sequentially Solve Subquestions）**：第二步自下而上的依次解决问题，逐一回答子问题，并把子问题的回答作为下一个子问题回答的上下文，循序渐进地解决问题，直到给出最终答案；在这个依次回答问题的过程中，问题由少变多，这也是 Least-to-Most 一词的来源。
 
 ### 思维树 (ToT)
 
@@ -446,6 +446,25 @@ The process continues until a conclusive answer is found.
 Organize the entire response in a markdown table format.
 The task is:
 ```
+
+### 后退提示（Step-Back Prompting）
+
+**后退提示（Step-Back Prompting）** 是 Google DeepMind 团队在论文 [Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models](https://arxiv.org/abs/2310.06117) 中提出的一种新的提示技术，它的灵感来自于 **当人类面对具有挑战性的任务时，其思维经常会出现退一步并进行抽象，以得出指导过程的高级概念和原则**，后退提示解决问题的方法就是要求大模型先后退一步，重新考虑问题的基础原理，有助于避免直接跳入细节而导致错误。 
+
+后退提示使大模型能够从包含具体细节的实例中进行抽象，得出高级概念和基础原理，然后利用这些概念和原理来指导推理步骤，从而解决复杂问题。实验表明，在各种具有挑战性的推理密集型任务中，包括 STEM、知识问答和多跳推理，后退提示都取得了显著的性能提升。这种策略与思维链等直接解决问题的方法形成了鲜明的对比，下图对后退提示与思维链提示在解决问题的方法上进行对比：
+
+![](./images/step-back.png)
+
+左侧是思维链提示，它是一个直接解决问题的过程，按步骤逐一推理。第一个示例（顶部）来自 MMLU 高中物理题：*如果温度增加 2 倍且体积增加 1 倍，理想气体的压力 P 会发生什么变化？*，使用思维链提示对此问题进行推理时偏离了理想气体定律的第一原理。
+
+第二示例（底部）来自 TimeQA 中的例子，当问及 *Estella Leopold 在 1954 年 8 月至 1954 年 11 月期间去了哪所学校？*，详细的时间范围限制让大模型很难直接解决，而后退提示会先询问 “教育史”，这是一个包含原始问题的高级概念，因此大模型可以得到所有必要的信息来推理 “Estella Leopold 在特定时期去了哪所学校”。
+
+从图中可以看出，后退提示分为两个步骤：
+
+* 第一步：**抽象（Abstraction）**：首先将问题的基础原理和概念提取出来。例如，面对理化问题，先问 “解决这个任务涉及哪些物理或化学原理和概念？”，从而让模型先确定这些原理和概念；
+* 第二步：**推理（Reasoning）**：有了基础原理后，再进行问题的解答。例如，根据气体定律来计算压力如何变化。
+
+后退提示鼓励大模型着眼于大局，而不是迷失在细节中，通过 “先抽象、再推理” 的过程正确解答问题，而不是仅仅依靠直观的连续思考。后退提示鼓励深入理解问题的本质，因此可以促进更深层次的思考和更精确的推理。
 
 ### 检索增强生成 (RAG)
 
@@ -559,7 +578,6 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Brex's Prompt Engineering Guide](https://github.com/brexhq/prompt-engineering)
 * [The Prompt Landscape](https://blog.langchain.dev/the-prompt-landscape/)
 * [HuggingLLM](https://github.com/datawhalechina/hugging-llm)
-* [OpenAI Cookbook](https://github.com/openai/openai-cookbook)
 * [Best practices for prompt engineering with OpenAI API](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api)
 * [OpenAI 官方提示工程指南 [译]](https://baoyu.io/translations/openai/openai-prompt-engineering-guides)
 * [Instruction Tuning（FLAN、instructGPT、chatGPT）](https://blog.csdn.net/qq_39388410/article/details/128265846)
@@ -567,7 +585,9 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [解密Prompt系列9. 模型复杂推理-思维链基础和进阶玩法](https://cloud.tencent.com/developer/article/2296079)
 * [12 Prompt Engineering Techniques](https://cobusgreyling.medium.com/12-prompt-engineering-techniques-644481c857aa)
 * [Practical Prompt Engineering - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/practical-prompt-engineering-part)
+* [Advanced Prompt Engineering - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/advanced-prompt-engineering)
 * [Prompt Ensembles Make LLMs More Reliable](https://cameronrwolfe.substack.com/p/prompt-ensembles-make-llms-more-reliable)
+* [后退提示Step-Back Prompting：AI应对复杂问题的新策略](https://zhuanlan.zhihu.com/p/675045202)
 
 ## 更多
 
@@ -608,6 +628,7 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Ask Me Anything: A simple strategy for prompting language models](https://arxiv.org/abs/2210.02441) - AMA Prompting
 * [Complexity-Based Prompting for Multi-Step Reasoning](https://arxiv.org/abs/2210.00720) - 复杂推理提示
 * [Progressive-Hint Prompting Improves Reasoning in Large Language Models](https://arxiv.org/abs/2304.09797) - 渐进提示
+* [STaR: Bootstrapping Reasoning With Reasoning](https://arxiv.org/abs/2203.14465)
 
 #### 数学推理
 
