@@ -588,6 +588,7 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Advanced Prompt Engineering - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/advanced-prompt-engineering)
 * [Prompt Ensembles Make LLMs More Reliable](https://cameronrwolfe.substack.com/p/prompt-ensembles-make-llms-more-reliable)
 * [后退提示Step-Back Prompting：AI应对复杂问题的新策略](https://zhuanlan.zhihu.com/p/675045202)
+* [是时候开始讨论大语言模型中的提示架构了吗？](https://baoyu.io/translations/prompt-engineering/is-it-time-to-start-talking-about-prompt-architecture-in-llms)
 
 ## 更多
 
@@ -640,3 +641,5 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding](https://arxiv.org/abs/2401.12954)
 * [Iteratively Prompt Pre-trained Language Models for Chain of Thought](https://arxiv.org/abs/2203.08383) - 迭代提示
 * [Large Language Models are Zero-Shot Rankers for Recommender Systems](https://arxiv.org/abs/2305.08845) - 顺序提示
+* [Chain-of-Verification Reduces Hallucination in Large Language Models](https://arxiv.org/abs/2309.11495) - CoVe
+* [Zero-Resource Hallucination Prevention for Large Language Models](https://arxiv.org/abs/2309.02654)

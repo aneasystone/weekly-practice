@@ -30,6 +30,8 @@ WebGPT 是一个基于 GPT-3 的微调模型，它可以搜索和浏览网页，
 * [Internet-augmented language models through few-shot prompting for open-domain question answering](https://arxiv.org/abs/2203.05115)
 * [Internet-Augmented Dialogue Generation](https://arxiv.org/abs/2107.07566)
 * [WebGPT: Browser-assisted question-answering with human feedback](https://arxiv.org/abs/2112.09332)
+* [WebCPM: Interactive Web Search for Chinese Long-form Question Answering](https://arxiv.org/abs/2305.06849)
+* [WebGLM: Towards An Efficient Web-Enhanced Question Answering System with Human Preferences](https://arxiv.org/abs/2306.07906)
 
 ## 编程增强
 
@@ -140,14 +142,6 @@ TALM 和 Toolformer 都是微调方案，相比于 Prompt 方案，在复杂问�
 
 作者在 GitHub 上开源了 [ART 的实现代码](https://github.com/bhargaviparanjape/language-programmes)，有兴趣的可以参考一下。
 
-### LLMs As Tool Makers（LATM）
-
-[Large Language Models as Tool Makers](https://arxiv.org/abs/2305.17126)
-
-[CREATOR: Tool Creation for Disentangling Abstract and Concrete Reasoning of Large Language Models](https://arxiv.org/abs/2305.14318)
-
-https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
-
 ## 任务规划
 
 在上一篇笔记中，我们学习了不少改善大模型推理能力的提示技术，如思维链（CoT）、思维树（ToT）、最小到最多提示（Least-to-Most Prompting）等，在这一篇笔记中，我们又继续学习如何使用工具增强让大模型的能力得到更大的提升。尽量这两方面的研究都展示了令人印象深刻的效果，但是大模型在解决一些复杂任务时还是不尽如人意。于是研究人员开始将这两点结合起来，智能体的概念也随之浮出水面。
@@ -160,6 +154,27 @@ https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
 
 * 任务分解：可以将大任务分解为多个更小的任务，生成行动计划，从而高效地处理复杂任务；
 * 反思和改善：可以对过去的行动进行自我批评和自我反思，从错误中吸取教训并为未来的步骤进行改进，从而提高最终结果的质量。
+
+### MRKL System
+
+2022 年 5 月，以色列 NLP 研究机构 AI21 Labs 发表了一篇论文 [MRKL Systems: A modular, neuro-symbolic architecture that combines large language models, external knowledge sources and discrete reasoning](https://arxiv.org/abs/2205.00445)，提出了 MRKL 系统的概念。MRKL 全称为 **Modular Reasoning, Knowledge and Language（模块化推理、知识和语言系统）**，发音为英文单词 *miracle（奇迹）*，这是一种模块化的神经符号架构，试图将现有的神经网络模型（比如大模型），和外部知识库，以及过去流行的符号专家系统结合在一起，从而来兼顾神经模型和符号推理能力。
+
+同时他们还基于 MRKL 实现了 [Jurassic-X](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system)，其前身是对标 BERT、GPT-3、PaLM 等大模型的 Jurassic-1，在引入 MRKL 系统之前，这些大模型普遍表现出不能获取实时信息、不能访问外部知识、不擅长算术推理、更新成本高等缺点，论文中给出了一些 GPT-3 回答错误（甚至离谱）的例子：
+
+![](./images/mrkl-error-examples.png)
+
+尽管存在这些缺点，但 AI21 Labs 仍然认为，大型语言模型是未来人工智能系统的重要支柱。为解决这些问题，他们提出 MRKL 解决方案，概要设计如下：
+
+![](./images/mrkl-system.png)
+
+一个 MRKL 系统由一组可扩展的模块和一个路由器组成，路由器将每个传入的自然语言输入路由到一个可以最好地响应输入的模块。这些模块被称之为 **专家（experts）**，它们可以是：
+
+* 神经网络：包括通用的大型语言模型以及其他更小的、专门的语言模型；
+* 符号系统：包括数学计算器、货币转换器或对数据库的 API 调用等；
+
+通过将符号系统和神经网络相结合，我们可以充分挖掘大型语言模型的潜力。论文中给出了一个计算器的测试用例，当被问到 `123 乘以 456 等于多少？` 时，MRKL 系统将其路由到计算器应用程序，并从问题中提取出算式，从而得出计算结果。此外，[Jurassic-X 的这篇博客](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system) 中还介绍了很多 MRKL 的应用场景，涉及到日常生活中的各种问题，感兴趣的同学可以直接阅读原文。
+
+当然，要完成所有这些工作还有很多细节和挑战，比如训练离散专家、平滑符号与神经网络之间的接口、在不同模块之间进行路由等等。遗憾的是，论文中并没有给出 MRKL 的训练方法和代码，只是高屋建瓴地从概念上对 MRKL 系统进行了阐述。下面介绍几种类似 MRKL 系统的实现。
 
 ### ReAct
 
@@ -215,14 +230,6 @@ https://cameronrwolfe.substack.com/p/can-language-models-make-their-own
 另外，在两个交互式决策型任务（[ALFWorld](https://alfworld.github.io/) 和 [WebShop](https://webshop-pnlp.github.io/)）上，只需一两个上下文示例的提示，ReAct 就实现了分别比模仿学习和强化学习方法高出 34% 和 10% 的成功率。不过要注意的是，尽管在这些类型的任务中，ReAct 的推理显露出优势，但目前基于提示的方法在这些任务上的表现与人类专家相差甚远。
 
 ReAct 的实现代码在 [GitHub](https://github.com/ysymyth/ReAct) 上开源了，有兴趣同学的可以尝试下。另外，LangChain 基于 ReAct 的思想实现了 [Zero-shot ReAct Agent](https://python.langchain.com/docs/modules/agents/agent_types/react)，关于它的使用方法可以参考我之前写的 [大模型应用开发框架 LangChain 学习笔记](../week044-llm-application-frameworks-langchain-2/README.md)。
-
-### MRKL
-
-[MRKL Systems: A modular, neuro-symbolic architecture that combines large language models, external knowledge sources and discrete reasoning](https://arxiv.org/abs/2205.00445)
-
-Modular Reasoning, Knowledge and Language (MRKL, pronounced "miracle")
-
-Zero-shot ReAct Agent 更像是一个通用的 [MRKL 系统](https://arxiv.org/abs/2205.00445)，MRKL 的全称是模块化推理、知识和语言系统，它是一种模块化的神经符号架构，结合了大型语言模型、外部知识源和离散推理，它最初 [由 AI21 Labs 提出](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system)，并实现了 Jurassic-X，对 MRKL 感兴趣的同学可以参考 [这篇博客](https://zhuanlan.zhihu.com/p/526713337)。
 
 ### Self-ask Prompting
 
@@ -289,16 +296,20 @@ HuggingGPT 最有意思的一点是它使用的所有工具都来自于 Hugging 
 * [LLM 提示词工程学习笔记](https://zhuanlan.zhihu.com/p/666572032)
 * [解密Prompt系列12. LLM Agent零微调范式 ReAct & Self Ask](https://cloud.tencent.com/developer/article/2305421)
 * [解密Prompt系列13. LLM Agent指令微调方案: Toolformer & Gorilla](https://cloud.tencent.com/developer/article/2312674)
+* [解密Prompt系列14. LLM Agent之搜索应用设计：WebGPT & WebGLM & WebCPM](https://cloud.tencent.com/developer/article/2319879)
 * [从PaL到PoT，用程序辅助语言模型，释放大语言模型推理潜能](https://www.ai2news.com/blog/2965081/)
 * [Program-Aided Language Models - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/program-aided-language-models)
 * [LLM+Tools，几篇LLM使用工具文章速览](https://zhuanlan.zhihu.com/p/641402205)
 * [赋予大模型使用工具的能力：Toolformer与ART](https://blog.csdn.net/bqw18744018044/article/details/134489247)
 * [Teaching Language Models to use Tools](https://cameronrwolfe.substack.com/p/teaching-language-models-to-use-tools)
 * [Can language models make their own tools?](https://cameronrwolfe.substack.com/p/can-language-models-make-their-own)
+* [Language Models and Friends: Gorilla, HuggingGPT, TaskMatrix, and More](https://cameronrwolfe.substack.com/p/language-models-and-friends-gorilla)
 * [ReAct (Reason+Act) prompting in LLMs](https://tsmatz.wordpress.com/2023/03/07/react-with-openai-gpt-and-langchain/)
 * [Self-ask Prompting – Ofir Press](https://ofir.io/Self-ask-prompting/)
 * [Techniques to improve reliability](https://github.com/openai/openai-cookbook/blob/main/articles/techniques_to_improve_reliability.md)
-* [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
+* [Jurassic-X: Crossing the neuro-symbolic chasm with the MRKL system](https://www.ai21.com/blog/jurassic-x-crossing-the-neuro-symbolic-chasm-with-the-mrkl-system)
+* [Jurassic-X: 让神经模型学会符号推理](https://www.leiphone.com/category/academic/UKrwBWSCdqFKmp0s.html)
+* [神经符号主义里程碑：MRKL最快入门](https://zhuanlan.zhihu.com/p/526713337)
 
 ## 更多
 
@@ -310,13 +321,41 @@ HuggingGPT 最有意思的一点是它使用的所有工具都来自于 Hugging 
 * [Papers | Prompt Engineering Guide](https://www.promptingguide.ai/papers)
 * [Bibliography | Learn Prompting](https://learnprompting.org/zh-Hans/docs/bibliography)
 
-### 工具增强
+### 其他提示技术
+
+#### 工具增强
 
 * [LaMDA: Language Models for Dialog Applications](https://arxiv.org/abs/2201.08239)
 * [BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage](https://arxiv.org/abs/2208.03188)
 * [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)
+* [Gorilla: Large Language Model Connected with Massive APIs](https://arxiv.org/abs/2305.15334)
+* [TaskMatrix.AI: Completing Tasks by Connecting Foundation Models with Millions of APIs](https://arxiv.org/abs/2303.16434)
+* [API-Bank: A Comprehensive Benchmark for Tool-Augmented LLMs](https://arxiv.org/abs/2304.08244)
+* [ToolkenGPT: Augmenting Frozen Language Models with Massive Tools via Tool Embeddings](https://arxiv.org/abs/2305.11554)
+* [On the Tool Manipulation Capability of Open-source Large Language Models](https://arxiv.org/abs/2305.16504)
 
-### 提示工程安全
+#### LLMs As Tool Makers（LATM）
+
+* [Large Language Models as Tool Makers](https://arxiv.org/abs/2305.17126)
+* [CREATOR: Tool Creation for Disentangling Abstract and Concrete Reasoning of Large Language Models](https://arxiv.org/abs/2305.14318)
+* [Can language models make their own tools?](https://cameronrwolfe.substack.com/p/can-language-models-make-their-own)
+
+#### 提示工程安全
 
 * [对抗性提示](https://www.promptingguide.ai/zh/risks/adversarial)
 * [针对提示工程的破解技巧](https://learnprompting.org/zh-Hans/docs/category/-prompt-hacking)
+
+#### Plan-and-Execute Agents
+
+* [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
+* [An LLM Compiler for Parallel Function Calling](https://arxiv.org/abs/2312.04511)
+    * [SqueezeAILab/LLMCompiler](https://github.com/SqueezeAILab/LLMCompiler)
+* [ReWOO: Decoupling Reasoning from Observations for Efficient Augmented Language Models](https://arxiv.org/abs/2305.18323)
+    * [billxbf/ReWOO](https://github.com/billxbf/ReWOO)
+    * [最新ReWOO框架直指Auto-GPT和LangChain代理的冗杂性，提出轻量级LLM与工具的交互范式](https://www.kuxai.com/article/1146)
+
+### 提示工程实战
+
+* [LangChain Cookbook](https://github.com/langchain-ai/langchain/tree/master/cookbook)
+* [LangGraph Examples](https://github.com/langchain-ai/langgraph/tree/main/examples)
+* [OpenAI Cookbook](https://github.com/openai/openai-cookbook/tree/main/examples)
