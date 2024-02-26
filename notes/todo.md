@@ -11,10 +11,6 @@
 * [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 * [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
 
-### 实战 LLaMA
-
-* [ChatGPT平替模型：LLaMA](https://zhuanlan.zhihu.com/p/614118339)
-
 ### Structured Extraction
 
 * [Instructor (openai_function_call)](https://jxnl.github.io/instructor/)
@@ -26,10 +22,6 @@
 ### Agents
 
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
-
-### 模型推理和部署
-
-* [Run LLMs locally](https://python.langchain.com/docs/guides/local_llms)
 
 ### 模型训练和微调
 
@@ -186,12 +178,16 @@
 
 * [10分钟3个步骤集成使用SkyWalking](http://www.mangod.top/articles/2023/10/11/1696996147664.html)
 
-#### 日志
+#### 日志系统
 
 * [Send Your Logs To Loki](https://foojay.io/today/send-your-logs-to-loki/)
 * [Introduction to Grafana Loki](https://www.baeldung.com/ops/grafana-loki)
-* [系统日志规范及最佳实践](https://xie.infoq.cn/article/c7e46aa4bd7de3edb855c1f29)
 * [日志搜集系统从ELK到EFK](https://blog.csdn.net/mawming/article/details/78344939)
+
+#### 程序日志
+
+* [系统日志规范及最佳实践](https://xie.infoq.cn/article/c7e46aa4bd7de3edb855c1f29)
+* [开发Java应用时如何用好Log](https://my.oschina.net/u/4662964/blog/10946665)
 
 ### Spring StateMachine
 
@@ -429,7 +425,6 @@
 * [Linux性能优化实战](https://juconcurrent.com/books-jksj-11-20/)
 * [关于Linux中使用USE(使用率/饱和度/错误)方法分析系统性能的一些笔记](https://developer.aliyun.com/article/1031234)
 * [[肝] linux系统分析之工具大全(观测，性能分析等)](https://zhuanlan.zhihu.com/p/526432016)
-* [Linux Performance](https://www.brendangregg.com/linuxperf.html)
 * [Linux Performance Analysis in 60,000 Milliseconds](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（上册）](https://blog.csdn.net/l569590478/article/details/128665558)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
