@@ -21,6 +21,7 @@
 * [讯飞星火](https://xinghuo.xfyun.cn/)
 * [豆包](https://www.doubao.com/)
 * [Kimi Chat](https://kimi.moonshot.cn) - Moonshot AI 出品的智能助手
+* [Groq](https://groq.com/)
 
 #### 聚合聊天
 
@@ -39,6 +40,7 @@
     * [GPT Researcher](https://github.com/assafelovic/gpt-researcher) - GPT based autonomous agent that does online comprehensive research on any given topic
 * [Automating Web Research](https://blog.langchain.dev/automating-web-research/)
 * [天工AI搜索](https://search.tiangong.cn/) — 知识从这里开始
+* [Lepton Search](https://search.lepton.run/)
 
 #### 学习助手
 
@@ -62,8 +64,6 @@
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
 * [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
-* [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
-* [GPT Pilot](https://github.com/Pythagora-io/gpt-pilot) - Dev tool that writes scalable apps from scratch while the developer oversees the implementation
 * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
@@ -144,6 +144,7 @@
 * [Smodin](https://smodin.io/) - Multi-lingual Writing Assistance
 * [JenniAI](https://jenni.ai/) - Supercharge Your Next Research Paper
 * [Compose AI](https://www.compose.ai/) - Automate Your Writing
+* [AI 写作鱼](https://www.xiezuoyu666.com/) - 让人工智能重新定义写作
 
 #### 文档问答
 
@@ -172,6 +173,7 @@
 #### 思维导图
 
 * [AmyMind](https://amymind.com/) - 伴你思考的AI思维导图
+* [TreeMind 树图官网](https://shutu.cn/) - 新一代 “AI智能” 思维导图
 * [EdrawMind AI](https://www.edrawmind.com/ai-mind-map.html) - AI-Powered Mind Mapping Made Simple and Intuitive
 * [InstaGraph](https://instagraph.ai/) - Converts natural language prompts or URLs into a visualized knowlege graph
 
@@ -239,6 +241,8 @@
 * [ClipDrop - Stable Doodle](https://clipdrop.co/stable-doodle) - Transform your doodles into real images in seconds
 * [FaceChain](https://github.com/modelscope/facechain) - 一个可以用来打造个人数字形象的深度学习模型工具
 * [Magic123](https://github.com/guochengqian/Magic123) - One Image to High-Quality 3D Object Generation Using Both 2D and 3D Diffusion Priors
+* [InstantID](https://github.com/InstantID/InstantID) - Zero-shot Identity-Preserving Generation in Seconds
+* [PhotoMaker](https://github.com/TencentARC/PhotoMaker) - Customizing Realistic Human Photos via Stacked ID Embedding
 
 #### 图片编辑
 
@@ -322,6 +326,7 @@
     * [Qwen-7B](https://github.com/QwenLM/Qwen-7B) - 通义千问-7B
 * [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
 * [星火认知大模型](https://xinghuo.xfyun.cn/) - 科大讯飞
+    * [iFlytekSpark-13B](https://gitee.com/iflytekopensource/iFlytekSpark-13B) - 讯飞星火
 * [言犀](https://yanxi.jd.com/) - 京东
 * [混元大模型](https://hunyuan.tencent.com/) - 腾讯
 * [玉言](https://fuxi.163.com/) - 网易伏羲
@@ -364,6 +369,7 @@
 * [蓝心大模型](https://developers.vivo.com/product/ai/bluelm) - vivo
     * [vivo-ai-lab/BlueLM](https://github.com/vivo-ai-lab/BlueLM)
 * [零一万物](https://www.01.ai/)
+    * [Yi](https://github.com/01-ai/Yi) - 01.AI
 * [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
 
 ### 领域大模型
@@ -412,6 +418,7 @@
 * [Gorilla](https://github.com/ShishirPatil/gorilla) - An API store for LLMs
 * [nanoGPT](https://github.com/karpathy/nanoGPT) - The simplest, fastest repository for training/finetuning medium-sized GPTs.
 * [Lit-GPT](https://github.com/Lightning-AI/lit-gpt) - Hackable implementation of state-of-the-art open-source LLMs based on nanoGPT. Supports flash attention, 4-bit and 8-bit quantization, LoRA and LLaMA-Adapter fine-tuning, pre-training. Apache 2.0-licensed.
+* [OLMo](https://github.com/allenai/OLMo) - Open Language Model
 
 ### 其他大模型
 
@@ -423,7 +430,6 @@
 * [Petals](https://github.com/bigscience-workshop/petals)
 * [Mesh Transformer JAX](https://github.com/kingoflolz/mesh-transformer-jax)
 * [GPT-NeoX](https://github.com/EleutherAI/gpt-neox)
-* [JARVIS](https://github.com/microsoft/JARVIS)
 * [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
 * [Web LLM](https://mlc.ai/web-llm/)
 * [MiniRBT](https://github.com/iflytek/MiniRBT) - 中文小型预训练模型系列
@@ -488,12 +494,17 @@
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
 * [BentoML](https://github.com/bentoml/BentoML) - Build Production-Grade AI Applications
-* [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
 * [LangKit](https://github.com/whylabs/langkit) - An open-source toolkit for monitoring Language Learning Models.
 * [Rivet](https://github.com/Ironclad/rivet) - The open-source visual AI programming environment and TypeScript library
 * [Semantic Kernel](https://github.com/microsoft/semantic-kernel) - Integrate cutting-edge LLM technology quickly and easily into your apps
 * [Embedchain](https://github.com/embedchain/embedchain) - The Open Source RAG framework
     * [EmbedChain：比LangChain更加轻量化的LLM框架](https://zhuanlan.zhihu.com/p/662973975)
+* [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
+
+### 大模型应用产品
+
+* [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
+* [Dust](https://dust.tt/) - Amplify your team's potential with customizable and secure AI assistants
 
 ### 工作流
 
@@ -505,15 +516,28 @@
 
 ### Agent
 
+* [AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - 
 * [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [SuperAGI](https://superagi.com/) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
     * [TransformerOptimus/SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
-* [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 * [Generative Agents](https://github.com/joonspk-research/generative_agents) - Interactive Simulacra of Human Behavior
 * [XAgent](https://github.com/OpenBMB/XAgent) - An Autonomous LLM Agent for Complex Task Solving
 * [OpenAgents](https://github.com/xlang-ai/OpenAgents) - An Open Platform for Language Agents in the Wild
+* [HuggingGPT](https://huggingface.co/spaces/microsoft/HuggingGPT) - A system to connect LLMs with ML community
+    * [JARVIS](https://github.com/microsoft/JARVIS)
+* [CAMEL-AI](https://www.camel-ai.org/) - Communicative Agents for “Mind” Exploration of Large Language Model Society
+* [ShortGPT](https://github.com/RayVentura/ShortGPT) - Experimental AI framework for youtube shorts / tiktok channel automation
+* [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
+* [GPT Pilot](https://github.com/Pythagora-io/gpt-pilot) - Dev tool that writes scalable apps from scratch while the developer oversees the implementation
+
+### Multi-Agent
+
+* [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
+* [AutoGen](https://github.com/microsoft/autogen) - Enable Next-Gen Large Language Model Applications.
+    * [微软Agent框架AutoGen论文及原理解读](https://mp.weixin.qq.com/s/HgdAn2Bp10T7jCf5nZhdkw)
+* [ChatDev](https://github.com/OpenBMB/ChatDev) - Communicative Agents for Software Development
 
 ### RPA
 
@@ -623,7 +647,7 @@
 	* [Moonvy/OpenPromptStudio](https://github.com/Moonvy/OpenPromptStudio)
 * [ChatGPT Shortcut](https://www.aishort.top/) - 让生产力加倍的 ChatGPT 快捷指令
 	* [rockbenben/ChatGPT-Shortcut](https://github.com/rockbenben/ChatGPT-Shortcut)
-* [PromptPerfect](https://promptperfect.jinaai.cn/) - 将您的提示词提升至完美
+* [PromptPerfect](https://promptperfect.jina.ai/home) - 将您的提示词提升至完美
 * [LangGPT](https://github.com/yzfly/LangGPT) - Empowering everyone to create high-quality prompts!
 * [Knit](https://promptknit.com/) - A better playground for prompt designers
 

@@ -60,6 +60,7 @@
 * [长连接 Netty 服务内存泄漏，看我如何一步步捉 “虫” 解决](https://my.oschina.net/u/4090830/blog/8685855)
 * [CPU爆了，你却连那个线程出问题都不知道？](https://mp.weixin.qq.com/s/FvmlnV-oKNxrK5glrFKPHA)
 * [Possible Root Causes for High CPU Usage in Java](https://www.baeldung.com/java-high-cpu-usage-causes)
+* [完蛋！我被 Out of Memory 包围了！ | 京东云技术团队](https://my.oschina.net/u/4090830/blog/10141303)
 
 ### 调试技巧
 
