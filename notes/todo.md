@@ -36,6 +36,7 @@
 * [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
 * [初步探索GraalVM--云原生时代JVM黑科技](https://developer.jdcloud.com/article/2446)
+* [GraalVM Native Image Support](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
 
 ### Java Agent
 
@@ -279,6 +280,7 @@
 
 * [排障技能](https://imroc.cc/kubernetes/troubleshooting/skill/index.html)
 * [监控、日志和调试](https://kubernetes.io/zh-cn/docs/tasks/debug/)
+* [Troubleshooting Kubernetes Deployment at Every Level!](https://www.atatus.com/blog/troubleshooting-kubernetes-deployment/)
 
 ### 获取客户端真实 IP
 

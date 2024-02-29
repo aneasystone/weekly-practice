@@ -64,7 +64,8 @@
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
 * [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
-* [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
+* [CodeFuse](https://codefuse.alipay.com/welcome/open) - 蚂蚁自研的代码生成专属大模型
+    * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
@@ -96,6 +97,8 @@
 #### 代码转换
 
 * [GPT-Migrate](https://github.com/0xpayne/gpt-migrate) - Easily migrate your codebase from one framework or language to another.
+* [Make Real](https://github.com/tldraw/make-real) - Draw a ui and make it real
+* [screenshot-to-code](https://github.com/abi/screenshot-to-code) - Drop in a screenshot and convert it to clean code (HTML/Tailwind/React/Vue)
 
 #### 运维
 
@@ -165,6 +168,7 @@
 
 * [Wiseone](https://wiseone.io/) - Your AI-powered reading tool
 * [Webpilot](https://github.com/webpilot-ai/Webpilot) - a free, open-source "Copilot for web" that allows you to have free-form conversations with web pages
+* [GPT Crawler](https://github.com/BuilderIO/gpt-crawler) - Crawl a site to generate knowledge files to create your own custom GPT from a URL
 
 #### 音视频总结
 
@@ -293,6 +297,9 @@
 * [ShortGPT](https://github.com/RayVentura/ShortGPT) - Experimental AI framework for automated short/video content creation.
 * [facebookresearch/AnimatedDrawings](https://github.com/facebookresearch/AnimatedDrawings)
 * [3D-GPT](https://chuny1.github.io/3DGPT/3dgpt.html) - 3D MODELING WITH LARGE LANGUAGE MODELS
+* [Emu Video](https://emu-video.metademolab.com/) - Factorizing Text-to-Video Generation by Explicit Image Conditioning
+* [Stable Video Diffusion](https://stability.ai/news/stable-video-diffusion-open-ai-video-model)
+* [Sora](https://openai.com/sora) - Creating video from text
 
 #### 虚拟形象
 
@@ -334,7 +341,8 @@
 * [MiniMax](https://api.minimax.chat/)
 * [悟道·天鹰（Aquila）](https://github.com/FlagAI-Open/FlagAI/tree/master/examples/Aquila) - 北京智源人工智能研究院
 * [封神榜大模型](https://github.com/IDEA-CCNL/Fengshenbang-LM) - IDEA研究院
-* [源1.0](https://air.inspur.com/home) - 浪潮
+    * [姜子牙-LLaMA-13B-v1](https://modelscope.cn/models/Fengshenbang/Ziya-LLaMA-13B-v1/summary)
+* [源2.0](https://github.com/IEIT-Yuan/Yuan-2.0) - 浪潮
 * [孟子大模型](https://www.langboat.com/portal/mengzi-model) - 澜舟科技
 * [曹植大语言模型](http://www.datagrand.com/products/aigc/) - 达观数据
 * [日日新](https://www.sensecore.cn/solution/damoxing) - 商汤科技
@@ -370,7 +378,8 @@
     * [vivo-ai-lab/BlueLM](https://github.com/vivo-ai-lab/BlueLM)
 * [零一万物](https://www.01.ai/)
     * [Yi](https://github.com/01-ai/Yi) - 01.AI
-* [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
+* [元象 XVERSE](http://www.xverse.cn/)
+    * [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
 
 ### 领域大模型
 
@@ -490,6 +499,7 @@
 * [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
 	* [LangChain 中文入门教程](https://github.com/liaokongVFX/LangChain-Chinese-Getting-Started-Guide)
     * [Awesome LangChain](https://github.com/kyrolabs/awesome-langchain)
+* [LangGraph](https://github.com/langchain-ai/langgraph) - Building language agents as graphs
 * [LlamaIndex](https://github.com/jerryjliu/llama_index) - LlamaIndex (GPT Index) is a data framework for your LLM applications
 * [Haystack](https://github.com/deepset-ai/haystack) - Haystack is an open source NLP framework to interact with your data using Transformer models and LLMs (GPT-4, ChatGPT and alike). Haystack offers production-ready tools to quickly build complex question answering, semantic search, text generation applications, and more.
 * [Open Assistant](https://github.com/LAION-AI/Open-Assistant) - OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.
@@ -500,11 +510,13 @@
 * [Embedchain](https://github.com/embedchain/embedchain) - The Open Source RAG framework
     * [EmbedChain：比LangChain更加轻量化的LLM框架](https://zhuanlan.zhihu.com/p/662973975)
 * [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
+* [Towhee](https://github.com/towhee-io/towhee) - a framework that is dedicated to making neural data processing pipelines simple and fast.
 
 ### 大模型应用产品
 
 * [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
 * [Dust](https://dust.tt/) - Amplify your team's potential with customizable and secure AI assistants
+* [OpenGPTs](https://github.com/langchain-ai/opengpts) - open source OpenAI's GPTs and Assistants API
 
 ### 工作流
 
@@ -613,6 +625,7 @@
 * [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) - Stable Diffusion web UI
 * [camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) - stable diffusion webui colab
 * [lllyasviel/ControlNet](https://github.com/lllyasviel/ControlNet) - Let us control diffusion models!
+* [ComfyUI](https://github.com/comfyanonymous/ComfyUI) - The most powerful and modular stable diffusion GUI, api and backend with a graph/nodes interface.
 
 #### 文章
 
@@ -667,3 +680,4 @@
 ## 记忆管理
 
 * [MemGPT](https://github.com/cpacker/MemGPT) - Teaching LLMs memory management for unbounded context
+* [GPTCache](https://github.com/zilliztech/GPTCache) - A Library for Creating Semantic Cache for LLM Queries
