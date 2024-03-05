@@ -27,6 +27,8 @@
 
 * [ChatHub](https://github.com/chathub-dev/chathub) - ChatHub is an all-in-one chatbot client
 * [Poe](https://poe.com/)
+* [YesChat](https://www.yeschat.ai/zh-CN) - ChatGPT4V Dalle3 Claude 2 一体化免费服务
+* [ChatALL](https://github.com/sunner/ChatALL) - Chat with ALL AI Bots Concurrently, Discover the Best
 
 #### 角色扮演
 
@@ -71,12 +73,14 @@
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
 * [CodeShell](https://github.com/WisdomShell/codeshell) - 多语言代码大模型基座
 * [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
+* [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
 
 #### 数据分析
 
 * [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - OpenAI's Code Interpreter in your terminal, running locally
 * [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
 * [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
+* [Raccoon 办公小浣熊](https://raccoon.sensetime.com/office) - 商汤科技
 
 #### 调试助手
 
@@ -219,6 +223,7 @@
 * [Imagen](https://imagen.research.google/) - Text-to-Image Diffusion Models
 * [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
 * [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
+* [Imagine with Meta AI](https://imagine.meta.com/)
 
 #### 二维码生成
 
@@ -237,6 +242,7 @@
 * [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
 * [Flair](https://flair.ai/) - THE AI DESIGN TOOL FOR BRANDED CONTENT
 * [Galileo AI](https://www.usegalileo.ai/) - Galileo AI creates delightful, editable UI designs from a simple text description. It empowers you to design faster than ever.
+* [RoomGPT](https://github.com/Nutlope/roomGPT) - Upload a photo of your room to generate your dream room with AI.
 
 #### 风格转换
 
@@ -300,12 +306,14 @@
 * [Emu Video](https://emu-video.metademolab.com/) - Factorizing Text-to-Video Generation by Explicit Image Conditioning
 * [Stable Video Diffusion](https://stability.ai/news/stable-video-diffusion-open-ai-video-model)
 * [Sora](https://openai.com/sora) - Creating video from text
+* [MagicAnimate](https://github.com/magic-research/magic-animate) - Temporally Consistent Human Image Animation using Diffusion Model
 
 #### 虚拟形象
 
 * [Synthesia](https://www.synthesia.io/) - Synthesia is a #1 AI Video Creation Platform
 * [D-ID](https://www.d-id.com/) - The Digital People Platform
 * [TheRamU/Fay](https://github.com/TheRamU/Fay) - 包含Fay控制器及数字人模型
+* [HeyGen](https://www.heygen.com/) - AI Video Generator
 
 ### 机器人
 
@@ -331,6 +339,7 @@
 * [文心大模型](https://wenxin.baidu.com/) - 百度
 * [通义大模型](https://tongyi.aliyun.com/) - 阿里
     * [Qwen-7B](https://github.com/QwenLM/Qwen-7B) - 通义千问-7B
+    * [Qwen-72B](https://modelscope.cn/models/qwen/Qwen-72B/summary)
 * [盘古大模型](https://www.huaweicloud.com/product/pangu.html) - 华为
 * [星火认知大模型](https://xinghuo.xfyun.cn/) - 科大讯飞
     * [iFlytekSpark-13B](https://gitee.com/iflytekopensource/iFlytekSpark-13B) - 讯飞星火
@@ -380,6 +389,8 @@
     * [Yi](https://github.com/01-ai/Yi) - 01.AI
 * [元象 XVERSE](http://www.xverse.cn/)
     * [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
+* [DeepSeek](https://www.deepseek.com/) - 深度求索
+    * [DeepSeek LLM](https://github.com/deepseek-ai/DeepSeek-LLM)
 
 ### 领域大模型
 
@@ -404,8 +415,6 @@
 
 * [GPT-4](https://openai.com/gpt-4) - OpenAI
 * [LLaMa](https://github.com/facebookresearch/llama) - Meta
-	* [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
-    * [OpenGVLab/LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapter) - Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters
 * [Alpaca](https://github.com/tatsu-lab/stanford_alpaca) - Stanford University
 	* [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
 * [Claude](https://www.anthropic.com/index/introducing-claude) - Anthropic
@@ -428,6 +437,7 @@
 * [nanoGPT](https://github.com/karpathy/nanoGPT) - The simplest, fastest repository for training/finetuning medium-sized GPTs.
 * [Lit-GPT](https://github.com/Lightning-AI/lit-gpt) - Hackable implementation of state-of-the-art open-source LLMs based on nanoGPT. Supports flash attention, 4-bit and 8-bit quantization, LoRA and LLaMA-Adapter fine-tuning, pre-training. Apache 2.0-licensed.
 * [OLMo](https://github.com/allenai/OLMo) - Open Language Model
+* [microsoft/phi-2](https://huggingface.co/microsoft/phi-2)
 
 ### 其他大模型
 
@@ -463,6 +473,32 @@
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [Fuyu-8B](https://www.adept.ai/blog/fuyu-8b) - A Multimodal Architecture for AI Agents
     * [adept/fuyu-8b](https://huggingface.co/adept/fuyu-8b)
+
+### 模型推理 & 部署
+
+* [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
+* [Text Generation Inference](https://github.com/huggingface/text-generation-inference) - Large Language Model Text Generation Inference
+* [vllm-project/vllm](https://github.com/vllm-project/vllm) - A high-throughput and memory-efficient inference and serving engine for LLMs
+* [Ollama](https://ollama.ai/) - Get up and running with Llama 2 and other large language models locally
+    * [jmorganca/ollama](https://github.com/jmorganca/ollama)
+* [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
+* [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
+* [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
+* [SkyPilot](https://github.com/skypilot-org/skypilot) - Run LLMs, AI, and Batch jobs on any cloud
+* [llamafile](https://simonwillison.net/2023/Nov/29/llamafile/) - the new best way to run a LLM on your own computer
+* [Replicate](https://replicate.com/) - Run AI with an API.
+
+### 模型训练 & 微调
+
+* [OpenGVLab/LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapter) - Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters
+* [ColossalAI](https://github.com/hpcaitech/ColossalAI) - Making large AI models cheaper, faster and more accessible
+* [Ludwig](https://github.com/ludwig-ai/ludwig) - Low-code framework for building custom LLMs, neural networks, and other AI models
+* [DLLXW/baby-llama2-chinese](https://github.com/DLLXW/baby-llama2-chinese) - 从头预训练+SFT一个小参数量的中文LLaMa2
+
+### 模型评估
+
+* [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
+* [SuperCLUE琅琊榜](https://www.superclueai.com/) - 中文通用大模型匿名对战评价基准
 
 ## 大模型应用
 
@@ -543,6 +579,7 @@
 * [ShortGPT](https://github.com/RayVentura/ShortGPT) - Experimental AI framework for youtube shorts / tiktok channel automation
 * [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
 * [GPT Pilot](https://github.com/Pythagora-io/gpt-pilot) - Dev tool that writes scalable apps from scratch while the developer oversees the implementation
+* [AutoAgents](https://agentspro.cn/) - 
 
 ### Multi-Agent
 
@@ -559,41 +596,13 @@
 * [Robocorp](https://robocorp.com/) - Supercharge Python for Automation and Integrations
 * [OpenBots](https://openbots.ai/) - First Enterprise RPA With Zero Bot Licensing
 
-### 训练 & 微调
-
-* [ColossalAI](https://github.com/hpcaitech/ColossalAI) - Making large AI models cheaper, faster and more accessible
-* [Ludwig](https://github.com/ludwig-ai/ludwig) - Low-code framework for building custom LLMs, neural networks, and other AI models
-* [DLLXW/baby-llama2-chinese](https://github.com/DLLXW/baby-llama2-chinese) - 从头预训练+SFT一个小参数量的中文LLaMa2
-
-### 模型推理 & 部署
-
-* [Text Generation Inference](https://github.com/huggingface/text-generation-inference) - Large Language Model Text Generation Inference
-* [vllm-project/vllm](https://github.com/vllm-project/vllm) - A high-throughput and memory-efficient inference and serving engine for LLMs
-* [Ollama](https://ollama.ai/) - Get up and running with Llama 2 and other large language models locally
-    * [jmorganca/ollama](https://github.com/jmorganca/ollama)
-* [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
-* [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
-* [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
-* [SkyPilot](https://github.com/skypilot-org/skypilot) - Run LLMs, AI, and Batch jobs on any cloud
-
-### 模型评估
-
-* [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
-* [SuperCLUE琅琊榜](https://www.superclueai.com/) - 中文通用大模型匿名对战评价基准
-
-### 理论学习
-
-* [ChatGPT的工作原理，这篇文章说清楚了！](https://mp.weixin.qq.com/s/BcuMoaLYLPVMB--GW7O5ow)
-* [通俗直观介绍ChatGPT背后的大语言模型理论知识](https://mp.weixin.qq.com/s/IR0flZGOyul9BHuDYPnljg)
-* [a16z整理了AI大模型领域的经典阅读资料](https://mp.weixin.qq.com/s/e34W1EYLOdtRQxYv-VUzsg)
-* [深度学习论文精读](https://github.com/mli/paper-reading)
-
 ### Web UI
 
-* [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键免费部署你的跨平台私人 ChatGPT 应用
+* [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键拥有你自己的跨平台 ChatGPT/Gemini 应用。
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
 * [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
+* [Lobe Chat](https://github.com/lobehub/lobe-chat) - an open-source, modern-design ChatGPT/LLMs UI/Chat Framework. Supports speech-synthesis, multi-modal, and extensible plugin system. One-click FREE deployment of your private ChatGPT/Gemini/Ollama chat application.
 
 ### Awesome
 
@@ -675,6 +684,11 @@
 
 ### ANN
 
+* [ANN-Benchmarks](https://ann-benchmarks.com/index.html) - a benchmarking environment for approximate nearest neighbor algorithms search
+* [Faiss](https://faiss.ai/) - A library for efficient similarity search and clustering of dense vectors.
+* [Hnswlib](https://github.com/nmslib/hnswlib) - fast approximate nearest neighbor search
+* [Voyager](https://github.com/spotify/voyager) - an approximate nearest-neighbor search library for Python and Java with a focus on ease of use, simplicity, and deployability.
+* [Annoy](https://github.com/spotify/annoy) - Approximate Nearest Neighbors in C++/Python optimized for memory usage and loading/saving to disk
 * [Puck](https://github.com/baidu/puck) - a high-performance ANN search engine
 
 ## 记忆管理

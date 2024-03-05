@@ -2,6 +2,14 @@
 
 ## 大模型
 
+### 基础知识
+
+* [ChatGPT深入总结](https://blog.warmplace.cn/post/chatgpt)
+* [ChatGPT的工作原理，这篇文章说清楚了！](https://mp.weixin.qq.com/s/BcuMoaLYLPVMB--GW7O5ow)
+* [通俗直观介绍ChatGPT背后的大语言模型理论知识](https://mp.weixin.qq.com/s/IR0flZGOyul9BHuDYPnljg)
+* [大语言模型的前世今生](https://bbs.huaweicloud.com/blogs/416109)
+* [a16z整理了AI大模型领域的经典阅读资料](https://mp.weixin.qq.com/s/e34W1EYLOdtRQxYv-VUzsg)
+
 ### RAG
 
 * [Query Transformations](https://blog.langchain.dev/query-transformations/)
@@ -21,7 +29,12 @@
 
 ### Agents
 
+* [Adding Long Term Memory to OpenGPTs](https://blog.langchain.dev/adding-long-term-memory-to-opengpts/)
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
+
+### Multi-Agents
+
+* [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
 
 ### 模型训练和微调
 
@@ -109,6 +122,8 @@
 ## 聊聊 Java 中的锁技术
 
 * [聊聊 13 种锁的实现方式](https://mp.weixin.qq.com/s/AOshaWGmLw6uw92xKhLAvQ)
+* [并发情况如何实现加锁来保证数据一致性？](https://my.oschina.net/u/4090830/blog/10319213)
+* [Why Is sun.misc.Unsafe.park Actually Unsafe?](https://www.baeldung.com/java-sun-misc-unsafe-park-reason)
 
 ### Java 动态代理
 
@@ -146,6 +161,7 @@
 ### JVM
 
 * [深入浅出解析JVM中的Safepoint](https://mp.weixin.qq.com/s/_Khj3Qa2MZBN9718KhVp0w)
+* [Sharing Memory Between JVMs](https://www.baeldung.com/java-sharing-memory-between-jvms)
 
 ### JMX
 
@@ -159,7 +175,12 @@
 
 ### 可观测性
 
+* [七年 4 个阶段：滴滴可观测架构演进与实践](https://my.oschina.net/5129714/blog/10315681)
 * [一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
+* [得物 App 全栈可观测平台落地实践](https://www.infoq.cn/article/lUNazGtLiTLBAg9S714b)
+* [基于 eBPF 的云原生可观测性深度实践](https://www.infoq.cn/article/H1WOWBgxK5Y55EemDHze)
+* [Java JVM 可观测的原理解释和落地方案对比](https://www.infoq.cn/article/3iwV28HezCgCyPdFMWSd)
+* [使用全景拓扑持续跟踪云原生应用的压测性能瓶颈](https://cloudnative.to/blog/service-map-observation-performance-test/)
 
 #### Micrometer
 
@@ -171,6 +192,7 @@
 
 #### OpenTelemetry
 
+* [Exploring the OpenTelemetry Collector](https://blog.frankel.ch/opentelemetry-collector/)
 * [How to integrate a Spring Boot app with Grafana using OpenTelemetry standards](https://grafana.com/blog/2023/10/30/how-to-integrate-a-spring-boot-app-with-grafana-using-opentelemetry-standards/)
 * [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
 * [OpenTelemetry Setup in Spring Boot Application](https://www.baeldung.com/spring-boot-opentelemetry-setup)
@@ -199,6 +221,7 @@
 
 * [Spring Data JDBC - How To Maintain Your Database Schema](https://spring.io/blog/2023/08/29/spring-data-jdbc-how-to-maintain-your-database-schema)
 * [Understanding JPA/Hibernate Associations](https://www.baeldung.com/jpa-hibernate-associations)
+* [Table partitioning with Spring and Hibernate](https://vladmihalcea.com/table-partitioning-spring-hibernate/)
 
 ### 使用 Picocli 打造一个命令行程序
 
@@ -281,11 +304,14 @@
 * [排障技能](https://imroc.cc/kubernetes/troubleshooting/skill/index.html)
 * [监控、日志和调试](https://kubernetes.io/zh-cn/docs/tasks/debug/)
 * [Troubleshooting Kubernetes Deployment at Every Level!](https://www.atatus.com/blog/troubleshooting-kubernetes-deployment/)
+* [kubernetes 常见错误总结](https://csms.tech/202209281614/)
+* [强制删除 Kubernetes Namespace](https://www.iszy.cc/posts/force-delete-k8s-namespace/)
 
 ### 获取客户端真实 IP
 
 * [聊聊部署在K8S的项目如何获取客户端真实IP](https://juejin.cn/post/7239058077273079864)
 * [k8s生产实践之获取客户端真实IP](https://cloud.tencent.com/developer/article/1870731)
+* [在 Pod 中如何获取客户端的真实 IP](https://kubesphere.io/zh/blogs/how-to-get-real-ip-in-pod/)
 
 ### `kubectl` 小技巧
 
@@ -296,6 +322,7 @@
 ### 学习 Kubernetes 的工作负载
 
 * [StatefulSet 的使用场景](https://kuboard.cn/learning/k8s-intermediate/workload/wl-statefulset/)
+* [Kubernetes: Pods and WorkerNodes – control the placement of the Pods on the Nodes](https://rtfm.co.ua/en/kubernetes-pods-and-workernodes-control-the-placement-of-the-pods-on-the-nodes/)
 
 ### etcd for Kubernetes
 
@@ -315,6 +342,7 @@
 * [GitOps 实践之渐进式发布](https://coding.net/help/insight/gitops)
 * [基于 nacos/springcloud/k8s 的不停机服务更新[graceful shutdown]](http://yelog.org/2022/07/27/springboot-graceful-shutdown-based-on-nacos2-and-k8s/)
 * [使用 Argo 项目 Istio 及 SkyWalking 实现 GitOps 和金丝雀部署](https://jimmysong.io/blog/implementing-gitops-and-canary-deployment-with-argo-project-and-istio/)
+* [Canary releases with Apache APISIX](https://blog.frankel.ch/canary-releases-apisix/)
 
 ### 使用 KubeSphere 管理 Kubernetes
 
@@ -351,9 +379,14 @@
 * [Platform Engineering 101: Get Started with Platforms](https://www.infracloud.io/blogs/platform-engineering-101/)
 * [Starting Platform Engineering Journey with Backstage](https://www.infracloud.io/blogs/starting-platform-engineering-journey-backstage/)
 
+### Serverless
+
+* [OpenFunction：从 0 到 1，打造新一代开源函数计算平台](https://kubesphere.io/zh/blogs/faas-openfunction/)
+
 ### eBPF
 
 * [eBPF应用程序开发：快人一步](https://www.cnxct.com/ebpf-application-development-beyond-basics-zh_cn/)
+* [eBPF 的发展演进 --- 从石器时代到成为神（一）](https://my.oschina.net/u/4450925/blog/8685883)
 
 ## 数据库
 
@@ -379,14 +412,25 @@
 * [数据库和缓存如何保证一致性？](https://xiaolincoding.com/redis/architecture/mysql_redis_consistency.html)
 * [缓存和数据库一致性问题，看这篇就够了](https://xie.infoq.cn/article/9d733ec68b27b589c66070623)
 
+#### 集群部署
+
+* [在 Kubernetes 中基于 StatefulSet 部署 MySQL（上）](https://kubesphere.io/zh/blogs/mysql-on-k8s-statefulset-1/)
+* [在 Kubernetes 中基于 StatefulSet 部署 MySQL（下）](https://kubesphere.io/zh/blogs/mysql-on-k8s-statefulset-2/)
+
 ### Redis
 
-* [如何从0到1构建一个稳定、高性能的Redis集群](https://mp.weixin.qq.com/s/oYENEJHgnYhC7mWCBe5Ofw)
+#### 基础原理
+
 * [细说 redis 十种数据类型及底层原理](https://mp.weixin.qq.com/s/x9yrYOmQqKPyjd4n4FhRfQ)
 * [Redis夺命11连问](https://mp.weixin.qq.com/s/i3WxTDrfLiqC8H2MhzXCUw)
 * [High availability with Redis Sentinel](https://redis.io/docs/management/sentinel/)
 * [码哥字节的博客](https://my.oschina.net/magebyte?tab=newest&catalogId=7221361)
 * [一次访问Redis延时高问题排查与总结](https://mp.weixin.qq.com/s/f3dQIC4DBhWibyXQKBXrzg)
+
+#### 集群部署
+
+* [如何从0到1构建一个稳定、高性能的Redis集群](https://mp.weixin.qq.com/s/oYENEJHgnYhC7mWCBe5Ofw)
+* [在 KubeSphere 中部署高可用 Redis 集群](https://kubesphere.io/zh/blogs/kubesphere-redis/)
 
 ### ElasticSearch
 
@@ -421,6 +465,7 @@
 
 ### Linux Shell 技巧总结
 
+* [Shell 编程中的 test, \[ 和 \[\[](https://taoshu.in/unix/test-bracket.html)
 * [Shell test 单中括号[] 双中括号[[]] 的区别](https://www.cnblogs.com/zeweiwu/p/5485711.html)
 
 ### Linux 诊断
@@ -467,13 +512,19 @@
 
 * [Wasmer examples](https://docs.wasmer.io/integrations/examples)
 
-### mTLS
+### 微服务认证
+
+#### mTLS
 
 * [A Kubernetes engineer’s guide to mTLS](https://buoyant.io/mtls-guide)
 * [mTLS everywhere!](https://blog.frankel.ch/mtls-everywhere/)
 * [Mutual TLS Authentication](https://apisix.apache.org/docs/apisix/mtls/)
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
+
+#### TLS
+
+* [JWT 在 API 网关中的角色：服务间认证的新视角](https://cloudnative.to/blog/jwts-authenticate-services-api-gateways/)
 
 ### 网关
 
@@ -513,6 +564,7 @@
 
 * [手把手教你用代码画架构图](https://www.cnblogs.com/jingdongkeji/p/17401831.html)
 * [一文搞懂架构（业务架构、数据架构、技术架构...）](https://mp.weixin.qq.com/s/P8ZaML92CYTsEvokrGnH4g)
+* [如何画出规范的 UML 用例图](https://developer.aliyun.com/article/1383600)
 
 ### 设计模式
 
@@ -545,6 +597,10 @@
 * [vue组件库开发](https://zq99299.gitbooks.io/vue-note/content/chapter/vu_components_lib/)
 * [从零到一教你基于vue开发一个组件库](https://juejin.cn/post/6844904085808742407)
 * [远程组件实践](https://zhuanlan.zhihu.com/p/617722122)
+
+### Chrome 插件
+
+* [从浏览器原理出发聊聊Chrome插件](https://developer.aliyun.com/article/1381666)
 
 ## 极客
 
