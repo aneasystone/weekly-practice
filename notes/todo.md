@@ -9,15 +9,18 @@
 * [通俗直观介绍ChatGPT背后的大语言模型理论知识](https://mp.weixin.qq.com/s/IR0flZGOyul9BHuDYPnljg)
 * [大语言模型的前世今生](https://bbs.huaweicloud.com/blogs/416109)
 * [a16z整理了AI大模型领域的经典阅读资料](https://mp.weixin.qq.com/s/e34W1EYLOdtRQxYv-VUzsg)
+* [AGI 通用知识模型和认知架构：打造一个能够思考、学习和创造的人工智能的关键所在](https://mp.weixin.qq.com/s/9opOMPzugyPCklVS9k21XQ)
 
 ### RAG
 
+* [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
 * [Query Transformations](https://blog.langchain.dev/query-transformations/)
 * [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
 * [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 * [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
+* [Multi-modal RAG on slide decks](https://blog.langchain.dev/multi-modal-rag-template/)
 
 ### Structured Extraction
 
@@ -31,14 +34,25 @@
 
 * [Adding Long Term Memory to OpenGPTs](https://blog.langchain.dev/adding-long-term-memory-to-opengpts/)
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
+* [盘古智能体（Pangu-Agent）的五个创新点](https://mp.weixin.qq.com/s/H4g1LLEk2vNEP822TlPbxg)
+
+### Research Assistant
+
+* ["Research Assistant": Exploring UXs Besides Chat](https://blog.langchain.dev/exploring-uxs-besides-chat-with-research-assistant/)
+* [GPT Researcher x LangChain](https://blog.langchain.dev/gpt-researcher-x-langchain/)
 
 ### Multi-Agents
 
 * [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
+* [CrewAI Unleashed: Future of AI Agent Teams](https://blog.langchain.dev/crewai-unleashed-future-of-ai-agent-teams/)
 
 ### 模型训练和微调
 
 * [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
+
+### 模型评测
+
+* [Sharing LangSmith Benchmarks](https://blog.langchain.dev/public-langsmith-benchmarks/)
 
 ## Java
 
@@ -100,6 +114,7 @@
 * [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/3.2.x/reference/htmlsingle/)
 * [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
 * [How Google Cloud emulators and Testcontainers speed up development](https://cloud.google.com/blog/products/application-development/develop-and-test-spring-boot-applications-consistently/)
+* [A Comprehensive guide to Spring Boot 3.2 with Java 21, Virtual Threads, Spring Security, PostgreSQL, Flyway, Caching, Micrometer, Opentelemetry, JUnit 5, RabbitMQ, Keycloak Integration, and More! ](https://medium.com/@jojoooo/exploring-a-base-spring-boot-application-with-java-21-virtual-thread-spring-security-flyway-c0fde13c1eca#551c)
 
 ### Spring Modulith
 
@@ -343,6 +358,7 @@
 * [基于 nacos/springcloud/k8s 的不停机服务更新[graceful shutdown]](http://yelog.org/2022/07/27/springboot-graceful-shutdown-based-on-nacos2-and-k8s/)
 * [使用 Argo 项目 Istio 及 SkyWalking 实现 GitOps 和金丝雀部署](https://jimmysong.io/blog/implementing-gitops-and-canary-deployment-with-argo-project-and-istio/)
 * [Canary releases with Apache APISIX](https://blog.frankel.ch/canary-releases-apisix/)
+* [得物 SRE 视角下的蓝绿发布](https://my.oschina.net/u/5783135/blog/10773874)
 
 ### 使用 KubeSphere 管理 Kubernetes
 
@@ -500,6 +516,10 @@
 
 * [老码农的运行时漫谈](https://mp.weixin.qq.com/s/JcA2xIkkd0amerPCEF0KHw)
 
+### Dapr
+
+* [Dapr: A Portable, Event-Driven Runtime for Building Distributed Applications](https://medium.com/@seifeddinerajhi/dapr-a-portable-event-driven-runtime-for-building-distributed-applications-c2ea8254406c)
+
 ### WebAssembly
 
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
@@ -522,9 +542,10 @@
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
 
-#### TLS
+#### JWT
 
 * [JWT 在 API 网关中的角色：服务间认证的新视角](https://cloudnative.to/blog/jwts-authenticate-services-api-gateways/)
+* [What is a JWT? Understanding JSON Web Tokens](https://supertokens.com/blog/what-is-jwt)
 
 ### 网关
 

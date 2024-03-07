@@ -77,7 +77,8 @@
 
 #### 数据分析
 
-* [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - OpenAI's Code Interpreter in your terminal, running locally
+* [The Open Interpreter Project](https://openinterpreter.com/)
+    * [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - A natural language interface for computers
 * [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
 * [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
 * [Raccoon 办公小浣熊](https://raccoon.sensetime.com/office) - 商汤科技
@@ -128,6 +129,7 @@
 #### Code Review
 
 * [appleboy/CodeGPT](https://github.com/appleboy/CodeGPT) - A CLI written in Go language that writes git commit messages or do a code review brief for you using ChatGPT AI (gpt-4, gpt-3.5-turbo model) and automatically installs a git prepare-commit-msg hook.
+* [Sweep](https://github.com/sweepai/sweep) - AI-powered Junior Developer for small features and bug fixes.
 
 #### API 开发
 
@@ -167,6 +169,8 @@
 * [StanGirard/quivr](https://github.com/StanGirard/quivr) - Dump all your files and chat with it using your Generative AI Second Brain using LLMs & Embeddings
 * [PDF GPT](https://github.com/bhaskatripathi/pdfGPT) - allows you to chat with the contents of your PDF file by using GPT capabilities.
 * [GenAI Stack](https://github.com/docker/genai-stack) - Langchain + Docker + Neo4j
+* [FastGPT](https://fastgpt.run/) - 基于 LLM 大模型的 AI 知识库构建平台
+* [QAnything](https://github.com/netease-youdao/QAnything) - Question and Answer based on Anything.
 
 #### 网页助手
 
@@ -218,7 +222,7 @@
 * [DALL.E.2](https://openai.com/product/dall-e-2)
 * [Fooocus](https://github.com/lllyasviel/Fooocus) - Focus on prompting and generating
 * [Image Creator from Microsoft Bing](https://www.bing.com/create) - 来自 Microsoft 必应的图像创建器
-* [Adobe Firefly](https://www.adobe.com/sensei/generative-ai/firefly.html)
+* [Adobe Firefly](https://www.adobe.com/products/firefly.html)
 * [Openjourney](https://openjourney.art/)
 * [Imagen](https://imagen.research.google/) - Text-to-Image Diffusion Models
 * [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
@@ -242,6 +246,15 @@
 * [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
 * [Flair](https://flair.ai/) - THE AI DESIGN TOOL FOR BRANDED CONTENT
 * [Galileo AI](https://www.usegalileo.ai/) - Galileo AI creates delightful, editable UI designs from a simple text description. It empowers you to design faster than ever.
+
+#### 商品设计
+
+* [Mokker AI](https://mokker.ai/zh/) - 瞬时人工智能背景替换
+* [Marketsy.ai](https://marketsy.ai/) - Start a Digital Products Business In Seconds
+
+#### 室内设计
+
+* [Collov](https://collov.com/) - Online Interior Design Services | Luxury for All
 * [RoomGPT](https://github.com/Nutlope/roomGPT) - Upload a photo of your room to generate your dream room with AI.
 
 #### 风格转换
@@ -272,12 +285,14 @@
 
 #### 音乐创作
 
+* [Stable Audio](https://stability.ai/stable-audio) - Use generative AI to create music and sound effects.
 * [Magenta](https://github.com/tensorflow/magenta) - Music and Art Generation with Machine Intelligence
 * [Audiocraft](https://github.com/facebookresearch/audiocraft) - Audiocraft is a PyTorch library for deep learning research on audio generation
 	* [MusicGen](https://ai.honu.io/papers/musicgen/) - Simple and Controllable Music Generation
 	* [MusicGen](https://huggingface.co/spaces/facebook/MusicGen)
 * [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
 * [Uberduck](https://www.uberduck.ai/) - Make Music with AI Vocals
+* [Suno AI](https://www.suno.ai/) - 一款 AI 音乐和语音生成工具
 
 #### 语音识别
 
@@ -307,6 +322,7 @@
 * [Stable Video Diffusion](https://stability.ai/news/stable-video-diffusion-open-ai-video-model)
 * [Sora](https://openai.com/sora) - Creating video from text
 * [MagicAnimate](https://github.com/magic-research/magic-animate) - Temporally Consistent Human Image Animation using Diffusion Model
+* [Pika Labs](https://pikalabs.org/)
 
 #### 虚拟形象
 
@@ -327,6 +343,7 @@
 * [DeviantArt](https://www.deviantart.com/) - The Largest Online Art Gallery and Community
 * [CodeWithGPU](https://www.codewithgpu.com/image) - 能复现才是好算法
     * [CG文档中心](https://www.codewithgpu.com/docs/)
+* [OpenCSG](https://portal.opencsg.com/)
 
 ### GPU 租用
 
@@ -391,6 +408,9 @@
     * [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
 * [DeepSeek](https://www.deepseek.com/) - 深度求索
     * [DeepSeek LLM](https://github.com/deepseek-ai/DeepSeek-LLM)
+    * [DeepSeek MoE](https://github.com/deepseek-ai/DeepSeek-MoE)
+* [ChatLM-Chinese-0.2B](https://huggingface.co/charent/ChatLM-mini-Chinese) - 中文对话0.2B小模型
+* [Orion-14B](https://github.com/OrionStarAI/Orion) - 猎户星空
 
 ### 领域大模型
 
@@ -456,7 +476,8 @@
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
 * [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
 * [LongLoRA](https://github.com/dvlab-research/LongLoRA) - LongLoRA and LongAlpaca for Long-context LLMs
-* [RWKV](https://github.com/BlinkDL/RWKV-LM) - Parallelizable RNN with Transformer-level LLM Performance
+* [RWKV Language Model](https://www.rwkv.com/)
+    * [BlinkDL/RWKV-LM](https://github.com/BlinkDL/RWKV-LM) - Parallelizable RNN with Transformer-level LLM Performance
 
 ### 多模态
 
@@ -473,6 +494,8 @@
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [Fuyu-8B](https://www.adept.ai/blog/fuyu-8b) - A Multimodal Architecture for AI Agents
     * [adept/fuyu-8b](https://huggingface.co/adept/fuyu-8b)
+* [Emu Series](https://github.com/baaivision/Emu) - Generative Multimodal Models from BAAI
+* [Ferret](https://github.com/apple/ml-ferret) - Refer and Ground Anything Anywhere at Any Granularity
 
 ### 模型推理 & 部署
 
@@ -487,6 +510,7 @@
 * [SkyPilot](https://github.com/skypilot-org/skypilot) - Run LLMs, AI, and Batch jobs on any cloud
 * [llamafile](https://simonwillison.net/2023/Nov/29/llamafile/) - the new best way to run a LLM on your own computer
 * [Replicate](https://replicate.com/) - Run AI with an API.
+* [Jan](https://github.com/janhq/jan) - an open source alternative to ChatGPT that runs 100% offline on your computer
 
 ### 模型训练 & 微调
 
@@ -517,6 +541,7 @@
 * [xtekky/gpt4free](https://github.com/xtekky/gpt4free) - decentralising the Ai Industry, just some language model api's...
 * [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) - Reverse engineered ChatGPT API
 * [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
+* [songquanpeng/one-api](https://github.com/songquanpeng/one-api) - 通过标准的 OpenAI API 格式访问所有的大模型，开箱即用
 
 ### 部署教程
 
@@ -548,11 +573,19 @@
 * [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
 * [Towhee](https://github.com/towhee-io/towhee) - a framework that is dedicated to making neural data processing pipelines simple and fast.
 
+### LLMOps
+
+* [LangSmith](https://www.langchain.com/langsmith) - Get your LLM app from prototype to production
+* [Prompt flow](https://github.com/microsoft/promptflow) - Build high-quality LLM apps - from prototyping, testing to production deployment and monitoring.
+
 ### 大模型应用产品
 
 * [Dify](https://dify.ai/zh) - 简单的创造和运营基于 GPT-4 的 AI 原生应用
 * [Dust](https://dust.tt/) - Amplify your team's potential with customizable and secure AI assistants
 * [OpenGPTs](https://github.com/langchain-ai/opengpts) - open source OpenAI's GPTs and Assistants API
+* [灵境矩阵](https://agents.baidu.com/) - 文心大模型智能体平台
+* [Coze](https://www.coze.com/home) - a next-generation AI Bot development platform
+* [SkyAgents](https://model-platform.tiangong.cn/) - 天工开放平台
 
 ### 工作流
 
@@ -564,9 +597,8 @@
 
 ### Agent
 
-* [AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - 
+* [AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.
 * [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
-* [Significant-Gravitas/Auto-GPT](https://github.com/Significant-Gravitas/Auto-GPT) - An experimental open-source attempt to make GPT-4 fully autonomous.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
 * [SuperAGI](https://superagi.com/) - A dev-first open source autonomous AI agent framework. Enabling developers to build, manage & run useful autonomous agents quickly and reliably.
     * [TransformerOptimus/SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
@@ -587,6 +619,7 @@
 * [AutoGen](https://github.com/microsoft/autogen) - Enable Next-Gen Large Language Model Applications.
     * [微软Agent框架AutoGen论文及原理解读](https://mp.weixin.qq.com/s/HgdAn2Bp10T7jCf5nZhdkw)
 * [ChatDev](https://github.com/OpenBMB/ChatDev) - Communicative Agents for Software Development
+* [CrewAI](https://github.com/joaomdmoura/crewai) - Framework for orchestrating role-playing, autonomous AI agents.
 
 ### RPA
 
@@ -603,6 +636,7 @@
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
 * [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
 * [Lobe Chat](https://github.com/lobehub/lobe-chat) - an open-source, modern-design ChatGPT/LLMs UI/Chat Framework. Supports speech-synthesis, multi-modal, and extensible plugin system. One-click FREE deployment of your private ChatGPT/Gemini/Ollama chat application.
+* [GeminiProChat](https://github.com/babaohuang/GeminiProChat) - Minimal web UI for GeminiPro.
 
 ### Awesome
 
