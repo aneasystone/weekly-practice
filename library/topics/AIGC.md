@@ -13,7 +13,7 @@
 
 * [ChatGPT](https://chat.openai.com/)
 * [Claude AI](https://www.anthropic.com/claude-in-slack)
-* [Bard](https://bard.google.com/)
+* [Gemini](https://gemini.google.com) – chat to supercharge your ideas
 * [HuggingChat](https://huggingface.co/chat/)
 * [Character.AI](https://beta.character.ai/)
 * [文心一言](https://yiyan.baidu.com/)
@@ -62,18 +62,22 @@
 * [AlphaCode](https://alphacode.deepmind.com/)
 * [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
 * [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
-* [StarCoder](https://github.com/bigcode-project/starcoder)
-* [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
-* [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
-* [CodeFuse](https://codefuse.alipay.com/welcome/open) - 蚂蚁自研的代码生成专属大模型
-    * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
-* [CodeShell](https://github.com/WisdomShell/codeshell) - 多语言代码大模型基座
 * [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
 * [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
+
+#### 代码大模型
+
+* [StarCoder](https://github.com/bigcode-project/starcoder)
+* [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
+* [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
+* [CodeShell](https://github.com/WisdomShell/codeshell) - 多语言代码大模型基座
+* [CodeFuse](https://codefuse.alipay.com/welcome/open) - 蚂蚁自研的代码生成专属大模型
+    * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
+* [AlphaCodium](https://github.com/Codium-ai/AlphaCodium) - Code Generation with AlphaCodium: From Prompt Engineering to Flow Engineering
 
 #### 数据分析
 
@@ -82,6 +86,7 @@
 * [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
 * [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
 * [Raccoon 办公小浣熊](https://raccoon.sensetime.com/office) - 商汤科技
+* [PandasAI](https://github.com/Sinaptik-AI/pandas-ai) - Chat with your data (SQL, CSV, pandas, polars, noSQL, etc). PandasAI makes data analysis conversational using LLMs (GPT 3.5 / 4, Anthropic, VertexAI) and RAG.
 
 #### 调试助手
 
@@ -105,9 +110,10 @@
 * [Make Real](https://github.com/tldraw/make-real) - Draw a ui and make it real
 * [screenshot-to-code](https://github.com/abi/screenshot-to-code) - Drop in a screenshot and convert it to clean code (HTML/Tailwind/React/Vue)
 
-#### 运维
+#### 运维安全
 
 * [k8sgpt-ai/k8sgpt](https://github.com/k8sgpt-ai/k8sgpt) - Giving Kubernetes Superpowers to everyone
+* [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
 
 #### 数据库
 
@@ -228,6 +234,7 @@
 * [borisdayma/dalle-mini](https://github.com/borisdayma/dalle-mini) - DALL·E Mini - Generate images from a text prompt
 * [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
 * [Imagine with Meta AI](https://imagine.meta.com/)
+* [ByteDance/SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning)
 
 #### 二维码生成
 
@@ -276,10 +283,8 @@
 * [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
 * [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
 * [remove.bg](https://www.remove.bg/zh) - 图片去除背景
-
-#### 图片修复
-
 * [GFPGAN](https://github.com/TencentARC/GFPGAN) - aims at developing Practical Algorithms for Real-world Face Restoration.
+* [LaMa](https://github.com/advimman/lama) - Resolution-robust Large Mask Inpainting with Fourier Convolutions
 
 ### 音视频助手
 
@@ -293,6 +298,7 @@
 * [SoftVC VITS Singing Voice Conversion](https://github.com/svc-develop-team/so-vits-svc) - 歌声音色转换模型
 * [Uberduck](https://www.uberduck.ai/) - Make Music with AI Vocals
 * [Suno AI](https://www.suno.ai/) - 一款 AI 音乐和语音生成工具
+* [AI Image to Music Generator](https://imagetomusic.top/)
 
 #### 语音识别
 
@@ -320,9 +326,16 @@
 * [3D-GPT](https://chuny1.github.io/3DGPT/3dgpt.html) - 3D MODELING WITH LARGE LANGUAGE MODELS
 * [Emu Video](https://emu-video.metademolab.com/) - Factorizing Text-to-Video Generation by Explicit Image Conditioning
 * [Stable Video Diffusion](https://stability.ai/news/stable-video-diffusion-open-ai-video-model)
-* [Sora](https://openai.com/sora) - Creating video from text
 * [MagicAnimate](https://github.com/magic-research/magic-animate) - Temporally Consistent Human Image Animation using Diffusion Model
 * [Pika Labs](https://pikalabs.org/)
+* [EMO: Emote Portrait Alive](https://humanaigc.github.io/emote-portrait-alive/) - Generating Expressive Portrait Videos with Audio2Video Diffusion Model under Weak Conditions
+
+##### Sora
+
+* [Sora](https://openai.com/sora) - Creating video from text
+* [Open-Sora-Plan](https://github.com/PKU-YuanGroup/Open-Sora-Plan) - This project aim to reproducing Sora (Open AI T2V model)
+* [hpcaitech/Open-Sora](https://github.com/hpcaitech/Open-Sora) - Building your own video generation model like OpenAI's Sora
+* [最强文生视频模型 SORA 超详细解读](https://zhuanlan.zhihu.com/p/682579303)
 
 #### 虚拟形象
 
@@ -334,6 +347,7 @@
 ### 机器人
 
 * [RT-2](https://robotics-transformer2.github.io/) - Vision-Language-Action Models
+* [VoxPoser](https://voxposer.github.io/) - Composable 3D Value Maps for Robotic Manipulation with Language Models
 
 ## 模型社区
 
@@ -344,6 +358,11 @@
 * [CodeWithGPU](https://www.codewithgpu.com/image) - 能复现才是好算法
     * [CG文档中心](https://www.codewithgpu.com/docs/)
 * [OpenCSG](https://portal.opencsg.com/)
+
+### HuggingFace 镜像站
+
+* [Huggingface 镜像站](https://hf-mirror.com/)
+* [异型岛](https://aliendao.cn/)
 
 ### GPU 租用
 
@@ -502,8 +521,8 @@
 * [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) - Port of Facebook's LLaMA model in C/C++
 * [Text Generation Inference](https://github.com/huggingface/text-generation-inference) - Large Language Model Text Generation Inference
 * [vllm-project/vllm](https://github.com/vllm-project/vllm) - A high-throughput and memory-efficient inference and serving engine for LLMs
-* [Ollama](https://ollama.ai/) - Get up and running with Llama 2 and other large language models locally
-    * [jmorganca/ollama](https://github.com/jmorganca/ollama)
+* [Ollama](https://ollama.ai/) - Get up and running with Llama 2, Mistral, Gemma, and other large language models.
+    * [ollama/ollama](https://github.com/ollama/ollama)
 * [MegEngine/InferLLM](https://github.com/MegEngine/InferLLM) - a lightweight LLM model inference framework
 * [Lepton AI](https://www.lepton.ai/) - Build AI The Simple Way
 * [Fireworks.ai](https://app.fireworks.ai/) - Experience the world's fastest LLM inference platform.
@@ -530,7 +549,6 @@
 
 * [josStorer/chatGPTBox](https://github.com/josStorer/chatGPTBox) - Integrating ChatGPT into your browser deeply, everything you need is here
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
-* [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
 * [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) - Reverse engineered API of Microsoft's Bing Chat AI
 * [gd3kr/BlenderGPT](https://github.com/gd3kr/BlenderGPT) - Use commands in English to control Blender with OpenAI's GPT-4
 * [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
@@ -572,6 +590,7 @@
     * [EmbedChain：比LangChain更加轻量化的LLM框架](https://zhuanlan.zhihu.com/p/662973975)
 * [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
 * [Towhee](https://github.com/towhee-io/towhee) - a framework that is dedicated to making neural data processing pipelines simple and fast.
+* [LLMStack](https://llmstack.ai/) - Open-source platform to build AI Agents, workflows and applications with your data
 
 ### LLMOps
 
@@ -597,6 +616,7 @@
 
 ### Agent
 
+* [Awesome AI Agents](https://github.com/e2b-dev/awesome-ai-agents) - A list of AI autonomous agents
 * [AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.
 * [AgentGPT](https://github.com/reworkd/AgentGPT) - Assemble, configure, and deploy autonomous AI Agents in your browser.
 * [BabyAGI](https://github.com/yoheinakajima/babyagi)
@@ -652,6 +672,7 @@
 * [两条命令搞定 ChatGPT API 的调用问题，有手就会！](https://blog.didispace.com/openai-proxy-aliyunfc/)
 * [LLM Map: 大模型技术图谱](https://gitee.com/oschina/llm-map)
 * [awesome-llm: 可能是最全的开源 LLM （大语言模型）整理](https://gitee.com/oschina/awesome-llm)
+* [Open LLMs](https://github.com/eugeneyan/open-llms) - A list of open LLMs available for commercial use.
 
 ## 图像类
 
@@ -696,6 +717,7 @@
 * [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/advanced-prompt-engineering)
 * [datawhalechina/hugging-llm](https://github.com/datawhalechina/hugging-llm) - HuggingLLM, Hugging Future.
 * [Learn Prompt](https://www.learnprompt.pro/) - Your Cookbook to Becoming to Communicating with AIGC
+* [EgoAlpha/prompt-in-context-learning](https://github.com/EgoAlpha/prompt-in-context-learning) - Awesome resources for in-context learning and prompt engineering: Mastery of the LLMs such as ChatGPT, GPT-3, and FlanT5, with up-to-date and cutting-edge updates.
 
 ### 应用产品
 

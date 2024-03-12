@@ -847,6 +847,8 @@ if (obj instanceof Integer i) {
 System.out.println(formatted);
 ```
 
+更多关于 `switch` 模式匹配的用法可以参考 [这篇文章](https://inside.java/2023/11/13/sip088/)。
+
 ## 参考
 
 * [The Arrival of Java 21](https://blogs.oracle.com/java/post/the-arrival-of-java-21)

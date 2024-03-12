@@ -10,9 +10,12 @@
 * [大语言模型的前世今生](https://bbs.huaweicloud.com/blogs/416109)
 * [a16z整理了AI大模型领域的经典阅读资料](https://mp.weixin.qq.com/s/e34W1EYLOdtRQxYv-VUzsg)
 * [AGI 通用知识模型和认知架构：打造一个能够思考、学习和创造的人工智能的关键所在](https://mp.weixin.qq.com/s/9opOMPzugyPCklVS9k21XQ)
+* [The History of Open-Source LLMs: Better Base Models (Part Two)](https://cameronrwolfe.substack.com/p/the-history-of-open-source-llms-better)
 
 ### RAG
 
+* [高级 RAG 技术：图解概览](https://baoyu.io/translations/rag/advanced-rag-techniques-an-illustrated-overview)
+* [Advanced RAG Techniques: an Illustrated Overview](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6)
 * [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
 * [Query Transformations](https://blog.langchain.dev/query-transformations/)
 * [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
@@ -21,6 +24,8 @@
 * [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 * [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
 * [Multi-modal RAG on slide decks](https://blog.langchain.dev/multi-modal-rag-template/)
+* [Self-Reflective RAG with LangGraph](https://blog.langchain.dev/agentic-rag-with-langgraph/)
+* [12个 RAG 痛点和解决建议 —— 解决检索增强生成的核心挑战](https://mp.weixin.qq.com/s/y3igfA03EqC60B1LTTb55w)
 
 ### Structured Extraction
 
@@ -30,11 +35,30 @@
 
 * [How to use ChatGPT’s new “Code Interpreter” feature](https://www.pluralsight.com/resources/blog/data/chatgpt-code-interpreter-plugin-guide)
 
+#### Jupyter
+
+* [Jupyter Kernel Gateway](https://jupyter-kernel-gateway.readthedocs.io/en/latest/getting-started.html)
+    * [jupyter/kernel_gateway_demos](https://github.com/jupyter/kernel_gateway_demos)
+    * [jupyter-server/kernel_gateway](https://github.com/jupyter-server/kernel_gateway)
+* [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html)
+* [Jupyter Server](https://jupyter-server.readthedocs.io/en/latest/index.html)
+* [CodeBox API](https://shroominic.github.io/codebox-api/installation/)
+
 ### Agents
 
 * [Adding Long Term Memory to OpenGPTs](https://blog.langchain.dev/adding-long-term-memory-to-opengpts/)
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
 * [盘古智能体（Pangu-Agent）的五个创新点](https://mp.weixin.qq.com/s/H4g1LLEk2vNEP822TlPbxg)
+* [LangGraph](https://blog.langchain.dev/langgraph/)
+* [Reflection Agents](https://blog.langchain.dev/reflection-agents/)
+* [LangGraph for Code Generation](https://blog.langchain.dev/code-execution-with-langgraph/)
+* [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
+* [基于大语言模型的AI Agents—Part 1](https://www.breezedeus.com/article/ai-agent-part1)
+* [基于大语言模型的AI Agents—Part 2](https://www.breezedeus.com/article/ai-agent-part2)
+* [基于大语言模型的AI Agents—Part 3](https://www.breezedeus.com/article/ai-agent-part3)
+* [Agent的颠覆性影响 | LearnPrompt](https://www.learnprompt.pro/article/agent)
+* [Building Your First LLM Agent Application](https://developer.nvidia.com/blog/building-your-first-llm-agent-application/)
+* [AI Agent，为什么是AIGC最后的杀手锏？](https://www.tisi.org/27147)
 
 ### Research Assistant
 
@@ -45,14 +69,21 @@
 
 * [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
 * [CrewAI Unleashed: Future of AI Agent Teams](https://blog.langchain.dev/crewai-unleashed-future-of-ai-agent-teams/)
+* [LangGraph: Multi-Agent Workflows](https://blog.langchain.dev/langgraph-multi-agent-workflows/)
+* [彻底搞懂LangGraph：构建强大的Multi-Agent多智能体应用的LangChain新利器 【1】](https://mp.weixin.qq.com/s/MzLz4lJF0WMsWrThiOWPog)
 
 ### 模型训练和微调
 
+* [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
 * [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
 
 ### 模型评测
 
 * [Sharing LangSmith Benchmarks](https://blog.langchain.dev/public-langsmith-benchmarks/)
+
+### 模型安全
+
+* [Adversarial Attacks on LLMs](https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/)
 
 ## Java
 
@@ -75,11 +106,13 @@
 
 * [Guide to JNI (Java Native Interface)](https://www.baeldung.com/jni)
 
-### 学习 JUnit
+### 单元测试
 
 * [Creating a Test Suite With JUnit](https://www.baeldung.com/java-junit-test-suite)
 * [Best Practices for Unit Testing in Java](https://www.baeldung.com/java-unit-testing-best-practices)
 * [Pitfalls on Testing with Spring Boot](https://www.baeldung.com/spring-boot-testing-pitfalls)
+* [Mocking Private Fields With Mockito](https://www.baeldung.com/java-mockito-private-fields)
+* [Run JMeter .jmx File From the Command Line and Configure the Report File](https://www.baeldung.com/java-jmeter-command-line)
 
 ### 问题诊断
 
@@ -115,6 +148,7 @@
 * [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
 * [How Google Cloud emulators and Testcontainers speed up development](https://cloud.google.com/blog/products/application-development/develop-and-test-spring-boot-applications-consistently/)
 * [A Comprehensive guide to Spring Boot 3.2 with Java 21, Virtual Threads, Spring Security, PostgreSQL, Flyway, Caching, Micrometer, Opentelemetry, JUnit 5, RabbitMQ, Keycloak Integration, and More! ](https://medium.com/@jojoooo/exploring-a-base-spring-boot-application-with-java-21-virtual-thread-spring-security-flyway-c0fde13c1eca#551c)
+* [All together now: Spring Boot 3.2, GraalVM native images, Java 21, and virtual threads with Project Loom](https://spring.io/blog/2023/09/09/all-together-now-spring-boot-3-2-graalvm-native-images-java-21-and-virtual)
 
 ### Spring Modulith
 
@@ -129,6 +163,8 @@
 ### Spring Security
 
 * [How to Implement Simple Authentication in Spring Boot?](https://www.tutorialspoint.com/how-to-implement-simple-authentication-in-spring-boot)
+* [Securing Spring Boot API With API Key and Secret](https://www.baeldung.com/spring-boot-api-key-secret)
+* [Spring Boot 3.1中如何整合Spring Security和Keycloak](https://blog.didispace.com/spring-boot-3-keycloak-21/)
 
 ### Reactor 响应式编程
 
@@ -152,6 +188,7 @@
 
 * [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
 * [Is CompletableFuture Non-blocking?](https://www.baeldung.com/java-completablefuture-non-blocking)
+* [CompletableFuture原理与实践-外卖商家端API的异步化](https://tech.meituan.com/2022/05/12/principles-and-practices-of-completablefuture.html)
 
 ### Guava
 
@@ -178,6 +215,10 @@
 * [深入浅出解析JVM中的Safepoint](https://mp.weixin.qq.com/s/_Khj3Qa2MZBN9718KhVp0w)
 * [Sharing Memory Between JVMs](https://www.baeldung.com/java-sharing-memory-between-jvms)
 
+### IPC
+
+* [Inter-Process Communication Methods in Java](https://www.baeldung.com/java-ipc)
+
 ### JMX
 
 * [External Debugging With JMXTerm](https://www.baeldung.com/java-jmxterm-external-debugging)
@@ -187,6 +228,11 @@
 
 * [Eclipse Memory Analyzer](https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.mat.ui.help%2Fwelcome.html)
 * [JVM 内存分析工具 MAT 的深度讲解与实践 - 知乎](https://zhuanlan.zhihu.com/p/585668729)
+* [记一次Native memory leak排查过程](https://www.cnblogs.com/jingdongkeji/p/17517087.html)
+
+#### 性能分析
+
+* [开源 Java 性能分析器比较：VisualVM、JMC 和 async-profiler](https://www.infoq.cn/article/yO6pjms5izsxK5YrZ036)
 
 ### 可观测性
 
@@ -196,6 +242,7 @@
 * [基于 eBPF 的云原生可观测性深度实践](https://www.infoq.cn/article/H1WOWBgxK5Y55EemDHze)
 * [Java JVM 可观测的原理解释和落地方案对比](https://www.infoq.cn/article/3iwV28HezCgCyPdFMWSd)
 * [使用全景拓扑持续跟踪云原生应用的压测性能瓶颈](https://cloudnative.to/blog/service-map-observation-performance-test/)
+* [腾讯云原生可观测性之路：探索、实践与踩坑](https://www.infoq.cn/article/UzPDWKw83lU0gfNfmUEz)
 
 #### Micrometer
 
@@ -265,6 +312,7 @@
 ### 虚拟线程
 
 * [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
+* [虚拟线程原理及性能分析](https://tech.dewu.com/article?id=89)
 
 ### 限流
 
@@ -272,6 +320,10 @@
 * [Resilience4j Events Endpoints](https://www.baeldung.com/resilience4j-events-endpoints)
 * [Sentinel夺命连环 17 问](https://mp.weixin.qq.com/s/gTLDPxlEdDkD-Bdua5qyNQ)
 * [Sentinel为什么这么强，我扒了扒背后的实现原理](https://mp.weixin.qq.com/s/ETghXbTV5GAs78GsqB86XQ)
+
+### 工具和库
+
+* [Java 表达式引擎选型调研分析](https://my.oschina.net/u/4090830/blog/10315584)
 
 ## Docker
 
@@ -306,6 +358,7 @@
 
 ### 策略管理
 
+* [Policy management in Kubernetes is changing](https://www.cncf.io/blog/2023/09/14/policy-management-in-kubernetes-is-changing/)
 * [Secure your Kubernetes environment with OPA and Gatekeeper](https://www.cncf.io/blog/2023/10/09/secure-your-kubernetes-environment-with-opa-and-gatekeeper/)
 
 ### Kubernetes Secrets
@@ -321,6 +374,7 @@
 * [Troubleshooting Kubernetes Deployment at Every Level!](https://www.atatus.com/blog/troubleshooting-kubernetes-deployment/)
 * [kubernetes 常见错误总结](https://csms.tech/202209281614/)
 * [强制删除 Kubernetes Namespace](https://www.iszy.cc/posts/force-delete-k8s-namespace/)
+* [KubeShark: Kubernetes 的 Wireshark](https://xie.infoq.cn/article/30ea5e58984a2772f68b5fd39)
 
 ### 获取客户端真实 IP
 
@@ -359,6 +413,7 @@
 * [使用 Argo 项目 Istio 及 SkyWalking 实现 GitOps 和金丝雀部署](https://jimmysong.io/blog/implementing-gitops-and-canary-deployment-with-argo-project-and-istio/)
 * [Canary releases with Apache APISIX](https://blog.frankel.ch/canary-releases-apisix/)
 * [得物 SRE 视角下的蓝绿发布](https://my.oschina.net/u/5783135/blog/10773874)
+* [Canary deployment with Flagger and Istio on Devtron](https://www.cncf.io/blog/2023/08/23/canary-deployment-with-flagger-and-istio-on-devtron/)
 
 ### 使用 KubeSphere 管理 Kubernetes
 
@@ -370,6 +425,7 @@
 * [如何使用 Kubernetes 实现应用程序的弹性伸缩](https://mp.weixin.qq.com/s/aVrAOnX4mwTYAX6KcmORYg)
 * [使用 KEDA 自动伸缩 Kubernetes 应用](https://mp.weixin.qq.com/s/y0pIC70DYcaOUD7wMvCn1Q)
 * [应用现代化中的弹性伸缩](https://www.kubesphere.io/zh/blogs/building-resilient-and-scalable-systems/)
+* [用 KEDA 根据工作负载进行快速扩容](https://blog.fleeto.us/post/way-to-keda/)
 
 ### Kubernetes 网络
 
@@ -380,10 +436,22 @@
 * [Kubernetes网络排错指南（万字长文）](https://mp.weixin.qq.com/s/Beb4QsfiR12bXLsG9VGCFw)
 * [记一次KUBERNETES/DOCKER网络排障](https://coolshell.cn/articles/18654.html)
 
+### Service Mesh
+
+* [Service Mesh：探索分布式系统的幻觉与未来](https://www.infoq.cn/article/XaSoBilDNO7qy24zCOyM)
+* [使用 Go 重新实现一套 Service Mesh](https://www.apiseven.com/blog/service-mesh)
+
 ### 深入 Istio
 
 * [从Istio在CNCF毕业，看服务网格的架构变迁](https://mp.weixin.qq.com/s/_VNdxzhxCoQCcITqyklASg)
 * [Istio 中的负载均衡详解及多集群路由实践](https://jimmysong.io/blog/demystifying-the-load-balancing-in-istio/)
+* [Istio 的未来：无 Sidecar 和带有 Ambient Mesh 的 Sidecar](https://www.infoq.cn/article/hh12UJcPhkRmKoQLKyK7)
+* [如何在 Istio 中按路径配置全局速率限制](https://cloudnative.to/blog/how-to-configure-global-rate-limits-by-path-in-istio/)
+* [Database Mesh: 使用 Istio 和 Aeraki 对 Redis 进行流量管理](https://www.zhaohuabing.com/post/2023-05-08-manage-redis-with-aeraki-mesh/)
+* [外部服务别名：ExternalName 与 ServiceEntry 对比](https://jimmysong.io/blog/externalname-and-serviceentry/)
+
+### MoE - MOSN on Envoy
+
 * [MoE 系列 - 如何使用 Golang 扩展 Envoy [一]](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-1/)
 * [MoE 系列 [二] - Golang 扩展从 Envoy 接收配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-2/)
 * [MoE 系列 [三] - 使用 Istio 动态更新 Go 扩展配置](https://mosn.io/blog/posts/moe-extend-envoy-using-golang-3/)
@@ -395,14 +463,23 @@
 * [Platform Engineering 101: Get Started with Platforms](https://www.infracloud.io/blogs/platform-engineering-101/)
 * [Starting Platform Engineering Journey with Backstage](https://www.infracloud.io/blogs/starting-platform-engineering-journey-backstage/)
 
+### 多租户
+
+* [K8s 多租户方案的挑战与价值](https://sealos.io/zh-Hans/blog/k8s-multi-tenancy)
+
 ### Serverless
 
+* [15 年了，我们到底怎样才能用好 Serverless？](https://my.oschina.net/u/4526289/blog/8695856)
 * [OpenFunction：从 0 到 1，打造新一代开源函数计算平台](https://kubesphere.io/zh/blogs/faas-openfunction/)
 
 ### eBPF
 
 * [eBPF应用程序开发：快人一步](https://www.cnxct.com/ebpf-application-development-beyond-basics-zh_cn/)
 * [eBPF 的发展演进 --- 从石器时代到成为神（一）](https://my.oschina.net/u/4450925/blog/8685883)
+
+### 证书管理
+
+* [如何在 APISIX 使用 Vault 管理证书](https://www.apiseven.com/blog/apisix-integrate-with-vault-to-store-certs)
 
 ## 数据库
 
@@ -413,8 +490,9 @@
 * [MySQL 索引之道](https://juejin.cn/post/7161964571853815822)
 * [1.5万字+30张图盘点索引常见的11个知识点](https://www.cnblogs.com/zzyang/p/17440187.html)
 
-#### 锁
+#### 事务和锁
 
+* [MYSQL 事务的底层原理 | 京东物流技术团队](https://my.oschina.net/u/4090830/blog/10142911)
 * [鹅厂T12详解MySQL加锁机制](https://mp.weixin.qq.com/s/TEXjgA85vUrvx2Q6O5Id1A)
 
 #### 数据库分片
@@ -432,6 +510,14 @@
 
 * [在 Kubernetes 中基于 StatefulSet 部署 MySQL（上）](https://kubesphere.io/zh/blogs/mysql-on-k8s-statefulset-1/)
 * [在 Kubernetes 中基于 StatefulSet 部署 MySQL（下）](https://kubesphere.io/zh/blogs/mysql-on-k8s-statefulset-2/)
+
+#### 数据脱敏
+
+* [PostgreSQL 数据脱敏方式盘点](https://my.oschina.net/u/6148470/blog/10306946)
+
+### Mongo
+
+* [MongoDB 索引操作引起的 Crash](https://my.oschina.net/actiontechoss/blog/10082808)
 
 ### Redis
 
@@ -495,6 +581,7 @@
 * [Linux 网络延迟故障排查](https://z.itpub.net/article/detail/B4C1A280915C008AFE190AACAB45A5CB)
 * [生产Nginx现大量TIME-WAIT，连接耗尽，该如何处理？](https://mp.weixin.qq.com/s/U3ukNQOmsKmfHI20TFSxoQ)
 * [如何分析系统的负载？生产排错必备技能](https://www.yuanjava.cn/posts/load-average/)
+* [什么等等？ I/O Wait ≠ I/O 瓶颈？](https://www.ebpf.top/post/cpu_io_wait/)
 
 ### 网络
 
@@ -522,6 +609,7 @@
 
 ### WebAssembly
 
+* [Java 极客眼中的 WebAssembly](https://www.infoq.cn/article/H9VRjX3X1MeXqImEwI6J)
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
 
 #### Wasm in Dapr
@@ -541,6 +629,7 @@
 * [Mutual TLS Authentication](https://apisix.apache.org/docs/apisix/mtls/)
 * [如何理解 Istio 中的 MTLS 流量加密？](https://jimmysong.io/blog/understanding-the-tls-encryption-in-istio/)
 * [写给 Kubernetes 工程师的 mTLS 指南](https://lib.jimmysong.io/blog/mtls-guide/)
+* [Secure application communications with Mutual TLS and Istio](https://www.cncf.io/blog/2023/11/03/secure-application-communications-with-mutual-tls-and-istio/)
 
 #### JWT
 
@@ -562,11 +651,13 @@
 
 * [夜莺 - All-in-one 的开源观测平台](https://github.com/ccfos/nightingale)
 * [一文搞懂 VictoriaMetrics 的使用](https://www.qikqiak.com/post/victoriametrics-usage/)
+* [Metrics 监控方案的思考和实操（面向微服务组件）](https://www.infoq.cn/article/UepHIPhJaXMUK9hBypiC)
 
 ### Grafana 插件
 
 * [Grafana 数据源插件开发 (一) 准备开发环境 – Mofeng's Blog](https://blog.mofengfeng.com/2022/11/19/grafana-%E6%95%B0%E6%8D%AE%E6%BA%90%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91-%E4%B8%80-%E5%87%86%E5%A4%87%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/)
 * [Build a data source plugin | Grafana Plugin Tools](https://grafana.com/developers/plugin-tools/tutorials/build-a-data-source-plugin)
+* [How to perform multi-step API calls with Grafana](https://grafana.com/blog/2024/03/04/how-to-perform-multi-step-api-calls-with-grafana/)
 
 ### 实战 Litmus 云原生混沌工程
 
@@ -580,6 +671,10 @@
 ### 算法
 
 * [Building a Bloom filter](https://luminousmen.com/post/building-a-bloom-filter)
+
+### 信息安全
+
+* [vivo 网络端口安全建设技术实践](https://my.oschina.net/vivotech/blog/10140381)
 
 ### 作图技巧
 
