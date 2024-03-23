@@ -123,7 +123,99 @@ pyllama_data
 
 从下载文件 `consolidated.00.pth` 的后缀可以看出这是一个 [PyTorch](https://pytorch.org/) 中用于保存模型权重的文件，该文件包含了模型在训练过程中学到的权重参数，我们可以通过 PyTorch 提供的加载机制重新装载到相同或者相似结构的模型中，从而继续训练或者进行推理。
 
-* [Beyond LLaMA: The Power of Open LLMs](https://cameronrwolfe.substack.com/p/beyond-llama-the-power-of-open-llms)
+官方已经提供了这样的示例代码，可以对模型进行测试，我们先下载代码：
+
+```
+$ git clone https://github.com/meta-llama/llama.git
+$ cd llama
+$ git checkout llama_v1
+```
+
+注意切换到 `llama_v1` 分支，因为我们下的是 Llama 1 模型。然后安装所需依赖：
+
+```
+$ pip3 install -r requirements.txt
+```
+
+然后安装 Llama：
+
+```
+$ pip3 install -e .
+```
+
+最后运行下面的命令测试模型：
+
+```
+$ torchrun --nproc_per_node 1 example.py --ckpt_dir ../pyllama_data/7B --tokenizer_path ../pyllama_data/tokenizer.model
+```
+
+运行这个命令需要具备 NVIDIA 卡并且需要安装 CUDA，否则很可能会报下面这样的错：
+
+```
+Traceback (most recent call last):
+  File "/Users/aneasystone/Codes/github/llama/example.py", line 119, in <module>
+    fire.Fire(main)
+  File "/Library/Python/3.9/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/Library/Python/3.9/site-packages/fire/core.py", line 475, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/Library/Python/3.9/site-packages/fire/core.py", line 691, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "/Users/aneasystone/Codes/github/llama/example.py", line 74, in main
+    local_rank, world_size = setup_model_parallel()
+  File "/Users/aneasystone/Codes/github/llama/example.py", line 23, in setup_model_parallel
+    torch.distributed.init_process_group("nccl")
+  File "/Library/Python/3.9/site-packages/torch/distributed/c10d_logger.py", line 86, in wrapper
+    func_return = func(*args, **kwargs)
+  File "/Library/Python/3.9/site-packages/torch/distributed/distributed_c10d.py", line 1184, in init_process_group
+    default_pg, _ = _new_process_group_helper(
+  File "/Library/Python/3.9/site-packages/torch/distributed/distributed_c10d.py", line 1302, in _new_process_group_helper
+    raise RuntimeError("Distributed package doesn't have NCCL built in")
+RuntimeError: Distributed package doesn't have NCCL built in
+```
+
+在深度学习的训练和推理过程中，我们常常会遇到单机多卡或多机多卡的情况，这就会涉及到各个卡或节点之间的通信，这种通信被称为 **集合通信（Collective Communication
+）**，而 [NCCL](https://developer.nvidia.com/nccl) 就是这样的一个集合通信库，它是英伟达基于自家 NVIDIA GPU 定制开发的一套开源集合通信库，可以通过 PCIe 和 NVLink 等高速互联从而实现高带宽和低延迟。除了 NCCL，还有一些其他的库可以选择，比如 [MPI](https://www.mpi-forum.org/) 接口的开源实现 [Open MPI](https://www.open-mpi.org/) 、Facebook 的 [Gloo](https://github.com/facebookincubator/gloo) 等。
+
+为了让代码能在我的 Mac 上跑起来，我参考了 [这里](https://github.com/meta-llama/llama/issues/50) 和 [这里](https://github.com/meta-llama/llama/issues/112) 的方法，将代码中和 CUDA 有关的内容都删掉，虽然可以运行，模型也显示加载成功了，但是却一直没有运行结果。最后，参考网友 [b0kch01 的实现](https://github.com/b0kch01/llama-cpu)，还需要对参数做一些修改，然后将代码改成一次只处理一个提示词，再将机器上所有程序全部关闭，终于把 Llama 模型运行起来了：
+
+```
+$ torchrun --nproc_per_node 1 example.py --ckpt_dir ../pyllama_data/7B --tokenizer_path ../pyllama_data/tokenizer.model
+Locating checkpoints
+Found MP=1 checkpoints
+Creating checkpoint instance...
+Grabbing params...
+Loading model arguments...
+Creating tokenizer...
+Creating transformer...
+
+-- Creating embedding
+-- Creating transformer blocks (32)
+-- Adding output layers 
+-- Precomputing frequencies
+
+Loading checkpoint to model...done in 57.88 seconds
+Creating LLaMA generator...done in 0.01 seconds
+Loaded in 89.92 seconds
+Enter prompt: 
+```
+
+等了 90 秒，模型加载成功，接着我们手动输入示例中的第一个提示词：
+
+```
+Enter prompt: I believe the meaning of life is
+Starting generation with prompt: I believe the meaning of life is
+Forwarding 38 times
+responded in 472.85 seconds
+I believe the meaning of life is to fulfill your purpose in life, and once you’ve done that, you live to serve others and to love others.
+My goal is
+
+==================================
+
+Enter next prompt:
+```
+
+又等了将近 8 分钟，模型才慢吞吞地输出 150 个左右的字符。
 
 ## 模型量化
 
@@ -136,6 +228,10 @@ https://github.com/ggerganov/llama.cpp
 ### pyllama
 
 https://github.com/juncongmoo/pyllama
+
+```
+$ pip3 install gptq
+```
 
 ### Ollama
 
@@ -173,12 +269,14 @@ https://github.com/facebookresearch/llama-recipes/
 
 ## 参考
 
+* [NCCL、OpenMPI、Gloo对比](https://blog.csdn.net/taoqick/article/details/126449935)
 * [如何评价 LLaMA 模型泄露？](https://www.zhihu.com/question/587479829)
 * [Run LLMs locally](https://python.langchain.com/docs/guides/local_llms)
 * [本地部署开源大模型的完整教程：LangChain + Streamlit+ Llama](https://zhuanlan.zhihu.com/p/639565332)
 * [用 Ollama 轻松玩转本地大模型](https://sspai.com/post/85193)
 * [Mac 上 LLAMA2 大语言模型安装到使用](https://my.oschina.net/qyhstech/blog/11046186)
 * [用筆電就能跑 LLaMA 2! llama.cpp 教學](https://medium.com/@cch.chichieh/%E7%94%A8%E6%89%8B%E6%A9%9F%E5%B0%B1%E8%83%BD%E8%B7%91-llama-2-llama-cpp-%E6%95%99%E5%AD%B8-2451807f8ba5)
+* [Beyond LLaMA: The Power of Open LLMs](https://cameronrwolfe.substack.com/p/beyond-llama-the-power-of-open-llms)
 
 ## 更多
 
