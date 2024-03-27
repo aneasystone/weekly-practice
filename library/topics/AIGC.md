@@ -173,6 +173,7 @@
 * [ChatPDF](https://www.chatpdf.com/) - Chat with any PDF!
 * [ChatDOC](https://chatdoc.com/) - Chat with your documents
 * [StanGirard/quivr](https://github.com/StanGirard/quivr) - Dump all your files and chat with it using your Generative AI Second Brain using LLMs & Embeddings
+* [zylon-ai/private-gpt](https://github.com/zylon-ai/private-gpt) - Interact with your documents using the power of GPT, 100% privately, no data leaks
 * [PDF GPT](https://github.com/bhaskatripathi/pdfGPT) - allows you to chat with the contents of your PDF file by using GPT capabilities.
 * [GenAI Stack](https://github.com/docker/genai-stack) - Langchain + Docker + Neo4j
 * [FastGPT](https://fastgpt.run/) - 基于 LLM 大模型的 AI 知识库构建平台

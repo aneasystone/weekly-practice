@@ -219,9 +219,9 @@ Enter next prompt:
 
 ## 模型量化
 
-可以看到，就算是最小的 7B 模型，在一般的个人电脑上跑起来也是相当费劲。目前有很多方法在研究如何减少大模型的资源占用，例如 [llama.cpp](https://github.com/ggerganov/llama.cpp)，号称可以在树莓派上进行推理，最低只需要 4G 内存。
+可以看到，就算是最小的 7B 模型，在一般的个人电脑上跑起来也是相当费劲。目前有很多方法在研究如何减少大模型的资源占用，例如 [llama.cpp](https://github.com/ggerganov/llama.cpp)，号称可以在树莓派上进行推理，最低只需要 4G 内存。这种技术也被称为 **量化（Quantization）**，通过降低权重的精度，可以节省内存并加快推理速度，同时保持大部分模型的性能。常见的量化技术有：NF4、GPTQ 和 GGML 等，对量化原理感兴趣的同学可以参考 [Introduction to Weight Quantization](https://towardsdatascience.com/introduction-to-weight-quantization-2494701b9c0c) 这篇文章。
 
-### llama.cpp
+### 使用 `llama.cpp` 量化并运行 Llama 模型
 
 首先我们下载 `llama.cpp` 的源码：
 
@@ -244,10 +244,16 @@ $ make
 * `quantize` - 用于模型量化
 * `server` - 以服务器模式运行
 
+不过此时我们还无法直接运行推理程序，`llama.cpp` 不支持 PyTorch 格式的模型文件，我们需要将其转换为 [GGUF 格式](https://github.com/ggerganov/ggml/blob/master/docs/gguf.md)，在之前的版本中叫做 [GGML 格式](https://github.com/ggerganov/ggml)，它是由 Georgi Gerganov 创建的一种独特的二进制格式，用来分发语言模型文件，`GG` 就是他名字的缩写，同时他也是 `llama.cpp` 的作者。
+
+将模型转换成这种格式非常简单，在 `llama.cpp` 的源码里已经内置了 `convert.py` 脚本，直接执行该脚本即可：
+
 ```
 $ pip3 install -r requirements.txt
 $ python3 convert.py ../pyllama_data/7B
 ```
+
+转换完成后，模型目录下会多一个 `ggml-model-f16.gguf` 文件：
 
 ```
 $ ls -lh ../pyllama_data/7B 
@@ -258,9 +264,51 @@ total 52679296
 -rw-r--r--@ 1 aneasystone  staff   101B Mar  5  2023 params.json
 ```
 
+这个文件和之前的模型文件一样，还是很大，接着我们使用 `quantize` 程序对模型文件进行量化，量化的尺寸可以选择 8 Bit、4 Bit 或 2 Bit 等，不同的尺寸在效果和资源占用上存在差异。我们这里选择的是 `Q4_K_M`，这是一种既能保留大部分模型的性能又能节约内存的量化类型。运行命令如下：
+
 ```
 $ ./quantize ../pyllama_data/7B/ggml-model-f16.gguf ../pyllama_data/7B/ggml-model-Q4_K_M.gguf Q4_K_M
 ```
+
+除此之外，下面是该命令支持的所有量化类型：
+
+```
+Allowed quantization types:
+   2  or  Q4_0    :  3.56G, +0.2166 ppl @ LLaMA-v1-7B
+   3  or  Q4_1    :  3.90G, +0.1585 ppl @ LLaMA-v1-7B
+   8  or  Q5_0    :  4.33G, +0.0683 ppl @ LLaMA-v1-7B
+   9  or  Q5_1    :  4.70G, +0.0349 ppl @ LLaMA-v1-7B
+  19  or  IQ2_XXS :  2.06 bpw quantization
+  20  or  IQ2_XS  :  2.31 bpw quantization
+  28  or  IQ2_S   :  2.5  bpw quantization
+  29  or  IQ2_M   :  2.7  bpw quantization
+  24  or  IQ1_S   :  1.56 bpw quantization
+  10  or  Q2_K    :  2.63G, +0.6717 ppl @ LLaMA-v1-7B
+  21  or  Q2_K_S  :  2.16G, +9.0634 ppl @ LLaMA-v1-7B
+  23  or  IQ3_XXS :  3.06 bpw quantization
+  26  or  IQ3_S   :  3.44 bpw quantization
+  27  or  IQ3_M   :  3.66 bpw quantization mix
+  12  or  Q3_K    : alias for Q3_K_M
+  22  or  IQ3_XS  :  3.3 bpw quantization
+  11  or  Q3_K_S  :  2.75G, +0.5551 ppl @ LLaMA-v1-7B
+  12  or  Q3_K_M  :  3.07G, +0.2496 ppl @ LLaMA-v1-7B
+  13  or  Q3_K_L  :  3.35G, +0.1764 ppl @ LLaMA-v1-7B
+  25  or  IQ4_NL  :  4.50 bpw non-linear quantization
+  30  or  IQ4_XS  :  4.25 bpw non-linear quantization
+  15  or  Q4_K    : alias for Q4_K_M
+  14  or  Q4_K_S  :  3.59G, +0.0992 ppl @ LLaMA-v1-7B
+  15  or  Q4_K_M  :  3.80G, +0.0532 ppl @ LLaMA-v1-7B
+  17  or  Q5_K    : alias for Q5_K_M
+  16  or  Q5_K_S  :  4.33G, +0.0400 ppl @ LLaMA-v1-7B
+  17  or  Q5_K_M  :  4.45G, +0.0122 ppl @ LLaMA-v1-7B
+  18  or  Q6_K    :  5.15G, +0.0008 ppl @ LLaMA-v1-7B
+   7  or  Q8_0    :  6.70G, +0.0004 ppl @ LLaMA-v1-7B
+   1  or  F16     : 13.00G              @ 7B
+   0  or  F32     : 26.00G              @ 7B
+          COPY    : only copy tensors, no quantizing
+```
+
+这时，模型目录下应该会生成一个 `ggml-model-Q4_K_M.gguf` 文件：
 
 ```
 $ ls -lh ../pyllama_data/7B 
@@ -271,6 +319,10 @@ total 60674720
 -rw-r--r--@ 1 aneasystone  staff    13G Mar 24 15:33 ggml-model-f16.gguf
 -rw-r--r--@ 1 aneasystone  staff   101B Mar  5  2023 params.json
 ```
+
+> 为了节约时间，我们也可以从 [TheBloke](https://huggingface.co/TheBloke) 这里下载已经量化好的模型直接使用。
+
+相比于原文件，这个模型文件减小了很多，只有 3.8G，接下来就可以使用 `main` 对其进行推理了：
 
 ```
 $ ./main -m ../pyllama_data/7B/ggml-model-Q4_K_M.gguf -n 128 -p "I believe the meaning of life is"
@@ -383,7 +435,8 @@ llama_new_context_with_model:        CPU compute buffer size =     9.00 MiB
 llama_new_context_with_model: graph nodes  = 1060
 llama_new_context_with_model: graph splits = 2
 
-system_info: n_threads = 4 / 8 | AVX = 0 | AVX_VNNI = 0 | AVX2 = 0 | AVX512 = 0 | AVX512_VBMI = 0 | AVX512_VNNI = 0 | FMA = 0 | NEON = 1 | ARM_FMA = 1 | F16C = 0 | FP16_VA = 1 | WASM_SIMD = 0 | BLAS = 1 | SSE3 = 0 | SSSE3 = 0 | VSX = 0 | MATMUL_INT8 = 0 | 
+system_info: n_threads = 4 / 8 | AVX = 0 | AVX_VNNI = 0 | AVX2 = 0 | AVX512 = 0 | AVX512_VBMI = 0 | AVX512_VNNI = 0 | FMA = 0 | 
+NEON = 1 | ARM_FMA = 1 | F16C = 0 | FP16_VA = 1 | WASM_SIMD = 0 | BLAS = 1 | SSE3 = 0 | SSSE3 = 0 | VSX = 0 | MATMUL_INT8 = 0 | 
 sampling: 
         repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
         top_k = 40, tfs_z = 1.000, top_p = 0.950, min_p = 0.050, typical_p = 1.000, temp = 0.800
@@ -393,7 +446,6 @@ CFG -> Penalties -> top_k -> tfs_z -> typical_p -> top_p -> min_p -> temperature
 generate: n_ctx = 512, n_batch = 2048, n_predict = 128, n_keep = 1
 
 
-I believe the meaning of life is to serve others. As a doctor, I want to help those in need and make a difference in their lives.
 I believe the meaning of life is to serve others. As a doctor, I want to help those in need and make a difference in their lives. 
 I am honored to be able to do just that in my community.
 I love meeting new people and developing relationships with them. My goal is to provide high-quality care in a relaxed and comfortable environment. 
@@ -408,6 +460,36 @@ ggml_metal_free: deallocating
 Log end
 ```
 
+和之前比起来，推理速度有了质的提升，而且生成效果也还可以。我们也可以使用 `-i` 选项，以交互形式和大模型对话：
+
+```
+$ ./main -m ../pyllama_data/7B/ggml-model-Q4_K_M.gguf -n 128 --repeat_penalty 1.0 --color -i -r "User:" -f prompts/chat-with-bob.txt
+...
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to LLaMa.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+
+ Transcript of a dialog, where the User interacts with an Assistant named Bob. 
+ Bob is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
+
+User: Hello, Bob.
+Bob: Hello. How may I help you today?
+User: Please tell me the largest city in Europe.
+Bob: Sure. The largest city in Europe is Moscow, the capital of Russia.
+User: What;s your name?
+Bob: My name is Bob.
+User: What can you do?
+Bob: I am very good at writing.
+User: Tell me a joke
+Bob: Knock knock. Who's there?
+```
+
+其中 `-n` 表示限定生成的 token 数量；`--repeat_penalty` 有助于防止模型生成重复或单调的文本，较高的值会更严厉地惩罚重复，而较低的值则更宽容；`--color` 表示使用彩色输出区分提示词、用户输入和生成的文本；关于 `main` 程序的其他可用参数可以参考 [这篇文档](https://github.com/ggerganov/llama.cpp/blob/master/examples/main/README.md)。
+
+除了以命令行形式运行大模型，`llama.cpp` 也提供了服务器模式运行模型，我们运行 `server` 程序：
+
 ```
 $ ./server -m ../pyllama_data/7B/ggml-model-Q4_K_M.gguf -c 1024
 ...
@@ -418,15 +500,18 @@ $ ./server -m ../pyllama_data/7B/ggml-model-Q4_K_M.gguf -c 1024
 {"tid":"0x1fd44a080","timestamp":1711270965,"level":"INFO","function":"main","line":3524,"msg":"HTTP server listening","port":"8080","n_threads_http":"7","hostname":"127.0.0.1"}
 ```
 
-### pyllama
-
-https://github.com/juncongmoo/pyllama
+服务启动成功后，我们就能通过 `http://localhost:8080` 来访问它，下面是使用 `curl` 调用该接口的例子：
 
 ```
-$ pip3 install gptq
+$ curl --request POST \
+    --url http://localhost:8080/completion \
+    --header "Content-Type: application/json" \
+    --data '{"prompt": "Building a website can be done in 10 simple steps:","n_predict": 128}'
 ```
 
-### Ollama
+[这篇文档](https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md) 对服务器模式的其他接口和参数做了详细说明。
+
+### 使用 Ollama 运行 Llama 模型
 
 https://github.com/ollama/ollama
 
@@ -436,13 +521,7 @@ https://ollama.com/library
 
 https://python.langchain.com/docs/guides/local_llms
 
-### PrivateGPT
-
-https://docs.privategpt.dev/overview/welcome/introduction
-
-### GPT4All
-
-https://github.com/nomic-ai/gpt4all
+https://sspai.com/post/85193
 
 ## 模型微调
 
@@ -460,6 +539,14 @@ https://llama.meta.com/
 
 https://github.com/facebookresearch/llama-recipes/
 
+## 实现类似 ChatGPT 的聊天应用
+
+https://github.com/oobabooga/text-generation-webui
+
+https://github.com/alexrozanski/LlamaChat
+
+https://github.com/nomic-ai/gpt4all
+
 ## 参考
 
 * [NCCL、OpenMPI、Gloo对比](https://blog.csdn.net/taoqick/article/details/126449935)
@@ -472,15 +559,20 @@ https://github.com/facebookresearch/llama-recipes/
 * [Beyond LLaMA: The Power of Open LLMs](https://cameronrwolfe.substack.com/p/beyond-llama-the-power-of-open-llms)
 * [Efficiently Run Your Fine-Tuned LLM Locally Using Llama.cpp](https://medium.com/vendi-ai/efficiently-run-your-fine-tuned-llm-locally-using-llama-cpp-66e2a7c51300)
 * [How is LLaMa.cpp possible?](https://finbarr.ca/how-is-llama-cpp-possible/)
+* [Quantize Llama models with GGUF and llama.cpp](https://towardsdatascience.com/quantize-llama-models-with-ggml-and-llama-cpp-3612dfbcc172)
+* [Introduction to Weight Quantization](https://towardsdatascience.com/introduction-to-weight-quantization-2494701b9c0c)
 
 ## 更多
 
-### 其他大模型
+### 大模型部署
 
 * [本地运行“李开复”的零一万物 34B 大模型](https://soulteary.com/2023/11/26/locally-run-the-yi-34b-large-model-of-kai-fu-lee.html)
 * [手把手教大家从搭建环境开始实现本地部署ChatGLM2 6B 大模型](https://zhuanlan.zhihu.com/p/668773349)
 * [如何真正“不花一分钱”部署一个属于你的大模型](https://www.cnblogs.com/rude3knife/p/llm-free-deploy.html)
-
-### 其他推理框架
-
 * [本地化大模型部署：LocalGPT应用指南](https://www.51cto.com/article/778996.html)
+
+### 大模型量化
+
+* [juncongmoo/pyllama](https://github.com/juncongmoo/pyllama)
+* [qwopqwop200/GPTQ-for-LLaMa](https://github.com/qwopqwop200/GPTQ-for-LLaMa)
+* [AutoGPTQ](https://github.com/AutoGPTQ/AutoGPTQ)
