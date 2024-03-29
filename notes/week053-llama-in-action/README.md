@@ -1,8 +1,30 @@
 # WEEK053 - 开源大模型 Llama 实战
 
-去年 2 月 24 号，Facebook 的母公司 [Meta AI 推出 Llama 语言模型](https://ai.meta.com/blog/large-language-model-llama-meta-ai/)，该模型完全使用公开可用的数据集进行训练，拥有 70 亿到 650 亿个参数，包括 `7B`、`13B`、`30B` 和 `65B` 四个版本，可以进行本地部署和微调训练，非常适合个人和中小型企业。OpenAI 对于 GPT-2 之后的模型就不再开源，这个时候 Meta 推出的 Llama 补上了这个缺口，掀起了开源大模型的发展浪潮。
+去年 2 月 24 号，Facebook 的母公司 [Meta AI 推出 Llama 语言模型](https://ai.meta.com/blog/large-language-model-llama-meta-ai/)，该模型完全使用公开可用的数据集进行训练，拥有 70 亿到 650 亿个参数，包括 `7B`、`13B`、`30B` 和 `65B` 四个版本，可以进行本地部署和微调训练，非常适合个人和中小型企业。
 
-到了 7 月，Meta AI 联合 Microsoft [又推出了 Llama 2 模型](https://ai.meta.com/blog/llama-2/)，将预训练语料库的大小增加了 40%，将模型的上下文长度增加了一倍，并采用了分组查询注意力，参数范围从 70 亿到 700 亿，包括 `7B`、`13B` 和 `70B` 三个版本。同时还发布了 Llama 2 的微调版本 Llama 2-Chat，专门针对聊天场景进行了优化。
+值得注意的是，Llama 以非商业授权的形式发布，主要用于学术研究，[官方仓库](https://github.com/facebookresearch/llama) 里只给出了加载模型的示例代码，想要获取核心模型权重，还需要填写一份表单进行申请。尽管如此，Llama 模型的发布也具有划时代的意义，由于 OpenAI 对于 GPT-2 之后的模型就不再开源，这个时候 Meta 推出的 Llama 补上了这个缺口，掀起了开源大模型的发展浪潮。
+
+3 月 13 日，斯坦福大学发布了指令精调模型 [Alpaca 7B](https://github.com/tatsu-lab/stanford_alpaca)，它通过 OpenAI 的 `text-davinci-003` 模型生成了 5.2 万由指令数据，然后对 Llama 7B 进行精调而得。
+
+3 月 16 日，[Guanaco](https://guanaco-model.github.io/) 问世，它在 Alpaca 基础上补充了多语种语料和指令任务。
+
+3 月 23 日，中文小羊驼 [Chinese-Vicuna](https://github.com/Facico/Chinese-Vicuna) 面世，它基于 Llama 模型和 LoRA 方案，可按需投喂数据进行个性化指令精调。
+
+3 月 24 日，[Databricks 发布 Dolly 模型](https://www.databricks.com/blog/2023/03/24/hello-dolly-democratizing-magic-chatgpt-open-models.html)，它本质是 Alpaca 的开源克隆，基于 GPT-J-6B 精调，旨在证明精调指令数据比底座模型更为重要。
+
+3 月 25 日，来自华中师范大学和商汤的几位伙伴发起中文大语言模型开源项目 [骆驼（Luotuo）](https://github.com/LC1332/Luotuo-Chinese-LLM)，包含了一系列大语言模型、数据、管线和应用。
+
+3 月 28 日，[中文 LLaMA & Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) 大模型发布，包括了中文 Llama 模型和指令精调的 Alpaca 模型；中文 Llama 模型在原版 Llama 的基础上扩充了中文词表并使用了中文数据进行二次预训练，进一步提升了中文基础语义理解能力；同时，中文 Alpaca 模型进一步使用了中文指令数据进行精调，显著提升了模型对指令的理解和执行能力。
+
+3 月 30 日，来自加州大学伯克利分校、卡内基梅隆大学、斯坦福大学、加州大学圣地亚哥分校的几位计算机博士成立 [LMSYS 组织](https://lmsys.org/)，并发布了 [Vicuna-13B](https://lmsys.org/blog/2023-03-30-vicuna/)，它基于 ShareGPT 收集的对话对 Llama 进行精调，仅需 300 美元即完成训练，号称达到了 ChatGPT 90% 的能力。
+
+同月，智谱 AI 开源了 [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B) 模型，这是一个开源的、支持中英双语的对话语言模型，基于 GLM 架构，具有 62 亿参数，使用了和 ChatGPT 相似的技术，针对中文问答和对话进行了优化。
+
+6 月 7 日，上海 AI 实验室发布了开源多语言大型语言模型 [InternLM-7B](https://github.com/InternLM/InternLM)，中文名书生·浦语，在 1.6 万亿标记的大型语料库上进行预训练，采用多阶段渐进式的过程，然后进行了微调以与人类偏好对齐。
+
+6 月 15 日，百川智能发布了开源可商用的大规模预训练语言模型 [Baichuan-7B](https://github.com/baichuan-inc/Baichuan-7B)，基于 Transformer 结构，在大约 1.2 万亿 tokens 上训练的 70 亿参数模型，支持中英双语。
+
+开源大模型如雨后春笋般冒了出来，层出不穷，到了 7 月，Meta AI 联合 Microsoft [又推出了 Llama 2 模型](https://ai.meta.com/blog/llama-2/)，将预训练语料库的大小增加了 40%，将模型的上下文长度增加了一倍，并采用了分组查询注意力，参数范围从 70 亿到 700 亿，包括 `7B`、`13B` 和 `70B` 三个版本。同时还发布了 Llama 2 的微调版本 Llama 2-Chat，专门针对聊天场景进行了优化。
 
 ## 模型下载
 
@@ -219,9 +241,15 @@ Enter next prompt:
 
 ## 模型量化
 
-可以看到，就算是最小的 7B 模型，在一般的个人电脑上跑起来也是相当费劲。目前有很多方法在研究如何减少大模型的资源占用，例如 [llama.cpp](https://github.com/ggerganov/llama.cpp)，号称可以在树莓派上进行推理，最低只需要 4G 内存。这种技术也被称为 **量化（Quantization）**，通过降低权重的精度，可以节省内存并加快推理速度，同时保持大部分模型的性能。常见的量化技术有：NF4、GPTQ 和 GGML 等，对量化原理感兴趣的同学可以参考 [Introduction to Weight Quantization](https://towardsdatascience.com/introduction-to-weight-quantization-2494701b9c0c) 这篇文章。
+可以看到，就算是最小的 7B 模型，在一般的个人电脑上跑起来也是相当费劲。一般来说，基础模型都是 16 位浮点精度的，或称为 FP16 模型，也就是说，模型的每个参数都需要一个 16 位浮点数（2 字节）来保存，所以模型权重的体积和推理所需的显存大小约为模型参数量的两倍，比如运行 Llama 7B 大约需要 14GB 的显存。
+
+目前有很多方法在研究如何减少大模型的资源占用，例如 [llama.cpp](https://github.com/ggerganov/llama.cpp)，号称可以在树莓派上进行推理，最低只需要 4G 内存。这种技术也被称为 **量化（Quantization）**，通过降低权重的精度，可以很大程度上降低显存要求，加快推理速度，同时保持大部分模型的性能。以 4 Bit 量化为例，它将原本的 16 位浮点精度压缩为 4 位整数精度，使模型权重的体积减小到原本的 1/4，推理所需显存也大幅减少，意味着约 4GB 左右的显存就可以对 7B 模型进行推理。
+
+常见的量化技术有：NF4、GPTQ 和 GGML 等，对量化原理感兴趣的同学可以参考 [Introduction to Weight Quantization](https://towardsdatascience.com/introduction-to-weight-quantization-2494701b9c0c) 这篇文章。
 
 ### 使用 `llama.cpp` 量化并运行 Llama 模型
+
+想要在个人电脑上玩转大模型，首推 `llama.cpp` 项目，它使用 C/C++ 重写了 Llama 的推理代码，不仅避免了 PyTorch 引入的复杂依赖，而且对各类硬件和库提供了广泛的支持，比如支持纯 CPU 推理，支持 Apple Silicon 芯片，支持不同的操作系统，包括 Mac OS、Linux、Windows、Docker、FreeBSD 等，还支持大量的开源大模型，包括 Meta 的 Llama、Google 的 Gemma、Mistral AI 的 Mistral 系列、阿里的 Qwen 系列、零一万物的 Yi 系列等。
 
 首先我们下载 `llama.cpp` 的源码：
 
@@ -553,6 +581,7 @@ https://github.com/nomic-ai/gpt4all
 * [如何评价 LLaMA 模型泄露？](https://www.zhihu.com/question/587479829)
 * [Run LLMs locally](https://python.langchain.com/docs/guides/local_llms)
 * [本地部署开源大模型的完整教程：LangChain + Streamlit+ Llama](https://zhuanlan.zhihu.com/p/639565332)
+* [AI 时代，重识羊驼](https://sspai.com/post/79443)
 * [用 Ollama 轻松玩转本地大模型](https://sspai.com/post/85193)
 * [Mac 上 LLAMA2 大语言模型安装到使用](https://my.oschina.net/qyhstech/blog/11046186)
 * [用筆電就能跑 LLaMA 2! llama.cpp 教學](https://medium.com/@cch.chichieh/%E7%94%A8%E6%89%8B%E6%A9%9F%E5%B0%B1%E8%83%BD%E8%B7%91-llama-2-llama-cpp-%E6%95%99%E5%AD%B8-2451807f8ba5)
@@ -561,6 +590,7 @@ https://github.com/nomic-ai/gpt4all
 * [How is LLaMa.cpp possible?](https://finbarr.ca/how-is-llama-cpp-possible/)
 * [Quantize Llama models with GGUF and llama.cpp](https://towardsdatascience.com/quantize-llama-models-with-ggml-and-llama-cpp-3612dfbcc172)
 * [Introduction to Weight Quantization](https://towardsdatascience.com/introduction-to-weight-quantization-2494701b9c0c)
+* [每个大模型开发者都应该知道的数字](https://github.com/NascentCore/llm-numbers-cn)
 
 ## 更多
 
