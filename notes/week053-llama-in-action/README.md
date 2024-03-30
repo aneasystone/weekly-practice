@@ -1,10 +1,10 @@
 # WEEK053 - 开源大模型 Llama 实战
 
-去年 2 月 24 号，Facebook 的母公司 [Meta AI 推出 Llama 语言模型](https://ai.meta.com/blog/large-language-model-llama-meta-ai/)，该模型完全使用公开可用的数据集进行训练，拥有 70 亿到 650 亿个参数，包括 `7B`、`13B`、`30B` 和 `65B` 四个版本，可以进行本地部署和微调训练，非常适合个人和中小型企业。
+去年 2 月 24 日，Facebook 的母公司 [Meta AI 推出 Llama 语言模型](https://ai.meta.com/blog/large-language-model-llama-meta-ai/)，该模型完全使用公开可用的数据集进行训练，拥有 70 亿到 650 亿个参数，包括 `7B`、`13B`、`30B` 和 `65B` 四个版本，可以进行本地部署和微调训练，非常适合个人和中小型企业。
 
 值得注意的是，Llama 以非商业授权的形式发布，主要用于学术研究，[官方仓库](https://github.com/facebookresearch/llama) 里只给出了加载模型的示例代码，想要获取核心模型权重，还需要填写一份表单进行申请。尽管如此，Llama 模型的发布也具有划时代的意义，由于 OpenAI 对于 GPT-2 之后的模型就不再开源，这个时候 Meta 推出的 Llama 补上了这个缺口，掀起了开源大模型的发展浪潮。
 
-3 月 13 日，斯坦福大学发布了指令精调模型 [Alpaca 7B](https://github.com/tatsu-lab/stanford_alpaca)，它通过 OpenAI 的 `text-davinci-003` 模型生成了 5.2 万由指令数据，然后对 Llama 7B 进行精调而得。
+3 月 13 日，斯坦福大学发布了指令精调模型 [Alpaca 7B](https://github.com/tatsu-lab/stanford_alpaca)，它通过 OpenAI 的 `text-davinci-003` 模型生成了 5.2 万指令数据，然后对 Llama 7B 进行精调而得。
 
 3 月 16 日，[Guanaco](https://guanaco-model.github.io/) 问世，它在 Alpaca 基础上补充了多语种语料和指令任务。
 
@@ -514,7 +514,7 @@ User: Tell me a joke
 Bob: Knock knock. Who's there?
 ```
 
-其中 `-n` 表示限定生成的 token 数量；`--repeat_penalty` 有助于防止模型生成重复或单调的文本，较高的值会更严厉地惩罚重复，而较低的值则更宽容；`--color` 表示使用彩色输出区分提示词、用户输入和生成的文本；关于 `main` 程序的其他可用参数可以参考 [这篇文档](https://github.com/ggerganov/llama.cpp/blob/master/examples/main/README.md)。
+其中 `-n` 表示限定生成的 token 数量；`--repeat_penalty` 有助于防止模型生成重复或单调的文本，较高的值会更严厉地惩罚重复，而较低的值则更宽容；`--color` 表示使用彩色输出区分提示词、用户输入和生成的文本；`-r` 表示 `Reverse Prompts`，用于暂停文本生成并切换到交互模式，这里的 `-r "User:"` 表示轮到用户发言时停止，这有助于创建更具互动性和对话性的体验；`-f` 和 `-p` 一样，用于指定提示词，只不过提示词位于文件中；关于 `main` 程序的其他可用参数可以参考 [这篇文档](https://github.com/ggerganov/llama.cpp/blob/master/examples/main/README.md)。
 
 除了以命令行形式运行大模型，`llama.cpp` 也提供了服务器模式运行模型，我们运行 `server` 程序：
 
@@ -613,7 +613,86 @@ $ curl -X POST http://localhost:11434/api/generate -d '{
 
 因为 Ollama 是基于 `llama.cpp` 实现的，所以它也支持大量的开源大模型，比如 Gemma、Mistral、Qwen、Yi 这些基础大模型，还有 Code Llama、DeepSeek Coder、StarCoder 这些代码大模型，还有 LLaVA 和 BakLLaVA 这些多模态大模型，等等，可以在 [模型仓库](https://ollama.com/library) 页面找到所有 Ollama 支持的模型。
 
-https://github.com/ollama/ollama?tab=readme-ov-file#customize-a-model
+不仅如此，Ollama 还支持用户自己创建模型，正如在 Docker 中我们可以使用 `Dockerfile` 来构建自己的镜像，在 Ollama 中我们也可以使用 `Modelfile` 来构建自己的模型。细心的同学可能已经注意到，Ollama 的模型仓库里只有 Llama 2 的模型，并没有 Llama 模型，我们不妨自己来创建一个。
+
+Ollama 支持根据 GGUF 文件创建模型，首先我们新建一个 `Modelfile` 文件，在第一行使用 `FROM` 语句导入我们上面生成好的量化版模型文件：
+
+```
+FROM ../pyllama_data/7B/ggml-model-Q4_K_M.gguf
+```
+
+> 如果要导入其他类型的模型文件，比如 PyTorch 或 Safetensors 等，请参考文档 [Import a model](https://github.com/ollama/ollama/blob/main/docs/import.md)。
+
+然后使用 `ollama create` 命令创建模型：
+
+```
+$ ollama create llama -f Modelfile 
+transferring model data 
+creating model layer 
+using already created layer sha256:3672cbbdd94aaf2ec25e242afbba8691c44dacd1d627c478ad83c2248c80040c 
+writing layer sha256:5bbed095407083c16b0f36844732fd4b5aed0932420eb389f132b6e494376c32 
+writing manifest 
+success
+```
+
+很简单，是不是？这样我们就可以使用 Ollama 运行 Llama 模型了：
+
+```
+$ ollama run llama
+>>> The meaning of life is
+ to find your gift. The purpose of life is to give it away. ~Pablo Picasso
+```
+
+不过 Llama 模型是基础模型，不具有对话能力，我们可以使用提示词和停止词来模拟出对话效果（参考 `llama.cpp` 的交互模式）：
+
+```
+FROM ../pyllama_data/7B/ggml-model-Q4_K_M.gguf
+
+TEMPLATE """Transcript of a dialog, where the User interacts with an Assistant named Bob. 
+Bob is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
+
+User: Hello, Bob.
+Bob: Hello. How may I help you today?
+User: Please tell me the largest city in Europe.
+Bob: Sure. The largest city in Europe is Moscow, the capital of Russia.
+User: {{ .Prompt }}
+"""
+
+PARAMETER temperature 1
+PARAMETER num_ctx 4096
+PARAMETER num_predict 128
+PARAMETER repeat_penalty 1.0
+PARAMETER stop User:
+PARAMETER stop Transcript of a dialog
+```
+
+其中 `TEMPLATE` 关键字用于指定提示词，`PARAMETER` 关键字用于配置参数，这些参数和 `llama.cpp` 的参数非常类似，可以参考 [Ollama Model File](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)，其中 `PARAMETER stop` 用于设置停止词，这是模拟对话性体验的关键。
+
+然后重新创建模型并运行：
+
+```
+$ ollama create llama -f Modelfile 
+$ ollama run llama
+```
+
+这次我们就可以和它进行对话了：
+
+```
+>>> Hello
+Bob: Hello
+
+>>> What's your name?
+Bob: My name is Bob, and I am an artificial intelligent robot.
+
+>>> Tell me a joke.
+Bob: A: Knock knock.
+B: Who’s there?
+A: Tom.
+B: Tom who?
+A: I don’t know.
+
+>>> /bye
+```
 
 ## 实现类似 ChatGPT 的聊天应用
 
