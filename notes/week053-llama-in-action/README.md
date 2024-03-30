@@ -541,31 +541,79 @@ $ curl --request POST \
 
 ### 使用 Ollama 运行 Llama 模型
 
-https://github.com/ollama/ollama
+上一节我们学习了如何使用 `llama.cpp` 量化和运行 Llama 大模型，整个过程虽然不复杂，但是对于普通用户来说，无论是获取模型文件，还是编译和构建源码，抑或是以命令行形式运行推理程序，还是有一定门槛的。所以，很长一段时间里，在本地运行大模型都只局限于少数的极客和研究人员，直到 [Ollama](https://ollama.com) 项目的问世，才真正将大模型带入千万用户的个人电脑，让更多的普通小白也可以方便地在自己电脑上玩转大模型了。
 
-https://ollama.com/blog/run-code-llama-locally
+Ollama 基于 `llama.cpp` 实现，它的安装非常简单，直接进入 [官方下载页面](https://ollama.com/download)，找到适合自己系统的版本下载运行即可，支持 Mac OS、Linux 和 Windows 系统。
 
-https://ollama.com/library
+打开终端，输入 `ollama --version` 命令，如果能成功查询到版本号，表示 Ollama 已经安装好了：
 
-https://python.langchain.com/docs/guides/local_llms
+```
+$ ollama --version
+ollama version is 0.1.29
+```
 
-https://sspai.com/post/85193
+接下来，我们就可以用 `ollama pull` 命令来下载模型文件：
 
-## 模型微调
+```
+$ ollama pull llama2
+```
 
-Meta 最初发布的 Llama 模型并没有进行指令微调，于是斯坦福马上公布了 Alpaca 模型，该模型是由 Llama 7B 利用 52k 的指令微调出来的。
+熟悉 Docker 的同学应该对这个命令感到很亲切，Ollama 参考了 Docker 的设计理念，类似于 `docker pull` 可以从镜像仓库下载镜像，`ollama pull` 可以从 [模型仓库](https://ollama.com/library) 下载模型。在不指定 tag 的情况下，我们下载的是 `llama2:latest` 模型，从 [模型详情页](https://ollama.com/library/llama2:latest) 可以看出这是 Llama 2 7B 模型的 4 Bit 量化版本（实际上是 Llama 2-Chat 模型，Llama 2 模型对应的 tag 是 `llama2:text`）：
 
-https://github.com/tatsu-lab/stanford_alpaca
+![](./images/llama2-latest.png)
 
-https://github.com/tloen/alpaca-lora
+接下来使用 `ollama run` 命令运行大模型：
 
-https://github.com/ymcui/Chinese-LLaMA-Alpaca
+```
+$ ollama run llama2
+>>> 
+```
 
-https://github.com/LC1332/Luotuo-Chinese-LLM
+这样就可以和大模型进行对话了：
 
-https://llama.meta.com/
+```
+>>> Hello
+Hello! It's nice to meet you. Is there something I can help you with or would you like to chat?
 
-https://github.com/facebookresearch/llama-recipes/
+>>> Who are you?
+Hello! I am LLaMA, an AI assistant developed by Meta AI that can understand and respond to human input 
+in a conversational manner. I'm here to help you with any questions 
+or topics you'd like to discuss. Is there something specific you'd like to talk about?
+
+>>> 用中文回答
+你好！我是LLaMA，一个由Meta AI开发的人工智能助手。我可以理解和回应人类输入的语言，让您与我互动。您有什么问题或话题想聊？
+
+>>> /bye
+```
+
+此外，Ollama 也支持以服务器模式启动：
+
+```
+$ ollama serve
+```
+
+这样我们就可以通过接口形式来调用：
+
+```
+$ curl -X POST http://localhost:11434/api/generate -d '{
+  "model": "llama2",
+  "prompt":"Why is the sky blue?"
+ }'
+```
+
+更多关于 Ollama 的接口细节，可以参考官方的 [API 文档](https://github.com/ollama/ollama/blob/main/docs/api.md)。
+
+除了 `ollama pull` 和 `ollama run`，Ollama 还支持一些其他的命令选项，比如：
+
+* `ollama list` - 显示所有本地已安装的模型
+* `ollama rm` - 删除已安装的模型
+* `ollama show` - 显示模型的详细信息
+* `ollama create` - 通过 `Modelfile` 创建模型文件
+* `ollama push` - 将创建的模型文件推送到远程仓库
+
+因为 Ollama 是基于 `llama.cpp` 实现的，所以它也支持大量的开源大模型，比如 Gemma、Mistral、Qwen、Yi 这些基础大模型，还有 Code Llama、DeepSeek Coder、StarCoder 这些代码大模型，还有 LLaVA 和 BakLLaVA 这些多模态大模型，等等，可以在 [模型仓库](https://ollama.com/library) 页面找到所有 Ollama 支持的模型。
+
+https://github.com/ollama/ollama?tab=readme-ov-file#customize-a-model
 
 ## 实现类似 ChatGPT 的聊天应用
 
@@ -606,3 +654,14 @@ https://github.com/nomic-ai/gpt4all
 * [juncongmoo/pyllama](https://github.com/juncongmoo/pyllama)
 * [qwopqwop200/GPTQ-for-LLaMa](https://github.com/qwopqwop200/GPTQ-for-LLaMa)
 * [AutoGPTQ](https://github.com/AutoGPTQ/AutoGPTQ)
+
+### 大模型微调
+
+Meta 最初发布的 Llama 模型并没有进行指令微调，于是斯坦福马上公布了 Alpaca 模型，该模型是由 Llama 7B 利用 52k 的指令微调出来的。
+
+* [Stanford Alpaca: An Instruction-following LLaMA Model](https://github.com/tatsu-lab/stanford_alpaca)
+* [Alpaca-LoRA](https://github.com/tloen/alpaca-lora)
+* [中文 LLaMA & Alpaca 大语言模型](https://github.com/ymcui/Chinese-LLaMA-Alpaca)
+* [Llama Recipes: Examples to get started using the Llama models from Meta](https://github.com/facebookresearch/llama-recipes/)
+* [Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters](https://github.com/OpenGVLab/LLaMA-Adapter)
+* [从头预训练 + SFT 一个小参数量的中文 LLaMa2](https://github.com/DLLXW/baby-llama2-chinese)
