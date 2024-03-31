@@ -696,11 +696,59 @@ A: I don’t know.
 
 ## 实现类似 ChatGPT 的聊天应用
 
-https://github.com/oobabooga/text-generation-webui
+至此，我们已经可以熟练地在本地部署和运行 Llama 模型了，为了让我们和语言模型之间的交互更加友好，我们还可以借助一些开源项目打造一款类似 ChatGPT 的聊天应用。无论是 `llama.cpp` 还是 Ollama，周边生态都非常丰富，社区开源了大量的网页、桌面、终端等交互界面以及诸多的插件和拓展，参考 Ollama 的 [Community Integrations](https://github.com/ollama/ollama?tab=readme-ov-file#community-integrations)。
 
-https://github.com/alexrozanski/LlamaChat
+下面列举一些比较有名的 Web UI：
 
-https://github.com/nomic-ai/gpt4all
+* [Open WebUI](https://github.com/open-webui/open-webui)
+* [Text generation web UI](https://github.com/oobabooga/text-generation-webui)
+* [Jan](https://github.com/janhq/jan)
+* [GPT4All](https://github.com/nomic-ai/gpt4all)
+* [LibreChat](https://github.com/danny-avila/LibreChat)
+
+接下来我们就基于 Open WebUI 来实现一个本地聊天应用。Open WebUI 是一个可扩展、功能丰富且用户友好的自托管 WebUI，旨在完全离线运行。它的原名叫 Ollama WebUI，原本只是对 Ollama 的，后来在社区的推动下，发展成了一款通用的聊天应用 WebUI，支持各种 LLM 运行器，包括 Ollama 以及与 OpenAI 兼容的接口。
+
+Open WebUI 具备大量的功能特性，包括：
+
+* 直观的界面：接近 ChatGPT 的界面，提供用户友好的体验；
+* 响应式的设计：同时兼容桌面和移动端设备；
+* 快速的响应：让用户享受快速且响应迅速的性能；
+* 轻松的安装：支持使用 Docker 或 Kubernetes 进行安装；
+* 代码语法高亮：增强代码的可读性；
+* 全面支持 Markdown 和 LaTeX：实现更丰富的交互，提升用户的体验；
+* 本地 RAG 集成：支持在聊天中对文档进行问答；
+* 网页浏览功能：支持在聊天中对网页进行问答；
+* 预设的提示词：聊天时输入 `/` 命令即可立即访问预设的提示词；
+* RLHF 注释：通过给消息点赞或点踩，为 RLHF 创建数据集，便于使用您的消息来训练或微调模型；
+* 对话标记：轻松分类和定位特定的聊天，以便快速参考和高效数据收集；
+* 模型管理：支持在页面上下载或删除模型；支持导入 GGUF 文件，轻松创建 Ollama 模型或 Modelfile 文件；
+* 多模型切换：支持多个模型之间的切换；
+* 多模型对话：同时与多个模型进行交流，通过比较获得最佳回应；
+* 多模态：支持多模态大模型，可以在聊天中使用图片；
+* 聊天记录：轻松访问和管理对话历史，支持导入和导出聊天数据；
+* 语音输入支持：通过语音互动与模型进行交流，享受直接与模型对话的便利；
+* 图像生成集成：无缝地使用 AUTOMATIC1111 API 和 DALL-E 集成图像生成功能，为聊天体验增添动态视觉内容；
+* OpenAI API 集成：轻松地将与 Ollama 模型兼容的 OpenAI API 集成到对话中；
+* 国际化（i18n）：支持多种不同的语言；
+
+运行如下的 Docker 命令即可安装 Open WebUI：
+
+```
+$ docker run -d -p 3000:8080 \
+    --add-host=host.docker.internal:host-gateway \
+    -v open-webui:/app/backend/data \
+    --name open-webui \
+    --restart always \
+    ghcr.io/open-webui/open-webui:main
+```
+
+安装成功后，浏览器访问 `http://localhost:3000/` 即可，首次访问需要注册一个账号：
+
+![](./images/open-webui-login.png)
+
+注册账号并登录后，就可以看到我们熟悉的聊天界面了：
+
+![](./images/open-webui.png)
 
 ## 参考
 
