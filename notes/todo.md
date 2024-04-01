@@ -14,18 +14,10 @@
 
 ### RAG
 
-* [高级 RAG 技术：图解概览](https://baoyu.io/translations/rag/advanced-rag-techniques-an-illustrated-overview)
-* [Advanced RAG Techniques: an Illustrated Overview](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6)
-* [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
-* [Query Transformations](https://blog.langchain.dev/query-transformations/)
 * [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
-* [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
-* [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
-* [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 * [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
-* [Multi-modal RAG on slide decks](https://blog.langchain.dev/multi-modal-rag-template/)
-* [Self-Reflective RAG with LangGraph](https://blog.langchain.dev/agentic-rag-with-langgraph/)
 * [12个 RAG 痛点和解决建议 —— 解决检索增强生成的核心挑战](https://mp.weixin.qq.com/s/y3igfA03EqC60B1LTTb55w)
+* [RAG 系统开发中的 12 大痛点及解决方案](https://baoyu.io/translations/rag/12-rag-pain-points-and-proposed-solutions)
 
 ### Structured Extraction
 
