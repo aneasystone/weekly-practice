@@ -643,6 +643,7 @@ DB-GPT 还支持插件功能，你可以从 [DB-GPT-Plugins](https://github.com/
 
 * [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
 * [Constructing knowledge graphs from text using OpenAI functions: Leveraging knowledge graphs to power LangChain Applications](https://blog.langchain.dev/constructing-knowledge-graphs-from-text-using-openai-functions/)
+* [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
 
 #### Elasticsearch
 
@@ -664,6 +665,7 @@ DB-GPT 还支持插件功能，你可以从 [DB-GPT-Plugins](https://github.com/
 * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
 * [Semi-structured and Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_and_multi_modal_RAG.ipynb)
 * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
+* [Multi-modal RAG on slide decks](https://blog.langchain.dev/multi-modal-rag-template/)
 
 ### 学习 LCEL
 

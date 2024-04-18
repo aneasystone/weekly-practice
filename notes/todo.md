@@ -12,13 +12,6 @@
 * [AGI 通用知识模型和认知架构：打造一个能够思考、学习和创造的人工智能的关键所在](https://mp.weixin.qq.com/s/9opOMPzugyPCklVS9k21XQ)
 * [The History of Open-Source LLMs: Better Base Models (Part Two)](https://cameronrwolfe.substack.com/p/the-history-of-open-source-llms-better)
 
-### RAG
-
-* [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
-* [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
-* [12个 RAG 痛点和解决建议 —— 解决检索增强生成的核心挑战](https://mp.weixin.qq.com/s/y3igfA03EqC60B1LTTb55w)
-* [RAG 系统开发中的 12 大痛点及解决方案](https://baoyu.io/translations/rag/12-rag-pain-points-and-proposed-solutions)
-
 ### Structured Extraction
 
 * [Instructor (openai_function_call)](https://jxnl.github.io/instructor/)

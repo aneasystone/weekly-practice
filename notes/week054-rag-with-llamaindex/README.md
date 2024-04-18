@@ -113,16 +113,90 @@ Wenqi Glantz 在他的博客 [12 RAG Pain Points and Proposed Solutions](https:/
 
 ## LlamaIndex 实战
 
-https://docs.llamaindex.ai/en/stable/
+通过上面的学习，我们了解了 RAG 的基本原理和发展历史，以及开发 RAG 系统时可能遇到的一些问题。这一节我们将继续学习 [LlamaIndex](https://github.com/run-llama/llama_index) 框架，对实现 RAG 系统中涉及的技术细节进行实战。
 
-* [LLM 之 RAG 理论](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=Mzg3NDIyMzI0Mw==&action=getalbum&album_id=3377843493502664707)
-* [LLM 之 RAG 实战](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=Mzg3NDIyMzI0Mw==&action=getalbum&album_id=3377833073308024836)
+### LlamaIndex 快速入门
+
+LlamaIndex 是一个由 [Jerry Liu](https://jerryjliu.github.io/) 创建的 Python 库，用于开发基于大模型的应用程序，类似于 LangChain，但它更偏向于 RAG 系统的开发。使用 LlamaIndex，开发人员可以很方便地摄取、结构化和访问私有或领域特定数据，以便将这些数据安全可靠地注入大模型中，从而实现更准确的文本生成。
+
+正如 LlamaIndex 的名字所暗示的，**索引（Index）** 是 RAG 系统中的核心概念，它是大模型和用户数据之间的桥梁，无论是数据库类的结构化数据，还是文档类的非结构化数据，抑或是程序类的 API 数据，都是通过索引来查询的，查询出来的内容作为上下文和用户的问题一起发送给大模型，得到响应：
+
+![](./images/basic-rag.png)
+
+LlamaIndex 将 RAG 分为五个关键阶段：
+
+* **加载（Loading）**：[LlamaHub](https://llamahub.ai/) 提供了数百个的加载器用于导入各种用户数据，无论是文本文件、PDF、另一个网站、数据库还是 API；
+* **索引（Indexing）**：可以是 Embedding 向量，也可以是其他元数据策略，方便我们准确地找到上下文相关的数据；
+* **存储（Storing）**：对索引持久化存储，以免重复索引；
+* **查询（Querying）**：对给定的索引策略进行查询，包括子查询、多步查询和混合策略；
+* **评估（Evaluation）**：提供客观的度量标准，用于衡量查询响应的准确性、忠实度和速度；
+
+可以看到这些阶段几乎都和索引有关，为了对这些阶段有个更感性的认识，我们参考 LlamaIndex 官方文档中的 [Starter Tutorial](https://docs.llamaindex.ai/en/stable/getting_started/starter_example/)，快速实现一个简单的 RAG 程序。
+
+首先，我们使用 pip 安装 LlamaIndex：
+
+```
+$ pip3 install llama-index
+```
+
+通过 LlamaIndex 提供的高级 API，初学者只需 5 行代码即可实现一个简单的 RAG 程序：
+
+```
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+documents = SimpleDirectoryReader("data").load_data()
+index = VectorStoreIndex.from_documents(documents)
+query_engine = index.as_query_engine()
+response = query_engine.query("What did the author do growing up?")
+```
+
+示例中使用了保罗·格雷厄姆的文章 [What I Worked On](http://paulgraham.com/worked.html) 作为测试数据，我们将其下载并保存到 data 目录，运行程序，得到下面的输出：
+
+```
+The author worked on writing and programming before college.
+```
+
+上面的代码中展示了 `加载` -> `索引` -> `查询` 这几个阶段，其中有几个概念需要特别说明下：
+
+* [Documents](https://docs.llamaindex.ai/en/stable/module_guides/loading/documents_and_nodes/)：对应任何数据源的容器，比如 PDF 文档，API 接口的输出，或从数据库中检索数据；我们可以手动构造 Document 对象，也可以使用所谓的 [数据连接器（Data Connectors）](https://docs.llamaindex.ai/en/stable/module_guides/loading/connector/) 来加载数据；由于加载的数据可能很大，Document 通常不直接使用，在 LlamaIndex 中，会将 Document 切分成很多很多的小块，这些文档的分块被称为 `Node`，它是 LlamaIndex 中数据的原子单位；Node 中包含一些元数据，比如属于哪个文档，和其他 Node 的关联等；
+
+
+* [Indexes](https://docs.llamaindex.ai/en/stable/module_guides/indexing/)
+* [Embeddings](https://docs.llamaindex.ai/en/stable/module_guides/models/embeddings/)
+* [Retrievers](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/)
+* [Routers](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/)
+* [Node Postprocessors](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/)
+* [Response Synthesizers](https://docs.llamaindex.ai/en/stable/module_guides/querying/response_synthesizers/)
+* [Query Engines](https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/)
+* [Chat Engines](https://docs.llamaindex.ai/en/stable/module_guides/deploying/chat_engines/)
+* [Agents](https://docs.llamaindex.ai/en/stable/module_guides/deploying/agents/)。
+
+### 索引优化
+
+* [Semantic Chunker](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
+
+### 重排序
+
+### 查询转换
+
+* [Query Transform Cookbook](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
+* [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
+* [Query Transformations](https://blog.langchain.dev/query-transformations/)
+
+#### HyDE
+
+* [HyDE Query Transform](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/)
+
+#### Agentic RAG
+
+* [Agentic RAG With LlamaIndex](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6)
 
 ## RAG 技巧
 
 * [从 RAG 到 Self-RAG —— LLM 的知识增强](https://zhuanlan.zhihu.com/p/661465330)
 * [Self-Reflective RAG with LangGraph](https://blog.langchain.dev/agentic-rag-with-langgraph/)
-* [Query Transformations](https://blog.langchain.dev/query-transformations/)
+* [Building (and Breaking) WebLangChain](https://blog.langchain.dev/weblangchain/)
+* [LLM 之 RAG 理论](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=Mzg3NDIyMzI0Mw==&action=getalbum&album_id=3377843493502664707)
+* [LLM 之 RAG 实战](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=Mzg3NDIyMzI0Mw==&action=getalbum&album_id=3377833073308024836)
 
 ## 参考
 
@@ -134,9 +208,4 @@ https://docs.llamaindex.ai/en/stable/
 * [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
-
-## 更多
-
-### 多模态 RAG
-
-* [Multi-modal RAG on slide decks](https://blog.langchain.dev/multi-modal-rag-template/)
+* [LlamaIndex Documents](https://docs.llamaindex.ai/en/stable/)
