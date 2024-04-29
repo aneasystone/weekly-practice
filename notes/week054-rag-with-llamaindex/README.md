@@ -11,7 +11,9 @@ RAG 之所以如此流行，原因有几个：
 3. 它提供了很好的可观察性和可检查性，可以对用户输入、检索的上下文和模型生成的回复进行比对，而微调过程是不透明的；
 4. 它更容易维护，对知识库持续更新的过程比较简单，而不需要专业人员；
 
-我们在之前的笔记中已经学习过不少和 RAG 相关的内容，比如在 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中，我们学习了如何打造一个针对本地文档的问答系统，在 [week047-structured-data-qa](../week047-structured-data-qa/README.md) 这篇笔记中，我们继续探索了如何针对结构化的数据进行问答。不过这些内容都比较简单，只是对 RAG 原理的入门级讲解，在这篇笔记中我们将学习 RAG 的高级技巧，并使用 LlamaIndex 对各个技巧一一进行实战。
+我们在之前的笔记中已经学习过不少和 RAG 相关的内容，比如在 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中，我们学习了如何打造一个针对本地文档的问答系统，在 [week047-structured-data-qa](../week047-structured-data-qa/README.md) 这篇笔记中，我们继续探索了如何针对结构化的数据进行问答。不过这些内容都比较简单，只是对 RAG 原理的入门级讲解，我打算针对 RAG 写一个系列博客，对 RAG 的高级技巧进行深入学习，并使用 LlamaIndex 对各个技巧一一进行实战。
+
+这是这个系列的第一篇，对 RAG 和 LlamaIndex 做一个概述性的讲解。
 
 ## RAG 概述
 
@@ -125,7 +127,7 @@ LlamaIndex 是一个由 [Jerry Liu](https://jerryjliu.github.io/) 创建的 Pyth
 
 LlamaIndex 将 RAG 分为五个关键阶段：
 
-* **加载（Loading）**：[LlamaHub](https://llamahub.ai/) 提供了数百个的加载器用于导入各种用户数据，无论是文本文件、PDF、另一个网站、数据库还是 API；
+* **加载（Loading）**：用于导入各种用户数据，无论是文本文件、PDF、另一个网站、数据库还是 API；[LlamaHub](https://llamahub.ai/) 提供了数百个的加载器；
 * **索引（Indexing）**：可以是 Embedding 向量，也可以是其他元数据策略，方便我们准确地找到上下文相关的数据；
 * **存储（Storing）**：对索引持久化存储，以免重复索引；
 * **查询（Querying）**：对给定的索引策略进行查询，包括子查询、多步查询和混合策略；
@@ -180,11 +182,34 @@ The author worked on writing and programming before college.
 
 ## 高级 RAG 技巧
 
-基于 LlamaIndex，我们只用了 5 行代码就实现了一个简单的 RAG 系统，可以看出，这是朴素 RAG 的基本思路。这一节我们将继续学习高级 RAG 技巧，对实现 RAG 系统中涉及的技术细节进行实战。
+基于 LlamaIndex，我们只用了 5 行代码就实现了一个简单的 RAG 系统，可以看出，这是朴素 RAG 的基本思路。这一节我们将继续学习高级 RAG 技巧，我们暂时不讨论过多的技术细节，旨在带大家对 RAG 的技术全貌有一个大致的了解。
 
-IVAN ILIN 在他的 [Advanced RAG Techniques: an Illustrated Overview](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6) 这篇博客中对高级 RAG 做了一个全面的综述，下图展示了涉及的核心步骤和算法：
+下图展示了 高级 RAG 涉及的核心步骤和算法：
 
-![](./images/advanced-rag.webp)
+![](./images/advanced-rag.jpeg)
+
+### 查询转换（Query Transformations）
+
+RAG 系统面临的第一个问题就是如何处理用户输入，我们知道，RAG 的基本思路是根据用户输入检索出最相关的内容，但是用户输入是不可控的，可能存在冗余、模糊或歧义等情况，如果直接拿着用户输入去检索，效果可能不理想。
+
+**查询转换（Query Transformations）** 是一组旨在修改用户输入以改善检索的方法，使检索对用户输入的变化具有鲁棒性。
+
+* [Query Transformations | LlamaIndex](https://docs.llamaindex.ai/en/stable/optimizing/advanced_retrieval/query_transformations/)
+    * [Query Transform Cookbook](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
+    * [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
+    * [HyDE Query Transform](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/)
+    * [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/)
+* [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
+
+#### 查询扩展（Query Expansion）
+
+假设你的知识库中包含了各个公司的基本信息，考虑这样的用户输入：*微软和苹果哪一个成立时间更早？* 要获得更好的检索效果，我们可以将其拆解成两个用户输入：*微软的成立时间* 和 *苹果的成立时间*，这种将用户输入分解为多个子问题的方法被称为 **查询扩展（Query Expansion）**。
+
+查询扩展有多种不同的实现，比如：
+
+* [`MultiQueryRetriever`](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever/) 是 LangChain 中的一个类，可根据用户输入生成子问题，然后依次进行检索，最后将检索到的文档合并返回；
+* [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是实现 RAG Fusion 的代码示例；
+* [回退提示（Step-back prompting）](https://arxiv.org/abs/2310.06117) 是另一种查询扩展的方法，它基于用户的原始问题生成一个回退问题，回退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以回退为一个关于该问题背后的物理原理的问题，然后对原始问题和回退问题进行检索；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于回退提示实现 RAG 问答的一个示例；
 
 ### 文本分块
 
@@ -208,15 +233,6 @@ IVAN ILIN 在他的 [Advanced RAG Techniques: an Illustrated Overview](https://p
 
 * [Node Postprocessor Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)
     * [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/)
-
-### 查询转换
-
-* [Query Transformations | LlamaIndex](https://docs.llamaindex.ai/en/stable/optimizing/advanced_retrieval/query_transformations/)
-    * [Query Transform Cookbook](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
-    * [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
-    * [HyDE Query Transform](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/)
-    * [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/)
-* [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
 
 ### 查询路由
 
