@@ -199,7 +199,6 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
     * [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
     * [HyDE Query Transform](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/)
     * [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/)
-* [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
 
 #### 查询扩展（Query Expansion）
 
@@ -210,6 +209,19 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 * [`MultiQueryRetriever`](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever/) 是 LangChain 中的一个类，可根据用户输入生成子问题，然后依次进行检索，最后将检索到的文档合并返回；
 * [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是实现 RAG Fusion 的代码示例；
 * [回退提示（Step-back prompting）](https://arxiv.org/abs/2310.06117) 是另一种查询扩展的方法，它基于用户的原始问题生成一个回退问题，回退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以回退为一个关于该问题背后的物理原理的问题，然后对原始问题和回退问题进行检索；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于回退提示实现 RAG 问答的一个示例；
+
+#### 查询重写（Query Rewriting）
+
+用户输入可能表达不清晰或措辞不当，为解决这个问题，Xinbei Ma 等人提出了一种 **Rewrite-Retrieve-Read** 的方法，对用户的问题进行改写，以改善检索效果，[这里是论文地址](https://arxiv.org/abs/2305.14283)，可以 [参考 LangChain 的实现](https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb)。
+
+#### 查询压缩（Query Compression）
+
+在一些 RAG 应用程序中，用户可能是以聊天对话的形式与系统交互的，为了正确回答用户的问题，我们需要考虑完整的对话上下文，为了解决这个问题，可以将聊天历史压缩成最终问题以便检索，可以 [参考这个 Prompt](https://smith.langchain.com/hub/langchain-ai/weblangchain-search-query)。
+
+### 查询路由（Routing）
+
+* [Routers | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/)
+    * [Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RouterQueryEngine/)
 
 ### 文本分块
 
@@ -234,11 +246,6 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 * [Node Postprocessor Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)
     * [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/)
 
-### 查询路由
-
-* [Routers | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/)
-    * [Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RouterQueryEngine/)
-
 ### Agentic RAG
 
 * [Agentic RAG With LlamaIndex](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6)
@@ -253,7 +260,9 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 * [Advanced RAG Techniques: an Illustrated Overview](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6) - [中文翻译](https://baoyu.io/translations/rag/advanced-rag-techniques-an-illustrated-overview)
 * [12 RAG Pain Points and Proposed Solutions](https://towardsdatascience.com/12-rag-pain-points-and-proposed-solutions-43709939a28c) - [中文翻译](https://baoyu.io/translations/rag/12-rag-pain-points-and-proposed-solutions)
 * [Challenges In Adopting Retrieval-Augmented Generation Solutions](https://cobusgreyling.medium.com/challenges-in-adopting-retrieval-augmented-generation-solutions-eb30c07db398)
-* [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
+* [Deconstructing RAG | LangChain](https://blog.langchain.dev/deconstructing-rag/)
+* [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
+* [Applying OpenAI's RAG Strategies | LangChain](https://blog.langchain.dev/applying-openai-rag/)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
 * [LlamaIndex Documents](https://docs.llamaindex.ai/en/stable/)
