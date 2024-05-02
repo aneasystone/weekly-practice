@@ -184,9 +184,11 @@ The author worked on writing and programming before college.
 
 基于 LlamaIndex，我们只用了 5 行代码就实现了一个简单的 RAG 系统，可以看出，这是朴素 RAG 的基本思路。这一节我们将继续学习高级 RAG 技巧，我们暂时不讨论过多的技术细节，旨在带大家对 RAG 的技术全貌有一个大致的了解。
 
-下图展示了 高级 RAG 涉及的核心步骤和算法：
+下图展示了高级 RAG 涉及的核心步骤和算法：
 
 ![](./images/advanced-rag.jpeg)
+
+LangChain 的 [这篇博客](https://blog.langchain.dev/deconstructing-rag/) 对这些步骤进行详细的讨论。
 
 ### 查询转换（Query Transformations）
 
@@ -220,8 +222,31 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 ### 查询路由（Routing）
 
+在经过第一步查询转换后，我们已经将用户问题转换成易于检索的形式，接下来我们就要开始检索了。但是从哪里检索呢？有很多 RAG 示例都是从向量数据库中检索，但是在真正的生产环境中通常情况会比这复杂的多，数据可能存储在多个不同的库中，比如，向量数据库，关系型数据库，图数据库，甚至是 API 接口。这时我们需要对传入的查询进行动态路由，根据不同的用户问题检索不同的库。
+
 * [Routers | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/)
     * [Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RouterQueryEngine/)
+* [Dynamically route logic based on input](https://python.langchain.com/docs/expression_language/how_to/routing/)
+
+### 查询构造（Query Construction）
+
+我们面临的第三个问题是：使用什么语法来检索数据？在上一步中，我们知道数据可能存储在关系型数据库或图数据库中，要从这些库中检索数据，必须使用特定的语法，而用户问题通常都是用自然语言提出的，所以我们需要将自然语言转换为特定的查询语法。
+
+* [Query Construction](https://blog.langchain.dev/query-construction/)
+
+#### Text-to-SQL
+
+* [Q&A over SQL + CSV](https://python.langchain.com/docs/use_cases/sql/)
+* [Incoporating semantic similarity in tabular databases](https://github.com/langchain-ai/langchain/blob/master/cookbook/retrieval_in_sql.ipynb)
+
+#### Text-to-Cypher
+
+* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
+
+#### Text-to-metadata filters
+
+* [Self-querying](https://python.langchain.com/docs/modules/data_connection/retrievers/self_query/)
+* [Filtering by metadata | Chroma](https://docs.trychroma.com/usage-guide#filtering-by-metadata)
 
 ### 文本分块
 
