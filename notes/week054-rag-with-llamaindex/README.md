@@ -236,14 +236,25 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 #### Text-to-SQL
 
+将自然语言翻译成 SQL 是一个非常热门的话题，已经有不少人对此展开了研究。通过向 LLM 提供一个自然语言问题以及相关的数据库表信息，可以轻松地完成文本到 SQL 的转换。
+
 * [Q&A over SQL + CSV](https://python.langchain.com/docs/use_cases/sql/)
+
+在关系型数据库中，混合类型数据存储变得越来越普遍，这种数据被称为 **半结构化数据（semi-structured data）**，也就是说既有结构化数据，也有非结构化数据。比如使用 PostgreSQL 的 [pgvector 扩展](https://github.com/pgvector/pgvector) 可以在表中增加嵌入式文档列，这让我们可以使用自然语言与这些半结构化数据进行交互，将 SQL 的表达能力与语义搜索相结合。
+
 * [Incoporating semantic similarity in tabular databases](https://github.com/langchain-ai/langchain/blob/master/cookbook/retrieval_in_sql.ipynb)
 
 #### Text-to-Cypher
 
+向量数据库可以轻松处理非结构化数据，但它们无法理解向量之间的关系；SQL 数据库可以建模表之间的关系，但是却不擅长建模数据之间的关系，特别是多对多关系或难以在表格形式中表示的层次结构的数据；图数据库可以通过建模数据之间的关系并扩展关系类型来解决这些挑战。
+
+和 SQL 一样，Cypher 是一种对图数据库进行查询的结构化查询语言，我们可以使用类似的方法将自然语言翻译成 Cypher 语言。
+
 * [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
 
 #### Text-to-metadata filters
+
+通过元数据过滤功能，向量数据库也可以实现结构化查询，这和关系型数据库的半结构化数据很像。通过 LLM 我们可以将自然语言翻译为带有元数据过滤器的查询语法。
 
 * [Self-querying](https://python.langchain.com/docs/modules/data_connection/retrievers/self_query/)
 * [Filtering by metadata | Chroma](https://docs.trychroma.com/usage-guide#filtering-by-metadata)
