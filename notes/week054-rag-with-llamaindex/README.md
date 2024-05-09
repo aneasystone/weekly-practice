@@ -69,8 +69,6 @@ RAG 近年来发展迅速，随着对 RAG 的研究不断深入，各种 RAG 技
 
 包含答案的文档已经成功检索出来，但却没有包含在大模型所使用的上下文中。当从数据库中检索到多个文档，并且使用合并过程提取答案时，就会出现这种情况。
 
-> 这种情况发生的具体场景是？
-
 4. 未提取（Not Extracted）
 
 答案在提供的上下文中，但是大模型未能准确地提取出来，这通常发生在上下文中存在过多的噪音或冲突信息时。
@@ -263,7 +261,7 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 上面三步都是关于检索的，包括从哪里检索以及如何检索。第四个要考虑的问题是怎么存储我的数据？怎么设计我的索引？通过上面的学习我们知道，可以将数据存储到向量数据库、SQL 数据库或者图数据库中，针对这些不同的存储方式，我们又可以使用不同的索引策略。
 
-#### 文档分块
+#### 分块策略
 
 文档分块是索引构建中的关键步骤，在尝试不同的分块策略和大小时，要特别注意检查文档在拆分时是否会出现语义相关内容被不自然地拆分的情况。无论是 LangChain 和 LlamaIndex 都提供了大量的文档分块的方法。
 
@@ -279,7 +277,7 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 * [Chunk Size Matters](https://www.mattambrogi.com/posts/chunk-size-matters/)
 
-#### 文档嵌入
+#### 嵌入策略
 
 当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 就是使用了这种检索策略。
 
@@ -303,8 +301,23 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 ### 后处理
 
+这是打造 RAG 系统的最后一个问题，如何将检索出来的信息丢给大模型？检索出来的信息可能过长，或者存在冗余（比如从多个来源进行检索），我们可以在后处理步骤中对其进行压缩、排序、去重等。
+
 * [Node Postprocessor Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)
     * [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/)
+
+#### 重排序
+
+当检索结果太多时，与查询相关性最高的信息可能被埋在大量的无关文档中，如果将所有这些文档都传递到大模型，可能导致更昂贵的调用费用，生成的响应也更差。
+
+可以使用 [Cohere 的 Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
+
+上文中提到的 [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 利用 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法对检索结果进行排序，也是一种重排技术。
+
+* [Contextual compression](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/)
+* [Cohere reranker](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)
+* [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1)
+* [RAG Fusion](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb)
 
 ### Agentic RAG
 
