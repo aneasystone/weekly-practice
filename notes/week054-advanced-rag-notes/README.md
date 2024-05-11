@@ -1,4 +1,4 @@
-# WEEK054 - 基于 LlamaIndex 打造本地 RAG 系统
+# WEEK054 - 高级 RAG 技术学习笔记
 
 随着大模型技术的发展，基于大模型开发的应用也越来越多，比如类似 ChatGPT 的对话服务，将搜索引擎与大模型相结合的问答服务，等等。但在这些应用中，我们也面临着大量的问题，包括缺乏领域知识、无法获取实时信息以及生成虚假内容。**检索增强生成（Retrieval-Augmented Generation，简称 RAG）** 通过引入外部信息源，为这些问题提供了一种有效的缓解策略。
 
@@ -11,9 +11,7 @@ RAG 之所以如此流行，原因有几个：
 3. 它提供了很好的可观察性和可检查性，可以对用户输入、检索的上下文和模型生成的回复进行比对，而微调过程是不透明的；
 4. 它更容易维护，对知识库持续更新的过程比较简单，而不需要专业人员；
 
-我们在之前的笔记中已经学习过不少和 RAG 相关的内容，比如在 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中，我们学习了如何打造一个针对本地文档的问答系统，在 [week047-structured-data-qa](../week047-structured-data-qa/README.md) 这篇笔记中，我们继续探索了如何针对结构化的数据进行问答。不过这些内容都比较简单，只是对 RAG 原理的入门级讲解，我打算针对 RAG 写一个系列博客，对 RAG 的高级技巧进行深入学习，并使用 LlamaIndex 对各个技巧一一进行实战。
-
-这是这个系列的第一篇，对 RAG 和 LlamaIndex 做一个概述性的讲解。
+我们在之前的笔记中已经学习过不少和 RAG 相关的内容，比如在 [week042-doc-qa-using-embedding](../week042-doc-qa-using-embedding/README.md) 这篇笔记中，我们学习了如何打造一个针对本地文档的问答系统，在 [week047-structured-data-qa](../week047-structured-data-qa/README.md) 这篇笔记中，我们继续探索了如何针对结构化的数据进行问答。不过这些内容都比较简单，只是对 RAG 原理的入门级讲解，本篇博客将对 RAG 的高级技巧进行深入学习，并结合 LangChain 和 LlamaIndex 对各个技巧一一进行实战。
 
 ## RAG 概述
 
@@ -180,7 +178,7 @@ The author worked on writing and programming before college.
 
 ## 高级 RAG 技巧
 
-基于 LlamaIndex，我们只用了 5 行代码就实现了一个简单的 RAG 系统，可以看出，这是朴素 RAG 的基本思路。这一节我们将继续学习高级 RAG 技巧，我们暂时不讨论过多的技术细节，旨在带大家对 RAG 的技术全貌有一个大致的了解。
+基于 LlamaIndex，我们只用了 5 行代码就实现了一个简单的 RAG 系统，可以看出，这是朴素 RAG 的基本思路。这一节我们将继续学习高级 RAG 技巧，争取对每一种技巧都进行实战验证，带大家一窥 RAG 的技术全貌。
 
 下图展示了高级 RAG 涉及的核心步骤和算法：
 
@@ -206,13 +204,47 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 查询扩展有多种不同的实现，比如：
 
+##### 多查询检索器（Multi Query Retriever）
+
 * [`MultiQueryRetriever`](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever/) 是 LangChain 中的一个类，可根据用户输入生成子问题，然后依次进行检索，最后将检索到的文档合并返回；
-* [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是实现 RAG Fusion 的代码示例；
-* [回退提示（Step-back prompting）](https://arxiv.org/abs/2310.06117) 是另一种查询扩展的方法，它基于用户的原始问题生成一个回退问题，回退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以回退为一个关于该问题背后的物理原理的问题，然后对原始问题和回退问题进行检索；[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于回退提示实现 RAG 问答的一个示例；
+
+##### RAG 融合（RAG Fusion）
+
+* [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 和 `MultiQueryRetriever` 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好。
+
+[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是实现 RAG Fusion 的代码示例。
+
+##### 回退提示（Step-back prompting）
+
+[回退提示](https://arxiv.org/abs/2310.06117) 是另一种查询扩展的方法，它基于用户的原始问题生成一个回退问题，回退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以回退为一个关于该问题背后的物理原理的问题，然后对原始问题和回退问题进行检索。
+
+[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于回退提示实现 RAG 问答的一个示例，其中生成回退问题的 Prompt 如下：
+
+```
+You are an expert of world knowledge. I am going to ask you a question. \
+Your response should be comprehensive and not contradicted with the following \
+context if they are relevant. Otherwise, ignore them if they are not relevant.
+
+{normal_context}
+{step_back_context}
+
+Original Question: {question}
+Answer:
+```
 
 #### 查询重写（Query Rewriting）
 
-用户输入可能表达不清晰或措辞不当，为解决这个问题，Xinbei Ma 等人提出了一种 **Rewrite-Retrieve-Read** 的方法，对用户的问题进行改写，以改善检索效果，[这里是论文地址](https://arxiv.org/abs/2305.14283)，可以 [参考 LangChain 的实现](https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb)。
+用户输入可能表达不清晰或措辞不当，为解决这个问题，Xinbei Ma 等人提出了一种 **Rewrite-Retrieve-Read** 的方法，对用户的问题进行改写，以改善检索效果，[这里是论文地址](https://arxiv.org/abs/2305.14283)，实现方法其实很简单，通过下面的 Prompt 让大模型基于用户的输入给出一个更好的查询：
+
+```
+template = """Provide a better search query for \
+web search engine to answer the given question, end \
+the queries with ’**’. Question: \
+{x} Answer:"""
+rewrite_prompt = ChatPromptTemplate.from_template(template)
+```
+
+具体实现可以参考 [LangChain 的这个 cookbook](https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb)。
 
 #### 查询压缩（Query Compression）
 
@@ -279,18 +311,22 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 #### 嵌入策略
 
-当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 就是使用了这种检索策略。
+对于同一份文档，我们可以有多种嵌入方式，也就是为同一份文档生成几种不同的嵌入向量，这在很多情况下可以提高检索效果，这被称为 [多向量检索器（Multi-Vector Retriever）](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/multi_vector/)。为同一份文档生成不同的嵌入向量有很多策略可供选择。
 
-这种将嵌入的内容（用于检索）和送往大模型的内容（用于答案生成）分离的做法是索引设计中最简单且最有用的想法之一。
+当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 就是使用了这种策略；这种将嵌入的内容（用于检索）和送往大模型的内容（用于答案生成）分离的做法是索引设计中最简单且最有用的想法之一。
 
-除了父文档检索器，对于同一份文档，我们有多种嵌入方式，比如一段包含大量冗余细节的文本，我们可以对其分块，对每个分块进行嵌入，也可以对其进行摘要，对摘要进行嵌入，然后对多个嵌入进行检索，然后将检索内容传给大模型以生成答案，这被称为 **多向量检索器（multi-vector retriever）**。
+当我们处理一段包含大量冗余细节的文本时，我们可以对其分块，对每个分块进行嵌入，也可以对其进行摘要，对摘要进行嵌入，然后对多个嵌入进行检索，然后将检索内容传给大模型以生成答案，这也是多向量检索器的一个例子。
+
+另外，我们还可以通过大模型为每个文档生成假设性问题，然后生成这些问题和原文档的嵌入向量。
 
 多向量检索器对包含文本和表格的半结构化文档也能很好地工作，在这种情况下，可以提取每个表格，为表格生成适合检索的摘要，但生成答案时将原始表格送给大模型。有些文档不仅包含文本和表格，还可能包含图片，随着多模态大模型的出现，我们可以为图像生成摘要和嵌入。
 
 * [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
-* [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
-* [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
-* [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
+    * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
+    * [Semi-structured and Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_and_multi_modal_RAG.ipynb)
+    * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
+    * [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
+    * [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
 
 #### 检索策略
 

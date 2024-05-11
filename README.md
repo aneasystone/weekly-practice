@@ -2,7 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
-* WEEK054 - [基于 LlamaIndex 打造本地 RAG 系统](./notes/week054-rag-with-llamaindex/README.md)
+* WEEK054 - [高级 RAG 技术学习笔记](./notes/week054-advanced-rag-notes/README.md)
 * WEEK053 - [开源大模型 Llama 实战](./notes/week053-llama-in-action/README.md)
 * WEEK052 - [提示工程学习笔记（二）](./notes/week052-prompt-engineering-notes-2/README.md)
 * WEEK051 - [提示工程学习笔记](./notes/week051-prompt-engineering-notes/README.md)
