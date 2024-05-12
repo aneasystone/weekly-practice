@@ -234,7 +234,15 @@ Answer:
 
 #### 查询重写（Query Rewriting）
 
-用户输入可能表达不清晰或措辞不当，为解决这个问题，Xinbei Ma 等人提出了一种 **Rewrite-Retrieve-Read** 的方法，对用户的问题进行改写，以改善检索效果，[这里是论文地址](https://arxiv.org/abs/2305.14283)，实现方法其实很简单，通过下面的 Prompt 让大模型基于用户的输入给出一个更好的查询：
+用户输入可能表达不清晰或措辞不当，一个典型的例子是用户输入中包含大量冗余的信息，看下面这个例子：
+
+```
+hi there! I want to know the answer to a question. is that okay? 
+lets assume it is. my name is harrison, the ceo of langchain. 
+i like llms and openai. who is maisie peters?
+```
+
+我们想要回答的真正问题是 “who is maisie peters?”，但用户输入中有很多分散注意力的文本，如果直接拿着原始文本去检索，可能检索出很多无关的内容。为解决这个问题，我们可以不使用原始输入，而是从用户输入生成搜索查询。Xinbei Ma 等人提出了一种 **Rewrite-Retrieve-Read** 的方法，对用户的输入进行改写，以改善检索效果，[这里是论文地址](https://arxiv.org/abs/2305.14283)，实现方法其实很简单，通过下面的 Prompt 让大模型基于用户的输入给出一个更好的查询：
 
 ```
 template = """Provide a better search query for \
@@ -245,6 +253,20 @@ rewrite_prompt = ChatPromptTemplate.from_template(template)
 ```
 
 具体实现可以参考 [LangChain 的这个 cookbook](https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb)。
+
+除了处理表达不清的用户输入，查询重写还经常用于处理聊天场景中的后续问题（Follow Up Questions）。比如用户首先问 “合肥有哪些好玩的地方？”，接着用户又问 “那里有什么好吃的？”，如果直接用最后一句话进行嵌入和检索，就会丢失 “合肥” 这样的重要信息，这时，我们就可以用大模型来做问题重写来解决这个问题。
+
+在开源网页搜索助手 [WebLangChain](https://blog.langchain.dev/weblangchain/) 中，使用了如下的 Prompt 来实现问题重写：
+
+```
+Given the following conversation and a follow up question, rephrase the follow up \
+question to be a standalone question.
+
+Chat History:
+{chat_history}
+Follow Up Input: {question}
+Standalone Question:
+```
 
 #### 查询压缩（Query Compression）
 
