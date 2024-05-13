@@ -202,11 +202,38 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 
 假设你的知识库中包含了各个公司的基本信息，考虑这样的用户输入：*微软和苹果哪一个成立时间更早？* 要获得更好的检索效果，我们可以将其拆解成两个用户输入：*微软的成立时间* 和 *苹果的成立时间*，这种将用户输入分解为多个子问题的方法被称为 **查询扩展（Query Expansion）**。
 
+再考虑另一个用户输入：*哪个国家赢得了 2023 年的女子世界杯？该国的 GDP 是多少？*，和上面的例子一样，我们也需要通过查询扩展将其拆分成两个子问题，只不过这两个子问题是有依赖关系的，我们需要先查出第一个子问题的答案，然后才能查第二个子问题。也就是说，上面的例子中我们可以并行查询，而这个例子需要串行查询。
+
 查询扩展有多种不同的实现，比如：
 
 ##### 多查询检索器（Multi Query Retriever）
 
-* [`MultiQueryRetriever`](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever/) 是 LangChain 中的一个类，可根据用户输入生成子问题，然后依次进行检索，最后将检索到的文档合并返回；
+[`MultiQueryRetriever`](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever/) 是 LangChain 中的一个类，可根据用户输入生成子问题，然后依次进行检索，最后将检索到的文档合并返回。
+
+`MultiQueryRetriever` 不仅可以从原始问题中拆解出子问题，还可以对同一问题生成多个视角的提问，比如用户输入：*What are the approaches to Task Decomposition?*，大模型可以对这个问题生成多个角度的提问，比如：
+
+1. How can Task Decomposition be approached?
+2. What are the different methods for Task Decomposition?
+3. What are the various approaches to decomposing tasks?
+
+`MultiQueryRetriever` 默认使用的 Prompt 如下：
+
+```
+You are an AI language model assistant. Your task is 
+to generate 3 different versions of the given user 
+question to retrieve relevant documents from a vector  database. 
+By generating multiple perspectives on the user question, 
+your goal is to help the user overcome some of the limitations 
+of distance-based similarity search. Provide these alternative 
+questions separated by newlines. Original question: {question}
+```
+
+我们可以在此基础上稍作修改，就可以实现子问题拆解：
+
+```
+你是一个 AI 语言助手，你的任务是将用户的问题拆解成多个子问题便于检索，多个子问题以换行分割，保证每行一个。
+用户的原始问题为：{question}
+```
 
 ##### RAG 融合（RAG Fusion）
 
@@ -377,6 +404,12 @@ Standalone Question:
 * [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1)
 * [RAG Fusion](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb)
 
+#### 引用来源
+
+一个基于 RAG 的应用不仅要提供答案，还要提供答案的引用来源，这样做有两个好处，首先，用户可以打开引用来源对大模型的回复进行验证，其次，方便用户对特定主体进行进一步的深入研究。
+
+这里是 [Perplexity 泄露出来的 Prompt](https://twitter.com/jmilldotdev/status/1600624362394091523) 可供参考，这里是 [WebLangChain 对其修改后的实现](https://smith.langchain.com/hub/hwchase17/weblangchain-generation)。在这个 Prompt 中，要求大模型在生成内容时使用 `[N]` 格式表示来源，然后在客户端解析它并将其呈现为超链接。
+
 ### Agentic RAG
 
 * [Agentic RAG With LlamaIndex](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6)
@@ -394,6 +427,7 @@ Standalone Question:
 * [Deconstructing RAG | LangChain](https://blog.langchain.dev/deconstructing-rag/)
 * [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
 * [Applying OpenAI's RAG Strategies | LangChain](https://blog.langchain.dev/applying-openai-rag/)
+* [Building (and Breaking) WebLangChain | LangChain](https://blog.langchain.dev/weblangchain/)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
 * [LlamaIndex Documents](https://docs.llamaindex.ai/en/stable/)
