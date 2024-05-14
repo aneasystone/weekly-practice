@@ -237,9 +237,20 @@ questions separated by newlines. Original question: {question}
 
 ##### RAG 融合（RAG Fusion）
 
-* [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 和 `MultiQueryRetriever` 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好。
+`RAG Fusion` 和 `MultiQueryRetriever` 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好。它的大致流程如下：
 
-[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是实现 RAG Fusion 的代码示例。
+![](./images/rag-fusion.webp)
+
+可以分为四个步骤：
+
+* 首先，通过大模型将用户的问题转换为相似但不同的问题，例如，“气候变化的影响” 生成的问题可能包括 “气候变化的经济后果”、“气候变化和公共卫生” 等角度；
+* 其次，对原始问题和新生成的问题执行并发的向量搜索；
+* 接着，使用 RRF 算法聚合和细化所有结果；
+* 最后，将所有的问题和重新排序的结果丢给大模型，引导大模型进行有针对性的输出。
+
+其中生成问题的逻辑和 `MultiQueryRetriever` 别无二致，聚合和重排序的逻辑我们在后处理部分再做讨论。
+
+[这里](https://github.com/Raudaschl/rag-fusion) 是 RAG Fusion 原作者的基本实现，[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是基于 LangChain 的实现。
 
 ##### 回退提示（Step-back prompting）
 
@@ -258,6 +269,10 @@ context if they are relevant. Otherwise, ignore them if they are not relevant.
 Original Question: {question}
 Answer:
 ```
+
+通过查询扩展不仅可以将用户冗余的问题拆解成多个子问题，便于更精确的检索；而且可以基于用户的问题生成更多角度的提问，这意味着对用户问题进行全方位分析，加大了搜索范围，所以会检索出更多优质内容。
+
+但是查询扩展的最大缺点是太慢，而且费钱，因为需要大模型来生成子问题，这属于时间换效果，而且生成多个问题容易产生漂移，导致大模型输出的内容过于详细甚至偏题。
 
 #### 查询重写（Query Rewriting）
 
@@ -397,12 +412,60 @@ Standalone Question:
 
 可以使用 [Cohere 的 Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
 
-上文中提到的 [RAG Fusion](https://github.com/Raudaschl/rag-fusion) 利用 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法对检索结果进行排序，也是一种重排技术。
-
 * [Contextual compression](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/)
 * [Cohere reranker](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)
-* [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1)
-* [RAG Fusion](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb)
+
+##### RAG 融合（RAG Fusion）
+
+在上面学习查询扩展策略时，有提到 `RAG Fusion` 技术，它利用 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法对检索结果进行排序，这也是一种重排技术。
+
+RRF 是滑铁卢大学和谷歌合作开发的一种算法，它可以将具有不同相关性指标的多个结果集组合成单个结果集，这里是 [它的论文地址](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)，其中最关键的部分就是下面这个公式：
+
+![](./images/rrf-score.png)
+
+其中，D 表示文档集，R 是从 1 到 |D| 的排列，k 是一个常量，默认值为 60.
+
+为了对这个公式有个更直观的理解，我们不妨执行下 [RAG Fusion 开源的代码](https://github.com/Raudaschl/rag-fusion)，执行结果如下：
+
+```
+Initial individual search result ranks:
+For query '1. Effects of climate change on biodiversity': {'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}
+For query '2. Economic consequences of climate change': {'doc9': 0.85, 'doc7': 0.79}
+For query '3. Health impacts of climate change': {'doc1': 0.8, 'doc10': 0.76}
+For query '4. Solutions to mitigate the impact of climate change': {'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}
+Updating score for doc7 from 0 to 0.016666666666666666 based on rank 0 in query '1. Effects of climate change on biodiversity'
+Updating score for doc8 from 0 to 0.01639344262295082 based on rank 1 in query '1. Effects of climate change on biodiversity'
+Updating score for doc5 from 0 to 0.016129032258064516 based on rank 2 in query '1. Effects of climate change on biodiversity'
+Updating score for doc9 from 0 to 0.016666666666666666 based on rank 0 in query '2. Economic consequences of climate change'
+Updating score for doc7 from 0.016666666666666666 to 0.03306010928961749 based on rank 1 in query '2. Economic consequences of climate change'
+Updating score for doc1 from 0 to 0.016666666666666666 based on rank 0 in query '3. Health impacts of climate change'
+Updating score for doc10 from 0 to 0.01639344262295082 based on rank 1 in query '3. Health impacts of climate change'
+Updating score for doc7 from 0.03306010928961749 to 0.04972677595628415 based on rank 0 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc10 from 0.01639344262295082 to 0.03278688524590164 based on rank 1 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc1 from 0.016666666666666666 to 0.03279569892473118 based on rank 2 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc9 from 0.016666666666666666 to 0.032539682539682535 based on rank 3 in query '4. Solutions to mitigate the impact of climate change'
+Final reranked results: {'doc7': 0.04972677595628415, 'doc1': 0.03279569892473118, 'doc10': 0.03278688524590164, 'doc9': 0.032539682539682535, 'doc8': 0.01639344262295082, 'doc5': 0.016129032258064516}
+Final output based on ['1. Effects of climate change on biodiversity', '2. Economic consequences of climate change', '3. Health impacts of climate change', '4. Solutions to mitigate the impact of climate change'] and reranked documents: ['doc7', 'doc1', 'doc10', 'doc9', 'doc8', 'doc5']
+```
+
+首先针对原始问题生成四个不同的问题，然后针对不同的问题分别执行检索得到不同的文档排名：
+
+* 问题 1 检索结果排名：`{'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}`
+* 问题 2 检索结果排名：`{'doc9': 0.85, 'doc7': 0.79}`
+* 问题 3 检索结果排名：`{'doc1': 0.8, 'doc10': 0.76}`
+* 问题 4 检索结果排名：`{'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}`
+
+可以看到每次检索出来的文档都不一样，就算是相同文档，得分也不一样。为了计算每个文档的最终排名，我们使用 RRF 公式对每个文档计算 RRF 分数，这里以 `doc7` 为例，该文档一共出现了三次，在问题 1 的检索中排名第一，问题 2 的检索中排名第二，问题 4 的检索中排名第一，所以它的得分计算如下：
+
+```
+RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
+```
+
+使用类似的方法计算其他文档的得分，最终得到所有文档的最终排名。
+
+从 RRF 分数的计算中，我们可以看出，RRF 不依赖于每次检索分配的绝对分数，而是依赖于相对排名，这使得它非常适合组合来自可能具有不同分数尺度或分布的查询结果。
+
+值得注意的是，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。
 
 #### 引用来源
 
@@ -428,6 +491,7 @@ Standalone Question:
 * [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
 * [Applying OpenAI's RAG Strategies | LangChain](https://blog.langchain.dev/applying-openai-rag/)
 * [Building (and Breaking) WebLangChain | LangChain](https://blog.langchain.dev/weblangchain/)
+* [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1) - [中文翻译](https://blog.csdn.net/lichunericli/article/details/135451681)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
 * [LlamaIndex Documents](https://docs.llamaindex.ai/en/stable/)
