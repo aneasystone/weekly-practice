@@ -195,7 +195,6 @@ RAG 系统面临的第一个问题就是如何处理用户输入，我们知道�
 * [Query Transformations | LlamaIndex](https://docs.llamaindex.ai/en/stable/optimizing/advanced_retrieval/query_transformations/)
     * [Query Transform Cookbook](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
     * [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
-    * [HyDE Query Transform](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/)
     * [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/)
 
 #### 查询扩展（Query Expansion）
@@ -269,6 +268,21 @@ context if they are relevant. Otherwise, ignore them if they are not relevant.
 Original Question: {question}
 Answer:
 ```
+
+##### 假设性文档嵌入（Hypothetical Document Embeddings，HyDE）
+
+当我们使用基于相似性的向量检索时，在原始问题上进行检索可能效果不佳，因为它们的嵌入可能与相关文档的嵌入不太相似，但是，如果让大模型生成一个假设的相关文档，然后使用它来执行相似性检索可能会得到意想不到的结果。这就是 **假设性文档嵌入（Hypothetical Document Embeddings，HyDE）** 背后的关键思想。
+
+HyDE 是 Luyu Gao 在 [Precise Zero-Shot Dense Retrieval without Relevance Labels](https://arxiv.org/abs/2212.10496) 这篇论文中提出的一种方法，它的思路非常有意思，首先通过大模型为用户问题生成答案，不管答案是否正确，然后计算生成的答案的嵌入，并进行向量检索，生成的答案虽然可能是错误的，但是通过它却可能比原问题更好地检索出正确的答案片段。
+
+[这里](https://python.langchain.com/v0.1/docs/use_cases/query_analysis/techniques/hyde/) 是 LangChain 通过 HyDE 生成假设性文档的示例。
+
+LlamaIndex 也提供了一个类 `HyDEQueryTransform` 来实现 HyDE，[这里](https://docs.llamaindex.ai/en/stable/examples/query_transformations/HyDEQueryTransformDemo/) 是示例代码，同时文档也提到了使用 HyDE 可能出现的两个失败场景：
+
+1. 在没有上下文的情况下，HyDE 可能会对原始问题产出误解，导致检索出误导性的文档；比如用户问题是 “What is Bel?”，由于大模型缺乏上下文，并不知道 Bel 指的是 Paul Graham 论文中提到的一种编程语言，因此生成的内容和论文完全没有关系，导致检索出和用户问题没有关系的文档；
+2. 对开放式的问题，HyDE 可能产生偏见；比如用户问题是 “What would the author say about art vs. engineering?”，这时大模型会随意发挥，生成的内容可能带有偏见，从而导致检索的结果也带有偏见；
+
+---
 
 通过查询扩展不仅可以将用户冗余的问题拆解成多个子问题，便于更精确的检索；而且可以基于用户的问题生成更多角度的提问，这意味着对用户问题进行全方位分析，加大了搜索范围，所以会检索出更多优质内容。
 
