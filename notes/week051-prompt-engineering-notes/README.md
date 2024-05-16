@@ -588,6 +588,7 @@ APE 的目的是自动化进行指令生成和选择，通过 LLM 生成指令�
 * [Advanced Prompt Engineering - by Cameron R. Wolfe, Ph.D.](https://cameronrwolfe.substack.com/p/advanced-prompt-engineering)
 * [Prompt Ensembles Make LLMs More Reliable](https://cameronrwolfe.substack.com/p/prompt-ensembles-make-llms-more-reliable)
 * [后退提示Step-Back Prompting：AI应对复杂问题的新策略](https://zhuanlan.zhihu.com/p/675045202)
+* [A New Prompt Engineering Technique Has Been Introduced Called Step-Back Prompting](https://cobusgreyling.medium.com/a-new-prompt-engineering-technique-has-been-introduced-called-step-back-prompting-b00e8954cacb)
 * [是时候开始讨论大语言模型中的提示架构了吗？](https://baoyu.io/translations/prompt-engineering/is-it-time-to-start-talking-about-prompt-architecture-in-llms)
 
 ## 更多

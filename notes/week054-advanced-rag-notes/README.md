@@ -251,11 +251,11 @@ questions separated by newlines. Original question: {question}
 
 [这里](https://github.com/Raudaschl/rag-fusion) 是 RAG Fusion 原作者的基本实现，[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb) 是基于 LangChain 的实现。
 
-##### 回退提示（Step-back prompting）
+##### 后退提示（Step-Back Prompting）
 
-[回退提示](https://arxiv.org/abs/2310.06117) 是另一种查询扩展的方法，它基于用户的原始问题生成一个回退问题，回退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以回退为一个关于该问题背后的物理原理的问题，然后对原始问题和回退问题进行检索。
+**后退提示（Step-Back Prompting）** 是 Google DeepMind 团队在论文 [Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models](https://arxiv.org/abs/2310.06117) 中提出的一种新的提示技术，我在 [之前的笔记中](../week051-prompt-engineering-notes/README.md) 已经介绍过后退提示的基本原理。总的来说，它基于用户的原始问题生成一个后退问题，后退问题相比原始问题具有更高级别的概念或原则，从而提高解决复杂问题的效果，例如一个关于物理学的问题可以后退为一个关于该问题背后的物理原理的问题，然后对原始问题和后退问题进行检索。
 
-[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于回退提示实现 RAG 问答的一个示例，其中生成回退问题的 Prompt 如下：
+很显然，后退提示也可以在 RAG 中作为一种查询扩展的方法，[这里](https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb) 是基于后退提示实现 RAG 问答的一个示例，其中生成后退问题的 Prompt 如下：
 
 ```
 You are an expert of world knowledge. I am going to ask you a question. \
@@ -310,7 +310,7 @@ rewrite_prompt = ChatPromptTemplate.from_template(template)
 
 具体实现可以参考 [LangChain 的这个 cookbook](https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb)。
 
-除了处理表达不清的用户输入，查询重写还经常用于处理聊天场景中的后续问题（Follow Up Questions）。比如用户首先问 “合肥有哪些好玩的地方？”，接着用户又问 “那里有什么好吃的？”，如果直接用最后一句话进行嵌入和检索，就会丢失 “合肥” 这样的重要信息，这时，我们就可以用大模型来做问题重写来解决这个问题。
+除了处理表达不清的用户输入，查询重写还经常用于处理聊天场景中的 **后续问题（Follow Up Questions）**。比如用户首先问 “合肥有哪些好玩的地方？”，接着用户又问 “那里有什么好吃的？”，如果直接用最后一句话进行嵌入和检索，就会丢失 “合肥” 这样的重要信息，这时，我们就可以用大模型来做问题重写来解决这个问题。
 
 在开源网页搜索助手 [WebLangChain](https://blog.langchain.dev/weblangchain/) 中，使用了如下的 Prompt 来实现问题重写：
 
