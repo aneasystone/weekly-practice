@@ -330,11 +330,67 @@ Standalone Question:
 
 ### 查询路由（Routing）
 
-在经过第一步查询转换后，我们已经将用户问题转换成易于检索的形式，接下来我们就要开始检索了。但是从哪里检索呢？有很多 RAG 示例都是从向量数据库中检索，但是在真正的生产环境中通常情况会比这复杂的多，数据可能存储在多个不同的库中，比如，向量数据库，关系型数据库，图数据库，甚至是 API 接口。这时我们需要对传入的查询进行动态路由，根据不同的用户问题检索不同的库。
+在经过第一步查询转换后，我们已经将用户问题转换成易于检索的形式，接下来我们就要开始检索了。但是从哪里检索呢？有很多 RAG 示例都是从单一数据存储中检索。但是为了更好的组织数据，我们通常会将不同的数据存储在不同的库中；在真正的生产环境中，情况可能会更复杂，数据甚至可能存储在多个不同种类的库中，比如，向量数据库，关系型数据库，图数据库，甚至是 API 接口。这时我们需要对传入的用户问题进行动态路由，根据不同的用户问题检索不同的库。
 
-* [Routers | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/)
-    * [Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RouterQueryEngine/)
-* [Dynamically route logic based on input](https://python.langchain.com/docs/expression_language/how_to/routing/)
+[这篇教程](https://python.langchain.com/docs/expression_language/how_to/routing/) 介绍了 LangChain 中实现路由的两种方式，第一种方式是使用大模型将用户问题路由到一组自定义的子链，这些子链可以是不同的大模型，也可以是不同的向量存储，LangChain 提供了 `RunnableLambda` 和 `RunnableBranch` 两个类帮助我们快速实现这个功能，其中 `RunnableLambda` 是推荐的做法，用户可以在 `route` 方法中自定义路由逻辑：
+
+```
+def route(info):
+    if "anthropic" in info["topic"].lower():
+        return anthropic_chain
+    elif "langchain" in info["topic"].lower():
+        return langchain_chain
+    else:
+        return general_chain
+
+from langchain_core.runnables import RunnableLambda
+
+full_chain = {"topic": chain, "question": lambda x: x["question"]} | RunnableLambda(
+    route
+)
+print(full_chain.invoke({"question": "how do I use Anthropic?"}))
+```
+
+另一种方法是计算用户问题和子链 Prompt 的嵌入向量，将最相似的子链作为下一步路由：
+
+```
+def prompt_router(input):
+    query_embedding = embeddings.embed_query(input["query"])
+    similarity = cosine_similarity([query_embedding], prompt_embeddings)[0]
+    most_similar = prompt_templates[similarity.argmax()]
+    print("Using MATH" if most_similar == math_template else "Using PHYSICS")
+    return PromptTemplate.from_template(most_similar)
+```
+
+可以看到 LangChain 的路由功能非常地原始，连路由的 Prompt 都需要用户自己定义。相比来说，[LlamaIndex 的路由器](https://docs.llamaindex.ai/en/stable/module_guides/querying/router/) 显得就要高级得多，它可以根据用户的输入从一堆带有元数据的选项中动态地选择一个或多个。
+
+LlamaIndex 将动态选择的过程抽象为选择器，并且内置了一些选择器，比如 `LLMSingleSelector` 和 `LLMMultiSelector` 通过 Prompt 让大模型返回一个或多个选项，`PydanticSingleSelector` 和 `PydanticMultiSelector` 则是通过 Function Call 功能来实现的。这里选择的选项可以是 **查询引擎（Query Engines）** 或 **检索器（Retrievers）**，甚至是任何用户自定义的东西，下面的代码演示了如何使用 LlamaIndex 的 [RouterQueryEngine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RouterQueryEngine/) 实现根据用户的输入在多个查询引擎中动态选择其中一个：
+
+```
+# convert query engines to tools
+list_tool = QueryEngineTool.from_defaults(
+    query_engine=list_query_engine,
+    description="Useful for summarization questions related to Paul Graham eassy on What I Worked On.",
+)
+
+vector_tool = QueryEngineTool.from_defaults(
+    query_engine=vector_query_engine,
+    description="Useful for retrieving specific context from Paul Graham essay on What I Worked On.",
+)
+
+# routing engine tools with a selector
+query_engine = RouterQueryEngine(
+    selector=PydanticSingleSelector.from_defaults(),
+    query_engine_tools=[
+        list_tool,
+        vector_tool,
+    ],
+)
+
+response = query_engine.query("What is the summary of the document?")
+```
+
+和 RouterQueryEngine 类似，使用 [RouterRetriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/router_retriever/) 可以根据用户的输入动态路由到不同的检索器。此外，LlamaIndex 官方还有一些路由器的其他示例，比如 [SQL Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/SQLRouterQueryEngine/) 这个示例演示了自定义路由器来路由到 SQL 数据库或向量数据库；[Retriever Router Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/RetrieverRouterQueryEngine/) 这个示例演示了使用 `ToolRetrieverRouterQueryEngine` 来解决选项过多可能导致超出大模型 token 限制的问题。
 
 ### 查询构造（Query Construction）
 
