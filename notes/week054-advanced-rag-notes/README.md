@@ -396,13 +396,88 @@ response = query_engine.query("What is the summary of the document?")
 
 我们面临的第三个问题是：使用什么语法来检索数据？在上一步中，我们知道数据可能存储在关系型数据库或图数据库中，要从这些库中检索数据，必须使用特定的语法，而用户问题通常都是用自然语言提出的，所以我们需要将自然语言转换为特定的查询语法。
 
-* [Query Construction](https://blog.langchain.dev/query-construction/)
+根据数据存储和数据类型的不同，查询构造可以分为以下几种常见的场景：
+
+![](./images/query-construction.png)
 
 #### Text-to-SQL
 
 将自然语言翻译成 SQL 是一个非常热门的话题，已经有不少人对此展开了研究。通过向 LLM 提供一个自然语言问题以及相关的数据库表信息，可以轻松地完成文本到 SQL 的转换。
 
+这个过程虽然简单，不过也有不少值得注意的问题和小技巧：
+
+* 大模型擅长写 SQL，但是写出来的 SQL 往往出现表名或字段名对应不上的情况；
+
+解决方法是将你的数据库信息详细地告诉大模型，包括数据表的描述信息，有哪些字段，字段类型分别是什么，表中有什么样的数据，等等。Nitarshan Rajkumar 等人在 [Evaluating the Text-to-SQL Capabilities of Large Language Models](https://arxiv.org/abs/2204.00498) 这篇论文中发现，对于 OpenAI Codex 模型来说，使用 `CREATE TABLE` 语句来描述数据库表信息可以得到最佳性能，此外，在 `CREATE TABLE` 语句后通过一条 `SELECT` 语句附加 3 行表中的数据样本，可以进一步改善大模型生成 SQL 的效果。
+
+LangChain 提供的 `SQLDatabase` 类可以方便地得到这些信息：
+
+```
+db = SQLDatabase.from_uri(
+	"sqlite:///Chinook.db",
+	include_tables=['Track'],
+	sample_rows_in_table_info=3
+)
+print(db.table_info)
+```
+
+输出结果如下：
+
+```
+CREATE TABLE "Track" (
+  "TrackId" INTEGER NOT NULL,
+  "Name" NVARCHAR(200) NOT NULL,
+  "AlbumId" INTEGER,
+  "MediaTypeId" INTEGER NOT NULL,
+  "GenreId" INTEGER,
+  "Composer" NVARCHAR(220),
+  "Milliseconds" INTEGER NOT NULL,
+  "Bytes" INTEGER,
+  "UnitPrice" NUMERIC(10, 2) NOT NULL,
+  PRIMARY KEY ("TrackId"),
+  FOREIGN KEY("MediaTypeId") REFERENCES "MediaType" ("MediaTypeId"),
+  FOREIGN KEY("GenreId") REFERENCES "Genre" ("GenreId"),
+  FOREIGN KEY("AlbumId") REFERENCES "Album" ("AlbumId")
+)
+SELECT * FROM 'Track' LIMIT 3;
+TrackId	Name	AlbumId	MediaTypeId	GenreId	Composer	Milliseconds	Bytes	UnitPrice
+1	For Those About To Rock (We Salute You)	1	1	1	Angus Young, Malcolm Young, Brian Johnson	343719	11170334	0.99
+2	Balls to the Wall	2	2	1	None	342562	5510424	0.99
+3	Fast As a Shark	3	2	1	F. Baltes, S. Kaufman, U. Dirkscneider & W. Hoffman	230619	3990994	0.99
+```
+
+有时候，前 3 行数据不足以完整地表达出表中数据的样貌，这时我们可以手工构造数据样本；有时候，表中数据存在敏感信息，我们也可以使用伪造的假数据来代替真实情况。
+
+* 数据库查询结果过多，超出大模型的限制；
+
+生成 SQL 并执行后，我们通常需要将执行结果送到大模型的上下文中，以便它能回答用户的问题。但是如果查询结果过多，这将超出大模型的 token 限制。因此，我们要对 SQL 输出的大小合理地进行限制，比如让大模型尽可能少地使用列并限制返回行数来实现这一点。
+
+* 大模型编写的 SQL 可能存在语法错误无法执行；
+
+如果在执行大模型生成的 SQL 时出现语法错误，可以参考我们人类自己是如何解决这类问题的。通常我们会查看报错信息，然后去查询关于报错信息的资料，以便对错误的语法进行纠正。[这篇博客](https://patterns.app/blog/2023-01-18-crunchbot-sql-analyst-gpt) 介绍了如何通过 Prompt 让大模型自动地做到这一点，将原始查询和报错信息发送给大模型，并要求它纠正，大模型就可以理解出了什么问题，从而生成更加精准的 SQL 查询。
+
+```
+error_prompt = f"""{query.sql}
+
+The query above produced the following error:
+
+{query.error}
+
+Rewrite the query with the error fixed:"""
+```
+
+---
+
+以上三点是处理 Text-to-SQL 时要面对的基本问题和解决思路，还有一些优化方法可以进一步地提高 Text-to-SQL 的效果：
+
+* 使用少样本示例：在 [Nitarshan Rajkumar 等人的研究](https://arxiv.org/abs/2204.00498) 中，他们发现给大模型一些问题和对应 SQL 查询的示例，可以提高 SQL 生成的准确性；
+* 使用子查询：一些用户发现，让大模型将问题分解成多个子查询，有助于得到正确答案，如果让大模型对每个子查询进行注释，效果更好，这有点类似于之前学习过的 CoT 或 PoT 等提示技术，将一个大问题拆分成多个子查询，会迫使大模型按逻辑逐步思考，而且每一步相对来说更简单，从而出错概率降低；
+
+使用 LangChain 提供的 `create_sql_query_chain` 和 `create_sql_agent` 可以方便地实现 Text-to-SQL 功能，LangChain 的官方文档中有很多 Text-to-SQL 的例子：
+
 * [Q&A over SQL + CSV](https://python.langchain.com/docs/use_cases/sql/)
+
+#### Text-to-SQL + Semantic
 
 在关系型数据库中，混合类型数据存储变得越来越普遍，这种数据被称为 **半结构化数据（semi-structured data）**，也就是说既有结构化数据，也有非结构化数据。比如使用 PostgreSQL 的 [pgvector 扩展](https://github.com/pgvector/pgvector) 可以在表中增加嵌入式文档列，这让我们可以使用自然语言与这些半结构化数据进行交互，将 SQL 的表达能力与语义搜索相结合。
 
@@ -561,6 +636,8 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 * [Query Transformations | LangChain](https://blog.langchain.dev/query-transformations/)
 * [Applying OpenAI's RAG Strategies | LangChain](https://blog.langchain.dev/applying-openai-rag/)
 * [Building (and Breaking) WebLangChain | LangChain](https://blog.langchain.dev/weblangchain/)
+* [Query Construction | LangChain](https://blog.langchain.dev/query-construction/)
+* [LLMs and SQL | LangChain](https://blog.langchain.dev/llms-and-sql/)
 * [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1) - [中文翻译](https://blog.csdn.net/lichunericli/article/details/135451681)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
