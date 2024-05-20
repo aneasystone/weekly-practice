@@ -448,13 +448,64 @@ TrackId	Name	AlbumId	MediaTypeId	GenreId	Composer	Milliseconds	Bytes	UnitPrice
 
 有时候，前 3 行数据不足以完整地表达出表中数据的样貌，这时我们可以手工构造数据样本；有时候，表中数据存在敏感信息，我们也可以使用伪造的假数据来代替真实情况。
 
-* 数据库查询结果过多，超出大模型的限制；
+使用 LangChain 提供的 `create_sql_query_chain` 可以方便地实现 Text-to-SQL 功能：
 
-生成 SQL 并执行后，我们通常需要将执行结果送到大模型的上下文中，以便它能回答用户的问题。但是如果查询结果过多，这将超出大模型的 token 限制。因此，我们要对 SQL 输出的大小合理地进行限制，比如让大模型尽可能少地使用列并限制返回行数来实现这一点。
+```
+from langchain_community.utilities import SQLDatabase
+from langchain_openai import ChatOpenAI
+from langchain.chains import create_sql_query_chain
+
+db = SQLDatabase.from_uri("sqlite:///./sqlite/Chinook.db")
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+chain = create_sql_query_chain(llm, db)
+response = chain.invoke({"question": "How many employees are there"})
+```
+
+使用 LangChain 提供的 `create_sql_agent` 可以实现更智能体的 Text-to-SQL 功能，包括 SQL 的生成，检查，执行，重试等：
+
+```
+from langchain_community.utilities import SQLDatabase
+from langchain_openai import ChatOpenAI
+from langchain_community.agent_toolkits import create_sql_agent
+
+db = SQLDatabase.from_uri("sqlite:///./sqlite/Chinook.db")
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+agent_executor = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
+response = agent_executor.invoke({
+    "input": "List the total sales per country. Which country's customers spent the most?"
+})
+```
+
+具体内容可以参考 LangChain 的文档 [Q&A over SQL + CSV](https://python.langchain.com/docs/use_cases/sql/)。
+
+LlamaIndex 的 [NLSQLTableQueryEngine](https://docs.llamaindex.ai/en/stable/examples/index_structs/struct_indices/SQLIndexDemo/) 同样可以实现类似的 Text-to-SQL 功能：
+
+```
+from llama_index.llms.openai import OpenAI
+from sqlalchemy import create_engine
+from llama_index.core import SQLDatabase
+from llama_index.core.query_engine import NLSQLTableQueryEngine
+
+llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo")
+
+engine = create_engine("sqlite:///./sqlite/Chinook.db")
+sql_database = SQLDatabase(engine, include_tables=["Employee"])
+
+query_engine = NLSQLTableQueryEngine(
+    sql_database=sql_database, tables=["Employee"], llm=llm
+)
+response = query_engine.query("How many employees are there?")
+```
+
+* 数据库表过多，或查询结果过多，超出大模型的限制；
+
+为了大模型能生成准确的 SQL，我们必须将数据库表的信息完整的送入大模型的上下文中，如果数据库表或列过多，就会超出大模型的 token 限制。这时，我们必须找到方法，动态地仅插入最相关的信息到提示中。我们可以使用 LangChain 内置的 [create_extraction_chain_pydantic](https://python.langchain.com/v0.1/docs/use_cases/sql/large_db/) 链来实现这点，它通过 OpenAI 的 funtion call 功能动态地挑出和用户问题最相关的表，然后再基于这些表生成 SQL 语句；LlamaIndex 的 [SQLTableRetrieverQueryEngine](https://docs.llamaindex.ai/en/stable/examples/index_structs/struct_indices/SQLIndexDemo/#part-2-query-time-retrieval-of-tables-for-text-to-sql) 也实现了同样的功能，它通过为每个表生成一个嵌入向量来实现这一点。
+
+此外，生成 SQL 并执行后，我们通常需要将执行结果送到大模型的上下文中，以便它能回答用户的问题。但是如果查询结果过多，同样会超出大模型的 token 限制。因此，我们要对 SQL 输出的大小合理地进行限制，比如让大模型尽可能少地使用列并限制返回行数来实现这一点。
 
 * 大模型编写的 SQL 可能存在语法错误无法执行；
 
-如果在执行大模型生成的 SQL 时出现语法错误，可以参考我们人类自己是如何解决这类问题的。通常我们会查看报错信息，然后去查询关于报错信息的资料，以便对错误的语法进行纠正。[这篇博客](https://patterns.app/blog/2023-01-18-crunchbot-sql-analyst-gpt) 介绍了如何通过 Prompt 让大模型自动地做到这一点，将原始查询和报错信息发送给大模型，并要求它纠正，大模型就可以理解出了什么问题，从而生成更加精准的 SQL 查询。
+如果在执行大模型生成的 SQL 时出现语法错误，可以参考我们人类自己是如何解决这类问题的。通常我们会查看报错信息，然后去查询关于报错信息的资料，以便对错误的语法进行纠正。[这篇博客](https://patterns.app/blog/2023-01-18-crunchbot-sql-analyst-gpt) 介绍了如何通过 Prompt 让大模型自动地做到这一点，将原始查询和报错信息发送给大模型，并要求它纠正，大模型就可以理解出了什么问题，从而生成更加精准的 SQL 查询。下面是作者所使用的 Prompt：
 
 ```
 error_prompt = f"""{query.sql}
@@ -466,22 +517,32 @@ The query above produced the following error:
 Rewrite the query with the error fixed:"""
 ```
 
+[这里](https://python.langchain.com/v0.1/docs/use_cases/sql/query_checking/) 是基于 LangChain 的实现。
+
 ---
 
 以上三点是处理 Text-to-SQL 时要面对的基本问题和解决思路，还有一些优化方法可以进一步地提高 Text-to-SQL 的效果：
 
-* 使用少样本示例：在 [Nitarshan Rajkumar 等人的研究](https://arxiv.org/abs/2204.00498) 中，他们发现给大模型一些问题和对应 SQL 查询的示例，可以提高 SQL 生成的准确性；
-* 使用子查询：一些用户发现，让大模型将问题分解成多个子查询，有助于得到正确答案，如果让大模型对每个子查询进行注释，效果更好，这有点类似于之前学习过的 CoT 或 PoT 等提示技术，将一个大问题拆分成多个子查询，会迫使大模型按逻辑逐步思考，而且每一步相对来说更简单，从而出错概率降低；
+* 使用少样本示例
 
-使用 LangChain 提供的 `create_sql_query_chain` 和 `create_sql_agent` 可以方便地实现 Text-to-SQL 功能，LangChain 的官方文档中有很多 Text-to-SQL 的例子：
+在 [Nitarshan Rajkumar 等人的研究](https://arxiv.org/abs/2204.00498) 中，他们发现给大模型一些问题和对应 SQL 查询的示例，可以提高 SQL 生成的准确性；[LangChain 的这个示例](https://python.langchain.com/v0.1/docs/use_cases/sql/prompting/) 中介绍了如何构造 SQL 查询的少样本示例，以及如何通过 `SemanticSimilarityExampleSelector` 根据用户的问题动态的选择不同的少样本示例。
 
-* [Q&A over SQL + CSV](https://python.langchain.com/docs/use_cases/sql/)
+* 使用子查询
+
+一些用户发现，让大模型将问题分解成多个子查询，有助于得到正确答案，如果让大模型对每个子查询进行注释，效果更好，这有点类似于之前学习过的 CoT 或 PoT 等提示技术，将一个大问题拆分成多个子查询，会迫使大模型按逻辑逐步思考，而且每一步相对来说更简单，从而出错概率降低。
+
+* 处理高基数列（High-cardinality columns）
+
+**高基数列（High-cardinality columns）** 是指一个数据列中包含的不同数值的个数较多，即列中数据的唯一性较高，重复率较低，比如姓名、地址、歌曲名称等这些专有名词的列。如果生成的 SQL 语句中包含这样的列，我们首先需要仔细检查拼写，以确保能正确地过滤数据，因为用户输入这些名称时往往会使用一些别名或拼写错误。
+
+由于高基数列中的数据基本上不重复或者重复率非常低，所以我们可以想办法将用户的输入关联到正确的名称上，从而实现准确的查询。最简单的做法是创建一个向量存储，将数据库中存在的所有专有名词的向量存储进去，然后就可以计算和用户输入最接近的专有名词。[这里](https://python.langchain.com/v0.1/docs/use_cases/sql/large_db/#high-cardinality-columns) 和 [这里](https://python.langchain.com/v0.1/docs/use_cases/sql/agents/#dealing-with-high-cardinality-columns) 是基于 LangChain 的代码示例。
 
 #### Text-to-SQL + Semantic
 
 在关系型数据库中，混合类型数据存储变得越来越普遍，这种数据被称为 **半结构化数据（semi-structured data）**，也就是说既有结构化数据，也有非结构化数据。比如使用 PostgreSQL 的 [pgvector 扩展](https://github.com/pgvector/pgvector) 可以在表中增加嵌入式文档列，这让我们可以使用自然语言与这些半结构化数据进行交互，将 SQL 的表达能力与语义搜索相结合。
 
 * [Incoporating semantic similarity in tabular databases](https://github.com/langchain-ai/langchain/blob/master/cookbook/retrieval_in_sql.ipynb)
+* [Text-to-SQL with PGVector](https://docs.llamaindex.ai/en/stable/examples/query_engine/pgvector_sql_query_engine/)
 
 #### Text-to-Cypher
 
