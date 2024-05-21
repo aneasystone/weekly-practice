@@ -394,7 +394,13 @@ response = query_engine.query("What is the summary of the document?")
 
 ### 查询构造（Query Construction）
 
-我们面临的第三个问题是：使用什么语法来检索数据？在上一步中，我们知道数据可能存储在关系型数据库或图数据库中，要从这些库中检索数据，必须使用特定的语法，而用户问题通常都是用自然语言提出的，所以我们需要将自然语言转换为特定的查询语法。
+我们面临的第三个问题是：使用什么语法来检索数据？在上一步中，我们知道数据可能存储在关系型数据库或图数据库中，根据数据的类型，我们将其分为结构化、半结构化和非结构化三大类：
+
+* **结构化数据**：主要存储在 SQL 或图数据库中，结构化数据的特点是具有预定义的模式，并且以表格或关系的形式组织，使其适合进行精确的查询操作；
+* **半结构化数据**：半结构化数据将结构化元素（例如文档中的表格或关系数据库）与非结构化元素（例如文本或关系数据库中的嵌入列）相结合；
+* **非结构化数据**：通常存储在向量数据库中，非结构化数据由没有预定义模型的信息组成，通常伴随着结构化元数据，以便进行过滤。
+
+将自然语言与各种类型的数据无缝连接是一件极具挑战的事情。要从这些库中检索数据，必须使用特定的语法，而用户问题通常都是用自然语言提出的，所以我们需要将自然语言转换为特定的查询语法。这个过程被称为 **查询构造（Query Construction）**。
 
 根据数据存储和数据类型的不同，查询构造可以分为以下几种常见的场景：
 
@@ -461,7 +467,7 @@ chain = create_sql_query_chain(llm, db)
 response = chain.invoke({"question": "How many employees are there"})
 ```
 
-使用 LangChain 提供的 `create_sql_agent` 可以实现更智能体的 Text-to-SQL 功能，包括 SQL 的生成，检查，执行，重试等：
+使用 LangChain 提供的 `create_sql_agent` 可以实现更智能的 Text-to-SQL 功能，包括 SQL 的生成，检查，执行，重试等：
 
 ```
 from langchain_community.utilities import SQLDatabase
@@ -539,10 +545,49 @@ Rewrite the query with the error fixed:"""
 
 #### Text-to-SQL + Semantic
 
-在关系型数据库中，混合类型数据存储变得越来越普遍，这种数据被称为 **半结构化数据（semi-structured data）**，也就是说既有结构化数据，也有非结构化数据。比如使用 PostgreSQL 的 [pgvector 扩展](https://github.com/pgvector/pgvector) 可以在表中增加嵌入式文档列，这让我们可以使用自然语言与这些半结构化数据进行交互，将 SQL 的表达能力与语义搜索相结合。
+通过 Text-to-SQL 可以很好的回答关于结构化数据的问题，比如：公司一共有多少员工，公司里男女员工比例是多少，等等；但是有些用户问题不仅要对结构化字段进行过滤查询，还需要对非结构化字段进行语义检索，比如：1980 年上映了哪些有关外星人的电影？我们不仅要使用 `year == 1980` 对电影的上映年份进行过滤，还需要根据 `外星人` 从电影名称或描述中进行语义检索。
 
-* [Incoporating semantic similarity in tabular databases](https://github.com/langchain-ai/langchain/blob/master/cookbook/retrieval_in_sql.ipynb)
-* [Text-to-SQL with PGVector](https://docs.llamaindex.ai/en/stable/examples/query_engine/pgvector_sql_query_engine/)
+在关系型数据库中添加向量支持是实现混合数据检索的关键，这种混合类型的数据被称为 **半结构化数据（semi-structured data）**，也就是说既有结构化数据，也有非结构化数据。比如使用 PostgreSQL 的 [Pgvector 扩展](https://github.com/pgvector/pgvector) 可以在表中增加向量列，这让我们可以使用自然语言与这些半结构化数据进行交互，将 SQL 的表达能力与语义检索相结合。
+
+Pgvector 通过 `<->` 运算符在向量列上进行相似性检索，比如下面的 SQL 用于查询名称最为伤感的 3 首歌曲：
+
+```
+SELECT * FROM tracks ORDER BY name_embedding <-> {sadness_embedding} LIMIT 3;
+```
+
+也可以将语义检索和正常的 SQL 查询结合，比如下面的 SQL 用于查询 1980 年上映的有关外星人的电影：
+
+```
+SELECT * FROM movies WHERE year == 1980 ORDER BY name_embedding <-> {aliens_embedding} LIMIT 5;
+```
+
+> Pgvector 也支持内积（`<#>`）、余弦距离（`<=>`）和 L1 距离（`<+>`）等运算符。
+
+为了让大模型准确使用 Pgvector 的向量运算符，我们需要在 Prompt 里将 Pgvector 的语法告诉大模型，可以参考 [Incoporating semantic similarity in tabular databases](https://github.com/langchain-ai/langchain/blob/master/cookbook/retrieval_in_sql.ipynb) 这篇教程里的实现：
+
+```
+...
+
+You can use an extra extension which allows you to run semantic similarity using <-> operator 
+on tables containing columns named "embeddings".
+<-> operator can ONLY be used on embeddings columns.
+The embeddings value for a given row typically represents the semantic meaning of that row.
+The vector represents an embedding representation of the question, given below. 
+Do NOT fill in the vector values directly, but rather specify a `[search_word]` placeholder, 
+which should contain the word that would be embedded for filtering.
+For example, if the user asks for songs about 'the feeling of loneliness' the query could be:
+'SELECT "[whatever_table_name]"."SongName" FROM "[whatever_table_name]" ORDER BY "embeddings" <-> '[loneliness]' LIMIT 5'
+
+...
+```
+
+这篇教程详细介绍了如何使用 LangChain 实现基于 Pgvector 的语义检索，并将 Text-to-SQL + Semantic 总结为三种场景：
+
+* 基于向量列的语义过滤：比如 `查询名称最为伤感的 3 首歌曲`；
+* 结合普通列的过滤和向量列的语义过滤：比如 `查询 1980 年上映的有关外星人的电影`；
+* 结合多个向量列的语义过滤：比如：`从名称可爱的专辑中获取 5 首伤感的歌曲`；
+
+在 LlamaIndex 中，也有一个 `PGVectorSQLQueryEngine` 类用于实现 Pgvector 的语义检索，参考 [Text-to-SQL with PGVector](https://docs.llamaindex.ai/en/stable/examples/query_engine/pgvector_sql_query_engine/) 这篇教程。
 
 #### Text-to-Cypher
 
