@@ -666,13 +666,30 @@ and(
 
 具体内容可以 [参考这里](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/self_query/#constructing-from-scratch-with-lcel)，除此之外，[Building hotel room search with self-querying retrieval](https://github.com/langchain-ai/langchain/blob/master/cookbook/self_query_hotel_search.ipynb) 这篇教程使用自查询检索器实现了酒店数据的问答，感兴趣的同学可以一并参考。
 
-同样，在 LlamaIndex 中也支持对向量数据库进行元数据过滤，这个功能被叫做 **Auto-Retrieval**，并抽象成 [VectorIndexAutoRetriever](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/vector/#llama_index.core.retrievers.VectorIndexAutoRetriever) 类，下面是一些 Auto-Retrieval 的示例：
+同样，在 LlamaIndex 中也支持对向量数据库进行元数据过滤，这个功能被叫做 **Auto-Retrieval**，并抽象成 [VectorIndexAutoRetriever](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/vector/#llama_index.core.retrievers.VectorIndexAutoRetriever) 类，同时，LlamaIndex 也对不少的向量数据库做了集成，比如 [Pinecone](https://docs.llamaindex.ai/en/stable/examples/vector_stores/pinecone_auto_retriever/)、[Chroma](https://docs.llamaindex.ai/en/stable/examples/vector_stores/chroma_auto_retriever/)、[Elasticsearch](https://docs.llamaindex.ai/en/stable/examples/vector_stores/elasticsearch_auto_retriever/)、[Vectara](https://docs.llamaindex.ai/en/stable/examples/retrievers/vectara_auto_retriever/)、[Lantern](https://docs.llamaindex.ai/en/stable/examples/vector_stores/LanternAutoRetriever/)、[BagelDB](https://docs.llamaindex.ai/en/stable/examples/vector_stores/BagelAutoRetriever/) 等。
 
-* [A Simple to Advanced Guide with Auto-Retrieval (with Pinecone + Arize Phoenix)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/pinecone_auto_retriever/)
-* [Auto-Retrieval from a Vector Database (with Chroma)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/chroma_auto_retriever/)
-* [Auto-Retrieval from a Vector Database (with Elasticsearch)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/elasticsearch_auto_retriever/)
-* [Auto-Retrieval from a Vectara Index](https://docs.llamaindex.ai/en/stable/examples/retrievers/vectara_auto_retriever/)
-* [Structured Hierarchical Retrieval](https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)
+下面是 `VectorIndexAutoRetriever` 的使用示例，和 `SelfQueryRetriever` 很像：
+
+```
+from llama_index.core.vector_stores.types import MetadataInfo, VectorStoreInfo
+from llama_index.core.retrievers import VectorIndexAutoRetriever
+
+vector_store_info = VectorStoreInfo(
+    content_info="brief biography of celebrities",
+    metadata_info=[
+        MetadataInfo(name="category", type="str", description="Category of the celebrity, one of [Sports, Entertainment, Business, Music]"),
+        MetadataInfo(name="country", type="str", description="Country of the celebrity, one of [United States, Barbados, Portugal]"),
+    ],
+)
+
+retriever = VectorIndexAutoRetriever(
+    index, vector_store_info=vector_store_info
+)
+
+response = retriever.retrieve("Tell me about Sports celebrities from United States")
+```
+
+和 Text-to-SQL 一样，元数据过滤也面临着大模型生成的过滤条件可能和库中的元数据无法完全匹配的问题，比如：库中的字段是大写，而用户的输入是小写，库中的字段是全称，而用户的输入是简称，这时我们也可以借鉴 Text-to-SQL 中的优化手段，比如自定义 Prompt 或 根据用户输入动态选择样本，[这里](https://docs.llamaindex.ai/en/stable/examples/vector_stores/pinecone_auto_retriever/#part-2-extending-auto-retrieval-with-dynamic-metadata-retrieval) 是 LlamaIndex 的示例。此外，LlamaIndex 官网还有一篇使用元数据过滤实现 [多文档检索（或者叫结构化分层检索）]((https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)) 的示例。
 
 ### 索引（Indexing）
 
