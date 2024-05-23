@@ -599,10 +599,80 @@ For example, if the user asks for songs about 'the feeling of loneliness' the qu
 
 #### Text-to-metadata filters
 
-通过元数据过滤功能，向量数据库也可以实现结构化查询，这和关系型数据库的半结构化数据很像。通过 LLM 我们可以将自然语言翻译为带有元数据过滤器的查询语法。
+很多向量数据库都具备 **元数据过滤（metadata filters）** 的功能，这和关系型数据库的半结构化数据很像（参考上面的 Text-to-SQL + Semantic 一节），可以把带元数据的向量数据库看成有一个向量列的关系型数据表。下面是 [Chroma](https://docs.trychroma.com/guides#filtering-by-metadata) 的一个带元数据过滤的查询示例：
 
-* [Self-querying](https://python.langchain.com/docs/modules/data_connection/retrievers/self_query/)
-* [Filtering by metadata | Chroma](https://docs.trychroma.com/usage-guide#filtering-by-metadata)
+```
+collection.query(
+    query_texts=["query1", "query2"],
+    n_results=10,
+    where={"metadata_field": "is_equal_to_this"},
+    where_document={"$contains":"search_string"}
+)
+```
+
+Chroma 不仅支持 `query_texts` 参数实现语义检索，还支持 `where` 参数实现类似 SQL 的结构化过滤，为了生成这样的查询语法，我们可以使用 LangChain 提供的 [自查询检索器（Self Query Retriever）](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/self_query/)：
+
+```
+document_content_description = "Brief summary of a movie"
+metadata_field_info = [
+    AttributeInfo(name="genre", description="The genre of the movie", type="string or list[string]"),
+    AttributeInfo(name="year", description="The year the movie was released", type="integer" ),
+    AttributeInfo(name="director", description="The name of the movie director", type="string" ),
+    AttributeInfo(name="rating", description="A 1-10 rating for the movie", type="float"),
+]
+
+retriever = SelfQueryRetriever.from_llm(
+    llm, vectorstore, document_content_description, metadata_field_info, verbose=True
+)
+response = retriever.invoke("What are some movies about dinosaurs")
+```
+
+首先我们对整个文档以及文档包含的元数据字段做一个大致的描述，然后通过 `SelfQueryRetriever.from_llm()` 构造自查询检索器，检索器可以对自然语言问题进行解释，将问题转换成用于语义检索的查询语句（被称为 **Query**）和用于元数据过滤的过滤器语法（被称为 **Filters**），由于 LangChain [集成了大量的向量数据库](https://python.langchain.com/v0.1/docs/integrations/retrievers/self_query/)，每个向量数据库的过滤器语法都可能不一样，所以 LangChain 设计了一套中间语法，让大模型根据这套语法规则生成过滤器语句，然后通过 `StructuredQueryOutputParser` 将过滤器语句解析为 `StructuredQuery` 对象（使用 [lark-parser](https://github.com/lark-parser/lark) 实现），再由各个向量数据库的 `structured_query_translator` 将其转换为各自的查询语法。
+
+如果对这套中间语法感兴趣，可以使用 `get_query_constructor_prompt()` 查看 `SelfQueryRetriever` 内置的 Prompt:
+
+```
+from langchain.chains.query_constructor.base import get_query_constructor_prompt
+
+prompt = get_query_constructor_prompt(document_content_description, metadata_field_info)
+print(prompt.format(query="dummy question"))
+```
+
+通过这个 Prompt 我们可以手动构造 `StructuredQuery` 对象：
+
+```
+from langchain.chains.query_constructor.base import StructuredQueryOutputParser
+
+output_parser = StructuredQueryOutputParser.from_components()
+query_constructor = prompt | llm | output_parser
+
+response = query_constructor.invoke({
+ "query": "Songs by Taylor Swift or Katy Perry about teenage romance under 3 minutes long in the dance pop genre"
+})
+```
+
+生成的过滤器语法类似于下面这样：
+
+```
+and(
+    or(
+        eq("artist", "Taylor Swift"), 
+        eq("artist", "Katy Perry")
+    ), 
+    lt("length", 180), 
+    eq("genre", "pop")
+)
+```
+
+具体内容可以 [参考这里](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/self_query/#constructing-from-scratch-with-lcel)，除此之外，[Building hotel room search with self-querying retrieval](https://github.com/langchain-ai/langchain/blob/master/cookbook/self_query_hotel_search.ipynb) 这篇教程使用自查询检索器实现了酒店数据的问答，感兴趣的同学可以一并参考。
+
+同样，在 LlamaIndex 中也支持对向量数据库进行元数据过滤，这个功能被叫做 **Auto-Retrieval**，并抽象成 [VectorIndexAutoRetriever](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/vector/#llama_index.core.retrievers.VectorIndexAutoRetriever) 类，下面是一些 Auto-Retrieval 的示例：
+
+* [A Simple to Advanced Guide with Auto-Retrieval (with Pinecone + Arize Phoenix)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/pinecone_auto_retriever/)
+* [Auto-Retrieval from a Vector Database (with Chroma)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/chroma_auto_retriever/)
+* [Auto-Retrieval from a Vector Database (with Elasticsearch)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/elasticsearch_auto_retriever/)
+* [Auto-Retrieval from a Vectara Index](https://docs.llamaindex.ai/en/stable/examples/retrievers/vectara_auto_retriever/)
+* [Structured Hierarchical Retrieval](https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)
 
 ### 索引（Indexing）
 
