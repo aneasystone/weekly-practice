@@ -589,14 +589,6 @@ For example, if the user asks for songs about 'the feeling of loneliness' the qu
 
 在 LlamaIndex 中，也有一个 `PGVectorSQLQueryEngine` 类用于实现 Pgvector 的语义检索，参考 [Text-to-SQL with PGVector](https://docs.llamaindex.ai/en/stable/examples/query_engine/pgvector_sql_query_engine/) 这篇教程。
 
-#### Text-to-Cypher
-
-向量数据库可以轻松处理非结构化数据，但它们无法理解向量之间的关系；SQL 数据库可以建模表之间的关系，但是却不擅长建模数据之间的关系，特别是多对多关系或难以在表格形式中表示的层次结构的数据；图数据库可以通过建模数据之间的关系并扩展关系类型来解决这些挑战。
-
-和 SQL 一样，Cypher 是一种对图数据库进行查询的结构化查询语言，我们可以使用类似的方法将自然语言翻译成 Cypher 语言。
-
-* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
-
 #### Text-to-metadata filters
 
 很多向量数据库都具备 **元数据过滤（metadata filters）** 的功能，这和关系型数据库的半结构化数据很像（参考上面的 Text-to-SQL + Semantic 一节），可以把带元数据的向量数据库看成有一个向量列的关系型数据表。下面是 [Chroma](https://docs.trychroma.com/guides#filtering-by-metadata) 的一个带元数据过滤的查询示例：
@@ -690,6 +682,28 @@ response = retriever.retrieve("Tell me about Sports celebrities from United Stat
 ```
 
 和 Text-to-SQL 一样，元数据过滤也面临着大模型生成的过滤条件可能和库中的元数据无法完全匹配的问题，比如：库中的字段是大写，而用户的输入是小写，库中的字段是全称，而用户的输入是简称，这时我们也可以借鉴 Text-to-SQL 中的优化手段，比如自定义 Prompt 或 根据用户输入动态选择样本，[这里](https://docs.llamaindex.ai/en/stable/examples/vector_stores/pinecone_auto_retriever/#part-2-extending-auto-retrieval-with-dynamic-metadata-retrieval) 是 LlamaIndex 的示例。此外，LlamaIndex 官网还有一篇使用元数据过滤实现 [多文档检索（或者叫结构化分层检索）]((https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)) 的示例。
+
+#### Text-to-Cypher
+
+向量数据库可以轻松处理非结构化数据，但它们无法理解向量之间的关系；SQL 数据库可以建模表之间的关系，但是却不擅长建模数据之间的关系，特别是多对多关系或难以在表格形式中表示的层次结构的数据；图数据库可以通过建模数据之间的关系并扩展关系类型来解决这些挑战。
+
+和 SQL 一样，[Cypher](https://en.wikipedia.org/wiki/Cypher_(query_language)) 是一种对图数据库进行查询的结构化查询语言。LangChain 中提供的 `GraphCypherQAChain` 让我们可以方便地将自然语言翻译成 Cypher 语言，从而实现基于图数据库的问答：
+
+```
+from langchain_openai import ChatOpenAI
+from langchain.chains import GraphCypherQAChain
+
+chain = GraphCypherQAChain.from_llm(
+    ChatOpenAI(temperature=0), graph=graph, verbose=True
+)
+response = chain.invoke({"query": "Who played in Top Gun?"})
+```
+
+值得注意的是，Cypher 是最流行的图数据库查询语言之一，可以用在很多不同的图数据库中，比如 [Neo4j](https://python.langchain.com/v0.1/docs/integrations/graphs/neo4j_cypher/)、[Amazon Neptune](https://python.langchain.com/v0.1/docs/integrations/graphs/amazon_neptune_open_cypher/) 等等，但是还有很多图数据库使用了其他的查询语言，比如 [Nebula Graph](https://python.langchain.com/v0.1/docs/integrations/graphs/nebula_graph/) 使用的是 nGQL，[HugeGraph](https://python.langchain.com/v0.1/docs/integrations/graphs/hugegraph/) 使用的是 Gremlin 等等，我们在编写 Prompt 的时候也要稍加区别。
+
+* [Constructing knowledge graphs](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/)
+* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
+* [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
 
 ### 索引（Indexing）
 
@@ -831,6 +845,7 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 * [Building (and Breaking) WebLangChain | LangChain](https://blog.langchain.dev/weblangchain/)
 * [Query Construction | LangChain](https://blog.langchain.dev/query-construction/)
 * [LLMs and SQL | LangChain](https://blog.langchain.dev/llms-and-sql/)
+* [Incorporating domain specific knowledge in SQL-LLM solutions | LangChain](https://blog.langchain.dev/incorporating-domain-specific-knowledge-in-sql-llm-solutions/)
 * [Forget RAG, the Future is RAG-Fusion](https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1) - [中文翻译](https://blog.csdn.net/lichunericli/article/details/135451681)
 * [Chatting With Your Data Ultimate Guide](https://medium.com/aimonks/chatting-with-your-data-ultimate-guide-a4e909591436)
 * [Chat With Your Data Ultimate Guide | Part 2](https://medium.com/aimonks/chat-with-your-data-ultimate-guide-part-2-f72ab6dfa147)
