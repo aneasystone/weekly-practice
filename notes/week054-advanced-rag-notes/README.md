@@ -701,9 +701,28 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
 
 值得注意的是，Cypher 是最流行的图数据库查询语言之一，可以用在很多不同的图数据库中，比如 [Neo4j](https://python.langchain.com/v0.1/docs/integrations/graphs/neo4j_cypher/)、[Amazon Neptune](https://python.langchain.com/v0.1/docs/integrations/graphs/amazon_neptune_open_cypher/) 等等，但是还有很多图数据库使用了其他的查询语言，比如 [Nebula Graph](https://python.langchain.com/v0.1/docs/integrations/graphs/nebula_graph/) 使用的是 nGQL，[HugeGraph](https://python.langchain.com/v0.1/docs/integrations/graphs/hugegraph/) 使用的是 Gremlin 等等，我们在编写 Prompt 的时候也要稍加区别。
 
-* [Constructing knowledge graphs](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/)
+* [Knowledge Graph RAG Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_rag_query_engine/)
 * [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
-* [Implementing advanced RAG strategies with Neo4j](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/)
+* [Integrating Neo4j into the LangChain ecosystem](https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2)
+* [LangChain has added Cypher Search](https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5)
+* [LangChain Cypher Search: Tips & Tricks](https://medium.com/neo4j/langchain-cypher-search-tips-tricks-f7c9e9abca4d)
+
+### 检索策略
+
+* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
+    * [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
+    * [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
+    * [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
+    * [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
+* [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
+    * [Auto Merging Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_merging_retriever/)
+    * [BM25 Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/bm25_retriever/)
+    * [Pathway Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/pathway_retriever/)
+    * [Simple Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/simple_fusion/)
+    * [Reciprocal Rerank Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/reciprocal_rerank_fusion/)
+    * [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
+* [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
+* [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
 
 ### 索引（Indexing）
 
@@ -725,17 +744,45 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
 
 * [Chunk Size Matters](https://www.mattambrogi.com/posts/chunk-size-matters/)
 
-#### 嵌入策略
-
-对于同一份文档，我们可以有多种嵌入方式，也就是为同一份文档生成几种不同的嵌入向量，这在很多情况下可以提高检索效果，这被称为 [多向量检索器（Multi-Vector Retriever）](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/multi_vector/)。为同一份文档生成不同的嵌入向量有很多策略可供选择。
+#### 父文档检索
 
 当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 就是使用了这种策略；这种将嵌入的内容（用于检索）和送往大模型的内容（用于答案生成）分离的做法是索引设计中最简单且最有用的想法之一。
 
-当我们处理一段包含大量冗余细节的文本时，我们可以对其分块，对每个分块进行嵌入，也可以对其进行摘要，对摘要进行嵌入，然后对多个嵌入进行检索，然后将检索内容传给大模型以生成答案，这也是多向量检索器的一个例子。
+除了对文档进行分割获取小块，我们也可以使用大模型对文档进行摘要，然后对摘要进行嵌入和检索，这种方法对处理包含大量冗余细节的文本非常有效，这里的原始文档就相当于摘要的父文档。另一种思路是通过大模型为每个文档生成 **假设性问题（Hypothetical Questions）**，然后对问题进行嵌入和检索，也可以结合问题和原文档一起检索。
 
-另外，我们还可以通过大模型为每个文档生成假设性问题，然后生成这些问题和原文档的嵌入向量。
+![](./images/parent-retrieve.jpeg)
 
-多向量检索器对包含文本和表格的半结构化文档也能很好地工作，在这种情况下，可以提取每个表格，为表格生成适合检索的摘要，但生成答案时将原始表格送给大模型。有些文档不仅包含文本和表格，还可能包含图片，随着多模态大模型的出现，我们可以为图像生成摘要和嵌入。
+在 [这篇文章](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/) 中，作者综合使用了 Neo4j 的向量搜索和图搜索能力，对上面三种嵌入策略进行了实现。首先，作者对原始文档依次进行分块、总结和生成假设性问题，并将生成的子文档和父文档存储在 Neo4j 图数据库中：
+
+![](./images/parent-retrieve-data.png)
+
+其中，紫色节点是父文档，长度为 512 个 token，每个父文档都有多个子节点：橙色节点包含将父文档切分成更小的子文档；蓝色节点包含针对父文档生成的假设性问题；红色节点包含父文档的摘要。
+
+然后通过下面的代码对子文档进行检索：
+
+```
+parent_query = """
+MATCH (node)<-[:HAS_CHILD]-(parent)
+WITH parent, max(score) AS score // deduplicate parents
+RETURN parent.text AS text, score, {} AS metadata LIMIT 1
+"""
+
+parent_vectorstore = Neo4jVector.from_existing_index(
+    OpenAIEmbeddings(),
+    index_name="parent_document",
+    retrieval_query=parent_query,
+)
+```
+
+#### 层级索引
+
+* Hierarchical Index Retrieval
+
+#### 多向量检索
+
+对于同一份文档，我们可以有多种嵌入方式，也就是为同一份文档生成几种不同的嵌入向量，这在很多情况下可以提高检索效果，这被称为 [多向量检索器（Multi-Vector Retriever）](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/multi_vector/)。为同一份文档生成不同的嵌入向量有很多策略可供选择，上面所介绍的父文档检索就是比较典型的方法。
+
+除此之外，当我们处理包含文本和表格的半结构化文档时，多向量检索器也能派上用场，在这种情况下，可以提取每个表格，为表格生成适合检索的摘要，但生成答案时将原始表格送给大模型。有些文档不仅包含文本和表格，还可能包含图片，随着多模态大模型的出现，我们可以为图像生成摘要和嵌入。
 
 * [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
     * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
@@ -744,12 +791,13 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
     * [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
     * [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
 
-#### 检索策略
+#### 图谱构建
 
-* [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
-    * [Auto Merging Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_merging_retriever/)
-* [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
-* [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
+* [Constructing knowledge graphs](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/)
+* [Knowledge Graph Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/)
+* [Knowledge Graph Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_query_engine/)
+* [Rebel + LlamaIndex Knowledge Graph Query Engine](https://colab.research.google.com/drive/1G6pcR0pXvSkdMQlAK_P-IrYgo-_staxd)
+* [Knowledge Graph Construction w/ WikiData Filtering](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/knowledge_graph2/)
 
 ### 后处理
 
