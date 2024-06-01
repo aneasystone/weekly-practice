@@ -715,12 +715,8 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
     * [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
     * [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
 * [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
-    * [Auto Merging Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_merging_retriever/)
-    * [BM25 Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/bm25_retriever/)
+    
     * [Pathway Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/pathway_retriever/)
-    * [Simple Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/simple_fusion/)
-    * [Reciprocal Rerank Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/reciprocal_rerank_fusion/)
-    * [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
 * [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
 * [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
 
@@ -744,15 +740,17 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
 
 * [Chunk Size Matters](https://www.mattambrogi.com/posts/chunk-size-matters/)
 
-#### 父文档检索
+#### 父文档检索（Parent Document Retrieval）
 
-当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 就是使用了这种策略；这种将嵌入的内容（用于检索）和送往大模型的内容（用于答案生成）分离的做法是索引设计中最简单且最有用的想法之一。
+当我们对文档进行分块的时候，我们可能希望每个分块不要太长，因为只有当文本长度合适，嵌入才可以最准确地反映它们的含义，太长的文本嵌入可能会失去意义；但是在将检索内容送往大模型时，我们又希望有足够长的文本，以保留完整的上下文。为了实现二者的平衡，我们可以在检索过程中，首先获取小的分块，然后查找这些小分块的父文档，并返回较大的父文档，这里的父文档指的是小分块的来源文档，可以是整个原始文档，也可以是一个更大的分块。LangChain 提供的 [父文档检索器（Parent Document Retriever）](https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever/) 和 LlamaIndex 提供的 [自动合并检索器（Auto Merging Retriever）](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_merging_retriever/) 就是使用了这种策略；这种将嵌入的内容（用于检索）和送往大模型的内容（用于答案生成）分离的做法是索引设计中最简单且最有用的想法之一，它的核心理念是，检索更小的块以获得更好的搜索质量，同时添加周围的上下文以获取更好的推理结果。
 
-除了对文档进行分割获取小块，我们也可以使用大模型对文档进行摘要，然后对摘要进行嵌入和检索，这种方法对处理包含大量冗余细节的文本非常有效，这里的原始文档就相当于摘要的父文档。另一种思路是通过大模型为每个文档生成 **假设性问题（Hypothetical Questions）**，然后对问题进行嵌入和检索，也可以结合问题和原文档一起检索。
+除了对文档进行分割获取小块，我们也可以使用大模型对文档进行摘要，然后对摘要进行嵌入和检索，这种方法对处理包含大量冗余细节的文本非常有效，这里的原始文档就相当于摘要的父文档。另一种思路是通过大模型为每个文档生成 **假设性问题（Hypothetical Questions）**，然后对问题进行嵌入和检索，也可以结合问题和原文档一起检索，这种方法提高了搜索质量，因为与原始文档相比，用户查询和假设性问题之间的语义相似性更高。我们可以使用 LlamaIndex 提供的 [SummaryExtractor](https://docs.llamaindex.ai/en/stable/api_reference/extractors/summary/) 和 [QuestionsAnsweredExtractor](https://docs.llamaindex.ai/en/stable/api_reference/extractors/question/) 来生成摘要和问题。
+
+下图展示了这三种检索方法和原始检索方法的一个对比：
 
 ![](./images/parent-retrieve.jpeg)
 
-在 [这篇文章](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/) 中，作者综合使用了 Neo4j 的向量搜索和图搜索能力，对上面三种嵌入策略进行了实现。首先，作者对原始文档依次进行分块、总结和生成假设性问题，并将生成的子文档和父文档存储在 Neo4j 图数据库中：
+在 [这篇文章](https://blog.langchain.dev/implementing-advanced-retrieval-rag-strategies-with-neo4j/) 中，作者综合使用了 Neo4j 的向量搜索和图搜索能力，对上面三种检索方法进行了实现，可供参考。首先，作者对原始文档依次进行分块、总结和生成假设性问题，并将生成的子文档和父文档存储在 Neo4j 图数据库中：
 
 ![](./images/parent-retrieve-data.png)
 
@@ -774,11 +772,25 @@ parent_vectorstore = Neo4jVector.from_existing_index(
 )
 ```
 
-#### 层级索引
+#### 层级检索（Hierarchical Retrieval）
 
 * Hierarchical Index Retrieval
 
-#### 多向量检索
+#### 递归检索（Recursive Retrieval）
+
+* [Recursive Retriever + Node References](https://docs.llamaindex.ai/en/stable/examples/retrievers/recursive_retriever_nodes/)
+* [Recursive Retriever + Query Engine Demo](https://docs.llamaindex.ai/en/stable/examples/query_engine/pdf_tables/recursive_retriever/)
+* [Comparing Methods for Structured Retrieval (Auto-Retrieval vs. Recursive Retrieval)](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_vs_recursive_retriever/)
+
+#### 混合检索（Fusion Retrieval）
+
+* [Ensemble Retriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/ensemble/)
+* [Simple Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/simple_fusion/)
+* [Reciprocal Rerank Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/reciprocal_rerank_fusion/)
+* [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
+* [BM25 Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/bm25_retriever/)
+
+#### 多向量检索（Multi-Vector Retrieval）
 
 对于同一份文档，我们可以有多种嵌入方式，也就是为同一份文档生成几种不同的嵌入向量，这在很多情况下可以提高检索效果，这被称为 [多向量检索器（Multi-Vector Retriever）](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/multi_vector/)。为同一份文档生成不同的嵌入向量有很多策略可供选择，上面所介绍的父文档检索就是比较典型的方法。
 
