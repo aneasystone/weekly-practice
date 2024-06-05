@@ -701,11 +701,34 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
 
 值得注意的是，Cypher 是最流行的图数据库查询语言之一，可以用在很多不同的图数据库中，比如 [Neo4j](https://python.langchain.com/v0.1/docs/integrations/graphs/neo4j_cypher/)、[Amazon Neptune](https://python.langchain.com/v0.1/docs/integrations/graphs/amazon_neptune_open_cypher/) 等等，但是还有很多图数据库使用了其他的查询语言，比如 [Nebula Graph](https://python.langchain.com/v0.1/docs/integrations/graphs/nebula_graph/) 使用的是 nGQL，[HugeGraph](https://python.langchain.com/v0.1/docs/integrations/graphs/hugegraph/) 使用的是 Gremlin 等等，我们在编写 Prompt 的时候也要稍加区别。
 
-* [Knowledge Graph RAG Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_rag_query_engine/)
-* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
-* [Integrating Neo4j into the LangChain ecosystem](https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2)
-* [LangChain has added Cypher Search](https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5)
-* [LangChain Cypher Search: Tips & Tricks](https://medium.com/neo4j/langchain-cypher-search-tips-tricks-f7c9e9abca4d)
+和 LangChain 一样，LlamaIndex 也支持图数据库的问答，我们可以使用 [KnowledgeGraphRAGRetriever](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/knowledge_graph/) 来实现，它的用法如下：
+
+```
+from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.core.retrievers import KnowledgeGraphRAGRetriever
+graph_rag_retriever = KnowledgeGraphRAGRetriever(storage_context=storage_context, verbose=True)
+query_engine = RetrieverQueryEngine.from_args(
+    graph_rag_retriever,
+)
+```
+
+不过要注意的是，这里对图数据库的查询实现和 LangChain 是不同的，`KnowledgeGraphRAGRetriever` 通过从用户问题中提取相关 **实体（Entity）**，然后在图数据库中查询和这些实体有关联的子图（默认深度为 2，查询的模式可以是 embedding 或 keyword），从而构建出上下文，大模型基于查询出的子图来回答用户问题，所以这也被称为 **(Sub)Graph RAG**。
+
+LlamaIndex 也支持 Text-to-Cypher 方式基于用户问题生成图查询语句，我们可以使用 [KnowledgeGraphQueryEngine](https://docs.llamaindex.ai/en/stable/api_reference/query_engine/knowledge_graph/) 来实现：
+
+```
+from llama_index.core.query_engine import KnowledgeGraphQueryEngine
+query_engine = KnowledgeGraphQueryEngine(
+    storage_context=storage_context,
+    llm=llm,
+    graph_query_synthesis_prompt=graph_query_synthesis_prompt,
+    verbose=True,
+)
+```
+
+不过当前的版本（0.10.25）支持得还不是很好，用户必须编写出合适的 Prompt 来能生成正确的 Cypher 语句。
+
+LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/Neo4jKGIndexDemo/) 或 [Nebula Graph Store](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_rag_query_engine/)。
 
 ### 检索策略
 
@@ -715,8 +738,6 @@ response = chain.invoke({"query": "Who played in Top Gun?"})
     * [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
     * [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
 * [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
-    
-    * [Pathway Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/pathway_retriever/)
 * [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
 * [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
 
@@ -804,6 +825,39 @@ parent_vectorstore = Neo4jVector.from_existing_index(
     * [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
 
 #### 图谱构建
+
+在上面的查询构造一节，我们学习了如何实现 Text-to-Cypher，根据用户的问题生成图查询语句，从而实现图数据库的问答。查询构造依赖的是现有的图数据库，如果用户没有图数据库，数据散落在各种非结构化文档中，那么我们在查询之前可能还需要先对文档进行预处理，LlamaIndex 和 LangChain 都提供了相应的方法，让我们可以快速从杂乱的文档中构建出图谱数据。
+
+LlamaIndex 可以通过 [KnowledgeGraphIndex](https://docs.llamaindex.ai/en/stable/api_reference/indices/knowledge_graph/) 实现：
+
+```
+from llama_index.core import KnowledgeGraphIndex
+index = KnowledgeGraphIndex.from_documents(
+    documents,
+    storage_context=storage_context,
+    max_triplets_per_chunk=10,
+    space_name=space_name,
+    edge_types=edge_types,
+    rel_prop_names=rel_prop_names,
+    tags=tags,
+    include_embeddings=True,
+)
+```
+
+这个构建的过程可能会很长，构建完成后，就可以通过 `index.as_query_engine()` 将其转换为 `RetrieverQueryEngine` 来实现问答：
+
+```
+query_engine = index.as_query_engine(
+    include_text=True, response_mode="tree_summarize"
+)
+response = query_engine.query("Tell me more about Interleaf")
+```
+
+> 其中，`documents` 也可以设置成一个空数组，这样也可以基于现有的图数据库来问答：
+>
+> ```
+> index = KnowledgeGraphIndex.from_documents([], storage_context=storage_context)
+> ```
 
 * [Constructing knowledge graphs](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/)
 * [Knowledge Graph Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/)
@@ -937,3 +991,10 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 * [Advanced RAG 08: Self-RAG](https://ai.gopubby.com/advanced-rag-08-self-rag-c0c5b5952e0e)
 * [Advanced RAG 09: Prompt Compression](https://ai.gopubby.com/advanced-rag-09-prompt-compression-95a589f7b554)
 * [Advanced RAG 10: Corrective Retrieval Augmented Generation (CRAG)](https://ai.gopubby.com/advanced-rag-10-corrective-retrieval-augmented-generation-crag-3f5a140796f9)
+
+### Knowledge Graph RAG
+
+* [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
+* [Integrating Neo4j into the LangChain ecosystem](https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2)
+* [LangChain has added Cypher Search](https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5)
+* [LangChain Cypher Search: Tips & Tricks](https://medium.com/neo4j/langchain-cypher-search-tips-tricks-f7c9e9abca4d)
