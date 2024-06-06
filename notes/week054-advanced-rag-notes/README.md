@@ -714,7 +714,7 @@ query_engine = RetrieverQueryEngine.from_args(
 
 不过要注意的是，这里对图数据库的查询实现和 LangChain 是不同的，`KnowledgeGraphRAGRetriever` 通过从用户问题中提取相关 **实体（Entity）**，然后在图数据库中查询和这些实体有关联的子图（默认深度为 2，查询的模式可以是 embedding 或 keyword），从而构建出上下文，大模型基于查询出的子图来回答用户问题，所以这也被称为 **(Sub)Graph RAG**。
 
-LlamaIndex 也支持 Text-to-Cypher 方式基于用户问题生成图查询语句，我们可以使用 [KnowledgeGraphQueryEngine](https://docs.llamaindex.ai/en/stable/api_reference/query_engine/knowledge_graph/) 来实现：
+LlamaIndex 也支持 Text-to-Cypher 方式基于用户问题生成图查询语句，我们可以使用 [KnowledgeGraphQueryEngine](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_query_engine/) 来实现：
 
 ```
 from llama_index.core.query_engine import KnowledgeGraphQueryEngine
@@ -828,7 +828,7 @@ parent_vectorstore = Neo4jVector.from_existing_index(
 
 在上面的查询构造一节，我们学习了如何实现 Text-to-Cypher，根据用户的问题生成图查询语句，从而实现图数据库的问答。查询构造依赖的是现有的图数据库，如果用户没有图数据库，数据散落在各种非结构化文档中，那么我们在查询之前可能还需要先对文档进行预处理，LlamaIndex 和 LangChain 都提供了相应的方法，让我们可以快速从杂乱的文档中构建出图谱数据。
 
-LlamaIndex 可以通过 [KnowledgeGraphIndex](https://docs.llamaindex.ai/en/stable/api_reference/indices/knowledge_graph/) 实现：
+LlamaIndex 可以通过 [KnowledgeGraphIndex](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/) 实现：
 
 ```
 from llama_index.core import KnowledgeGraphIndex
@@ -844,7 +844,7 @@ index = KnowledgeGraphIndex.from_documents(
 )
 ```
 
-这个构建的过程可能会很长，构建完成后，就可以通过 `index.as_query_engine()` 将其转换为 `RetrieverQueryEngine` 来实现问答：
+`KnowledgeGraphIndex` 默认使用大模型自动从文档中抽取出实体以及他们之间的关系，也就是所谓的 **三元组（Triplet）**，并将抽取出来的关系存入图数据库中，这个构建的过程可能会很长，构建完成后，就可以通过 `index.as_query_engine()` 将其转换为 `RetrieverQueryEngine` 来实现问答：
 
 ```
 query_engine = index.as_query_engine(
@@ -853,17 +853,33 @@ query_engine = index.as_query_engine(
 response = query_engine.query("Tell me more about Interleaf")
 ```
 
-> 其中，`documents` 也可以设置成一个空数组，这样也可以基于现有的图数据库来问答：
+此外，`KnowledgeGraphIndex` 还提供了一个 `kg_triplet_extract_fn` 参数，可以让用户自定义抽取三元组的逻辑：
+
+```
+index = KnowledgeGraphIndex.from_documents(
+    documents, 
+    kg_triplet_extract_fn=extract_triplets, 
+    service_context=service_context
+)
+```
+
+我们可以结合一些传统 NLP 里的关系抽取模型，比如 [REBEL](https://huggingface.co/Babelscape/rebel-large) 来实现图谱构建，参考 [Rebel + LlamaIndex Knowledge Graph Query Engine](https://colab.research.google.com/drive/1G6pcR0pXvSkdMQlAK_P-IrYgo-_staxd) 和 [Knowledge Graph Construction w/ WikiData Filtering](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/knowledge_graph2/) 这两个示例。
+
+> 其中，`documents` 也可以设置成一个空数组，这样也可以实现基于现有的图数据库来问答，和 `KnowledgeGraphRAGRetriever` 的效果一样：
 >
 > ```
 > index = KnowledgeGraphIndex.from_documents([], storage_context=storage_context)
 > ```
 
-* [Constructing knowledge graphs](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/)
-* [Knowledge Graph Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/)
-* [Knowledge Graph Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_query_engine/)
-* [Rebel + LlamaIndex Knowledge Graph Query Engine](https://colab.research.google.com/drive/1G6pcR0pXvSkdMQlAK_P-IrYgo-_staxd)
-* [Knowledge Graph Construction w/ WikiData Filtering](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/knowledge_graph2/)
+LangChain 也提供了一个类似的类 [LLMGraphTransformer](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/) 来实现图谱构建：
+
+```
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+
+llm_transformer = LLMGraphTransformer(llm=llm)
+graph_documents = llm_transformer.convert_to_graph_documents(documents)
+graph.add_graph_documents(graph_documents)
+```
 
 ### 后处理
 
