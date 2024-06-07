@@ -883,10 +883,41 @@ graph.add_graph_documents(graph_documents)
 
 ### 后处理
 
-这是打造 RAG 系统的最后一个问题，如何将检索出来的信息丢给大模型？检索出来的信息可能过长，或者存在冗余（比如从多个来源进行检索），我们可以在后处理步骤中对其进行压缩、排序、去重等。
+这是打造 RAG 系统的最后一个问题，如何将检索出来的信息丢给大模型？检索出来的信息可能过长，或者存在冗余（比如从多个来源进行检索），我们可以在后处理步骤中对其进行压缩、排序、去重等。LangChain 中并没有专门针对后处理的模块，文档也是零散地分布在各个地方，比如 [Contextual compression](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/)、[Cohere reranker](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/) 等；而 LlamaIndex 对此有一个专门的 [Postprocessor 模块](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)，学习起来相对更体系化一点。
 
-* [Node Postprocessor Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)
-    * [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/)
+#### 句子窗口检索（Sentence Window Retrieval）
+
+在上面的父文档检索一节中，我们提到，通过检索更小的块可以获得更好的搜索质量，然后通过扩大上下文范围可以获取更好的推理结果，**句子窗口检索** 使用的也是这个思想。它首先将文档分割成一个个句子，一句话相比于一段话来说，语义可能要更接近于用户的问题；每个句子包含一个窗口，也就是前后几句话，当检索出语义相近的句子后，将每个句子替换为包含前后句子的窗口。可以看到整个过程和父文档检索几乎是一样的，但是 LlamaIndex 为了区别其实现方式，将其放在了后处理模块，而不是检索模块。
+
+![](./images/sentence-window.webp)
+
+LlamaIndex 的文档中有一个示例 [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/) 演示了句子窗口检索的实现，首先使用 `SentenceWindowNodeParser` 将文档分割为 Node 列表，每个 Node 对应一个句子，并将前后 3 个句子放在 Node 的元数据中：
+
+```
+from llama_index.core.node_parser import SentenceWindowNodeParser
+
+node_parser = SentenceWindowNodeParser.from_defaults(
+    window_size=3,
+    window_metadata_key="window",
+    original_text_metadata_key="original_text",
+)
+nodes = node_parser.get_nodes_from_documents(documents)
+```
+
+然后对分割后的句子构建向量索引和查询引擎，最后将 `MetadataReplacementNodePostProcessor` 设置为查询引擎的后处理模块即可：
+
+```
+from llama_index.core import VectorStoreIndex
+from llama_index.core.postprocessor import MetadataReplacementPostProcessor
+
+sentence_index = VectorStoreIndex(nodes)
+query_engine = sentence_index.as_query_engine(
+    similarity_top_k=2,
+    node_postprocessors=[
+        MetadataReplacementPostProcessor(target_metadata_key="window")
+    ],
+)
+```
 
 #### 重排序
 
