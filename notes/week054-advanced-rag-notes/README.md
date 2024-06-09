@@ -732,18 +732,22 @@ LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https:
 
 ### 检索策略
 
-* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
-    * [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
-    * [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
-    * [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
-    * [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
 * [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
 * [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
 * [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
+* [Vector store-backed retriever | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/vectorstore/)
 
 ### 索引（Indexing）
 
 上面三步都是关于检索的，包括从哪里检索以及如何检索。第四个要考虑的问题是怎么存储我的数据？怎么设计我的索引？通过上面的学习我们知道，可以将数据存储到向量数据库、SQL 数据库或者图数据库中，针对这些不同的存储方式，我们又可以使用不同的索引策略。
+
+#### 索引策略
+
+* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
+* [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
+* [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
+* [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
+* [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
 
 #### 分块策略
 
@@ -885,9 +889,78 @@ graph.add_graph_documents(graph_documents)
 
 这是打造 RAG 系统的最后一个问题，如何将检索出来的信息丢给大模型？检索出来的信息可能过长，或者存在冗余（比如从多个来源进行检索），我们可以在后处理步骤中对其进行压缩、排序、去重等。LangChain 中并没有专门针对后处理的模块，文档也是零散地分布在各个地方，比如 [Contextual compression](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/)、[Cohere reranker](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/) 等；而 LlamaIndex 对此有一个专门的 [Postprocessor 模块](https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/node_postprocessors/)，学习起来相对更体系化一点。
 
+#### 过滤策略
+
+当检索结果太多时，与查询相关性最高的信息可能被埋在大量的无关文档中，如果将所有这些文档都传递到大模型，可能导致更昂贵的调用费用，生成的响应也更差。对检索结果进行过滤，是最容易想到的一种后处理方式。LlamaIndex 提供了下面这些过滤策略：
+
+* SimilarityPostprocessor
+
+为每个检索结果按相似度打分，然后通过设置一个分数阈值进行过滤。
+
+* KeywordNodePostprocessor
+
+使用 [spacy](https://spacy.io/) 的 **短语匹配器（PhraseMatcher）** 对检索结果进行检查，按包含或不包含特定的关键字进行过滤。
+
+* [Sentence Embedding Optimizer](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/OptimizerDemo/)
+
+使用 [nltk.tokenize](https://www.nltk.org/api/nltk.tokenize.html) 对检索出的每一条结果进行分句，然后通过计算每个分句和用户输入的相似性来过滤和输入不相干的句子，有两种过滤方式：`threshold_cutoff` 是根据相似度阈值来过滤（比如只保留相似度 0.75 以上的句子），`percentile_cutoff` 是根据百分位阈值来过滤（比如只保留相似度高的前 50% 的句子）。这种后处理方法可以极大地减少 token 的使用。
+
+* [FixedRecencyPostprocessor](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/RecencyPostprocessorDemo/)
+
+假设检索结果中有时间字段，我们可以按时间排序，然后取 topK 结果，这种策略对回答一些有关最近信息的问题非常有效。
+
+* [EmbeddingRecencyPostprocessor](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/RecencyPostprocessorDemo/)
+
+和 `FixedRecencyPostprocessor` 类似，也是根据检索结果中的时间字段排序，只不过它不是取 topK，而是将旧文档和新文档比较，将相似度很高的旧文档过滤掉。
+
+* [TimeWeightedPostprocessor](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/TimeWeightedPostprocessorDemo/)
+
+这种策略通过 **时间加权（Time Weighted）** 的方法对检索结果重新排序，然后再取 topK。每次检索时，对每一条检索结果设置一个最后访问时间，再通过下面的公式重新计算相似度分数：
+
+```
+hours_passed = (now - last_accessed) / 3600
+time_similarity = (1 - time_decay) ** hours_passed
+similarity = score + time_similarity
+```
+
+其中 `hours_passed` 指的是自上次访问以来经过的小时数，而 `time_decay` 是一个 0 到 1 之间的数值，该值由用户配置，值越低，表示记忆将会 “记住” 更长时间，值越高，记忆越容易 “遗忘”。可以看出 `hours_passed` 越大，`time_similarity` 就越小，这意味着经常访问的对象可以保持 “新鲜”，对于从没访问过的对象，`hours_passed` 为 0，这时 `time_similarity` 最大，这意味着检索更偏向于返回尚未查询过的信息。LangChain 也提供了 [Time-weighted vector store retriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/time_weighted_vectorstore/) 实现相似的功能。
+
+此外，LangChain 中的 [ContextualCompressionRetriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/) 也支持一些不同的过滤策略：
+
+* LLMChainExtractor
+
+这个过滤器依次将检索文档丢给大模型，让大模型从文档中抽取出和用户问题相关的片段，从而实现过滤的功能。
+
+* LLMChainFilter
+
+这个过滤器相比 `LLMChainExtractor` 稍微简单一点，它直接让大模型判断文档和用户问题是否相关，而不是抽取片段，这样做不仅消耗更少的 token，而且处理速度更快，而且可以防止大模型对文档原始内容进行篡改。
+
+* EmbeddingsFilter
+
+和 LlamaIndex 的 `SimilarityPostprocessor` 类似，计算每个文档和用户问题的相似度分数，然后通过设置一个分数阈值进行过滤。
+
+* EmbeddingsRedundantFilter
+
+这个过滤器虽然名字和 `EmbeddingsFilter` 类似，但是实现原理是不一样的，它不是计算文档和用户问题之间的相似度，而是计算文档之间的相似度，然后把相似的文档过滤掉，有点像 LlamaIndex 的 `EmbeddingRecencyPostprocessor`。
+
+#### 重排序
+
+可以使用 [Cohere 的 Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
+
+* LongContextReorder
+* [Long-Context Reorder | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/long_context_reorder/)
+* CohereRerank
+* [Cohere reranker | LangChain](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)
+* SentenceTransformerRerank
+* LLM Rerank
+* JinaRerank
+* RankGPT
+* Colbert Reranker
+* RankLLMRerank
+
 #### 句子窗口检索（Sentence Window Retrieval）
 
-在上面的父文档检索一节中，我们提到，通过检索更小的块可以获得更好的搜索质量，然后通过扩大上下文范围可以获取更好的推理结果，**句子窗口检索** 使用的也是这个思想。它首先将文档分割成一个个句子，一句话相比于一段话来说，语义可能要更接近于用户的问题；每个句子包含一个窗口，也就是前后几句话，当检索出语义相近的句子后，将每个句子替换为包含前后句子的窗口。可以看到整个过程和父文档检索几乎是一样的，但是 LlamaIndex 为了区别其实现方式，将其放在了后处理模块，而不是检索模块。
+除了对检索结果进行压缩过滤，我们也可以对检索结果进行增强。在上面的父文档检索一节中，我们提到，通过检索更小的块可以获得更好的搜索质量，然后通过扩大上下文范围可以获取更好的推理结果，**句子窗口检索** 使用的也是这个思想。它首先将文档分割成一个个句子，一句话相比于一段话来说，语义可能要更接近于用户的问题；每个句子包含一个窗口，也就是前后几句话，当检索出语义相近的句子后，将每个句子替换为包含前后句子的窗口。可以看到整个过程和父文档检索几乎是一样的，但是 LlamaIndex 为了区别其实现方式，将其放在了后处理模块，而不是检索模块。
 
 ![](./images/sentence-window.webp)
 
@@ -919,14 +992,11 @@ query_engine = sentence_index.as_query_engine(
 )
 ```
 
-#### 重排序
+#### 前向/后向增强
 
-当检索结果太多时，与查询相关性最高的信息可能被埋在大量的无关文档中，如果将所有这些文档都传递到大模型，可能导致更昂贵的调用费用，生成的响应也更差。
-
-可以使用 [Cohere 的 Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
-
-* [Contextual compression](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/)
-* [Cohere reranker](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)
+* [Forward/Backward Augmentation](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/PrevNextPostprocessorDemo/)
+    * PrevNextNodePostprocessor
+    * AutoPrevNextNodePostprocessor
 
 ##### RAG 融合（RAG Fusion）
 
@@ -979,6 +1049,10 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 从 RRF 分数的计算中，我们可以看出，RRF 不依赖于每次检索分配的绝对分数，而是依赖于相对排名，这使得它非常适合组合来自可能具有不同分数尺度或分布的查询结果。
 
 值得注意的是，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。
+
+#### 敏感信息处理
+
+* PIINodePostprocessor
 
 #### 引用来源
 
