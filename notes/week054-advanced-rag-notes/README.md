@@ -925,6 +925,16 @@ similarity = score + time_similarity
 
 其中 `hours_passed` 指的是自上次访问以来经过的小时数，而 `time_decay` 是一个 0 到 1 之间的数值，该值由用户配置，值越低，表示记忆将会 “记住” 更长时间，值越高，记忆越容易 “遗忘”。可以看出 `hours_passed` 越大，`time_similarity` 就越小，这意味着经常访问的对象可以保持 “新鲜”，对于从没访问过的对象，`hours_passed` 为 0，这时 `time_similarity` 最大，这意味着检索更偏向于返回尚未查询过的信息。LangChain 也提供了 [Time-weighted vector store retriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/time_weighted_vectorstore/) 实现相似的功能。
 
+* [LongContextReorder](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/LongContextReorder/)
+
+根据 Nelson F. Liu 等人在 [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172) 这篇论文中的研究，当前的大模型并没有充分利用上下文中的信息：当相关信息出现在上下文的开头或结尾时，性能往往最高，而当模型必须在长上下文的中间访问相关信息时，性能会显著下降。
+
+![](./images/long-context.png)
+
+基于这个结论，我们可以将检索出的最相关的片段分布在上下文的开头和结尾，而不是直接按相关性排序，比如检索结果是 1 2 3 4 5 6 7 8 9，重排序后可以是 1 3 5 7 9 8 6 4 2，这就是 Long-Context Reorder 的核心思路。
+
+LangChain 也支持 [Long-Context Reorder](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/long_context_reorder/)。
+
 此外，LangChain 中的 [ContextualCompressionRetriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/contextual_compression/) 也支持一些不同的过滤策略：
 
 * LLMChainExtractor
@@ -945,18 +955,75 @@ similarity = score + time_similarity
 
 #### 重排序
 
-可以使用 [Cohere 的 Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
+在上面的过滤策略中，我们经常会用到 Embedding 来计算文档的相似性，然后根据相似性来对文档进行排序，这里的排序被称为 **粗排**，我们还可以使用一些专门的排序引擎对文档进一步排序和过滤，这被称为 **精排**。LlamaIndex 支持下面这些重排序策略：
 
-* LongContextReorder
-* [Long-Context Reorder | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/long_context_reorder/)
-* CohereRerank
-* [Cohere reranker | LangChain](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)
-* SentenceTransformerRerank
-* LLM Rerank
-* JinaRerank
-* RankGPT
-* Colbert Reranker
-* RankLLMRerank
+* [CohereRerank](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/CohereRerank/)
+
+[Cohere AI](https://cohere.ai/) 是一家加拿大初创公司，提供自然语言处理模型，帮助公司改善人机交互。可以使用 Cohere 提供的 [Rerank API](https://docs.cohere.com/docs/reranking) 来对文档进行相关性重排，过滤不相干的内容从而达到压缩的效果。
+
+> 使用之前需要先申请和配置 `COHERE_API_KEY`，并安装 Python 依赖 `pip install llama-index-postprocessor-cohere-rerank`。
+
+LangChain 也集成了 Cohere 的 Rerank API，参考 [这里](https://python.langchain.com/v0.1/docs/integrations/retrievers/cohere-reranker/)。
+
+* [JinaRerank](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/JinaRerank/)
+
+[Jina AI](https://jina.ai/) 总部位于柏林，是一家领先的 AI 公司，提供一流的嵌入、重排序和提示优化服务，实现先进的多模态人工智能。可以使用 Jina 提供的 [Rerank API](https://jina.ai/reranker/) 来对文档进行精排。
+
+> 使用之前需要先申请和配置 `JINAAI_API_KEY`，并安装 Python 依赖 `pip install llama-index-postprocessor-jinaai-rerank`。
+
+* [SentenceTransformerRerank](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/SentenceTransformerRerank/)
+
+除了使用商业服务，我们也可以使用一些本地模型来实现重排序。比如 [sentence-transformer](https://www.sbert.net/index.html) 包中的 **交叉编码器（Cross Encoder）** 可以用来重新排序节点。
+
+LlamaIndex 默认使用的是 `cross-encoder/ms-marco-TinyBERT-L-2-v2` 模型，这个是速度最快的。为了权衡模型的速度和准确性，请参考 [sentence-transformer 文档](https://www.sbert.net/docs/pretrained-models/ce-msmarco.html)，以获取更完整的模型列表。
+
+* [Colbert Reranker](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/ColbertRerank/)
+
+另一种实现本地重排序的是 [ColBERT](https://github.com/stanford-futuredata/ColBERT) 模型，它是一种快速准确的检索模型，可以在几十毫秒内对大文本集合进行基于 BERT 的搜索。
+
+> 使用时需要安装 Python 依赖 `pip install llama-index-postprocessor-colbert-rerank`。
+
+* [LLM Rerank](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/LLMReranker-Gatsby/)
+
+我们还可以使用大模型来做重排序，将文档丢给大模型，然后让大模型对文档的相关性进行评分，从而实现文档的重排序。下面是 LlamaIndex 内置的用于重排序的 Prompt：
+
+```
+DEFAULT_CHOICE_SELECT_PROMPT_TMPL = (
+    "A list of documents is shown below. Each document has a number next to it along "
+    "with a summary of the document. A question is also provided. \n"
+    "Respond with the numbers of the documents "
+    "you should consult to answer the question, in order of relevance, as well \n"
+    "as the relevance score. The relevance score is a number from 1-10 based on "
+    "how relevant you think the document is to the question.\n"
+    "Do not include any documents that are not relevant to the question. \n"
+    "Example format: \n"
+    "Document 1:\n<summary of document 1>\n\n"
+    "Document 2:\n<summary of document 2>\n\n"
+    "...\n\n"
+    "Document 10:\n<summary of document 10>\n\n"
+    "Question: <question>\n"
+    "Answer:\n"
+    "Doc: 9, Relevance: 7\n"
+    "Doc: 3, Relevance: 4\n"
+    "Doc: 7, Relevance: 3\n\n"
+    "Let's try this now: \n\n"
+    "{context_str}\n"
+    "Question: {query_str}\n"
+    "Answer:\n"
+)
+```
+
+* [RankGPT](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/rankGPT/)
+
+RankGPT 是 Weiwei Sun 等人在论文 [Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents](https://arxiv.org/abs/2304.09542) 中提出的一种基于大模型的 zero-shot 重排方法，它采用了排列生成方法和滑动窗口策略来高效地对段落进行重排序，具体内容可以参考 [RankGPT 的源码](https://github.com/sunnweiwei/RankGPT)。
+
+> 使用时需要安装 Python 依赖 `pip install llama-index-postprocessor-rankgpt-rerank`。
+
+* [RankLLMRerank](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/rankLLM/)
+
+[RankLLM](https://github.com/castorini/rank_llm) 和 RankGPT 类似，也是利用大模型来实现重排，只不过它的重点放在与 [FastChat](https://github.com/lm-sys/FastChat?tab=readme-ov-file#supported-models) 兼容的开源大模型上，比如 Vicuna 和 Zephyr 等，并且对这些开源模型专门为重排任务进行了微调，比如 RankVicuna 和 RankZephyr 等。
+
+> 当前 RankLLM 依赖于 CUDA，且需要安装 JDK、PyTorch、Faiss 等依赖，使用时还需要安装 Python 依赖 `pip install llama-index-postprocessor-rankllm-rerank`。
 
 #### 句子窗口检索（Sentence Window Retrieval）
 
@@ -992,11 +1059,11 @@ query_engine = sentence_index.as_query_engine(
 )
 ```
 
-#### 前向/后向增强
+句子窗口检索通过扩大上下文范围来获取更好的推理结果，其实，LlamaIndex 中还有另外两个后处理器也使用了这种策略：`PrevNextNodePostprocessor` 和 `AutoPrevNextNodePostprocessor`，他们将检索结果的前后内容也一并送往大模型，所以也被称为 [前向/后向增强（Forward/Backward Augmentation）](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/PrevNextPostprocessorDemo/)，这在回答一些关于某个时间点之前或之后的问题时非常有用。
 
-* [Forward/Backward Augmentation](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/PrevNextPostprocessorDemo/)
-    * PrevNextNodePostprocessor
-    * AutoPrevNextNodePostprocessor
+![](./images/prev-next.png)
+
+如上图所示，用户的问题是 “作者在 YC 之后的时间里都做了啥？”，如果使用传统的检索方法，可能只检索到作者在 YC 期间的活动，很显然我们可以将文档后面的内容都带出来，更利于大模型的回答。`PrevNextNodePostprocessor` 通过手动设定向前或向后增强，而 `AutoPrevNextNodePostprocessor` 通过大模型自动判断是否要向前或向后增强。
 
 ##### RAG 融合（RAG Fusion）
 
@@ -1052,7 +1119,7 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 
 #### 敏感信息处理
 
-* PIINodePostprocessor
+检索的文档中可能含有如用户名、身份证、手机号等敏感信息，这类信息统称为 **PII（Personal Identifiable Information、个人可识别信息）**，如果将这类信息丢给大模型生成回复，可能存在一定的安全风险，所以需要在后处理步骤中将 PII 信息删除。LlamaIndex 提供了两种方式来 [删除 PII 信息](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/PII/)：使用大模型（`PIINodePostprocessor`）和使用专用的 NER 模型（`NERPIINodePostprocessor`）。
 
 #### 引用来源
 

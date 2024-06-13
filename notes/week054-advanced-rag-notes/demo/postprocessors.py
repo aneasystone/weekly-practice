@@ -79,3 +79,57 @@ postprocessor = LongContextReorder()
 nodes = postprocessor.postprocess_nodes(nodes)
 for node in nodes:
     print(node)
+
+# Cohere Rerank
+from llama_index.postprocessor.cohere_rerank import CohereRerank
+postprocessor = CohereRerank(
+    top_n=2, model="rerank-english-v2.0", api_key="YOUR COHERE API KEY"
+)
+postprocessor.postprocess_nodes(nodes)
+
+# Jina Rerank
+from llama_index.postprocessor.jinaai_rerank import JinaRerank
+postprocessor = JinaRerank(
+    top_n=2, model="jina-reranker-v1-base-en", api_key="YOUR JINA API KEY"
+)
+postprocessor.postprocess_nodes(nodes)
+
+# Sentence Transformer Rerank
+from llama_index.core.postprocessor import SentenceTransformerRerank
+postprocessor = SentenceTransformerRerank(
+    model="cross-encoder/ms-marco-MiniLM-L-2-v2", top_n=3
+)
+postprocessor.postprocess_nodes(nodes)
+
+# Colbert Rerank
+from llama_index.postprocessor.colbert_rerank import ColbertRerank
+postprocessor = ColbertRerank(
+    top_n=5, model="colbert-ir/colbertv2.0", tokenizer="colbert-ir/colbertv2.0", keep_retrieval_score=True,
+)
+postprocessor.postprocess_nodes(nodes)
+
+# LLM Rerank
+from llama_index.core.postprocessor import LLMRerank
+postprocessor = LLMRerank(
+    top_n=2, service_context=service_context
+)
+postprocessor.postprocess_nodes(nodes)
+
+# RankGPT Rerank
+from llama_index.postprocessor.rankgpt_rerank import RankGPTRerank
+postprocessor = RankGPTRerank(
+    top_n=3, llm=OpenAI(model="gpt-3.5-turbo-16k")
+)
+postprocessor.postprocess_nodes(nodes)
+
+# RankLLM Rerank
+from llama_index.postprocessor import RankLLMRerank
+postprocessor = RankLLMRerank(top_n=5, model="zephyr")
+postprocessor.postprocess_nodes(nodes)
+
+# PII node post processor
+from llama_index.core.postprocessor import PIINodePostprocessor
+postprocessor = PIINodePostprocessor(
+    service_context=service_context  # this should be setup with an LLM you trust
+)
+postprocessor.postprocess_nodes(nodes)
