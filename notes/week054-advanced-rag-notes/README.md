@@ -806,14 +806,63 @@ parent_vectorstore = Neo4jVector.from_existing_index(
 * [Recursive Retriever + Node References](https://docs.llamaindex.ai/en/stable/examples/retrievers/recursive_retriever_nodes/)
 * [Recursive Retriever + Query Engine Demo](https://docs.llamaindex.ai/en/stable/examples/query_engine/pdf_tables/recursive_retriever/)
 * [Comparing Methods for Structured Retrieval (Auto-Retrieval vs. Recursive Retrieval)](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_vs_recursive_retriever/)
+* [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
 
 #### 混合检索（Fusion Retrieval）
 
-* [Ensemble Retriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/ensemble/)
-* [Simple Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/simple_fusion/)
-* [Reciprocal Rerank Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/reciprocal_rerank_fusion/)
-* [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
-* [BM25 Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/bm25_retriever/)
+在上面学习查询扩展策略时，有提到 **RAG 融合（RAG Fusion）** 技术，它根据用户的原始问题生成意思相似但表述不同的子问题并检索。其实，我们还可以结合不同的检索策略，比如最常见的做法是将基于关键词的老式搜索和基于语义的现代搜索结合起来，基于关键词的搜索又被称为 **稀疏检索器（sparse retriever）**，通常使用 [BM25](https://en.wikipedia.org/wiki/Okapi_BM25)、[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) 等传统检索算法，基于语义的搜索又被称为 **密集检索器（dense retriever）**，使用的是现在流行的 embedding 算法。
+
+在 LangChain 中，可以使用 [EnsembleRetriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/ensemble/) 来实现混合检索，LlamaIndex 中的 [QueryFusionRetriever](https://docs.llamaindex.ai/en/latest/api_reference/retrievers/query_fusion/) 也能实现类似的功能，[Simple Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/simple_fusion/) 和 [Reciprocal Rerank Fusion Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/reciprocal_rerank_fusion/) 是两个基于 `QueryFusionRetriever` 实现混合检索的示例。
+
+混合检索将两种或多种互补的检索策略结合在一起，通常能得到更好的检索结果，其实现并不复杂，它的关键技巧是如何正确地将不同的检索结果结合起来，这个问题通常是通过 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法来解决的，RRF 算法对检索结果重新进行排序从而获得最终的检索结果。
+
+RRF 是滑铁卢大学和谷歌合作开发的一种算法，它可以将具有不同相关性指标的多个结果集组合成单个结果集，这里是 [它的论文地址](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)，其中最关键的部分就是下面这个公式：
+
+![](./images/rrf-score.png)
+
+其中，D 表示文档集，R 是从 1 到 |D| 的排列，k 是一个常量，默认值为 60.
+
+为了对这个公式有个更直观的理解，我们不妨执行下 [RAG Fusion 开源的代码](https://github.com/Raudaschl/rag-fusion)，执行结果如下：
+
+```
+Initial individual search result ranks:
+For query '1. Effects of climate change on biodiversity': {'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}
+For query '2. Economic consequences of climate change': {'doc9': 0.85, 'doc7': 0.79}
+For query '3. Health impacts of climate change': {'doc1': 0.8, 'doc10': 0.76}
+For query '4. Solutions to mitigate the impact of climate change': {'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}
+Updating score for doc7 from 0 to 0.016666666666666666 based on rank 0 in query '1. Effects of climate change on biodiversity'
+Updating score for doc8 from 0 to 0.01639344262295082 based on rank 1 in query '1. Effects of climate change on biodiversity'
+Updating score for doc5 from 0 to 0.016129032258064516 based on rank 2 in query '1. Effects of climate change on biodiversity'
+Updating score for doc9 from 0 to 0.016666666666666666 based on rank 0 in query '2. Economic consequences of climate change'
+Updating score for doc7 from 0.016666666666666666 to 0.03306010928961749 based on rank 1 in query '2. Economic consequences of climate change'
+Updating score for doc1 from 0 to 0.016666666666666666 based on rank 0 in query '3. Health impacts of climate change'
+Updating score for doc10 from 0 to 0.01639344262295082 based on rank 1 in query '3. Health impacts of climate change'
+Updating score for doc7 from 0.03306010928961749 to 0.04972677595628415 based on rank 0 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc10 from 0.01639344262295082 to 0.03278688524590164 based on rank 1 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc1 from 0.016666666666666666 to 0.03279569892473118 based on rank 2 in query '4. Solutions to mitigate the impact of climate change'
+Updating score for doc9 from 0.016666666666666666 to 0.032539682539682535 based on rank 3 in query '4. Solutions to mitigate the impact of climate change'
+Final reranked results: {'doc7': 0.04972677595628415, 'doc1': 0.03279569892473118, 'doc10': 0.03278688524590164, 'doc9': 0.032539682539682535, 'doc8': 0.01639344262295082, 'doc5': 0.016129032258064516}
+Final output based on ['1. Effects of climate change on biodiversity', '2. Economic consequences of climate change', '3. Health impacts of climate change', '4. Solutions to mitigate the impact of climate change'] and reranked documents: ['doc7', 'doc1', 'doc10', 'doc9', 'doc8', 'doc5']
+```
+
+首先针对原始问题生成四个不同的问题，然后针对不同的问题分别执行检索得到不同的文档排名：
+
+* 问题 1 检索结果排名：`{'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}`
+* 问题 2 检索结果排名：`{'doc9': 0.85, 'doc7': 0.79}`
+* 问题 3 检索结果排名：`{'doc1': 0.8, 'doc10': 0.76}`
+* 问题 4 检索结果排名：`{'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}`
+
+可以看到每次检索出来的文档都不一样，就算是相同文档，得分也不一样。为了计算每个文档的最终排名，我们使用 RRF 公式对每个文档计算 RRF 分数，这里以 `doc7` 为例，该文档一共出现了三次，在问题 1 的检索中排名第一，问题 2 的检索中排名第二，问题 4 的检索中排名第一，所以它的得分计算如下：
+
+```
+RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
+```
+
+使用类似的方法计算其他文档的得分，最终得到所有文档的最终排名。
+
+从 RRF 分数的计算中，我们可以看出，RRF 不依赖于每次检索分配的绝对分数，而是依赖于相对排名，这使得它非常适合组合来自可能具有不同分数尺度或分布的查询结果。
+
+值得注意的是，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。
 
 #### 多向量检索（Multi-Vector Retrieval）
 
@@ -1064,58 +1113,6 @@ query_engine = sentence_index.as_query_engine(
 ![](./images/prev-next.png)
 
 如上图所示，用户的问题是 “作者在 YC 之后的时间里都做了啥？”，如果使用传统的检索方法，可能只检索到作者在 YC 期间的活动，很显然我们可以将文档后面的内容都带出来，更利于大模型的回答。`PrevNextNodePostprocessor` 通过手动设定向前或向后增强，而 `AutoPrevNextNodePostprocessor` 通过大模型自动判断是否要向前或向后增强。
-
-##### RAG 融合（RAG Fusion）
-
-在上面学习查询扩展策略时，有提到 `RAG Fusion` 技术，它利用 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法对检索结果进行排序，这也是一种重排技术。
-
-RRF 是滑铁卢大学和谷歌合作开发的一种算法，它可以将具有不同相关性指标的多个结果集组合成单个结果集，这里是 [它的论文地址](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)，其中最关键的部分就是下面这个公式：
-
-![](./images/rrf-score.png)
-
-其中，D 表示文档集，R 是从 1 到 |D| 的排列，k 是一个常量，默认值为 60.
-
-为了对这个公式有个更直观的理解，我们不妨执行下 [RAG Fusion 开源的代码](https://github.com/Raudaschl/rag-fusion)，执行结果如下：
-
-```
-Initial individual search result ranks:
-For query '1. Effects of climate change on biodiversity': {'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}
-For query '2. Economic consequences of climate change': {'doc9': 0.85, 'doc7': 0.79}
-For query '3. Health impacts of climate change': {'doc1': 0.8, 'doc10': 0.76}
-For query '4. Solutions to mitigate the impact of climate change': {'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}
-Updating score for doc7 from 0 to 0.016666666666666666 based on rank 0 in query '1. Effects of climate change on biodiversity'
-Updating score for doc8 from 0 to 0.01639344262295082 based on rank 1 in query '1. Effects of climate change on biodiversity'
-Updating score for doc5 from 0 to 0.016129032258064516 based on rank 2 in query '1. Effects of climate change on biodiversity'
-Updating score for doc9 from 0 to 0.016666666666666666 based on rank 0 in query '2. Economic consequences of climate change'
-Updating score for doc7 from 0.016666666666666666 to 0.03306010928961749 based on rank 1 in query '2. Economic consequences of climate change'
-Updating score for doc1 from 0 to 0.016666666666666666 based on rank 0 in query '3. Health impacts of climate change'
-Updating score for doc10 from 0 to 0.01639344262295082 based on rank 1 in query '3. Health impacts of climate change'
-Updating score for doc7 from 0.03306010928961749 to 0.04972677595628415 based on rank 0 in query '4. Solutions to mitigate the impact of climate change'
-Updating score for doc10 from 0.01639344262295082 to 0.03278688524590164 based on rank 1 in query '4. Solutions to mitigate the impact of climate change'
-Updating score for doc1 from 0.016666666666666666 to 0.03279569892473118 based on rank 2 in query '4. Solutions to mitigate the impact of climate change'
-Updating score for doc9 from 0.016666666666666666 to 0.032539682539682535 based on rank 3 in query '4. Solutions to mitigate the impact of climate change'
-Final reranked results: {'doc7': 0.04972677595628415, 'doc1': 0.03279569892473118, 'doc10': 0.03278688524590164, 'doc9': 0.032539682539682535, 'doc8': 0.01639344262295082, 'doc5': 0.016129032258064516}
-Final output based on ['1. Effects of climate change on biodiversity', '2. Economic consequences of climate change', '3. Health impacts of climate change', '4. Solutions to mitigate the impact of climate change'] and reranked documents: ['doc7', 'doc1', 'doc10', 'doc9', 'doc8', 'doc5']
-```
-
-首先针对原始问题生成四个不同的问题，然后针对不同的问题分别执行检索得到不同的文档排名：
-
-* 问题 1 检索结果排名：`{'doc7': 0.89, 'doc8': 0.79, 'doc5': 0.72}`
-* 问题 2 检索结果排名：`{'doc9': 0.85, 'doc7': 0.79}`
-* 问题 3 检索结果排名：`{'doc1': 0.8, 'doc10': 0.76}`
-* 问题 4 检索结果排名：`{'doc7': 0.85, 'doc10': 0.8, 'doc1': 0.74, 'doc9': 0.71}`
-
-可以看到每次检索出来的文档都不一样，就算是相同文档，得分也不一样。为了计算每个文档的最终排名，我们使用 RRF 公式对每个文档计算 RRF 分数，这里以 `doc7` 为例，该文档一共出现了三次，在问题 1 的检索中排名第一，问题 2 的检索中排名第二，问题 4 的检索中排名第一，所以它的得分计算如下：
-
-```
-RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
-```
-
-使用类似的方法计算其他文档的得分，最终得到所有文档的最终排名。
-
-从 RRF 分数的计算中，我们可以看出，RRF 不依赖于每次检索分配的绝对分数，而是依赖于相对排名，这使得它非常适合组合来自可能具有不同分数尺度或分布的查询结果。
-
-值得注意的是，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。
 
 #### 敏感信息处理
 
