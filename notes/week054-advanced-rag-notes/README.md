@@ -730,40 +730,158 @@ query_engine = KnowledgeGraphQueryEngine(
 
 LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/Neo4jKGIndexDemo/) 或 [Nebula Graph Store](https://docs.llamaindex.ai/en/stable/examples/query_engine/knowledge_graph_rag_query_engine/)。
 
-### 检索策略
+### 索引（Indexing）
+
+上面三步都是关于检索的，包括从哪里检索以及如何检索。第四个要考虑的问题是怎么存储我的数据？怎么设计我的索引？通过上面的学习我们知道，可以将数据存储到向量数据库、SQL 数据库或者图数据库中，针对这些不同的存储方式，我们又可以使用不同的索引策略。
+
+#### 构建向量索引
+
+* [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
+
+#### 分块策略（Chunking）
+
+几乎所有的大模型或嵌入模型，输入长度都是受限的，因此，你需要将文档进行分块，通过分块不仅可以确保我们嵌入的内容尽可能少地包含噪音，同时保证嵌入内容和用户查询之间具有更高的语义相关性。有很多种不同的分块策略，比如你可以按长度进行分割，保证每个分块大小适中，你也可以按句子或段落进行分割，防止将完整的句子切成两半。每种分块策略可能适用于不同的情况，我们要仔细斟酌这些策略的优点和缺点，确定他们的适用场景，[这篇博客](https://www.pinecone.io/learn/chunking-strategies/) 对常见的分块策略做了一个总结。
+
+文档分块是索引构建中的关键步骤，无论是 LangChain 还是 LlamaIndex 都提供了大量的文档分块的方法，可以参考 [LangChain 的 Text Splitters](https://python.langchain.com/docs/modules/data_connection/document_transformers/) 或 [LlamaIndex 的 Node Parser 或 Text Splitters](https://docs.llamaindex.ai/en/stable/module_guides/loading/node_parsers/) 文档。
+
+* 固定大小分块（Fixed-size chunking）
+
+这是最常见也是最直接的分块策略，文档被分割成固定大小的分块，分块之间可以保留一些重叠，以确保不会出现语义相关的内容被不自然地拆分的情况。在大多数情况下，固定大小分块都是最佳选择，与其他形式的分块相比，它既廉价又简单易用，而且不需要使用任何自然语言处理库。
+
+分块大小是一个需要深思熟虑的参数，它取决于你所使用的嵌入模型的 token 容量，比如，基于 BERT 的 `sentence-transformer` 最多只能处理 512 个 token，而 OpenAI 的 `ada-002` 能够处理 8191 个；另外这里也需要权衡大模型的 token 限制，由于分块大小直接决定了我们加载到大模型上下文窗口中的信息量，[这篇博客](https://www.mattambrogi.com/posts/chunk-size-matters/) 中对不同的分块大小进行了实验，可以看到不同的分块大小可以得到不同的性能表现。
+
+使用 LangChain 的 `CharacterTextSplitter` 实现固定大小分块：
+
+```
+from langchain.text_splitter import CharacterTextSplitter
+text_splitter = CharacterTextSplitter(
+    separator = "\n\n",
+    chunk_size = 256,
+    chunk_overlap  = 20
+)
+docs = text_splitter.create_documents([text])
+```
+
+---
+
+LlamaIndex 中的各种分块方法：
+
+* File-Based Node Parsers
+    * SimpleFileNodeParser
+    * HTMLNodeParser
+    * JSONNodeParser
+    * DashScopeJsonNodeParser
+    * MarkdownNodeParser
+    * MarkdownElementNodeParser
+    * UnstructuredElementNodeParser
+* Text-Splitters
+    * CodeSplitter
+        * [Chunking 2M+ files a day for Code Search using Syntax Trees](https://docs.sweep.dev/blogs/chunking-2m-files)
+    * LangchainNodeParser
+    * SentenceSplitter
+    * SentenceWindowNodeParser
+    * SemanticSplitterNodeParser
+        * [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
+        * [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
+        * [The 5 Levels Of Text Splitting For Retrieval (Notebook)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
+    * TokenTextSplitter
+* Relation-Based Node Parsers
+    * HierarchicalNodeParser
+
+LangChain 中的各种分块方法：
+
+* [Split by HTML header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_header_metadata/)
+* [Split by HTML section](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_section_aware_splitter/)
+* [Split by character](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/character_text_splitter/)
+* [Split code](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/code_splitter/)
+* [Split by Markdown header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/)
+* [Recursively split JSON](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/)
+* [Recursively split by character](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_text_splitter/)
+* [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
+* [Split by tokens](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/split_by_token/)
+
+#### 嵌入策略（Embedding）
+
+有很多索引优化技术都围绕嵌入模型展开：
+
+* 微调嵌入模型，将嵌入模型定制为特定领域的上下文，特别是对于术语不断演化或罕见的领域。例如，`BAAI/bge-small-en` 是一个高性能的嵌入模型，可以进行微调；
+* 动态嵌入根据单词的上下文进行调整，而静态嵌入则为每个单词使用单一向量。例如，OpenAI 的 `embeddings-ada-02` 是一个复杂的动态嵌入模型，可以捕获上下文理解。
+
+* [Getting Started With Embeddings](https://huggingface.co/blog/getting-started-with-embeddings)
+* [Train and Fine-Tune Sentence Transformers Models](https://huggingface.co/blog/how-to-train-sentence-transformers)
+* [Training and Finetuning Embedding Models with Sentence Transformers v3](https://huggingface.co/blog/train-sentence-transformers)
+* [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
+
+#### 构建图谱
+
+在上面的查询构造一节，我们学习了如何实现 Text-to-Cypher，根据用户的问题生成图查询语句，从而实现图数据库的问答。查询构造依赖的是现有的图数据库，如果用户没有图数据库，数据散落在各种非结构化文档中，那么我们在查询之前可能还需要先对文档进行预处理，LlamaIndex 和 LangChain 都提供了相应的方法，让我们可以快速从杂乱的文档中构建出图谱数据。
+
+LlamaIndex 可以通过 [KnowledgeGraphIndex](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/) 实现：
+
+```
+from llama_index.core import KnowledgeGraphIndex
+index = KnowledgeGraphIndex.from_documents(
+    documents,
+    storage_context=storage_context,
+    max_triplets_per_chunk=10,
+    space_name=space_name,
+    edge_types=edge_types,
+    rel_prop_names=rel_prop_names,
+    tags=tags,
+    include_embeddings=True,
+)
+```
+
+`KnowledgeGraphIndex` 默认使用大模型自动从文档中抽取出实体以及他们之间的关系，也就是所谓的 **三元组（Triplet）**，并将抽取出来的关系存入图数据库中，这个构建的过程可能会很长，构建完成后，就可以通过 `index.as_query_engine()` 将其转换为 `RetrieverQueryEngine` 来实现问答：
+
+```
+query_engine = index.as_query_engine(
+    include_text=True, response_mode="tree_summarize"
+)
+response = query_engine.query("Tell me more about Interleaf")
+```
+
+此外，`KnowledgeGraphIndex` 还提供了一个 `kg_triplet_extract_fn` 参数，可以让用户自定义抽取三元组的逻辑：
+
+```
+index = KnowledgeGraphIndex.from_documents(
+    documents, 
+    kg_triplet_extract_fn=extract_triplets, 
+    service_context=service_context
+)
+```
+
+我们可以结合一些传统 NLP 里的关系抽取模型，比如 [REBEL](https://huggingface.co/Babelscape/rebel-large) 来实现图谱构建，参考 [Rebel + LlamaIndex Knowledge Graph Query Engine](https://colab.research.google.com/drive/1G6pcR0pXvSkdMQlAK_P-IrYgo-_staxd) 和 [Knowledge Graph Construction w/ WikiData Filtering](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/knowledge_graph2/) 这两个示例。
+
+> 其中，`documents` 也可以设置成一个空数组，这样也可以实现基于现有的图数据库来问答，和 `KnowledgeGraphRAGRetriever` 的效果一样：
+>
+> ```
+> index = KnowledgeGraphIndex.from_documents([], storage_context=storage_context)
+> ```
+
+LangChain 也提供了一个类似的类 [LLMGraphTransformer](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/) 来实现图谱构建：
+
+```
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+
+llm_transformer = LLMGraphTransformer(llm=llm)
+graph_documents = llm_transformer.convert_to_graph_documents(documents)
+graph.add_graph_documents(graph_documents)
+```
+
+#### 其他索引策略
+
+* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
+* [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
+* [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
+* [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
+
+### 检索策略（Retrieval）
 
 * [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
 * [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
 * [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
 * [Vector store-backed retriever | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/vectorstore/)
-
-### 索引（Indexing）
-
-上面三步都是关于检索的，包括从哪里检索以及如何检索。第四个要考虑的问题是怎么存储我的数据？怎么设计我的索引？通过上面的学习我们知道，可以将数据存储到向量数据库、SQL 数据库或者图数据库中，针对这些不同的存储方式，我们又可以使用不同的索引策略。
-
-#### 索引策略
-
-* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
-* [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
-* [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
-* [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
-* [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
-
-#### 分块策略
-
-文档分块是索引构建中的关键步骤，在尝试不同的分块策略和大小时，要特别注意检查文档在拆分时是否会出现语义相关内容被不自然地拆分的情况。无论是 LangChain 和 LlamaIndex 都提供了大量的文档分块的方法。
-
-* [Node Parser Usage Pattern | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/loading/node_parsers/)
-* [Node Parser Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/loading/node_parsers/modules/)
-* [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
-* [Text Splitters | LangChain](https://python.langchain.com/docs/modules/data_connection/document_transformers/)
-* [Chunking Strategies for LLM Applications](https://www.pinecone.io/learn/chunking-strategies/)
-* [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
-    * [Notebook](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
-
-由于分块大小直接决定了我们加载到大模型上下文窗口中的信息量，因此通过尝试调整不同的分块大小，可以得到不同的性能表现。
-
-* [Chunk Size Matters](https://www.mattambrogi.com/posts/chunk-size-matters/)
 
 #### 父文档检索（Parent Document Retrieval）
 
@@ -862,7 +980,16 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
 
 从 RRF 分数的计算中，我们可以看出，RRF 不依赖于每次检索分配的绝对分数，而是依赖于相对排名，这使得它非常适合组合来自可能具有不同分数尺度或分布的查询结果。
 
-值得注意的是，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。
+值得注意的是，现在有很多数据库都原生支持混合检索了，比如 [Milvus](https://milvus.io/docs/multi-vector-search.md)、[Qdrant](https://qdrant.tech/articles/hybrid-search/)、[OpenSearch](https://opensearch.org/docs/latest/query-dsl/compound/hybrid/)、[Pinecone](https://www.pinecone.io/learn/hybrid-search-intro/) 等，Elasticsearch 的最新版本中也 [支持 RRF 检索](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html)。对于这些支持混合检索的数据库，LlamaIndex 提供了一种简单的方式：
+
+```
+query_engine = index.as_query_engine(
+    ...,
+    vector_store_query_mode="hybrid", 
+    alpha=0.5,  # 指定向量搜索和关键字搜索之间的加权
+    ...
+)
+```
 
 #### 多向量检索（Multi-Vector Retrieval）
 
@@ -876,63 +1003,6 @@ RRF7 = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049
     * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
     * [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
     * [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
-
-#### 图谱构建
-
-在上面的查询构造一节，我们学习了如何实现 Text-to-Cypher，根据用户的问题生成图查询语句，从而实现图数据库的问答。查询构造依赖的是现有的图数据库，如果用户没有图数据库，数据散落在各种非结构化文档中，那么我们在查询之前可能还需要先对文档进行预处理，LlamaIndex 和 LangChain 都提供了相应的方法，让我们可以快速从杂乱的文档中构建出图谱数据。
-
-LlamaIndex 可以通过 [KnowledgeGraphIndex](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/KnowledgeGraphDemo/) 实现：
-
-```
-from llama_index.core import KnowledgeGraphIndex
-index = KnowledgeGraphIndex.from_documents(
-    documents,
-    storage_context=storage_context,
-    max_triplets_per_chunk=10,
-    space_name=space_name,
-    edge_types=edge_types,
-    rel_prop_names=rel_prop_names,
-    tags=tags,
-    include_embeddings=True,
-)
-```
-
-`KnowledgeGraphIndex` 默认使用大模型自动从文档中抽取出实体以及他们之间的关系，也就是所谓的 **三元组（Triplet）**，并将抽取出来的关系存入图数据库中，这个构建的过程可能会很长，构建完成后，就可以通过 `index.as_query_engine()` 将其转换为 `RetrieverQueryEngine` 来实现问答：
-
-```
-query_engine = index.as_query_engine(
-    include_text=True, response_mode="tree_summarize"
-)
-response = query_engine.query("Tell me more about Interleaf")
-```
-
-此外，`KnowledgeGraphIndex` 还提供了一个 `kg_triplet_extract_fn` 参数，可以让用户自定义抽取三元组的逻辑：
-
-```
-index = KnowledgeGraphIndex.from_documents(
-    documents, 
-    kg_triplet_extract_fn=extract_triplets, 
-    service_context=service_context
-)
-```
-
-我们可以结合一些传统 NLP 里的关系抽取模型，比如 [REBEL](https://huggingface.co/Babelscape/rebel-large) 来实现图谱构建，参考 [Rebel + LlamaIndex Knowledge Graph Query Engine](https://colab.research.google.com/drive/1G6pcR0pXvSkdMQlAK_P-IrYgo-_staxd) 和 [Knowledge Graph Construction w/ WikiData Filtering](https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/knowledge_graph2/) 这两个示例。
-
-> 其中，`documents` 也可以设置成一个空数组，这样也可以实现基于现有的图数据库来问答，和 `KnowledgeGraphRAGRetriever` 的效果一样：
->
-> ```
-> index = KnowledgeGraphIndex.from_documents([], storage_context=storage_context)
-> ```
-
-LangChain 也提供了一个类似的类 [LLMGraphTransformer](https://python.langchain.com/v0.1/docs/use_cases/graph/constructing/) 来实现图谱构建：
-
-```
-from langchain_experimental.graph_transformers import LLMGraphTransformer
-
-llm_transformer = LLMGraphTransformer(llm=llm)
-graph_documents = llm_transformer.convert_to_graph_documents(documents)
-graph.add_graph_documents(graph_documents)
-```
 
 ### 后处理
 
