@@ -750,7 +750,7 @@ LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https:
 
 分块大小是一个需要深思熟虑的参数，它取决于你所使用的嵌入模型的 token 容量，比如，基于 BERT 的 `sentence-transformer` 最多只能处理 512 个 token，而 OpenAI 的 `ada-002` 能够处理 8191 个；另外这里也需要权衡大模型的 token 限制，由于分块大小直接决定了我们加载到大模型上下文窗口中的信息量，[这篇博客](https://www.mattambrogi.com/posts/chunk-size-matters/) 中对不同的分块大小进行了实验，可以看到不同的分块大小可以得到不同的性能表现。
 
-使用 LangChain 的 `CharacterTextSplitter` 实现固定大小分块：
+在 LangChain 中，我们可以使用 [CharacterTextSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/character_text_splitter/) 和 [RecursiveCharacterTextSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_text_splitter/) 实现固定大小分块：
 
 ```
 from langchain.text_splitter import CharacterTextSplitter
@@ -760,6 +760,23 @@ text_splitter = CharacterTextSplitter(
     chunk_overlap  = 20
 )
 docs = text_splitter.create_documents([text])
+```
+
+可以看到，分块参数中除了分块大小（`chunk_size`）和分块间的重叠（`chunk_overlap`）两个配置之外，还有一个分隔符（`separator`）参数，`CharacterTextSplitter` 首先会按照分隔符进行分割，再对分割后的内容按大小分割，默认的分隔符是 `\n\n`，这样可以保证不同的段落会被划分到不同的分块里，提高分块的效果。
+
+`RecursiveCharacterTextSplitter` 被称为 **递归分块（Recursive chunking）**，和 `CharacterTextSplitter` 的区别是它可以接受一组分隔符，比如 `["\n\n", "\n", " ", ""]`，它首先使用第一个分隔符对文本进行分块，如果第一次分块后长度仍然超出分块大小，则使用第二个，以此类推，通过这种递归迭代的过程，直到达到所需的块大小。
+
+LlamaIndex 中的 [SentenceSplitter](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/sentence_splitter/) 实现类似的功能，不过它没有递归分块的功能，只是简单的将分隔符分成单词间分隔符和段落间分隔符两个参数：
+
+```
+from llama_index.core.node_parser import SentenceSplitter
+node_parser = SentenceSplitter(
+    separator=" ",
+    paragraph_separator="\n\n",
+    chunk_size=512, 
+    chunk_overlap=0
+)
+nodes = node_parser.get_nodes_from_documents(docs, show_progress=False)
 ```
 
 ---
@@ -778,7 +795,6 @@ LlamaIndex 中的各种分块方法：
     * CodeSplitter
         * [Chunking 2M+ files a day for Code Search using Syntax Trees](https://docs.sweep.dev/blogs/chunking-2m-files)
     * LangchainNodeParser
-    * SentenceSplitter
     * SentenceWindowNodeParser
     * SemanticSplitterNodeParser
         * [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
@@ -792,11 +808,9 @@ LangChain 中的各种分块方法：
 
 * [Split by HTML header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_header_metadata/)
 * [Split by HTML section](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_section_aware_splitter/)
-* [Split by character](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/character_text_splitter/)
 * [Split code](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/code_splitter/)
 * [Split by Markdown header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/)
 * [Recursively split JSON](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/)
-* [Recursively split by character](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_text_splitter/)
 * [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
 * [Split by tokens](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/split_by_token/)
 
