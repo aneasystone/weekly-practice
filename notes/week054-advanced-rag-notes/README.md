@@ -744,7 +744,7 @@ LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https:
 
 文档分块是索引构建中的关键步骤，无论是 LangChain 还是 LlamaIndex 都提供了大量的文档分块的方法，可以参考 [LangChain 的 Text Splitters](https://python.langchain.com/docs/modules/data_connection/document_transformers/) 或 [LlamaIndex 的 Node Parser 或 Text Splitters](https://docs.llamaindex.ai/en/stable/module_guides/loading/node_parsers/) 文档。
 
-* 固定大小分块（Fixed-size chunking）
+##### 固定大小分块（Fixed-size chunking）
 
 这是最常见也是最直接的分块策略，文档被分割成固定大小的分块，分块之间可以保留一些重叠，以确保不会出现语义相关的内容被不自然地拆分的情况。在大多数情况下，固定大小分块都是最佳选择，与其他形式的分块相比，它既廉价又简单易用，而且不需要使用任何自然语言处理库。
 
@@ -766,7 +766,7 @@ docs = text_splitter.create_documents([text])
 
 `RecursiveCharacterTextSplitter` 被称为 **递归分块（Recursive chunking）**，和 `CharacterTextSplitter` 的区别是它可以接受一组分隔符，比如 `["\n\n", "\n", " ", ""]`，它首先使用第一个分隔符对文本进行分块，如果第一次分块后长度仍然超出分块大小，则使用第二个，以此类推，通过这种递归迭代的过程，直到达到所需的块大小。
 
-LlamaIndex 中的 [SentenceSplitter](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/sentence_splitter/) 实现类似的功能，不过它没有递归分块的功能，只是简单的将分隔符分成单词间分隔符和段落间分隔符两个参数：
+LlamaIndex 中的 [TokenTextSplitter](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/token_text_splitter/) 和 [SentenceSplitter](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/sentence_splitter/) 实现类似的功能，不过它没有递归分块的功能，只是简单的将分隔符分成单词间分隔符和段落间分隔符两个参数：
 
 ```
 from llama_index.core.node_parser import SentenceSplitter
@@ -778,6 +778,37 @@ node_parser = SentenceSplitter(
 )
 nodes = node_parser.get_nodes_from_documents(docs, show_progress=False)
 ```
+
+此外，使用固定大小分块时有一点要注意的是，大模型的上下文限制是 token 数量，而不是文本长度，因此当我们将文本分成块时，建议计算分块的 token 数量，比如使用 OpenAI 的 [tiktoken](https://github.com/openai/tiktoken) 库。LangChain 中可以使用 `TokenTextSplitter` 或 `CharacterTextSplitter.from_tiktoken_encoder()` 来保证分块大小不超过 token 限制：
+
+```
+text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+    encoding="cl100k_base", chunk_size=100, chunk_overlap=0
+)
+texts = text_splitter.split_text(state_of_the_union)
+```
+
+##### 句子拆分（Sentence splitting）
+
+很多模型都针对句子级内容的嵌入进行了优化，所以，如果我们能将文本按句子拆分，可以得到很好的嵌入效果。常见的句子拆分方法有下面几种：
+
+* 直接按英文句号（`.`）、中文句号（`。`）或换行符等进行分割
+
+这种方法快速简单，但这种方法不会考虑所有可能的边缘情况。
+
+* 使用 [NLTK](https://www.nltk.org/) 库
+
+NLTK 是一个流行的自然语言工具包，它提供了一个句子分词器（sentence tokenizer），可以将文本分割成句子，有助于创建更有意义的块。
+
+LangChain 中的 `NLTKTextSplitter` 就是基于 NLTK 实现的。
+
+LlamaIndex 中的 `SentenceWindowNodeParser` 也可以实现句子拆分，默认也是基于 NLTK 实现的。
+
+* 使用 [spaCy](https://spacy.io/) 库
+
+spaCy 是另一个强大的用于自然语言处理任务的 Python 库，它提供了复杂的句子分割功能，可以高效地将文本分割成单独的句子，从而在生成的块中更好地保留上下文。LangChain 中的 `SpacyTextSplitter` 就是基于 spaCy 实现的。
+
+LangChain 的 [Split by tokens](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/split_by_token/) 这篇文档还介绍了一些其他方法可供参考。
 
 ---
 
@@ -795,12 +826,10 @@ LlamaIndex 中的各种分块方法：
     * CodeSplitter
         * [Chunking 2M+ files a day for Code Search using Syntax Trees](https://docs.sweep.dev/blogs/chunking-2m-files)
     * LangchainNodeParser
-    * SentenceWindowNodeParser
     * SemanticSplitterNodeParser
         * [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
         * [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
         * [The 5 Levels Of Text Splitting For Retrieval (Notebook)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
-    * TokenTextSplitter
 * Relation-Based Node Parsers
     * HierarchicalNodeParser
 
@@ -812,7 +841,6 @@ LangChain 中的各种分块方法：
 * [Split by Markdown header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/)
 * [Recursively split JSON](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/)
 * [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
-* [Split by tokens](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/split_by_token/)
 
 #### 嵌入策略（Embedding）
 

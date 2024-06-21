@@ -21,3 +21,12 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 docs = text_splitter.create_documents([text])
 print(docs)
+
+from langchain_text_splitters import TokenTextSplitter
+text_splitter = TokenTextSplitter(
+    model_name="gpt-4",
+    chunk_size=10,
+    chunk_overlap=0
+)
+docs = text_splitter.create_documents([text])
+print(docs)
