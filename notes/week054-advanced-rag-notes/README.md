@@ -794,21 +794,29 @@ texts = text_splitter.split_text(state_of_the_union)
 
 * 直接按英文句号（`.`）、中文句号（`。`）或换行符等进行分割
 
-这种方法快速简单，但这种方法不会考虑所有可能的边缘情况。
+这种方法快速简单，但这种方法不会考虑所有可能的边缘情况，可能会破坏句子的完整性。使用上面所介绍的 `CharacterTextSplitter` 或 `TokenTextSplitter` 就可以实现。
 
 * 使用 [NLTK](https://www.nltk.org/) 库
 
-NLTK 是一个流行的自然语言工具包，它提供了一个句子分词器（sentence tokenizer），可以将文本分割成句子，有助于创建更有意义的块。
+NLTK 是一个流行的自然语言工具包，它提供了一个句子分词器（sentence tokenizer），可以将文本分割成句子，有助于创建更有意义的块。LangChain 中的 `NLTKTextSplitter` 就是基于 NLTK 实现的。
 
-LangChain 中的 `NLTKTextSplitter` 就是基于 NLTK 实现的。
-
-LlamaIndex 中的 `SentenceWindowNodeParser` 也可以实现句子拆分，默认也是基于 NLTK 实现的。
+另外，LlamaIndex 中的 `SentenceSplitter` 和 `SentenceWindowNodeParser` 也可以实现句子拆分，默认也是基于 NLTK 实现的。
 
 * 使用 [spaCy](https://spacy.io/) 库
 
 spaCy 是另一个强大的用于自然语言处理任务的 Python 库，它提供了复杂的句子分割功能，可以高效地将文本分割成单独的句子，从而在生成的块中更好地保留上下文。LangChain 中的 `SpacyTextSplitter` 就是基于 spaCy 实现的。
 
 LangChain 的 [Split by tokens](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/split_by_token/) 这篇文档还介绍了一些其他方法可供参考。
+
+##### 特定格式分块（Specialized chunking）
+
+有很多文本文件具有特定的结构化内容，比如 Markdown、LaTeX、HTML 或 各种源码文件等，针对这种格式的内容可以使用一些专门的分块方法。
+
+* Markdown 文件
+
+Markdown 是一种轻量级标记语言，通常用于格式化文本，通过识别 Markdown 语法（例如标题、列表和代码块），可以根据其结构和层次智能地划分内容，从而产生更具语义一致性的块。LangChain 的 [MarkdownHeaderTextSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/) 就是基于这一想法实现的分块方法，它通过 Markdown 的标题来组织分组，然后再在特定标题组中创建分块。
+
+LlamaIndex 的 [MarkdownNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/markdown/) 和 [MarkdownElementNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/markdown_element/) 提供了更精细化的分块，可以实现代码块或表格等元素的抽取。
 
 ---
 
@@ -819,8 +827,6 @@ LlamaIndex 中的各种分块方法：
     * HTMLNodeParser
     * JSONNodeParser
     * DashScopeJsonNodeParser
-    * MarkdownNodeParser
-    * MarkdownElementNodeParser
     * UnstructuredElementNodeParser
 * Text-Splitters
     * CodeSplitter
@@ -838,7 +844,6 @@ LangChain 中的各种分块方法：
 * [Split by HTML header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_header_metadata/)
 * [Split by HTML section](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_section_aware_splitter/)
 * [Split code](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/code_splitter/)
-* [Split by Markdown header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/)
 * [Recursively split JSON](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/)
 * [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
 

@@ -21,3 +21,9 @@ node_parser = SentenceSplitter(
 nodes = node_parser.get_nodes_from_documents(docs, show_progress=False)
 for node in nodes:
     print(node)
+
+from llama_index.core.node_parser import MarkdownNodeParser
+parser = MarkdownNodeParser()
+nodes = parser.get_nodes_from_documents(docs)
+for node in nodes:
+    print(node)
