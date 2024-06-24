@@ -812,39 +812,45 @@ LangChain 的 [Split by tokens](https://python.langchain.com/v0.1/docs/modules/d
 
 有很多文本文件具有特定的结构化内容，比如 Markdown、LaTeX、HTML 或 各种源码文件等，针对这种格式的内容可以使用一些专门的分块方法。
 
-* Markdown 文件
+* Markdown 格式
 
 Markdown 是一种轻量级标记语言，通常用于格式化文本，通过识别 Markdown 语法（例如标题、列表和代码块），可以根据其结构和层次智能地划分内容，从而产生更具语义一致性的块。LangChain 的 [MarkdownHeaderTextSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/markdown_header_metadata/) 就是基于这一想法实现的分块方法，它通过 Markdown 的标题来组织分组，然后再在特定标题组中创建分块。
 
 LlamaIndex 的 [MarkdownNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/markdown/) 和 [MarkdownElementNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/markdown_element/) 提供了更精细化的分块，可以实现代码块或表格等元素的抽取。
 
----
+* HTML 格式
 
-LlamaIndex 中的各种分块方法：
+HTML 是另一种流行的标记语言，我们也可以根据 HTML 中的特殊标记（例如 `<h1>`、`<h2>`、`<table>` 等）对其进行分块，和 `MarkdownHeaderTextSplitter` 类似，LangChain 中的 [HTMLHeaderTextSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_header_metadata/) 根据标题来实现 HTML 的分块，[HTMLSectionSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_section_aware_splitter/) 能够在元素级别上分割文本，它基于指定的标签和字体大小进行分割，将具有相同元数据的元素组合在一起，以便将相关文本语义地分组，并在文档结构中保留丰富的上下文信息。
 
-* File-Based Node Parsers
-    * SimpleFileNodeParser
-    * HTMLNodeParser
-    * JSONNodeParser
-    * DashScopeJsonNodeParser
-    * UnstructuredElementNodeParser
-* Text-Splitters
-    * CodeSplitter
-        * [Chunking 2M+ files a day for Code Search using Syntax Trees](https://docs.sweep.dev/blogs/chunking-2m-files)
-    * LangchainNodeParser
-    * SemanticSplitterNodeParser
-        * [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
-        * [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
-        * [The 5 Levels Of Text Splitting For Retrieval (Notebook)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
-* Relation-Based Node Parsers
-    * HierarchicalNodeParser
+LlamaIndex 的 [HTMLNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/html/) 使用 [Beautiful Soup](https://beautiful-soup-4.readthedocs.io/en/latest/) 解析 HTML，它使用一些预定义的标签来对 HTML 进行分块。
 
-LangChain 中的各种分块方法：
+* LaTeX 格式
 
-* [Split by HTML header](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_header_metadata/)
-* [Split by HTML section](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/HTML_section_aware_splitter/)
-* [Split code](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/code_splitter/)
-* [Recursively split JSON](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/)
+LaTeX 是一种常用于学术论文和技术文档的文档准备系统和标记语言，通过解析 LaTeX 可以创建符合内容逻辑组织的块（例如章节、子章节和方程式），从而产生更准确和上下文相关的结果。LangChain 的 `LatexTextSplitter` 实现了 LaTex 格式的分块。
+
+* JSON 格式
+
+JSON 格式的分块需要考虑嵌套的 JSON 对象的完整性，通常按照深度优先的方式遍历 JSON 对象，并构建出较小的 JSON 块，参考 LangChain 的 [RecursiveJsonSplitter](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/recursive_json_splitter/) 和 LlamaIndex 的 [JSONNodeParser](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/json/)。
+
+* 其他代码格式
+
+除了上面所说的 Markdown、HTML、JSON 等结构化文本，还有很多代码格式的文件，不同的编程语言拥有不同的关键字和语法，分块方式也略有区别。LangChain 为每种编程语言预定义了对应的分隔符，我们可以直接使用 [RecursiveCharacterTextSplitter.from_language()](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/code_splitter/) 为特定语言创建文本分割器：
+
+```
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=50, chunk_overlap=0
+)
+python_docs = python_splitter.create_documents([PYTHON_CODE])
+```
+
+SweepAI 的 Kevin Lu 提出了一种更加优雅的代码拆分解决方案，[使用 AST 对代码语法进行解析](https://docs.sweep.dev/blogs/chunking-2m-files)，LlamaIndex 的 [CodeSplitter](https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/code/) 就是基于这种方案实现的。
+
+##### 语义分块（Semantic chunking）
+
+* SemanticSplitterNodeParser
+* [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
+* [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
+* [The 5 Levels Of Text Splitting For Retrieval (Notebook)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
 * [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
 
 #### 嵌入策略（Embedding）
