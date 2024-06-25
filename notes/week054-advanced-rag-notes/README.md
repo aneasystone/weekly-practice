@@ -847,11 +847,16 @@ SweepAI 的 Kevin Lu 提出了一种更加优雅的代码拆分解决方案，[�
 
 ##### 语义分块（Semantic chunking）
 
-* SemanticSplitterNodeParser
-* [Semantic Chunker | LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
-* [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4)
-* [The 5 Levels Of Text Splitting For Retrieval (Notebook)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
-* [Semantic Chunking](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/)
+这是一种实验性地分块技术，最初由 Greg Kamradt 提出，它在 [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4) 这个视频中将分块技术划分为 5 个等级，其中 **语义分块（Semantic chunking）** 是第 4 级。它的基本原理如下：
+
+* 首先将文本划分成一个个句子，并计算第一个句子的向量；
+* 接着计算第二个句子的向量，并和第一个句子进行比较，得到相似度；
+* 接着计算第三个句子的向量，并和第二个句子进行比较，得到相似度，以此类推；
+* 当句子之间的相似度高于某个阈值时，说明这里的话题可能存在转折，可以将这个地方作为分块的临界点。
+
+[这里](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb) 是对应的代码实现。
+
+LangChain 的 [SemanticChunker](https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/semantic-chunker/) 和 LlamaIndex 的 [SemanticSplitterNodeParser](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/) 都实现了语义分块。
 
 #### 嵌入策略（Embedding）
 
