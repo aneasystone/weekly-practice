@@ -860,15 +860,16 @@ LangChain 的 [SemanticChunker](https://python.langchain.com/v0.1/docs/modules/d
 
 #### 嵌入策略（Embedding）
 
-有很多索引优化技术都围绕嵌入模型展开：
+分块完成后，我们接下来就要为每个分块计算 Embedding 向量，这里有很多嵌入模型可供选择，比如 BAAI 的 [bge-large](https://huggingface.co/BAAI/bge-large-en-v1.5)，微软的 [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)，OpenAI 的 [text-embedding-3-large](https://platform.openai.com/docs/guides/embeddings) 等，可以在 [MTEB 排行榜](https://huggingface.co/spaces/mteb/leaderboard) 上了解最新的模型更新情况。
 
-* 微调嵌入模型，将嵌入模型定制为特定领域的上下文，特别是对于术语不断演化或罕见的领域。例如，`BAAI/bge-small-en` 是一个高性能的嵌入模型，可以进行微调；
-* 动态嵌入根据单词的上下文进行调整，而静态嵌入则为每个单词使用单一向量。例如，OpenAI 的 `embeddings-ada-02` 是一个复杂的动态嵌入模型，可以捕获上下文理解。
+词嵌入技术经历了一个[从静态到动态的发展过程](https://cloud.tencent.com/developer/article/1610111)，静态嵌入为每个单词使用单一向量，而动态嵌入根据单词的上下文进行调整，可以捕获上下文理解。排行榜上排名靠前的基本上都是动态嵌入模型。
 
-* [Getting Started With Embeddings](https://huggingface.co/blog/getting-started-with-embeddings)
-* [Train and Fine-Tune Sentence Transformers Models](https://huggingface.co/blog/how-to-train-sentence-transformers)
+此外，关于嵌入模型的优化，通常围绕着嵌入模型的微调展开，将嵌入模型定制为特定领域的上下文，特别是对于术语不断演化或罕见的领域，可以参考下面的一些教程：
+
 * [Training and Finetuning Embedding Models with Sentence Transformers v3](https://huggingface.co/blog/train-sentence-transformers)
 * [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
+
+> 值得一提的是，嵌入不仅仅限于文本，我们还可以创建图像或音频的嵌入，并将其与文本嵌入进行比较，这个概念适用于强大的图像或音频搜索、分类、描述等系统。
 
 #### 构建图谱
 
