@@ -107,7 +107,7 @@ Wenqi Glantz 在他的博客 [12 RAG Pain Points and Proposed Solutions](https:/
 
 在 Wenqi Glantz 的博客中，他不仅整理了这些问题，而且还对每个问题给出了对应的解决方案，整个 RAG 系统的蓝图如下：
 
-![](./images/12-pain-points.webp)
+![](./images/12-pain-points.png)
 
 ## LlamaIndex 实战
 
@@ -235,7 +235,7 @@ questions separated by newlines. Original question: {question}
 
 `RAG Fusion` 和 `MultiQueryRetriever` 基于同样的思路，生成子问题并检索，它对检索结果执行 **倒数排名融合（Reciprocal Rank Fusion，RRF）** 算法，使得检索效果更好。它的大致流程如下：
 
-![](./images/rag-fusion.webp)
+![](./images/rag-fusion.png)
 
 可以分为四个步骤：
 
@@ -1030,7 +1030,7 @@ parent_vectorstore = Neo4jVector.from_existing_index(
 
 假设我们有大量的文档需要检索，为了高效地在其中找到相关信息，一种高效的方法是创建两个索引：一个由摘要组成，另一个由文档块组成，然后分两步搜索，首先通过摘要筛选出相关文档，然后再在筛选出的文档中搜索。
 
-![](./images/hierarchical-retrieval.webp)
+![](./images/hierarchical-retrieval.png)
 
 这在 LlamaIndex 中被称为 [Hierarchical Retrieval](https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)。
 
@@ -1259,7 +1259,7 @@ RankGPT 是 Weiwei Sun 等人在论文 [Is ChatGPT Good at Search? Investigating
 
 除了对检索结果进行压缩过滤，我们也可以对检索结果进行增强。在上面的父文档检索一节中，我们提到，通过检索更小的块可以获得更好的搜索质量，然后通过扩大上下文范围可以获取更好的推理结果，**句子窗口检索** 使用的也是这个思想。它首先将文档分割成一个个句子，一句话相比于一段话来说，语义可能要更接近于用户的问题；每个句子包含一个窗口，也就是前后几句话，当检索出语义相近的句子后，将每个句子替换为包含前后句子的窗口。可以看到整个过程和父文档检索几乎是一样的，但是 LlamaIndex 为了区别其实现方式，将其放在了后处理模块，而不是检索模块。
 
-![](./images/sentence-window.webp)
+![](./images/sentence-window.png)
 
 LlamaIndex 的文档中有一个示例 [Metadata Replacement + Node Sentence Window](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/MetadataReplacementDemo/) 演示了句子窗口检索的实现，首先使用 `SentenceWindowNodeParser` 将文档分割为 Node 列表，每个 Node 对应一个句子，并将前后 3 个句子放在 Node 的元数据中：
 
