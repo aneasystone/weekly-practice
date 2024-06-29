@@ -190,12 +190,7 @@ LangChain 的 [这篇博客](https://blog.langchain.dev/deconstructing-rag/) 对
 
 RAG 系统面临的第一个问题就是如何处理用户输入，我们知道，RAG 的基本思路是根据用户输入检索出最相关的内容，但是用户输入是不可控的，可能存在冗余、模糊或歧义等情况，如果直接拿着用户输入去检索，效果可能不理想。
 
-**查询转换（Query Transformations）** 是一组旨在修改用户输入以改善检索的方法，使检索对用户输入的变化具有鲁棒性。
-
-* [Query Transformations | LlamaIndex](https://docs.llamaindex.ai/en/stable/optimizing/advanced_retrieval/query_transformations/)
-    * [Query Transform Cookbook](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
-    * [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/)
-    * [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/)
+**查询转换（Query Transformations）** 是一组旨在修改用户输入以改善检索的方法，使检索对用户输入的变化具有鲁棒性。可参考 LangChain 的 [这篇博客](https://blog.langchain.dev/query-transformations/) 和 LlamaIndex 的 [这份文档](https://docs.llamaindex.ai/en/stable/optimizing/advanced_retrieval/query_transformations/) 或 [这份指南](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)。
 
 #### 查询扩展（Query Expansion）
 
@@ -233,6 +228,8 @@ questions separated by newlines. Original question: {question}
 你是一个 AI 语言助手，你的任务是将用户的问题拆解成多个子问题便于检索，多个子问题以换行分割，保证每行一个。
 用户的原始问题为：{question}
 ```
+
+在 LlamaIndex 中可以通过 [Multi-Step Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_transformations/SimpleIndexDemo-multistep/) 或 [Sub Question Query Engine](https://docs.llamaindex.ai/en/stable/examples/query_engine/sub_question_query_engine/) 实现类似的多查询检索。
 
 ##### RAG 融合（RAG Fusion）
 
@@ -762,6 +759,8 @@ index = VectorStoreIndex.from_documents(
 )
 ```
 
+很多向量数据库还支持元数据功能，我们可以将元数据与向量一起存储，然后使用元数据过滤器搜索某些日期或来源的信息，这在上面的 **Text-to-metadata filters** 一节中已经介绍过，此处略过。
+
 LangChain 中没有 Index 和 StorageContext 概念，只有 [Vector Store](https://python.langchain.com/v0.1/docs/modules/data_connection/vectorstores/) 的概念，所以 LangChain 构建向量索引的步骤看上去要精简的多：
 
 ```
@@ -973,9 +972,27 @@ graph.add_graph_documents(graph_documents)
 
 #### 索引检索（Index Retrievers）
 
-* [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
-* [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
-* [Vector store-backed retriever | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/vectorstore/)
+上面学习了很多了索引，从索引中检索是最简单也最基础的检索策略。LlamaIndex 中的所有 Index 都有一个 `as_retriever()` 方法，方便从索引中快速检索出想要的内容：
+
+```
+retriever = index.as_retreiver()
+nodes = retriever.retrieve("<user question>")
+```
+
+在 LlamaIndex 中，不同的 Index 还可以有 [不同的检索模式](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)，比如使用 `SummaryIndex` 的 `llm` 模式：
+
+```
+retriever = summary_index.as_retriever(
+    retriever_mode="llm"
+)
+```
+
+LangChain 中的 Vector Store 也有一个 `as_retriever()` 方法用于检索，这被称为 [Vector store-backed retriever](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/vectorstore/)：
+
+```
+retriever = db.as_retriever()
+docs = retriever.invoke("<user question>")
+```
 
 #### 父文档检索（Parent Document Retrieval）
 
@@ -1011,14 +1028,13 @@ parent_vectorstore = Neo4jVector.from_existing_index(
 
 #### 层级检索（Hierarchical Retrieval）
 
-* Hierarchical Index Retrieval
+假设我们有大量的文档需要检索，为了高效地在其中找到相关信息，一种高效的方法是创建两个索引：一个由摘要组成，另一个由文档块组成，然后分两步搜索，首先通过摘要筛选出相关文档，然后再在筛选出的文档中搜索。
 
-#### 递归检索（Recursive Retrieval）
+![](./images/hierarchical-retrieval.webp)
 
-* [Recursive Retriever + Node References](https://docs.llamaindex.ai/en/stable/examples/retrievers/recursive_retriever_nodes/)
-* [Recursive Retriever + Query Engine Demo](https://docs.llamaindex.ai/en/stable/examples/query_engine/pdf_tables/recursive_retriever/)
-* [Comparing Methods for Structured Retrieval (Auto-Retrieval vs. Recursive Retrieval)](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_vs_recursive_retriever/)
-* [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
+这在 LlamaIndex 中被称为 [Hierarchical Retrieval](https://docs.llamaindex.ai/en/stable/examples/query_engine/multi_doc_auto_retrieval/multi_doc_auto_retrieval/)。
+
+在上面的父文档检索中我们也举了一个检索摘要的例子，和这里的层级检索很相似，其区别在于父文档检索只检索一次摘要，然后由摘要扩展出原始文档，而层级检索是通过检索摘要筛选出一批文档，然后在筛选出的文档中执行二次检索。
 
 #### 混合检索（Fusion Retrieval）
 
@@ -1091,12 +1107,13 @@ query_engine = index.as_query_engine(
 
 除此之外，当我们处理包含文本和表格的半结构化文档时，多向量检索器也能派上用场，在这种情况下，可以提取每个表格，为表格生成适合检索的摘要，但生成答案时将原始表格送给大模型。有些文档不仅包含文本和表格，还可能包含图片，随着多模态大模型的出现，我们可以为图像生成摘要和嵌入。
 
-* [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
-    * [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
-    * [Semi-structured and Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_and_multi_modal_RAG.ipynb)
-    * [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
-    * [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
-    * [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
+LangChain 的 [这篇博客](https://blog.langchain.dev/semi-structured-multi-modal-rag/) 对多向量检索做了一个全面的描述，并提供了大量的示例，用于表格或图片等多模任务的检索：
+
+* [Semi-structured RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_Structured_RAG.ipynb)
+* [Semi-structured and Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_and_multi_modal_RAG.ipynb)
+* [Private Semi-structured and Multi-modal RAG w/ LLaMA2 and LLaVA](https://github.com/langchain-ai/langchain/blob/master/cookbook/Semi_structured_multi_modal_RAG_LLaMA2.ipynb)
+* [Multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb)
+* [Chroma multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb)
 
 ### 后处理
 
@@ -1288,12 +1305,15 @@ query_engine = sentence_index.as_query_engine(
 
 这里是 [Perplexity 泄露出来的 Prompt](https://twitter.com/jmilldotdev/status/1600624362394091523) 可供参考，这里是 [WebLangChain 对其修改后的实现](https://smith.langchain.com/hub/hwchase17/weblangchain-generation)。在这个 Prompt 中，要求大模型在生成内容时使用 `[N]` 格式表示来源，然后在客户端解析它并将其呈现为超链接。
 
-### Agentic RAG
+## 总结
 
-* [Agentic RAG With LlamaIndex](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6)
-* [Agentic strategies](https://docs.llamaindex.ai/en/stable/optimizing/agentic_strategies/agentic_strategies/)
-* [Multi-Document Agents](https://docs.llamaindex.ai/en/stable/examples/agent/multi_document_agents/)
-* [Unlocking the Power of Multi-Document Agents with LlamaIndex](https://ai.gopubby.com/unlocking-the-power-of-multi-document-agents-with-llamaindex-d09e4d7dfe0e)
+这篇博客断断续续地写了将近三个月，最初想写 RAG 这个主题是因为在网上看到 IVAN ILIN 大神的 [Advanced RAG Techniques: an Illustrated Overview](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6) 这篇博客，看完之后我深受启发，感叹 RAG 技巧之多之杂，于是打算写一篇笔记记录总结一下。我是一个实践狂，在写的过程中，想着把每种技巧都一一实践一遍，由点到线，由线到面，这才发现自己掉入了一个大坑，关于 RAG 的内容远远不是一篇笔记能概括的，于是越陷越深，发现自己不懂的东西也越来越多，笔记的篇幅也越来越长。
+
+RAG 是一门实践学科，它参考了大量的传统搜索技术，比如上面学习的 RAG 融合、查询重写等，都是 Google 多少年之前玩剩下的。学习之余，不得不佩服前人的智慧，同时也提醒我们学习传统技术的重要性，有很多新技术都是基于传统技术的再包装。
+
+这篇博客几乎包括了打造 RAG 系统的方方面面，综合了 LlamaIndex 和 LangChain 两个著名的 LLM 开发框架，对 RAG 中的各种高级技巧进行了详细讲解和实践。尽管如此，还是有很多内容没有介绍到，比如 LlamaIndex 最近比较火的 [Agentic RAG](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6) 概念，[如何对 RAG 的效果进行评估](https://docs.llamaindex.ai/en/stable/optimizing/evaluation/evaluation/)，[模型的微调](https://docs.llamaindex.ai/en/stable/optimizing/fine-tuning/fine-tuning/)（这包括 Embedding 的微调、Re-ranking 的微调、LLM 的微调），等等这些话题。
+
+博客篇幅较长，难免疏漏，如果有任何问题，欢迎留言指正。这篇博客仅仅作为一个引子，希望拓宽读者对 RAG 领域的视野，并引导读者踏上一场 RAG 的探索之旅。如果探索过程中有任何发现，也欢迎与我分享！
 
 ## 参考
 
@@ -1321,14 +1341,16 @@ query_engine = sentence_index.as_query_engine(
 * [大语言模型的检索增强生成 (RAG) 方法](https://www.promptingguide.ai/zh/research/rag)
 * [RAG-Survey](https://github.com/Tongji-KGLLM/RAG-Survey)
 
-### Advanced RAG Learning Series | Akash Mathur
+### 更多
+
+#### Advanced RAG Learning Series | Akash Mathur
 
 * [Advanced RAG: Optimizing Retrieval with Additional Context & MetaData using LlamaIndex](https://akash-mathur.medium.com/advanced-rag-optimizing-retrieval-with-additional-context-metadata-using-llamaindex-aeaa32d7aa2f)
 * [Advanced RAG: Enhancing Retrieval Efficiency through Rerankers using LlamaIndex](https://akash-mathur.medium.com/advanced-rag-enhancing-retrieval-efficiency-through-evaluating-reranker-models-using-llamaindex-3f104f24607e)
 * [Advanced RAG: Query Augmentation for Next-Level Search using LlamaIndex](https://akash-mathur.medium.com/advanced-rag-query-augmentation-for-next-level-search-using-llamaindex-d362fed7ecc3)
 * [Data Management in LlamaIndex: Smart Tracking and Debugging of Document Changes](https://akash-mathur.medium.com/data-management-in-llamaindex-smart-tracking-and-debugging-of-document-changes-7b81c304382b)
 
-### Self-RAG | Florian June
+#### Self-RAG | Florian June
 
 * [Advanced RAG 01: Problems of Naive RAG](https://ai.plainenglish.io/advanced-rag-part-01-problems-of-naive-rag-7e5f8ebb68d5)
 * [Advanced RAG 02: Unveiling PDF Parsing](https://pub.towardsai.net/advanced-rag-02-unveiling-pdf-parsing-b84ae866344e)
@@ -1341,13 +1363,27 @@ query_engine = sentence_index.as_query_engine(
 * [Advanced RAG 09: Prompt Compression](https://ai.gopubby.com/advanced-rag-09-prompt-compression-95a589f7b554)
 * [Advanced RAG 10: Corrective Retrieval Augmented Generation (CRAG)](https://ai.gopubby.com/advanced-rag-10-corrective-retrieval-augmented-generation-crag-3f5a140796f9)
 
-### Knowledge Graph RAG
+#### Knowledge Graph RAG
 
 * [Using a Knowledge Graph to implement a DevOps RAG application](https://blog.langchain.dev/using-a-knowledge-graph-to-implement-a-devops-rag-application/)
 * [Integrating Neo4j into the LangChain ecosystem](https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2)
 * [LangChain has added Cypher Search](https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5)
 * [LangChain Cypher Search: Tips & Tricks](https://medium.com/neo4j/langchain-cypher-search-tips-tricks-f7c9e9abca4d)
 
-### RAG Eval
+#### RAG Eval
 
 * [Advanced RAG Eval](https://github.com/langchain-ai/langchain/blob/master/cookbook/advanced_rag_eval.ipynb)
+
+#### Agentic RAG
+
+* [Agentic RAG With LlamaIndex](https://www.llamaindex.ai/blog/agentic-rag-with-llamaindex-2721b8a49ff6)
+* [Agentic strategies](https://docs.llamaindex.ai/en/stable/optimizing/agentic_strategies/agentic_strategies/)
+* [Multi-Document Agents](https://docs.llamaindex.ai/en/stable/examples/agent/multi_document_agents/)
+* [Unlocking the Power of Multi-Document Agents with LlamaIndex](https://ai.gopubby.com/unlocking-the-power-of-multi-document-agents-with-llamaindex-d09e4d7dfe0e)
+
+#### Recursive Retrieval
+
+* [Recursive Retriever + Node References](https://docs.llamaindex.ai/en/stable/examples/retrievers/recursive_retriever_nodes/)
+* [Recursive Retriever + Query Engine Demo](https://docs.llamaindex.ai/en/stable/examples/query_engine/pdf_tables/recursive_retriever/)
+* [Comparing Methods for Structured Retrieval (Auto-Retrieval vs. Recursive Retrieval)](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_vs_recursive_retriever/)
+* [Ensemble Retrieval Guide](https://docs.llamaindex.ai/en/stable/examples/retrievers/ensemble_retrieval/)
