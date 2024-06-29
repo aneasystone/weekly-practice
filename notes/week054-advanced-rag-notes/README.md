@@ -736,7 +736,40 @@ LlamaIndex 也集成了不同的图数据库，比如 [Neo4j Graph Store](https:
 
 #### 构建向量索引
 
-* [Vector Store Index](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/)
+构建向量索引是打造 RAG 系统中的关键步骤之一。在上面的 LlamaIndex 实战一节，我们使用 [VectorStoreIndex](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/) 快速将文档构建成向量索引：
+
+```
+from llama_index.core import VectorStoreIndex
+index = VectorStoreIndex.from_documents(documents)
+```
+
+默认情况下 `VectorStoreIndex` 将向量保存到内存中，可以通过 `StorageContext` 指定 [Vector Store](https://docs.llamaindex.ai/en/stable/module_guides/storing/vector_stores/) 将向量保存到向量数据库中，LlamaIndex [集成了大量的 Vector Store 实现](https://docs.llamaindex.ai/en/stable/community/integrations/vector_stores/)，比如下面是集成 Chroma 的示例：
+
+```
+import chromadb
+chroma_client = chromadb.EphemeralClient()
+chroma_collection = chroma_client.create_collection("quickstart")
+
+from llama_index.core import StorageContext
+from llama_index.vector_stores.chroma import ChromaVectorStore
+storage_context = StorageContext.from_defaults(
+    vector_store=ChromaVectorStore(chroma_collection=chroma_collection)
+)
+
+from llama_index.core import VectorStoreIndex
+index = VectorStoreIndex.from_documents(
+    documents, storage_context=storage_context
+)
+```
+
+LangChain 中没有 Index 和 StorageContext 概念，只有 [Vector Store](https://python.langchain.com/v0.1/docs/modules/data_connection/vectorstores/) 的概念，所以 LangChain 构建向量索引的步骤看上去要精简的多：
+
+```
+from langchain_chroma import Chroma
+db = Chroma.from_documents(documents, OpenAIEmbeddings())
+```
+
+构建向量索引有两个绕不开的话题，分块（Chunking）和嵌入（Embedding），下面将分节介绍。
 
 #### 分块策略（Chunking）
 
@@ -930,16 +963,18 @@ graph.add_graph_documents(graph_documents)
 
 #### 其他索引策略
 
-* [How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/)
-* [Summary Index](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)
-* [Tree Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)
-* [Keyword Table Index](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/)
+除了上面所介绍的向量索引（`VectorStoreIndex`）和图谱索引（`KnowledgeGraphIndex`），LlamaIndex 还提供了一些其他的索引策略，比如 [SummaryIndex](https://docs.llamaindex.ai/en/stable/examples/index_structs/doc_summary/DocSummary/)、[TreeIndex](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/tree/)、[KeywordTableIndex](https://docs.llamaindex.ai/en/stable/api_reference/retrievers/keyword/) 等。
+
+在我看来，索引其实就是文档的组织方式，不同的索引代表不同的存储形式或数据结构，比如 `VectorStoreIndex` 以向量形式存储，`KnowledgeGraphIndex` 以图谱形式存储，`SummaryIndex` 以链表形式存储，`TreeIndex` 以树形式存储，`KeywordTableIndex` 以倒排索引形式存储。[How Each Index Works](https://docs.llamaindex.ai/en/stable/module_guides/indexing/index_guide/) 这份指南对不同索引的工作原理用图文的方式进行了通俗的讲解。
 
 ### 检索策略（Retrieval）
 
+构建索引的目的是为了更快的检索，无论是 [LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/) 还是 [LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/) 都提供了大量的 **检索器（Retriever）**。检索器可以针对单个索引，在 LlamaIndex 中这被称为 **索引检索（Index Retrievers）**，不同的索引又可以有不同的 [检索模式](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)；检索器也可以组合不同检索技术，比如上面所学习的查询转换、查询路由、查询构造也都需要配合相应的检索策略来进行，下面还会学习一些其他的检索策略，比如父文档检索、混合检索等。
+
+#### 索引检索（Index Retrievers）
+
 * [Retriever Modules | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retrievers/)
 * [Retriever Modes | LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/retriever_modes/)
-* [Retrievers | LangChain](https://python.langchain.com/docs/modules/data_connection/retrievers/)
 * [Vector store-backed retriever | LangChain](https://python.langchain.com/v0.1/docs/modules/data_connection/retrievers/vectorstore/)
 
 #### 父文档检索（Parent Document Retrieval）
@@ -1312,3 +1347,7 @@ query_engine = sentence_index.as_query_engine(
 * [Integrating Neo4j into the LangChain ecosystem](https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2)
 * [LangChain has added Cypher Search](https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5)
 * [LangChain Cypher Search: Tips & Tricks](https://medium.com/neo4j/langchain-cypher-search-tips-tricks-f7c9e9abca4d)
+
+### RAG Eval
+
+* [Advanced RAG Eval](https://github.com/langchain-ai/langchain/blob/master/cookbook/advanced_rag_eval.ipynb)
