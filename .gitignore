@@ -135,3 +135,4 @@ node_modules/
 .DS_store
 
 *.class
+*.dylib
