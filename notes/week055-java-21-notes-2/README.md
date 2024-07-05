@@ -20,7 +20,16 @@
 
 **外部函数和内存 API（Foreign Function & Memory API，简称 FFM API）** 是 Java 17 中首次引入的一个重要特性，经过了 [JEP 412](https://openjdk.org/jeps/412) 和 [JEP 419](https://openjdk.org/jeps/419) 两个孵化版本，以及 [JEP 424](https://openjdk.org/jeps/424)  和 [JEP 434](https://openjdk.org/jeps/434) 两个预览版本，在 Java 21 中，这已经是第三个预览版本了。
 
-FFM API 由两大部分组成：**外部函数接口（Foreign Function Interface，简称 FFI）** 和 **内存 API（Memory API）**，FFI 用于实现 Java 代码和外部代码之间的相互操作，而 Memory API 则用于安全地管理堆外内存。FFM API 的引入为 Java 在人工智能、数据科学等领域的应用提供了更多的可能性，有望加速 Java 在这些领域的发展和应用。
+近年来，随着人工智能、数据科学、图像处理等领域的发展，我们在越来越多的场景下接触到原生代码：
+
+* Off-CPU Computing (CUDA, OpenCL)
+* Deep Learning (Blas, cuBlas, cuDNN, Tensorflow)
+* Graphics Processing (OpenGL, Vulkan, DirectX)
+* Others (CRIU, fuse, io_uring, OpenSSL, V8, ucx, ...)
+
+这些代码不太可能用 Java 重写，也没有必要，Java 急需一种能与本地库进行交互的方案，这就是 FFM API 诞生的背景。FFM API 最初作为 [Panama 项目](https://openjdk.org/projects/panama/) 中的核心组件，旨在改善 Java 与本地代码的互操作性。FFM API 是 Java 现代化进程中的一个重要里程碑，标志着 Java 在与本地代码互操作性方面迈出了重要一步，它的引入也为 Java 在人工智能、数据科学等领域的应用提供了更多的可能性，有望加速 Java 在这些领域的发展和应用。
+
+FFM API 由两大部分组成：**外部函数接口（Foreign Function Interface，简称 FFI）** 和 **内存 API（Memory API）**，FFI 用于实现 Java 代码和外部代码之间的相互操作，而 Memory API 则用于安全地管理堆外内存。
 
 ### 使用 JNI 调用外部函数
 
@@ -94,7 +103,7 @@ $ gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -dynamiclib JNIDemo.c
 
 这个命令会在当前目录下生成一个名为 `libJNIDemo.dylib` 的动态链接库文件，这个库文件正是我们在 Java 代码中通过 `System.loadLibrary("JNIDemo")` 加载的库文件。
 
-> 注意这里我用的是 Mac 操作系统，其他操作系统的命令略有区别。
+> 注意这里我用的是 Mac 操作系统，动态链接库的名称必须以 `lib` 为前缀，以 `.dylib` 为扩展名，其他操作系统的命令略有区别。
 >
 > Linux 系统：
 > ```
@@ -116,9 +125,58 @@ $ java -cp . -Djava.library.path=. JNIDemo
 
 ### 外部函数接口（Foreign Function Interface）
 
-FFI 实现了对外部函数库的原生接口，从而可以使 Java 在与 C、C++ 等语言编写的库集成时更加方便和高效，可以理解为 JNI 的平替。
+从上面的过程可以看出，JNI 的使用非常繁琐，一个简单的 Hello World 都要费好大劲：首先要在 Java 代码中定义 `native` 方法，然后从 Java 代码派生 C 头文件，最后还要使用 C 语言对其进行实现。Java 开发人员必须跨多个工具链工作，当本地库快速演变时，这个工作就会变得尤为枯燥乏味。
+
+除此之外，JNI 还有几个更为严重的问题：
+
+* Java 语言最大的特性是跨平台，所谓 **一次编译，到处运行**，但是使用本地接口需要涉及 C 语言的编译和链接，这是平台相关的，所以丧失了 Java 语言的跨平台特性；
+* JNI 桩代码非常难以编写和维护，首先，JNI 在类型处理上很糟糕，由于 Java 和 C 的类型系统不一致，比如聚合数据在 Java 中用对象表示，而在 C 中用结构体表示，因此，任何传递给 native 方法的 Java 对象都必须由本地代码费力地解包；另外，假设某个本地库包含 1000 个函数，那么意味着我们要生成 1000 个对应的 JNI 桩代码，这么大量的 JNI 桩代码非常难以维护；
+* 由于本地代码不受 JVM 的安全机制管理，所以 JNI 本质上是不安全的，它在使用上非常危险和脆弱，JNI 错误可能导致 JVM 的崩溃；
+* JNI 的性能也不行，一方面是由于 JNI 方法调用不能从 JIT 优化中受益，另一方面是由于通过 JNI 传递 Java 对象很慢；这就导致开发人员更愿意使用 Unsafe API 来分配堆外内存，并将其地址传递给 native 方法，这使得 Java 代码非常不安全！
+
+多年来，已经出现了许多框架来解决 JNI 遗留下来的问题，包括 [JNA](https://github.com/java-native-access/jna)、[JNR](https://github.com/jnr/jnr-ffi) 和 [JavaCPP](https://github.com/bytedeco/javacpp)。这些框架通常比 JNI 有显著改进，但情况仍然不尽理想，尤其是与提供一流本地互操作性的语言相比。例如，Python 的 `ctypes` 包可以动态地包装本地库中的函数，而无需任何胶水代码，Rust 则提供了从 C/C++ 头文件自动生成本地包装器的工具。
+
+FFI 综合参考了其他语言的实现，试图更加优雅地解决这些问题，它实现了对外部函数库的原生接口，提供了一种更高效更安全的方式来访问本地内存和函数，从而取代了传统的 JNI。
+
+下面的代码是使用 FFI 实现和上面相同的 Hello World 的例子：
+
+```
+public class FFIDemo {
+    public static void main(String[] args) throws Throwable {
+        Linker linker = Linker.nativeLinker();
+        SymbolLookup symbolLookup = linker.defaultLookup();
+        MethodHandle printf = linker.downcallHandle(
+            symbolLookup.find("printf").orElseThrow(), 
+            FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
+        );
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment hello = arena.allocateUtf8String("Hello World!\n");
+            printf.invoke(hello);
+        }
+    }
+}
+```
+
+相比于 JNI 的实现，FFI 的代码要简洁优雅得多，这里涉及了三个 FFI 中的重要接口：
+
+* `Linker`
+* `SymbolLookup`
+* `FunctionDescriptor`
+
+其中 `SymbolLookup` 用于从已加载的本地库中查找外部函数的地址，`Linker` 用于链接 Java 代码与外部函数，它同时支持下行调用（从 Java 代码调用本地代码）和上行调用（从本地代码返回到 Java 代码），`FunctionDescriptor` 用于描述外部函数的返回类型和参数类型，这些类型在 FFM API 中可以由 `MemoryLayout` 对象描述，例如 `ValueLayout` 表示值类型，`GroupLayout` 表示结构类型。
+
+通过 FFI 提供的接口，我们可以生成对应外部函数的方法句柄（`MethodHandle`），方法句柄是 Java 7 引入的一个抽象概念，可以实现对方法的动态调用，它提供了比反射更高的性能和更灵活的使用方式，这里复用了方法句柄的概念，通过方法句柄的 `invoke()` 方法就可以实现外部函数的调用。
 
 ### 使用 `ByteBuffer` 和 `sun.misc.Unsafe` 访问堆外内存
+
+使用 `ByteBuffer` 可以分配堆外内存，但是存在一些限制：
+
+* 最多只支持 2G 空间；
+* 不支持手动释放直接内存；
+
+--
+
+`sun.misc.Unsafe` 提供了一些执行低级别、不安全操作的方法，如直接访问系统内存资源、自主管理内存资源等，Unsafe 类让 Java 语言拥有了类似 C 语言指针一样操作内存空间的能力，但同时，也增加了 Java 语言的不安全性，不正确使用 Unsafe 类会使得程序出错的概率变大。
 
 ### 内存 API（Memory API）
 
@@ -143,6 +201,7 @@ https://openjdk.org/jeps/446
 ## 参考
 
 * [Guide to JNI (Java Native Interface)](https://www.baeldung.com/jni)
+* [深入拆解 Java 虚拟机 - 32 JNI 的运行机制](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E6%8B%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA/32%20%20JNI%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6.md)
 * [The Arrival of Java 21](https://blogs.oracle.com/java/post/the-arrival-of-java-21)
 * [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 9 - 21：新特性解读](https://www.didispace.com/java-features/)
