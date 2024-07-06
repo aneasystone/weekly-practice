@@ -157,7 +157,7 @@ public class FFIDemo {
 }
 ```
 
-相比于 JNI 的实现，FFI 的代码要简洁优雅得多，这里涉及了三个 FFI 中的重要接口：
+相比于 JNI 的实现，FFI 的代码要简洁优雅得多。这里的代码涉及三个 FFI 中的重要接口：
 
 * `Linker`
 * `SymbolLookup`
@@ -167,20 +167,98 @@ public class FFIDemo {
 
 通过 FFI 提供的接口，我们可以生成对应外部函数的方法句柄（`MethodHandle`），方法句柄是 Java 7 引入的一个抽象概念，可以实现对方法的动态调用，它提供了比反射更高的性能和更灵活的使用方式，这里复用了方法句柄的概念，通过方法句柄的 `invoke()` 方法就可以实现外部函数的调用。
 
-### 使用 `ByteBuffer` 和 `sun.misc.Unsafe` 访问堆外内存
+这里我们不再需要编写 C 代码，也不再需要编译链接生成动态库，所以，也就不存在平台相关的问题了。另一方面，FFI 接口的设计大多数情况下是安全的，由于都是 Java 代码，因此也受到 Java 安全机制的约束，虽然也有一部分接口是不安全的，但是比 JNI 来说要好多了。
 
-使用 `ByteBuffer` 可以分配堆外内存，但是存在一些限制：
+> OpenJDK 还提供了一个 [jextract](https://github.com/openjdk/jextract) 工具，用于从本地库自动生成 Java 代码，有兴趣的同学可以尝试一下。
 
-* 最多只支持 2G 空间；
-* 不支持手动释放直接内存；
+### 使用 `ByteBuffer` 和 `Unsafe` 访问堆外内存
 
---
+上面说过，FFM API 的另一个主要部分是 **内存 API（Memory API）**，用于安全地管理堆外内存。其实在 `FFIDemo` 的示例中我们已经见到内存 API 了，其中 `printf` 打印的 `Hello World!\n` 字符串，就是通过 `Arena` 这个内存 API 分配的。
 
-`sun.misc.Unsafe` 提供了一些执行低级别、不安全操作的方法，如直接访问系统内存资源、自主管理内存资源等，Unsafe 类让 Java 语言拥有了类似 C 语言指针一样操作内存空间的能力，但同时，也增加了 Java 语言的不安全性，不正确使用 Unsafe 类会使得程序出错的概率变大。
+但是在学习内存 API 之前，我们先来复习下 Java 在之前的版本中是如何处理堆外内存的。
+
+内存的使用往往和程序性能挂钩，很多像 TensorFlow、Ignite、Netty 这样的类库，都对性能有很高的要求，为了避免垃圾收集器不可预测的行为以及额外的性能开销，这些类库一般倾向于使用 JVM 之外的内存来存储和管理数据，这就是我们常说的 **堆外内存（off-heap memory）**。
+
+使用堆外内存有两个明显的好处：
+
+* 使用堆外内存，也就意味着堆内内存较小，从而可以减少垃圾回收次数，以及垃圾回收停顿对于应用的影响；
+* 在 I/O 通信过程中，通常会存在堆内内存和堆外内存之间的数据拷贝操作，频繁的内存拷贝是性能的主要障碍之一，为了极致的性能，一份数据应该只占一份内存空间，这就是所谓的 **零拷贝**，直接使用堆外内存可以提升程序 I/O 操作的性能。
+
+`ByteBuffer` 是访问堆外内存最常用的方法：
+
+```
+private static void testDirect() {
+    ByteBuffer bb = ByteBuffer.allocateDirect(10);
+    bb.putInt(0);
+    bb.putInt(1);
+    bb.put((byte)0);
+    bb.put((byte)1);
+
+    bb.flip();
+
+    System.out.println(bb.getInt());
+    System.out.println(bb.getInt());
+    System.out.println(bb.get());
+    System.out.println(bb.get());
+}
+```
+
+上面的代码使用 `ByteBuffer.allocateDirect(10)` 分配了 10 个字节的直接内存，然后通过 `put` 写内存，通过 `get` 读内存。
+
+可以注意到这里的 `int` 是 4 个字节，`byte` 是 1 个字节，当写完 2 个 `int` 和 2 个 `byte` 后，如果再继续写，就会报 `java.nio.BufferOverflowException` 异常。
+
+另外还有一点值得注意，我们并没有手动释放内存。虽然这个内存是直接从操作系统分配的，不受 JVM 的控制，但是创建 `DirectByteBuffer` 对象的同时也会创建一个 `Cleaner` 对象，它用于跟踪对象的垃圾回收，当 `DirectByteBuffer` 被垃圾回收时，分配的堆外内存也会一起被释放，所以我们不用手动释放内存。
+
+`ByteBuffer` 是异步编程和非阻塞编程的核心类，从 `java.nio.ByteBuffer` 这个包名就可以看出这个类是为 NIO 而设计，可以说，几乎所有的 Java 异步模式或者非阻塞模式的代码，都要直接或者间接地使用 `ByteBuffer` 来管理数据。尽管如此，这个类仍然存在着一些无法摆脱的限制：
+
+* 首先，它不支持手动释放内存，`ByteBuffer` 对应内存的释放，完全依赖于 JVM 的垃圾回收机制，这对于一些像 Netty 这样追求极致性能的类库来说并不满足，这些类库往往需要对内存进行精确的控制；
+* 其次，`ByteBuffer` 使用了 Java 的整数来表示存储空间的大小，这就导致，它的存储空间最多只有 2G；在网络编程的环境下，这可能并不是一个问题，但是在处理超过 2G 的文件时就不行了，而且像 Memcahed 这样的分布式缓存系统，内存 2G 的限制明显是不够的。
+
+为了突破这些限制，有些类库选择了访问堆外内存的另一条路，使用 `sun.misc.Unsafe` 类。这个类提供了一些低级别不安全的方法，可以直接访问系统内存资源，自主管理内存资源：
+
+```
+private static void testUnsafe() throws Exception {
+    Field f = Unsafe.class.getDeclaredField("theUnsafe");
+    f.setAccessible(true);
+    Unsafe unsafe = (Unsafe) f.get(null);
+    
+    long address = unsafe.allocateMemory(10);
+    unsafe.putInt(address, 0);
+    unsafe.putInt(address+4, 1);
+    unsafe.putByte(address+8, (byte)0);
+    unsafe.putByte(address+9, (byte)1);
+    System.out.println(unsafe.getInt(address));
+    System.out.println(unsafe.getInt(address+4));
+    System.out.println(unsafe.getByte(address+8));
+    System.out.println(unsafe.getByte(address+9));
+    unsafe.freeMemory(address);
+}
+```
+
+`Unsafe` 的使用方法和 `ByteBuffer` 很像，我们使用 `unsafe.allocateMemory(10)` 分配了 10 个字节的直接内存，然后通过 `put` 写内存，通过 `get` 读内存，区别在于我们要手动调整内存地址。
+
+使用 `Unsafe` 操作内存就像是使用 C 语言中的指针一样，效率虽然提高了不少，但是很显然，它增加了 Java 语言的不安全性，因为它实际上可以访问到任意位置的内存，不正确使用 `Unsafe` 类会使得程序出错的概率变大。
+
+>注意，默认情况下，我们无法直接使用 `Unsafe` 类，直接使用的话会报下面这样的 `SecurityException` 异常：
+>
+>```
+>Exception in thread "main" java.lang.SecurityException: Unsafe
+>        at jdk.unsupported/sun.misc.Unsafe.getUnsafe(Unsafe.java:99)
+>        at ByteBufferDemo.testUnsafe(ByteBufferDemo.java:33)
+>        at ByteBufferDemo.main(ByteBufferDemo.java:10)
+>```
+>
+>所以上面的代码通过反射的手段，使得我们可以使用 `Unsafe`。
+
+说了这么多，总结一句话就是：`ByteBuffer` 安全但效率低，`Unsafe` 效率高但是不安全。此时，就轮到 **内存 API** 出场了。
 
 ### 内存 API（Memory API）
 
-https://openjdk.org/jeps/442
+内存 API 特别适用于以下几个场景：
+
+* 大规模数据处理：在处理大规模数据集时，内存 API 的直接内存访问能力将显著提高程序的执行效率；
+* 高性能计算：对于需要频繁进行数值计算的任务，内存 API 可以减少对象访问的开销，从而实现更高的计算性能；
+* 与本地代码交互：内存 API 的使用可以使得 Java 代码更方便地与本地代码进行交互，实现更灵活的数据传输和处理；
 
 ## 未命名模式和变量（预览版本）
 
@@ -209,13 +287,15 @@ https://openjdk.org/jeps/446
 * [JDK11 升级 JDK17 最全实践干货来了 | 京东云技术团队](https://my.oschina.net/u/4090830/blog/10142895)
 * [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
-* [深入剖析Java新特性](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/)
 * [浅析一下Java FFM API(Project Panama)](https://zhuanlan.zhihu.com/p/648108631)
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
 * [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
 * [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
 * [千呼万唤始出来：Java终于发布了"协程"--虚拟线程!](https://www.yuanjava.cn/posts/virtual-thread/)
 * [JNI的运行机制](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/%e6%b7%b1%e5%85%a5%e6%8b%86%e8%a7%a3Java%e8%99%9a%e6%8b%9f%e6%9c%ba/32%20%20JNI%e7%9a%84%e8%bf%90%e8%a1%8c%e6%9c%ba%e5%88%b6.md)
+* [深入剖析Java新特性：12 外部内存接口：零拷贝的障碍还有多少？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/12%20%E5%A4%96%E9%83%A8%E5%86%85%E5%AD%98%E6%8E%A5%E5%8F%A3%EF%BC%9A%E9%9B%B6%E6%8B%B7%E8%B4%9D%E7%9A%84%E9%9A%9C%E7%A2%8D%E8%BF%98%E6%9C%89%E5%A4%9A%E5%B0%91%EF%BC%9F.md)
+* [深入剖析Java新特性：13 外部函数接口，能不能取代Java本地接口？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/13%20%E5%A4%96%E9%83%A8%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3%EF%BC%8C%E8%83%BD%E4%B8%8D%E8%83%BD%E5%8F%96%E4%BB%A3Java%E6%9C%AC%E5%9C%B0%E6%8E%A5%E5%8F%A3%EF%BC%9F.md)
+* [Java魔法类：Unsafe应用解析](https://tech.meituan.com/2019/02/14/talk-about-java-magic-class-unsafe.html)
 
 ## 更多
 
