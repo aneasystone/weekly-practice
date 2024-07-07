@@ -20,6 +20,8 @@
 
 **外部函数和内存 API（Foreign Function & Memory API，简称 FFM API）** 是 Java 17 中首次引入的一个重要特性，经过了 [JEP 412](https://openjdk.org/jeps/412) 和 [JEP 419](https://openjdk.org/jeps/419) 两个孵化版本，以及 [JEP 424](https://openjdk.org/jeps/424)  和 [JEP 434](https://openjdk.org/jeps/434) 两个预览版本，在 Java 21 中，这已经是第三个预览版本了。
 
+> 在 [Java 22](https://openjdk.org/projects/jdk/22/) 中，这个特性终于退出了预览版本。
+
 近年来，随着人工智能、数据科学、图像处理等领域的发展，我们在越来越多的场景下接触到原生代码：
 
 * Off-CPU Computing (CUDA, OpenCL)
@@ -157,6 +159,8 @@ public class FFIDemo {
 }
 ```
 
+> 注意，Java 22 中取消了 `Arena::allocateUtf8String()` 方法，改成了 `Arena::allocateFrom()` 方法。
+
 相比于 JNI 的实现，FFI 的代码要简洁优雅得多。这里的代码涉及三个 FFI 中的重要接口：
 
 * `Linker`
@@ -254,11 +258,57 @@ private static void testUnsafe() throws Exception {
 
 ### 内存 API（Memory API）
 
-内存 API 特别适用于以下几个场景：
+内存 API 基于前人的经验，使用了全新的接口设计，它的基本使用如下：
+
+```
+private static void testAllocate() {
+    try (Arena offHeap = Arena.ofConfined()) {
+        MemorySegment address = offHeap.allocate(8);
+        address.setAtIndex(ValueLayout.JAVA_INT, 0, 1);
+        address.setAtIndex(ValueLayout.JAVA_INT, 1, 0);
+        System.out.println(address.getAtIndex(ValueLayout.JAVA_INT, 0));
+        System.out.println(address.getAtIndex(ValueLayout.JAVA_INT, 1));
+    }
+}
+```
+
+这段代码使用 `Arena::allocate()` 分配了 8 个字节的外部内存，然后写入两个整型数字，最后再读取出来。下面是另一个示例，写入再读取字符串：
+
+```
+private static void testAllocateString() {
+    try (Arena offHeap = Arena.ofConfined()) {
+        MemorySegment str = offHeap.allocateUtf8String("hello");
+        System.out.println(str.getUtf8String(0));
+    }
+}
+```
+
+这段代码使用 `Arena::allocateUtf8String()` 根据字符串的长度动态地分配外部内存，然后通过 `MemorySegment::getUtf8String()` 将其复制到 JVM 栈上并输出。
+
+> 注意，Java 22 中取消了 `Arena::allocateUtf8String()` 和 `MemorySegment::getUtf8String()` 方法，改成了 `Arena::allocateFrom()` 和 `MemorySegment::getString()` 方法。
+
+这两段代码中的 `Arena` 和 `MemorySegment` 是内存 API 的关键，`MemorySegment` 用于表示一段内存片段，既可以是堆内内存也可以是堆外内存；`Arena` 定义了内存资源的生命周期管理机制，它实现了 `AutoCloseable` 接口，所以可以使用 `try-with-resource` 语句及时地释放它管理的内存。
+
+`Arena.ofConfined()` 表示定义一块受限区域，只有一个线程可以访问在受限区域中分配的内存段。除此之外，我们还可以定义其他类型的区域：
+
+* `Arena.global()` - 全局区域，分配的区域永远不会释放，随时可以访问；
+* `Arena.ofAuto()` - 自动区域，由垃圾收集器自动检测并释放；
+* `Arena.ofShared()` - 共享区域，可以被多个线程同时访问；
+
+`Arena` 接口的设计经过了多次调整，在最初的版本中被称为 `ResourceScope`，后来改成 `MemorySession`，再后来又拆成了 `Arena` 和 `SegmentScope` 两个类，现在基本上稳定使用 `Arena` 就可以了。
+
+除 `Arena` 接口，内存 API 还包括了下面这些接口，主要可以分为两大类：
+
+* `Arena`、`MemorySegment`、`SegmentAllocator` - 这几个接口用于控制外部内存的分配和释放
+* `MemoryLayout`、`VarHandle` - 这几个接口用于操作和访问结构化的外部内存
+
+内存 API 试图简化 Java 代码操作堆外内存的难度，通过它可以实现更高效的内存访问方式，同时可以保障一定的安全性，特别适用于下面这些场景：
 
 * 大规模数据处理：在处理大规模数据集时，内存 API 的直接内存访问能力将显著提高程序的执行效率；
 * 高性能计算：对于需要频繁进行数值计算的任务，内存 API 可以减少对象访问的开销，从而实现更高的计算性能；
-* 与本地代码交互：内存 API 的使用可以使得 Java 代码更方便地与本地代码进行交互，实现更灵活的数据传输和处理；
+* 与本地代码交互：内存 API 的使用可以使得 Java 代码更方便地与本地代码进行交互，结合外部函数接口，可以实现更灵活的数据传输和处理。
+
+相信等内存 API 正式发布之后，之前使用 `ByteBuffer` 或 `Unsafe` 的很多类库估计都会考虑切换成使用内存 API 来获取性能的提升。
 
 ## 未命名模式和变量（预览版本）
 

@@ -16,6 +16,7 @@ public class FFIDemo {
         );
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment hello = arena.allocateUtf8String("Hello World!\n");
+            // MemorySegment hello = arena.allocateFrom("Hello World!\n");
             printf.invoke(hello);
         }
     }
