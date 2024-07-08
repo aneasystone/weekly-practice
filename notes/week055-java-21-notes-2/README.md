@@ -312,7 +312,106 @@ private static void testAllocateString() {
 
 ## 未命名模式和变量（预览版本）
 
-https://openjdk.org/jeps/443
+未命名模式和变量也是一个预览特性，其主要目的是为了提高代码的可读性和可维护性。
+
+在 Java 代码中，我们偶尔会遇到一些不需要使用的变量，比如下面这个例子中的异常 `e`：
+
+```
+try { 
+    int i = Integer.parseInt(s);
+    System.out.println("Good number: " + i);
+} catch (NumberFormatException e) { 
+    System.out.println("Bad number: " + s);
+}
+```
+
+这时我们就可以使用这个特性，使用下划线 `_` 来表示不需要使用的变量：
+
+```
+try { 
+    int i = Integer.parseInt(s);
+    System.out.println("Good number: " + i);
+} catch (NumberFormatException _) { 
+    System.out.println("Bad number: " + s);
+}
+```
+
+上面这个这被称为 **未命名变量（Unnamed Variables）**。
+
+顾名思义，未命名模式和变量包含两个方面：**未命名模式（Unnamed Patterns）** 和 **未命名变量（Unnamed Variables）**。
+
+### 未命名模式（Unnamed Patterns）
+
+在 [上一篇笔记](../week050-java-21-notes/README.md) 中，我们学习了什么是 **记录模式（Record Pattern）** 以及 `instanceof` 和 `switch` 两种模式匹配。未命名模式允许在模式匹配中省略掉记录组件的类型和名称。下面的代码展示了如何在 `instanceof` 模式匹配中使用未命名模式这个特性：
+
+```
+if (obj instanceof Person(String name, _)) {
+    System.out.println("Name: " + name);
+}
+```
+
+其中 Person 记录的第二个参数 `Integer age` 在后续的代码中没用到，于是用下划线 `_` 把类型和名称都代替掉。我们也可以只代替 `age` 名称，这被称为 **未命名模式变量（Unnamed Pattern Variables）**：
+
+```
+if (obj instanceof Person(String name, Integer _)) {
+    System.out.println("Name: " + name);
+}
+```
+
+这个特性也可以在 `switch` 模式匹配中使用：
+
+```
+switch (b) {
+    case Box(RedBall _), Box(BlueBall _) -> processBox(b);
+    case Box(GreenBall _)                -> stopProcessing();
+    case Box(_)                          -> pickAnotherBox();
+}
+```
+
+这里前两个 `case` 是未命名模式变量，最后一个 `case` 是未命名模式。
+
+### 未命名变量（Unnamed Variables）
+
+未命名变量的使用场景更加丰富，除了上面在 `catch` 子句中使用的例子外，下面列举了一些其他的典型场景。
+
+在 `for` 循环中使用：
+
+```
+int acc = 0;
+for (Order _ : orders) {
+    if (acc < LIMIT) { 
+        ... acc++ ...
+    }
+}
+```
+
+在赋值语句中使用：
+
+```
+Queue<Integer> q = ... // x1, y1, z1, x2, y2, z2, ...
+while (q.size() >= 3) {
+   var x = q.remove();
+   var y = q.remove();
+   var _ = q.remove();
+   ... new Point(x, y) ...
+}
+```
+
+在 `try-with-resource` 语句中使用：
+
+```
+try (var _ = ScopedContext.acquire()) {
+  // No use of acquired resource
+}
+```
+
+在 lambda 表达式中使用：
+
+```
+stream.collect(
+    Collectors.toMap(String::toUpperCase, _ -> "NODATA")
+)
+```
 
 ## 虚拟线程
 
@@ -329,7 +428,7 @@ https://openjdk.org/jeps/446
 ## 参考
 
 * [Guide to JNI (Java Native Interface)](https://www.baeldung.com/jni)
-* [深入拆解 Java 虚拟机 - 32 JNI 的运行机制](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E6%8B%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA/32%20%20JNI%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6.md)
+* [深入拆解 Java 虚拟机：32 JNI 的运行机制](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E6%8B%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA/32%20%20JNI%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6.md)
 * [The Arrival of Java 21](https://blogs.oracle.com/java/post/the-arrival-of-java-21)
 * [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 9 - 21：新特性解读](https://www.didispace.com/java-features/)

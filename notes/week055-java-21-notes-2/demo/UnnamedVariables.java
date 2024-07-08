@@ -31,6 +31,12 @@ public class UnnamedVariables {
     }
 
     private static void test_unnamed_patterns(Object obj) {
+        // unnamed patterns
+        if (obj instanceof Person(String name, _)) {
+            System.out.println("Name: " + name);
+        }
+
+        // unnamed pattern variables
         if (obj instanceof Person(String name, Integer _)) {
             System.out.println("Name: " + name);
         }
