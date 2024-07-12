@@ -415,7 +415,108 @@ stream.collect(
 
 ## 虚拟线程
 
-https://openjdk.org/jeps/444
+**虚拟线程（Virtual Thread）** 是 Java 21 中最突出的特性之一，作为 [Loom](https://wiki.openjdk.org/display/loom) 项目的一部分，开发人员对这个特性可谓期待已久。它由预览特性变成正式特性经历了两个版本的迭代，第一次预览是 Java 19 的 [JEP 425](https://openjdk.org/jeps/425) ，第二次预览是 Java 20 的 [JEP 436](https://openjdk.org/jeps/436)，在 Java 21 中虚拟线程特性正式发布。 
+
+### 虚拟线程 vs. 平台线程
+
+在引入虚拟线程之前，我们常使用 `java.lang.Thread` 来创建 Java 线程，这个线程被称为 **平台线程（Platform Thread）**，它和操作系统的内核线程是一对一的关系，由内核线程调度器负责调度。
+
+![](./images/platform-threads.png)
+
+为了提高应用程序的性能和系统的吞吐量，我们将添加越来越多的 Java 线程，下面是一个模拟多线程的例子，我们创建 10 万个线程，每个线程模拟 IO 操作等待 1 秒钟：
+
+```
+private static void testThread() {
+    long l = System.currentTimeMillis();
+    try(var executor = Executors.newCachedThreadPool()) {
+        IntStream.range(0, 100000).forEach(i -> {
+            executor.submit(() -> {
+                Thread.sleep(Duration.ofSeconds(1));
+                // System.out.println(i);
+                return i;
+            });
+        });
+    }
+    System.out.printf("elapsed time：%d ms", System.currentTimeMillis() - l);
+}
+```
+
+这里的 10 万个线程对应着 10 万个内核线程，这种通过大量的线程来提高系统性能是不现实的，因为内核线程成本高昂，不仅会占用大量资源来处理上下文切换，而且可用数量也很受限，当系统资源不足时就会报错：
+
+```
+$ java ThreadDemo.java
+Exception in thread "pool-2-thread-427" java.lang.OutOfMemoryError: Java heap space
+        at java.base/java.util.concurrent.SynchronousQueue$TransferStack.snode(SynchronousQueue.java:328)
+        at java.base/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:371)
+        at java.base/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:903)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1069)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.runWith(Thread.java:1596)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+```
+
+于是人们又发明了各种线程池技术，最大程度地提高线程的复用性。下面我们使用一个固定大小为 200 的线程池来解决线程过多时报错的问题：
+
+```
+private static void testThreadPool() {
+    long l = System.currentTimeMillis();
+    try(var executor = Executors.newFixedThreadPool(200)) {
+        IntStream.range(0, 100000).forEach(i -> {
+            executor.submit(() -> {
+                Thread.sleep(Duration.ofSeconds(1));
+                // System.out.println(i);
+                return i;
+            });
+        });
+    }
+    System.out.printf("elapsed time：%d ms", System.currentTimeMillis() - l);
+}
+```
+
+在使用固定大小的线程池后，不会出现创建大量线程导致报错的问题，任务可以正常完成。但是这里的线程池却成了我们应用程序最大的性能瓶颈，程序运行花费了 50 秒的时间：
+
+```
+$ java ThreadDemo.java
+elapsed time：50863 ms
+```
+
+按理说每个线程耗时 1 秒，无论是多少个线程并发，总耗时应该都是 1 秒，很显然这里并没有发挥出硬件应有的性能。
+
+为了解决这个问题，于是就有了虚拟线程。虚拟线程由 [Loom](https://wiki.openjdk.org/display/loom) 项目提出，最初被称为 **纤程（Fibers）**，类似于 **协程（Coroutine）** 的概念，它由 JVM 而不是操作系统进行调度，可以让大量的虚拟线程在较少数量的平台线程上运行。我们将上面的代码改成虚拟线程非常简单，只需要将 `Executors.newFixedThreadPool(200)` 改成 `Executors.newVirtualThreadPerTaskExecutor()` 即可：
+
+```
+private static void testVirtualThread() {
+    long l = System.currentTimeMillis();
+    try(var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        IntStream.range(0, 100000).forEach(i -> {
+            executor.submit(() -> {
+                Thread.sleep(Duration.ofSeconds(1));
+                // System.out.println(i);
+                return i;
+            });
+        });
+    }
+    System.out.printf("elapsed time：%d ms", System.currentTimeMillis() - l);
+}
+```
+
+运行结果显示，虚拟线程使得程序的性能得到了非常显著的提升，10 万个线程全部运行只花费 1 秒多的时间：
+
+```
+$ java ThreadDemo.java
+elapsed time：1592 ms
+```
+
+虚拟线程的数量可以远大于平台线程的数量，多个虚拟线程将由 JVM 调度在某个平台线程上执行，一个平台线程可以在不同的时间执行不同的虚拟线程，当虚拟线程被阻塞或等待时，平台线程可以切换到另一个虚拟线程执行。
+
+虚拟线程、平台线程和系统内核线程的关系图如下所示：
+
+![](./images/virtual-threads.png)
+
+### 创建虚拟线程
+
+### 调试虚拟线程
 
 ## 未命名类和实例的 Main 方法（预览版本）
 
@@ -433,8 +534,6 @@ https://openjdk.org/jeps/446
 * [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 9 - 21：新特性解读](https://www.didispace.com/java-features/)
 * [Java 21 新特性概览](https://javaguide.cn/java/new-features/java21.html)
-* [JDK11 升级 JDK17 最全实践干货来了 | 京东云技术团队](https://my.oschina.net/u/4090830/blog/10142895)
-* [Java 21：下一个LTS版本，提供了虚拟线程、记录模式和模式匹配](https://www.infoq.cn/article/zIiqcmU8hiGhmuSAhzwb)
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
 * [浅析一下Java FFM API(Project Panama)](https://zhuanlan.zhihu.com/p/648108631)
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
