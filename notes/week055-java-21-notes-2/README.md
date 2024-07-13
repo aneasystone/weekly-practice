@@ -423,7 +423,7 @@ stream.collect(
 
 ![](./images/platform-threads.png)
 
-为了提高应用程序的性能和系统的吞吐量，我们将添加越来越多的 Java 线程，下面是一个模拟多线程的例子，我们创建 10 万个线程，每个线程模拟 IO 操作等待 1 秒钟：
+为了提高应用程序的性能和系统的吞吐量，我们将添加越来越多的 Java 线程，下面是一个模拟多线程的例子，我们创建 10 万个线程，每个线程模拟 I/O 操作等待 1 秒钟：
 
 ```
 private static void testThread() {
@@ -441,7 +441,7 @@ private static void testThread() {
 }
 ```
 
-这里的 10 万个线程对应着 10 万个内核线程，这种通过大量的线程来提高系统性能是不现实的，因为内核线程成本高昂，不仅会占用大量资源来处理上下文切换，而且可用数量也很受限，当系统资源不足时就会报错：
+这里的 10 万个线程对应着 10 万个内核线程，这种通过大量的线程来提高系统性能是不现实的，因为内核线程成本高昂，不仅会占用大量资源来处理上下文切换，而且可用数量也很受限，一个线程大约消耗 1M~2M 的内存，当系统资源不足时就会报错：
 
 ```
 $ java ThreadDemo.java
@@ -483,7 +483,13 @@ elapsed time：50863 ms
 
 按理说每个线程耗时 1 秒，无论是多少个线程并发，总耗时应该都是 1 秒，很显然这里并没有发挥出硬件应有的性能。
 
-为了解决这个问题，于是就有了虚拟线程。虚拟线程由 [Loom](https://wiki.openjdk.org/display/loom) 项目提出，最初被称为 **纤程（Fibers）**，类似于 **协程（Coroutine）** 的概念，它由 JVM 而不是操作系统进行调度，可以让大量的虚拟线程在较少数量的平台线程上运行。我们将上面的代码改成虚拟线程非常简单，只需要将 `Executors.newFixedThreadPool(200)` 改成 `Executors.newVirtualThreadPerTaskExecutor()` 即可：
+为了充分利用硬件，研究人员转而采用线程共享的方式，它的核心想法是这样的：我们并不需要在一个线程上从头到尾地处理一个请求，当执行到等待 I/O 操作时，可以将这个请求缓存到池中，以便线程可以处理其他请求，当 I/O 操作结束后会收到一个回调通知，再将请求从池中取出继续处理。这种细粒度的线程共享允许在高并发操作时不消耗大量线程，从而消除内核线程稀缺而导致的性能瓶颈。
+
+这种方式使用了一种被称为 **异步编程（Asynchronous Programming）** 的风格，通过所谓的 **响应式框架（Reactive Frameworks）** 来实现，比如著名的 [Reactor](https://projectreactor.io/) 项目一直致力于通过响应式编程来提高 Java 性能。但是这种风格的代码难以理解、难以调试、难以使用，普通开发人员只能对其敬而远之，只有高阶开发人员才能玩得转，所以并没有得到普及。
+
+所以 Java 一直在寻找一种既能有异步编程的性能，又能编写起来简单的方案，最终虚拟线程诞生。
+
+虚拟线程由 [Loom](https://wiki.openjdk.org/display/loom) 项目提出，最初被称为 **纤程（Fibers）**，类似于 **协程（Coroutine）** 的概念，它由 JVM 而不是操作系统进行调度，可以让大量的虚拟线程在较少数量的平台线程上运行。我们将上面的代码改成虚拟线程非常简单，只需要将 `Executors.newFixedThreadPool(200)` 改成 `Executors.newVirtualThreadPerTaskExecutor()` 即可：
 
 ```
 private static void testVirtualThread() {
@@ -514,7 +520,64 @@ elapsed time：1592 ms
 
 ![](./images/virtual-threads.png)
 
+值得注意的是，虚拟线程适用于 I/O 密集型任务，不适用于计算密集型任务，因为计算密集型任务始终需要 CPU 资源作为支持。如果测试程序中的任务不是等待 1 秒钟，而是执行一秒钟的计算（比如对一个巨大的数组进行排序），那么程序不会有明显的性能提升。因为虚拟线程不是更快的线程，它们运行代码的速度与平台线程相比并无优势。虚拟线程的存在是为了提供更高的吞吐量，而不是速度（更低的延迟）。
+
 ### 创建虚拟线程
+
+为了降低虚拟线程的使用门槛，官方尽力复用原有的 `java.lang.Thread` 线程类，让我们的代码可以平滑地过渡到虚拟线程的使用。下面列举几种创建虚拟线程的方式：
+
+1. 通过 `Thread.startVirtualThread()` 创建
+
+```
+Thread.startVirtualThread(() -> {
+    System.out.println("Hello");
+});
+```
+
+2. 使用 `Thread.ofVirtual()` 创建
+
+```
+Thread.ofVirtual().start(() -> {
+    System.out.println("Hello");
+});
+```
+
+上面的代码通过 `start()` 直接启动虚拟线程，也可以通过 `unstarted()` 创建一个未启动的虚拟线程，再在合适的时机启动：
+
+```
+Thread thread = Thread.ofVirtual().unstarted(() -> {
+    System.out.println("Hello");
+});
+thread.start();
+```
+
+> 和 `Thread.ofVirtual()` 对应的是 `Thread.ofPlatform()`，用于创建平台线程。
+
+3. 通过 `ThreadFactory` 创建
+
+```
+ThreadFactory factory = Thread.ofVirtual().factory();
+Thread thread = factory.newThread(() -> {
+    System.out.println("Hello");
+});
+thread.start();
+```
+
+4. 通过 `Executors.newVirtualThreadPerTaskExecutor()` 创建
+
+```
+try(var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    executor.submit(() -> {
+        System.out.println("Hello");
+    });
+}
+```
+
+这种方式和传统的创建线程池非常相似，只需要改一行代码就可以把之前的线程池切换到虚拟线程。
+
+很有意思的一点是，这里我们并没有指定虚拟线程的数量，这是因为虚拟线程非常廉价非常轻量，使用后立即就被销毁了，所以根本不需要被重用或池化。
+
+正是由于虚拟线程非常轻量，我们可以在单个平台线程中创建成百上千个虚拟线程，它们通过暂停和恢复来实现线程之间的切换，避免了上下文切换的额外耗费，兼顾了多线程的优点，简化了高并发程序的复杂，可以有效减少编写、维护和观察高吞吐量并发应用程序的工作量。
 
 ### 调试虚拟线程
 
@@ -530,8 +593,6 @@ https://openjdk.org/jeps/446
 
 * [Guide to JNI (Java Native Interface)](https://www.baeldung.com/jni)
 * [深入拆解 Java 虚拟机：32 JNI 的运行机制](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E6%8B%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA/32%20%20JNI%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6.md)
-* [The Arrival of Java 21](https://blogs.oracle.com/java/post/the-arrival-of-java-21)
-* [Java 版本历史](https://zh.wikipedia.org/wiki/Java%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2)
 * [Java 9 - 21：新特性解读](https://www.didispace.com/java-features/)
 * [Java 21 新特性概览](https://javaguide.cn/java/new-features/java21.html)
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
@@ -544,6 +605,8 @@ https://openjdk.org/jeps/446
 * [深入剖析Java新特性：12 外部内存接口：零拷贝的障碍还有多少？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/12%20%E5%A4%96%E9%83%A8%E5%86%85%E5%AD%98%E6%8E%A5%E5%8F%A3%EF%BC%9A%E9%9B%B6%E6%8B%B7%E8%B4%9D%E7%9A%84%E9%9A%9C%E7%A2%8D%E8%BF%98%E6%9C%89%E5%A4%9A%E5%B0%91%EF%BC%9F.md)
 * [深入剖析Java新特性：13 外部函数接口，能不能取代Java本地接口？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/13%20%E5%A4%96%E9%83%A8%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3%EF%BC%8C%E8%83%BD%E4%B8%8D%E8%83%BD%E5%8F%96%E4%BB%A3Java%E6%9C%AC%E5%9C%B0%E6%8E%A5%E5%8F%A3%EF%BC%9F.md)
 * [Java魔法类：Unsafe应用解析](https://tech.meituan.com/2019/02/14/talk-about-java-magic-class-unsafe.html)
+* [Java19 正式 GA！看虚拟线程如何大幅提高系统吞吐量](https://mp.weixin.qq.com/s/yyApBXxpXxVwttr01Hld6Q)
+* [How to Use Java 19 Virtual Threads](https://medium.com/javarevisited/how-to-use-java-19-virtual-threads-c16a32bad5f7)
 
 ## 更多
 
