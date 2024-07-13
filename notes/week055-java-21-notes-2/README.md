@@ -581,6 +581,19 @@ try(var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
 ### 调试虚拟线程
 
+JDK 长期以来一直提供调试、分析和监控线程的机制，这些机制对于故障排查、维护和优化是必不可少的，JDK 提供了很多工具来实现这点，这些工具现在对虚拟线程也提供了同样的支持。
+
+比如 `jstack` 或 `jcmd` 是流行的线程转储工具，它们可以打印出应用程序的所有线程，这种扁平的列表结构对于几十或几百个平台线程来说还可以，但对于成千上万的虚拟线程来说已经不适合了，于是在 `jcmd` 中引入了一种新的线程转储方式，以 JSON 格式将虚拟线程与平台线程一起打印：
+
+```
+$ jcmd <pid> Thread.dump_to_file -format=json <file>
+```
+
+以下是这样的线程转储的示例：
+
+![](./images/virtual-threads-dump.png)
+
+
 ## 未命名类和实例的 Main 方法（预览版本）
 
 https://openjdk.org/jeps/445

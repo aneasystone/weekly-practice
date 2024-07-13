@@ -79,7 +79,7 @@ public class ThreadDemo {
     private static void testVirtualThreadDebug() {
         long l = System.currentTimeMillis();
         try(var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            IntStream.range(0, 10).forEach(i -> {
+            IntStream.range(0, 1000).forEach(i -> {
                 executor.submit(() -> {
                     Thread.sleep(Duration.ofSeconds(60));
                     // System.out.println(i);
