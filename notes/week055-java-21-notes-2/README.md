@@ -594,9 +594,47 @@ $ jcmd <pid> Thread.dump_to_file -format=json <file>
 ![](./images/virtual-threads-dump.png)
 
 
-## 未命名类和实例的 Main 方法（预览版本）
+## 未命名类和实例 Main 方法（预览版本）
 
-https://openjdk.org/jeps/445
+相信所有学过 Java 的人对下面这几行代码都非常熟悉吧：
+
+```
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+```
+
+通常我们初学 Java 的时候，都会写出类似这样的 Hello World 程序，不过作为初学者的入门示例，这段代码相比其他语言来说显得过于臃肿了，给初学者的感觉就是 Java 太复杂了，因为这里掺杂了太多只有在开发大型应用的时候才会涉及到的概念：
+
+* 首先 `public class Hello` 这行代码涉及了类的声明和访问修饰符，这些概念可以用于数据隐藏、重用、访问控制、模块化等，在大型复杂应用程序中很有用；但是对于一个初学者，往往是从变量、控制流和子程序的基本编程概念开始学习的，在这个小例子中，它们毫无意义；
+* 其次，`main()` 函数的 `String[] args` 这个参数主要用于接收从命令行传入的参数，但是对于一个初学者来说，在这里它显得非常神秘，因为它在代码中从未被使用过；
+* 最后，`main()` 函数前面的 `static` 修饰符是 Java 类和对象模型的一部分，这个概念这对初学者也很不友好，甚至是有害的，因为如果要在代码中添加一个新的方法或字段时，为了访问它们，我们必须将它们全部声明成 `static` 的，这是一种既不常见也不是好习惯的用法，要么就要学习如何实例化对象。
+
+为了让初学者可以快速上手，Java 21 引入了未命名类和实例 Main 方法这个特性，这个特性包含两个部分：
+
+1. 增强了 Java 程序的 **启动协议（the launch protocol）**，使得 `main` 方法可以没有访问修饰符、没有 `static` 修饰符和没有 `String[]` 参数：
+
+```
+class Hello { 
+    void main() { 
+        System.out.println("Hello");
+    }
+}
+```
+
+这样的 `main` 方法被称为 **实例 Main 方法（instance main methods）**。
+
+2. 实现了 **未命名类（unnamed class）** 特性，使我们可以不用声明类，进一步简化上面的代码：
+
+```
+void main() {
+    System.out.println("Hello");
+}
+```
+
+在 Java 语言中，每个类都位于一个包中，每个包都位于一个模块中。而一个未命名的类位于未命名的包中，未命名的包位于未命名的模块中。
 
 ## 作用域值（预览版本）
 
