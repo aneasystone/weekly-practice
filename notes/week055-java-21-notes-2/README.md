@@ -638,7 +638,58 @@ void main() {
 
 ## 作用域值（预览版本）
 
-https://openjdk.org/jeps/446
+**作用域值（Scoped Values）** 是 [Loom](https://wiki.openjdk.org/display/loom) 项目提出的另一个重要特性，它提供了一种隐式方法参数的形式，允许在大型程序的各个部分之间安全地共享数据，而无需将它们作为显式参数添加到调用链中的每个方法中。作用域值通常是作为一个公共静态字段，因此可以从任何方法中访问到。如果多个线程使用相同的作用域值，则从每个线程的角度来看，它可能包含不同的值。
+
+如果您熟悉 **线程本地变量（thread-local variables）**，这听起来会很熟悉，事实上，作用域值正是为了解决使用线程本地变量时可能遇到的一些问题，在某些情况下可以将其作为线程本地变量的现代替代品。
+
+### 一个例子
+
+作用域值或线程本地变量的一个经典使用场景是在 Web 框架中获取当前已登录的用户信息，大概流程是这样：在接收到请求时对用户进行身份验证，然后将用户信息保存起来，这个信息可以被任意代码使用。
+
+下面是示例代码：
+
+```
+public class UserDemo {
+    
+    public static void main(String[] args) {
+
+        // 从 request 中获取用户信息
+        String userId = getUserFromRequest();
+        
+        // 查询用户详情
+        String userInfo = new UserService().getUserInfo(userId);
+        System.out.println(userInfo);
+    }
+
+    private static String getUserFromRequest() {
+        return "admin";
+    }
+
+    static class UserService {
+        public String getUserInfo(String userId) {
+            return new UserRepository().getUserInfo(userId);
+        }
+    }
+
+    static class UserRepository {
+        public String getUserInfo(String userId) {
+            return String.format("%s:%s", userId, userId);
+        }
+    }
+}
+```
+
+在这里我们使用方法参数将用户信息传递到其他要使用的地方，可以看到，`userId` 参数从 `UserDemo` 传到 `UserService` 又传到 `UserRepository`。
+
+在一个复杂的应用程序中，请求的处理可能会延伸到数百个方法，这时，我们需要为每一个方法添加 `userId` 参数，将用户传递到最底层需要用户信息的方法中。很显然，额外的 `userId` 参数会使我们的代码很快变得混乱，因为大多数方法不需要用户信息，甚至可能有一些方法出于安全原因根本不应该能够访问用户。如果在调用堆栈的某个深处我们还需要用户的 IP 地址怎么办？那么我们将不得不再添加一个 `ip` 参数，然后通过无数的方法传递它。
+
+### 使用 `ThreadLocal` 线程本地变量
+
+### 使用 `ScopedValue` 作用域值
+
+* 线程局部变量的值可以随意被更改，而作用域值是不可变的，无法更改；
+* 在使用大量的虚拟线程时，线程局部变量会占用大量内存，而作用域值更轻量，用完立即释放；
+* 线程局部变量持续时间太长，忘记清理的话可能导致内存泄露，作用域值没有这个问题；
 
 ## 参考
 
@@ -649,7 +700,6 @@ https://openjdk.org/jeps/446
 * [Hello, Java 21](https://spring.io/blog/2023/09/20/hello-java-21/)
 * [浅析一下Java FFM API(Project Panama)](https://zhuanlan.zhihu.com/p/648108631)
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
-* [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
 * [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
 * [千呼万唤始出来：Java终于发布了"协程"--虚拟线程!](https://www.yuanjava.cn/posts/virtual-thread/)
 * [JNI的运行机制](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/%e6%b7%b1%e5%85%a5%e6%8b%86%e8%a7%a3Java%e8%99%9a%e6%8b%9f%e6%9c%ba/32%20%20JNI%e7%9a%84%e8%bf%90%e8%a1%8c%e6%9c%ba%e5%88%b6.md)
@@ -658,6 +708,9 @@ https://openjdk.org/jeps/446
 * [Java魔法类：Unsafe应用解析](https://tech.meituan.com/2019/02/14/talk-about-java-magic-class-unsafe.html)
 * [Java19 正式 GA！看虚拟线程如何大幅提高系统吞吐量](https://mp.weixin.qq.com/s/yyApBXxpXxVwttr01Hld6Q)
 * [How to Use Java 19 Virtual Threads](https://medium.com/javarevisited/how-to-use-java-19-virtual-threads-c16a32bad5f7)
+* [Virtual Threads in Java (Project Loom) - HappyCoders.eu](https://www.happycoders.eu/java/virtual-threads/)
+* [Scoped Values in Java - HappyCoders.eu](https://www.happycoders.eu/java/scoped-values/)
+* [Structured Concurrency in Java with StructuredTaskScope](https://www.happycoders.eu/java/structured-concurrency-structuredtaskscope/)
 
 ## 更多
 
