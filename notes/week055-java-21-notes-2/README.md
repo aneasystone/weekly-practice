@@ -644,9 +644,7 @@ void main() {
 
 ### 一个例子
 
-作用域值或线程本地变量的一个经典使用场景是在 Web 框架中获取当前已登录的用户信息，大概流程是这样：在接收到请求时对用户进行身份验证，然后将用户信息保存起来，这个信息可以被任意代码使用。
-
-下面是示例代码：
+在 Web 应用开发中，一个经典的场景是获取当前已登录的用户信息，下面的代码模拟了大概的流程：
 
 ```
 public class UserDemo {
@@ -679,13 +677,56 @@ public class UserDemo {
 }
 ```
 
-在这里我们使用方法参数将用户信息传递到其他要使用的地方，可以看到，`userId` 参数从 `UserDemo` 传到 `UserService` 又传到 `UserRepository`。
+在接收到请求时，首先对用户进行身份验证，然后得到用户信息，这个信息可能被很多地方使用。在这里我们使用方法参数将用户信息传递到其他要使用的地方，可以看到，`userId` 参数从 `UserDemo` 传到 `UserService` 又传到 `UserRepository`。
 
 在一个复杂的应用程序中，请求的处理可能会延伸到数百个方法，这时，我们需要为每一个方法添加 `userId` 参数，将用户传递到最底层需要用户信息的方法中。很显然，额外的 `userId` 参数会使我们的代码很快变得混乱，因为大多数方法不需要用户信息，甚至可能有一些方法出于安全原因根本不应该能够访问用户。如果在调用堆栈的某个深处我们还需要用户的 IP 地址怎么办？那么我们将不得不再添加一个 `ip` 参数，然后通过无数的方法传递它。
 
 ### 使用 `ThreadLocal` 线程本地变量
 
+解决这一问题的传统方法是使用 `ThreadLocal`，它是线程本地变量，只要线程不销毁，我们随时可以获取 `ThreadLocal` 中的变量值。
+
+```
+public class UserDemoThreadLocal {
+    
+    private final static ThreadLocal<String> USER = new ThreadLocal<>();
+    
+    public static void main(String[] args) {
+        
+        // 从 request 中获取用户信息
+        String userId = getUserFromRequest();
+        USER.set(userId);
+
+        // 查询用户详情
+        String userInfo = new UserService().getUserInfo();
+        System.out.println(userInfo);
+    }
+
+    private static String getUserFromRequest() {
+        return "admin";
+    }
+
+    static class UserService {
+        public String getUserInfo() {
+            return new UserRepository().getUserInfo();
+        }
+    }
+
+    static class UserRepository {
+        public String getUserInfo() {
+            String userId = USER.get();
+            return String.format("%s:%s", userId, userId);
+        }
+    }
+}
+```
+
+这里我们定义了一个名为 `USER` 的 `ThreadLocal` 全局变量，获取完用户信息之后将其存入 `USER` 中，然后在 `UserRepository` 中直接从 `USER` 中获取。尽管看起来像普通变量，但线程本地变量的特点是每个线程都有一个独立实例，它的值取决于哪个线程调用其 `get` 或 `set` 方法来读取或写入其值。使用线程本地变量，可以方便地在调用堆栈上的方法之间共享数据，而无需使用方法参数。
+
+> 注意，`ThreadLocal` 只能在单个线程中共享数据，如果内部方法中创建了新线程，我们可以使用 `InheritableThreadLocal`，它是 `ThreadLocal` 的子类，主要用于子线程创建时自动继承父线程的 `ThreadLocal` 变量，方便必要信息的进一步传递。
+
 ### 使用 `ScopedValue` 作用域值
+
+不幸的是，线程本地变量存在许多设计缺陷，无法避免：
 
 * 线程局部变量的值可以随意被更改，而作用域值是不可变的，无法更改；
 * 在使用大量的虚拟线程时，线程局部变量会占用大量内存，而作用域值更轻量，用完立即释放；

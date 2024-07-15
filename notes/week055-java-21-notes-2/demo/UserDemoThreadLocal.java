@@ -1,7 +1,8 @@
 public class UserDemoThreadLocal {
     
-    private final static ThreadLocal<String> USER = new ThreadLocal<>();
-
+    // private final static ThreadLocal<String> USER = new ThreadLocal<>();
+    private final static ThreadLocal<String> USER = new InheritableThreadLocal<>();
+    
     public static void main(String[] args) {
         
         // 从 request 中获取用户信息
@@ -36,7 +37,10 @@ public class UserDemoThreadLocal {
         public String getUserInfo() {
             String userId = USER.get();
             Thread.ofPlatform().start(() -> {
-                System.out.println("thread: " + USER.get());
+                System.out.println("platform thread: " + USER.get());
+            });
+            Thread.ofVirtual().start(() -> {
+                System.out.println("virtual thread: " + USER.get());
             });
             return String.format("%s:%s", userId, userId);
         }
