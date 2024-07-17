@@ -728,9 +728,101 @@ public class UserDemoThreadLocal {
 
 不幸的是，线程本地变量存在许多设计缺陷，无法避免：
 
-* 线程局部变量的值可以随意被更改，而作用域值是不可变的，无法更改；
-* 在使用大量的虚拟线程时，线程局部变量会占用大量内存，而作用域值更轻量，用完立即释放；
-* 线程局部变量持续时间太长，忘记清理的话可能导致内存泄露，作用域值没有这个问题；
+* **不受限制的可变性（Unconstrained mutability）** - 线程本地变量都是可变的，它的值可以随意被更改，任何能够调用线程本地变量的 `get` 方法的代码都可以随时调用该变量的 `set` 方法；但是往往更常见的需求是从一个方法向其他方法简单的单向数据传输，就像上面的示例一样；对线程本地变量的任意修改可能导致类似意大利面条的数据流以及难以察觉的错误；
+* **无限寿命（Unbounded lifetime）** - 一旦线程本地变量通过 `set` 方法设值，这个值将在线程的整个生命周期中被保留，直到调用 `remove` 方法，不幸的是，开发人员经常忘记调用 `remove` 方法；如果使用了线程池，如果没有正确清除线程本地变量，可能会将一个线程的变量意外地泄漏到另一个不相关的线程中，导致潜在地安全漏洞；此外，忘记清理线程局部变量还可能导致内存泄露；
+* **昂贵的继承（Expensive inheritance）** - 当使用大量线程时，我们通常会使用 `InheritableThreadLocal` 让子线程自动继承父线程的线程本地变量，子线程无法共享父线程使用的存储空间，这会显著增加程序的内存占用；特别是在虚拟线程推出之后，这个问题变得更为显著，因为虚拟线程足够廉价，程序中可能会创建成千上万的虚拟线程，如果一百万个虚拟线程中的每一个都有自己的线程局部变量副本，很快就会出现内存不足的问题。
+
+**作用域值（Scoped Values）** 就是为解决这些问题而诞生的新概念。
+
+* 首先，作用域值是不可变的，它的值无法更改，单向的数据传输使得代码流程更清晰；
+* 另外，作用域值只在有限范围内使用，用完立即释放，不存在忘记清理的问题，所以也不会导致内存泄露；
+* 最后，作用域值更轻量，由于它是不可变的，所以父线程和子线程可以复用一个实例，再多的虚拟线程也不会有内存不足的问题。
+
+下面用 `ScopedValue` 对上面的代码进行重写：
+
+```
+public class UserDemoScopedValue {
+    
+    final static ScopedValue<String> USER = ScopedValue.newInstance();
+
+    public static void main(String[] args) {
+        // 从 request 中获取用户信息
+        String userId = getUserFromRequest();
+        ScopedValue.where(USER, userId)
+            .run(() -> {
+                // 查询用户详情
+                String userInfo = new UserService().getUserInfo();
+                System.out.println(userInfo);
+            });
+    }
+
+    private static String getUserFromRequest() {
+        return "admin";
+    }
+
+    static class UserService {
+        public String getUserInfo() {
+            return new UserRepository().getUserInfo();
+        }
+    }
+
+    static class UserRepository {
+        public String getUserInfo() {
+            String userId = USER.get();
+            return String.format("%s:%s", userId, userId);
+        }
+    }
+}
+```
+
+我们首先调用 `ScopedValue.where(USER, userId)`，它用于将作用域值和某个对象进行绑定，然后调用 `run()` 方法，它接受一个 lambda 表达式，从该表达式直接或间接调用的任何方法都可以通过 `get()` 方法读取作用域值。
+
+作用域值仅在 `run()` 调用的生命周期内有效，在 `run()` 方法完成后，绑定将被销毁。这种有界的生命周期，使得数据从调用方传输到被调用方（直接和间接）的单向传输一目了然。
+
+### 作用域值的重绑定
+
+上面说过，作用域值是不可变的，没有任何方法可以更改作用域值，但是我们可以重新绑定作用域值：
+
+```
+private static final ScopedValue<String> X = ScopedValue.newInstance();
+
+void foo() {
+    ScopedValue.where(X, "hello").run(() -> bar());
+}
+
+void bar() {
+    System.out.println(X.get()); // prints hello
+    ScopedValue.where(X, "goodbye").run(() -> baz());
+    System.out.println(X.get()); // prints hello
+}
+
+void baz() {
+    System.out.println(X.get()); // prints goodbye
+}
+```
+
+在这个例子中，`foo()` 方法将作用域值 `X` 绑定为 `hello`，所以在 `bar()` 方法中使用 `X.get()` 获得的是 `hello`；但是接下来，我们重新将 `X` 绑定为 `goodbye`，再去调用 `baz()` 方法，这时在 `baz()` 方法中使用 `X.get()` 得到的就是 `goodbye` 了；不过值得注意的是，当 `baz()` 方法结束后，重新回到 `bar()` 方法，使用 `X.get()` 获得的仍然是 `hello`，说明作用域值并没有被修改。
+
+### 作用域值的线程继承
+
+在使用 `ThreadLocal` 的时候，我们通常会使用 `InheritableThreadLocal` 让子线程自动继承父线程的线程本地变量，那么作用域值如何实现线程继承呢？可惜的是，并不存在 `InheritableScopedValue` 这样的类，Java 21 提供了另一种解决方案：[结构化并发 API（JEP 428）](https://openjdk.org/jeps/428)。
+
+`StructuredTaskScope` 是结构化并发中的核心类，它的使用方法如下：
+
+```
+try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    Supplier<String> user = scope.fork(() -> USER.get());
+    scope.join().throwIfFailed();
+    System.out.println("task scope: " + user.get());
+} catch (Exception ex) {
+}
+```
+
+其中 `scope.fork()` 方法用于创建子线程，父线程中的作用域值会自动被 `StructuredTaskScope` 创建的子线程继承，子线程中的代码可以使用父线程中为作用域值建立的绑定，而几乎没有额外开销。与线程局部变量不同，父线程的作用域值绑定不会被复制到子线程中，因此它的性能更高，也不会消耗过多的内存。
+
+子线程的作用域值绑定的生命周期由 `StructuredTaskScope` 提供的 `fork/join` 模型控制，`scope.join()` 等待子线程结束，当线程结束后绑定就会自动销毁，避免了使用线程本地变量时出现无限生命周期的问题。
+
+结构化并发也是 Java 21 中的一项重要特性，我们将在下一篇笔记中继续学习它的知识。
 
 ## 参考
 

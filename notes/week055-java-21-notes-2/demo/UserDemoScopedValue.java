@@ -1,3 +1,6 @@
+import java.util.concurrent.StructuredTaskScope;
+import java.util.function.Supplier;
+
 public class UserDemoScopedValue {
     
     final static ScopedValue<String> USER = ScopedValue.newInstance();
@@ -39,6 +42,13 @@ public class UserDemoScopedValue {
                 // Exception in thread "Thread-0" java.util.NoSuchElementException
                 System.out.println("thread: " + USER.get());
             });
+
+            try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+                Supplier<String> user = scope.fork(() -> USER.get());
+                scope.join().throwIfFailed();
+                System.out.println("task scope: " + user.get());
+            } catch (Exception ex) {
+            }
             return String.format("%s:%s", userId, userId);
         }
     }
