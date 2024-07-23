@@ -1,4 +1,4 @@
-# dromara/liteflow
+# dromara/liteflow - 轻量，快速，稳定可编排的组件式规则引擎
 
 * GitHub：https://github.com/dromara/liteflow
 * HomePage：https://liteflow.yomahub.com/
