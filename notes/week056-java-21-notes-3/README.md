@@ -1,4 +1,4 @@
-# WEEK055 - Java 21 初体验（二）
+# WEEK056 - Java 21 初体验（三）
 
 在 [上一篇笔记](../week055-java-21-notes-2/README.md) 和 [上上一篇笔记](../week050-java-21-notes/README.md) 中，我们学习了 Java 21 中前 10 个重要特性：
 
@@ -13,7 +13,7 @@
 * 445: [Unnamed Classes and Instance Main Methods (Preview)](https://openjdk.org/jeps/445)
 * 446: [Scoped Values (Preview)](https://openjdk.org/jeps/446)
 
-接下来，我们将继续学习后面的 5 个特性：
+接下来，我们将继续学习最后 5 个特性：
 
 * 448: [Vector API (Sixth Incubator)](https://openjdk.org/jeps/448)
 * 449: [Deprecate the Windows 32-bit x86 Port for Removal](https://openjdk.org/jeps/449)
@@ -49,11 +49,3 @@ https://openjdk.org/jeps/453
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
 * [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
 * [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
-
-## 更多
-
-### JDK Projects
-
-* [Project Panama](https://openjdk.org/projects/panama/) - Interconnecting JVM and native code
-* [Project Amber](https://openjdk.org/projects/amber/) - Explore and incubate smaller, productivity-oriented Java language features
-* [Project Loom](https://wiki.openjdk.org/display/loom) - Supporting easy-to-use, high-throughput lightweight concurrency and new programming models on the Java platform.
