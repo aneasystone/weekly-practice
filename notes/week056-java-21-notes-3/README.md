@@ -49,11 +49,26 @@ Java 平台中现有的加密 API 都无法以自然的方式表示 KEM，第三
 
 ### 对称加密 vs. 非对称加密
 
+上面对 KEM 的描述中涉及大量现代密码学的概念，为了对 KEM 有一个更直观的认识，我们不妨快速浏览一遍密码学的发展历史。
+
+我们经常会在各种讲述一二战的谍战片中看到破译电报的片段，当时使用的密码算法在现在看来是非常简单的，几乎所有的密码系统使用的都是 **对称加密（Symmetric Cryptography）** 算法，也就是说使用相同的密钥进行消息的加密与解密，因为这个特性，我们也称这个密钥为 **共享密钥（Shared Secret Key）**。
+
+![](./images/symmetric-crypto.png)
+
+常见的对称加密算法有：[DES](https://zh.wikipedia.org/wiki/%E8%B3%87%E6%96%99%E5%8A%A0%E5%AF%86%E6%A8%99%E6%BA%96)、[3DES](https://zh.wikipedia.org/wiki/3DES)、[AES](https://zh.wikipedia.org/wiki/%E9%AB%98%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%A0%87%E5%87%86)、[ChaCha20](https://zh.wikipedia.org/wiki/Salsa20)、[Blowfish](https://zh.wikipedia.org/wiki/Blowfish)、[RC6](https://zh.wikipedia.org/wiki/RC6)、[Camelia](https://zh.wikipedia.org/wiki/Camellia) 等。
+
+对称加密算法的问题有两点：
+
+* 需要安全的通道进行密钥交换，早期最常见的是面对面交换密钥，一旦密钥泄露，数据将完全暴露；
+* 每个点对点通信都需要使用不同的密钥，密钥的管理会变得很困难，如果你需要跟 100 个朋友安全通信，你就要维护 100 个不同的对称密钥；
+
+综上，对称加密会导致巨大的 **密钥交换** 跟 **密钥保存与管理** 的成本。
+
+---
+
+从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。在 1976 年 Malcolm J. Williamson 公开发表了现在被称为 **Diffie–Hellman 密钥交换（Diffie–Hellman Key Exchange，DHKE）** 的算法，并提出了 **公钥密码学** 的概念，这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+
 https://thiscute.world/posts/practical-cryptography-basics-6-symmetric-key-ciphers/
-
-对称加密是指，使用相同的密钥进行消息的加密与解密。因为这个特性，我们也称这个密钥为「共享密钥（Shared Secret Key）」。
-
-现代密码学中广泛使用的对称加密算法有：AES（AES-128、AES-192、AES-256）、ChaCha20、Twofish、IDEA、Serpent、Camelia、RC6、CAST 等。
 
 https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
 
