@@ -35,7 +35,7 @@ https://openjdk.org/jeps/451
 
 ## 密钥封装机制 API
 
-**密钥封装（Key Encapsulation）** 是一种现代加密技术，它使用非对称或公钥加密来保护对称密钥。传统的做法是使用公钥加密随机生成的对称密钥，但这需要 *填充（Padding）* 并且难以证明安全，**密钥封装机制（Key Encapsulation Mechanism，KEM）** 另辟蹊径，使用公钥的属性来推导相关的对称密钥，不需要填充。
+**密钥封装（Key Encapsulation）** 是一种现代加密技术，它使用非对称或公钥加密来保护对称密钥。传统的做法是使用公钥加密随机生成的对称密钥，但这需要 *填充（Paddings）* 并且难以证明安全，**密钥封装机制（Key Encapsulation Mechanism，KEM）** 另辟蹊径，使用公钥的属性来推导相关的对称密钥，不需要填充。
 
 KEM 的概念是由 Crammer 和 Shoup 在 [Design and Analysis of Practical Public-Key Encryption Schemes Secure against Adaptive Chosen Ciphertext Attack](https://eprint.iacr.org/2001/108.pdf) 这篇论文中提出的，后来 Shoup 将其提议为 ISO 标准，并于 2006 年 5 月接受并发布为 [ISO 18033-2](https://www.iso.org/standard/37971.html)。
 
@@ -55,7 +55,38 @@ Java 平台中现有的加密 API 都无法以自然的方式表示 KEM，第三
 
 ![](./images/symmetric-crypto.png)
 
-常见的对称加密算法有：[DES](https://zh.wikipedia.org/wiki/%E8%B3%87%E6%96%99%E5%8A%A0%E5%AF%86%E6%A8%99%E6%BA%96)、[3DES](https://zh.wikipedia.org/wiki/3DES)、[AES](https://zh.wikipedia.org/wiki/%E9%AB%98%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%A0%87%E5%87%86)、[ChaCha20](https://zh.wikipedia.org/wiki/Salsa20)、[Blowfish](https://zh.wikipedia.org/wiki/Blowfish)、[RC6](https://zh.wikipedia.org/wiki/RC6)、[Camelia](https://zh.wikipedia.org/wiki/Camellia) 等。
+常见的对称加密算法有：[DES](https://zh.wikipedia.org/wiki/%E8%B3%87%E6%96%99%E5%8A%A0%E5%AF%86%E6%A8%99%E6%BA%96)、[3DES](https://zh.wikipedia.org/wiki/3DES)、[AES](https://zh.wikipedia.org/wiki/%E9%AB%98%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%A0%87%E5%87%86)、[Salsa20 / ChaCha20](https://zh.wikipedia.org/wiki/Salsa20)、[Blowfish](https://zh.wikipedia.org/wiki/Blowfish)、[RC6](https://zh.wikipedia.org/wiki/RC6)、[Camelia](https://zh.wikipedia.org/wiki/Camellia) 等。
+
+其中绝大多数都是 **块密码算法（Block Cipher）** 或者叫 **分组密码算法**，这种算法一次只能加密固定大小的块（例如 128 位）；少部分是 **流密码算法（Stream Cipher）**，流密码算法将数据逐字节地加密为密文流。为了实现加密任意长度的数据，我们通常需要将分组密码算法转换为流密码算法，这被称为 **分组密码的工作模式**，常用的工作模式有：ECB（电子密码本）、CBC（密码块链接）、CTR（计数器）、CFB（密文反馈模式）、OFB（输出反馈模式）、GCM（伽罗瓦/计数器模式）） 等。
+
+分组密码的工作模式其背后的主要思想是把明文分成多个长度固定的组，再在这些分组上重复应用分组密码算法，以实现安全地加密或解密任意长度的数据。某些分组模式（如 CBC）要求将输入拆分为分组，并使用填充算法（例如添加特殊填充字符）将最末尾的分组填充到块大小，也有些分组模式（如 CTR、CFB、OFB、CCM、EAX 和 GCM）根本不需要填充，因为它们在每个步骤中，都直接在明文部分和内部密码状态之间执行异或（XOR）运算。
+
+因此我们在使用对称加密时，往往要指定 *工作模式（Modes）* 和 *填充模式（Paddings）* 这两个参数，下面是使用 Java 标准库提供的接口实现 AES 加密和解密的示例：
+
+```
+private static void testAES() throws Exception {
+
+    // 1. 生成对称密钥
+    KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+    keyGenerator.init(new SecureRandom());
+    Key secretKey =  keyGenerator.generateKey();
+
+    // 1. 使用固定密钥：128 位密钥 = 16 字节
+    // SecretKey secretKey = new SecretKeySpec("1234567890abcdef".getBytes(), "AES");
+
+    // 2. 加密
+    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+    byte[] encrypted = cipher.doFinal("hello".getBytes());
+
+    // 3. 解密
+    cipher.init(Cipher.DECRYPT_MODE, secretKey);
+    byte[] decrypted = cipher.doFinal(encrypted);
+    System.out.println(new String(decrypted));
+}
+```
+
+我们首先通过 `KeyGenerator` 生成一个对称密钥（也可以直接使用 `SecretKeySpec` 来定义一个固定的密钥，但是要注意密钥的长度），然后通过 `算法名称/工作模式/填充模式` 来获取一个 `Cipher` 实例，这里使用的是 AES 算法，ECB 分组模式以及 PKCS5Padding 填充模式，关于其他算法和模式可参考 [Java Security Standard Algorithm Names](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html)。得到 `Cipher` 实例后，就可以对数据进行加密和解密，可以看到，这里加密和解密使用的是同一个密钥。
 
 对称加密算法的问题有两点：
 
