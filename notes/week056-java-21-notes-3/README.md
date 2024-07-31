@@ -47,7 +47,7 @@ KEM 的概念是由 Crammer 和 Shoup 在 [Design and Analysis of Practical Publ
 
 Java 平台中现有的加密 API 都无法以自然的方式表示 KEM，第三方安全提供商的实施者已经表达了对标准 KEM API 的需求。于是，Java 21 引入了一种新的 KEM API，使应用程序能够自然且方便地使用 KEM 算法。
 
-### 对称加密 vs. 非对称加密
+### 对称加密
 
 上面对 KEM 的描述中涉及大量现代密码学的概念，为了对 KEM 有一个更直观的认识，我们不妨快速浏览一遍密码学的发展历史。
 
@@ -95,11 +95,52 @@ private static void testAES() throws Exception {
 
 综上，对称加密会导致巨大的 **密钥交换** 跟 **密钥保存与管理** 的成本。
 
----
+### 密钥交换协议
 
-从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。在 1976 年 Malcolm J. Williamson 公开发表了现在被称为 **Diffie–Hellman 密钥交换（Diffie–Hellman Key Exchange，DHKE）** 的算法，并提出了 **公钥密码学** 的概念，这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+为了解决对称加密存在的两大问题，密码学家们前仆后继，想出了各种各样的算法，其中最关键的一个是 Malcolm J. Williamson 在 1976 年公开发表的 **Diffie–Hellman 密钥交换（Diffie–Hellman Key Exchange，DHKE）** 算法。
 
-https://thiscute.world/posts/practical-cryptography-basics-6-symmetric-key-ciphers/
+![](./images/dhke.png)
+
+上图是经典 DHKE 协议的整个过程，其基本原理涉及到数学中的 **模幂（Modular Exponentiations）** 和 **离散对数（Discrete Logarithms）** 的知识。
+
+模幂是指求 `g` 的 `a` 次幂模 `p` 的值，其中 `g` `a` `p` 均为整数，公式如下：
+
+```
+A = (g^a) mod p
+```
+
+而离散对数是指在已知 `g` `p` 和模幂值 `A` 的情况下，求幂指数 `a` 的逆过程。
+
+我们通过将 `p` 设置为一个非常大的质数，使用计算机计算上述模幂的值是非常快的，但是求离散对数却非常困难，这也就是所谓的 **离散对数难题（Discrete Logarithm Problem，DLP）**。
+
+在 DHKE 协议中，Alice 和 Bob 首先约定好两个常数 `g` 和 `p`，这两个数所有人都可见。然后他们分别生成各自的私钥 `a` 和 `b`，这两个值各自保存，不对外公开。他们再分别使用各自的私钥计算出模幂 `A` 和 `B`，这两个值就是他们的公钥：
+
+```
+A = (g^a) mod p
+B = (g^b) mod p
+```
+
+接着，Alice 将 `A` 发送给 Bob，Bob 将 `B` 发送给 Alice，接受到彼此的公钥之后，他们使用自己的私钥来计算模幂：
+
+```
+S1 = (B^a) mod p
+S2 = (A^b) mod p
+```
+
+根据模幂的数学性质，我们可以得知 `S1` 和 `S2` 是相等的！
+
+```
+S1 = (B^a) mod p = (g^b)^a mod p = ( g^(b*a) ) mod p
+S2 = (A^b) mod p = (g^a)^b mod p = ( g^(a*b) ) mod p
+```
+
+至此 Alice 和 Bob 就协商出了一个共享密钥，这个密钥可以在后续的通讯中作为对称密钥来加密通讯内容。可以看到，尽管整个密钥交换过程是公开的，但是任何窃听者都无法根据公开信息推算出密钥，这就是密钥交换协议的巧妙之处。
+
+### 非对称加密
+
+从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。，并提出了 **公钥密码学** 的概念，这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+
+https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
 
 https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
 
@@ -112,10 +153,6 @@ https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciph
 ### 混合公钥加密
 
 https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/
-
-### 密钥交换协议
-
-https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
 
 ### 后量子密码学
 
@@ -153,3 +190,6 @@ https://openjdk.org/jeps/453
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
 * [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
 * [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
+* [写给开发人员的实用密码学（五）—— 密钥交换 DHKE 与完美前向保密 PFS](https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/)
+* [写给开发人员的实用密码学（六）—— 对称密钥加密算法](https://thiscute.world/posts/practical-cryptography-basics-6-symmetric-key-ciphers/)
+* [写给开发人员的实用密码学（七）—— 非对称密钥加密算法 RSA/ECC](https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/)
