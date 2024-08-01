@@ -97,7 +97,7 @@ private static void testAES() throws Exception {
 
 ### 密钥交换协议
 
-为了解决对称加密存在的两大问题，密码学家们前仆后继，想出了各种各样的算法，其中最关键的一个是 Malcolm J. Williamson 在 1976 年公开发表的 **Diffie–Hellman 密钥交换（Diffie–Hellman Key Exchange，DHKE）** 算法。
+为了解决对称加密存在的两大问题，密码学家们前仆后继，想出了各种各样的算法，其中最关键的一个是 Whitfield Diffie 和 Martin Hellman [在 1976 年公开发表的一种算法](https://ee.stanford.edu/%7Ehellman/publications/24.pdf)，也就是现在广为人知的 **Diffie–Hellman 密钥交换（Diffie–Hellman Key Exchange，DHKE）** 算法。
 
 ![](./images/dhke.png)
 
@@ -136,9 +136,39 @@ S2 = (A^b) mod p = (g^a)^b mod p = ( g^(a*b) ) mod p
 
 至此 Alice 和 Bob 就协商出了一个共享密钥，这个密钥可以在后续的通讯中作为对称密钥来加密通讯内容。可以看到，尽管整个密钥交换过程是公开的，但是任何窃听者都无法根据公开信息推算出密钥，这就是密钥交换协议的巧妙之处。
 
+下面的代码演示了如何在 Java 中实现标准的 DHKE 协议：
+
+```
+private static void testKeyAgreement() throws Exception {
+
+    // 1. Alice 和 Bob 分别生成各自的密钥对
+    KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
+    keyPairGen.initialize(512);
+    KeyPair keyPairAlice = keyPairGen.generateKeyPair();
+    KeyPair keyPairBob = keyPairGen.generateKeyPair();
+
+    // 2. Alice 根据 Bob 的公钥协商出对称密钥
+    KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
+    keyAgreement.init(keyPairAlice.getPrivate());
+    keyAgreement.doPhase(keyPairBob.getPublic(), true);
+    byte[] secretKey1 = keyAgreement.generateSecret();
+
+    // 3. Bob 根据 Alice 的公钥协商出对称密钥
+    keyAgreement.init(keyPairBob.getPrivate());
+    keyAgreement.doPhase(keyPairAlice.getPublic(), true);
+    byte[] secretKey2 = keyAgreement.generateSecret();
+
+    // 4. 比较双方的密钥是否一致
+    System.out.println("Alice Secret key: " + HexFormat.of().formatHex(secretKey1));
+    System.out.println("Bob Secret key: " + HexFormat.of().formatHex(secretKey2));
+}
+```
+
+这里首先通过 `KeyPairGenerator` 为 Alice 和 Bob 分别生成密钥对（密钥对中包含了一个私钥和一个公钥，也就是上文中的 `a/b` 和 `A/B`），然后使用 `KeyAgreement.getInstance("DH")` 获取一个 `KeyAgreement` 实例，用于密钥协商，Alice 根据 Bob 的公钥协商出对称密钥 `S1`，Bob 根据 Alice 的公钥协商出对称密钥 `S2`，根据输出结果可以看到 `S1` 和 `S2` 是相等的。
+
 ### 非对称加密
 
-从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。，并提出了 **公钥密码学** 的概念，这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。1976 年是密码学的一个分水岭，自 DHKE 算法被提出之后，**公钥密码学（Public-key Cryptography）** 的概念开始深入人心。这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
 
 https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
 
@@ -155,6 +185,8 @@ https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciph
 https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/
 
 ### 后量子密码学
+
+如果攻击者拥有大型量子计算机，那么他可以使用秀尔算法解决离散对数问题，从而破解私钥和共享秘密。目前的估算认为：破解256位素数域上的椭圆曲线，需要2330个量子比特与1260亿个托佛利门。相比之下，使用秀尔算法破解2048位的RSA则需要4098个量子比特与5.2万亿个托佛利门。因此，椭圆曲线会更先遭到量子计算机的破解。目前还不存在建造如此大型量子计算机的科学技术，因此椭圆曲线密码学至少在未来十年（或更久）依然是安全的。但是密码学家已经积极展开了后量子密码学的研究。其中，超奇异椭圆曲线同源密钥交换（SIDH）有望取代当前的常规椭圆曲线密钥交换（ECDH）。
 
 https://xueqiu.com/8483208408/287316931
 
