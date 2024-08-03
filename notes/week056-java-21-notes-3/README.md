@@ -180,17 +180,68 @@ private static void testKeyAgreement() throws Exception {
 
 ---
 
-https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
+最著名的非对称加密算法非 RSA 莫属，它是 1977 年由三位美国数学家 Ron Rivest、Adi Shamir 和 Leonard Adleman 共同设计的，这种算法以他们名字的首字母命名。RSA 算法涉及不少数论中的基础概念和定理，比如 **互质**、**欧拉函数**、**模反元素**、**中国余数定理**、**费马小定理** 等，网上有大量的文章介绍 RSA 算法原理，感兴趣的同学可以查阅相关的资料。
 
-https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
+不过对于初学者来说，这些原理可能显得晦涩难懂，不妨玩一玩下面这个数学小魔术：
+
+> 首先，让 A 任意想一个 3 位数，并把这个数乘以 `91`，然后将积的末三位告诉 B，B 就可以猜出 A 想的是什么数字。比如 A 想的是 `123`，那么他就计算出 `123 * 91 = 11193`，并把结果的末三位 `193` 告诉 B。那么 B 要怎么猜出对方的数字呢？其实很简单，只需要把对方说的数字再乘以 `11`，乘积的末三位就是 A 刚开始想的数了。可以验证一下，`193 * 11 = 2123`，末三位正是对方所想的秘密数字！
+
+这个小魔术的道理其实很简单，由于 `91 * 11 = 1001`，而任何一个三位数乘以 `1001` 后，末三位显然都不变，例如 `123 * 1001 = 123123`。
+
+这个例子直观地展示了非对称加密算法的工作流程：A 和 B 可以看做消息的发送方和接受方，其中 `91` 是 B 的公钥，`123` 是 A 要发送的消息，`123 * 91` 就好比使用公钥加密，`193` 就是加密后的密文；而 `11` 是 `B` 的私钥，`193 * 11` 就是使用私钥解密。
+
+RSA 算法的本质就是上面这套思想，只不过它不是简单的乘法计算，而是换成了更加复杂的指数和取模运算。
+
+下面继续使用 Java 代码来实现 RSA 的加密和解密：
+
+```
+private static void testRSA() throws Exception {
+
+    // 1. Bob 生成密钥对
+    KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+    keyPairGen.initialize(2048);
+    KeyPair keyPairBob = keyPairGen.generateKeyPair();
+
+    // 2. Alice 使用 Bob 的公钥加密数据
+    Cipher cipher1 = Cipher.getInstance("RSA");
+    cipher1.init(Cipher.ENCRYPT_MODE, keyPairBob.getPublic());
+    byte[] encrypted = cipher1.doFinal("hello".getBytes());
+
+    // 3. Bob 使用自己的私钥解密数据
+    Cipher cipher2 = Cipher.getInstance("RSA");
+    cipher2.init(Cipher.DECRYPT_MODE, keyPairBob.getPrivate());
+    byte[] decrypted = cipher2.doFinal(encrypted);
+
+    System.out.println(new String(decrypted));
+}
+```
+
+这里的代码和对称加密如出一辙，都是先通过 `Cipher.getInstance()` 获取一个 `Cipher` 实例，然后再通过它对数据进行加密和解密；和对称加密不同的是，这里加密用的是 Bob 的公钥，而解密用的是 Bob 的私钥。
+
+其实，根据非对称加密的性质，我们不仅可以 **公钥加密，私钥解密**，而且也可以 **私钥加密，公钥解密**，不过用私钥加密的信息所有人都能够用公钥解密，这看起来貌似没啥用，但是密码学家们却发现它大有用处，由于私钥加密的信息只能用公钥解密，也就意味着这个消息只能是私钥持有者发出的，其他人是不能伪造或篡改的，所以我们可以把它用作 **数字签名**，数字签名在数字证书等应用中。
+
+除了 RSA 算法，还有一些其他重要的非对称加密算法，比如基于 DHKE 的 [ElGamal 加密](https://zh.wikipedia.org/wiki/ElGamal%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95) 以及基于椭圆曲线的 [ECC 加密（Elliptic Curve Cryptography）](https://zh.wikipedia.org/wiki/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81%E5%AD%A6) 等。
 
 ### 混合公钥加密
 
 https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/
 
+https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
+
+https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
+
 ### 后量子密码学
 
+RSA 的安全性取决于 **大整数的因数分解**，暂时还没有好方法解决，一旦这个数学难题被破解，RSA 算法也就不再安全。
+
+这些算法各自基于不同的数学难题，如椭圆曲线上的点运算等。
+
 如果攻击者拥有大型量子计算机，那么他可以使用秀尔算法解决离散对数问题，从而破解私钥和共享秘密。目前的估算认为：破解256位素数域上的椭圆曲线，需要2330个量子比特与1260亿个托佛利门。相比之下，使用秀尔算法破解2048位的RSA则需要4098个量子比特与5.2万亿个托佛利门。因此，椭圆曲线会更先遭到量子计算机的破解。目前还不存在建造如此大型量子计算机的科学技术，因此椭圆曲线密码学至少在未来十年（或更久）依然是安全的。但是密码学家已经积极展开了后量子密码学的研究。其中，超奇异椭圆曲线同源密钥交换（SIDH）有望取代当前的常规椭圆曲线密钥交换（ECDH）。
+
+* [格子密码（Lattice-based Cryptography）](https://en.wikipedia.org/wiki/Lattice-based_cryptography)
+* SVP（Shortest Vector Problem，最短向量问题）和CVP（Closest Vector Problem，最近向量问题）是格密码学中的两个重要问题。
+* [SIS 问题，即小整数解问题（Short Integer Solution）](https://en.wikipedia.org/wiki/Short_integer_solution_problem)
+* [LWE（Learning With Errors）问题，通常翻译为容错学习问题](https://en.wikipedia.org/wiki/Learning_with_errors)
 
 https://xueqiu.com/8483208408/287316931
 
@@ -234,3 +285,4 @@ https://openjdk.org/jeps/453
 * [RSA算法原理（一）](https://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html)
 * [RSA算法原理（二）](https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html)
 * [如何用通俗易懂的话来解释非对称加密?](https://www.zhihu.com/question/33645891)
+* [格子密码（Lattice-based Cryptography）简介及其数学原理](https://zhuanlan.zhihu.com/p/439089338)
