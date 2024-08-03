@@ -168,17 +168,21 @@ private static void testKeyAgreement() throws Exception {
 
 ### 非对称加密
 
-从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。1976 年是密码学的一个分水岭，自 DHKE 算法被提出之后，**公钥密码学（Public-key Cryptography）** 的概念开始深入人心。这是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+从第一次世界大战、第二次世界大战到 1976 年这段时期密码的发展阶段，被称为 **近代密码阶段**。1976 年是密码学的一个分水岭，在 Whitfield Diffie 和 Martin Hellman [这篇论文](https://ee.stanford.edu/%7Ehellman/publications/24.pdf) 中，他们不仅提出了 DHKE 算法，还提出了 **公钥密码学（Public- Key Cryptography）** 的概念。
+
+公钥密码学中最核心的部分是 **非对称加密（Asymmetric Encryption）** 算法，和 DHKE 算法类似，它也是基于两个不同的密钥来实现加密和解密，一个称为公钥，另一个称为私钥，其中公钥可以公开，任何人都能访问；但和 DHKE 不同的是，DHKE 中的公钥只是用于协商出一个对称密钥，用于后续通讯的加解密，而在非对称加密中，不需要密钥协商，消息的发送者可以直接使用接受者的公钥对数据进行加密，而加密后的数据只有私钥的持有者才能将其解密。
+
+![](./images/asymmetric-encryption.png)
+
+非对称加密算法的这种神奇特性，使得通讯双发不需要预先协商密钥，因此非常适合在多方通信中使用；也使得公钥密码学的概念很快就深入人心，它极大地推动了现代密码学的发展，为 **数字签名** 和 **数字证书** 提供了理论基础，特别是 **公钥基础设施（PKI）** 体系的建立，实现安全的身份验证和数据保护。
+
+可以说，非对称加密是密码学领域一项划时代的发明，它宣告了近代密码阶段的终结，是现代密码学的起点。
+
+---
 
 https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
 
 https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
-
-非对称加密是一种使用两个不同密钥的加密方式，其中一个称为公钥，另一个称为私钥。公钥可以公开，任何人都可以使用它来加密消息，但只有私钥的持有者才能将其解密。
-
-这种加密方式的主要优点是不需要预先协商密钥，因此非常适合在多方通信中使用。
-
-常见的非对称加密算法包括RSA、ECC等。
 
 ### 混合公钥加密
 
@@ -225,3 +229,8 @@ https://openjdk.org/jeps/453
 * [写给开发人员的实用密码学（五）—— 密钥交换 DHKE 与完美前向保密 PFS](https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/)
 * [写给开发人员的实用密码学（六）—— 对称密钥加密算法](https://thiscute.world/posts/practical-cryptography-basics-6-symmetric-key-ciphers/)
 * [写给开发人员的实用密码学（七）—— 非对称密钥加密算法 RSA/ECC](https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/)
+* [A complete overview of SSL/TLS and its cryptographic system](https://dev.to/techschoolguru/a-complete-overview-of-ssl-tls-and-its-cryptographic-system-36pd)
+* [RSA算法背后的数学原理](https://luyuhuang.tech/2019/10/24/mathematics-principle-of-rsa-algorithm.html)
+* [RSA算法原理（一）](https://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html)
+* [RSA算法原理（二）](https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html)
+* [如何用通俗易懂的话来解释非对称加密?](https://www.zhihu.com/question/33645891)
