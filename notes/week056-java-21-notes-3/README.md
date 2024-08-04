@@ -41,7 +41,7 @@ KEM 的概念是由 Crammer 和 Shoup 在 [Design and Analysis of Practical Publ
 
 经过多年的发展，KEM 已经在多个密码学领域有所应用：
 
-* 在 [混合公钥加密（Hybrid Public Key Encryption，HPKE）](https://www.rfc-editor.org/rfc/rfc9180) 中，KEM 是基本的构建模块，比如 RSA 密钥封装机制（RSA-KEM）、椭圆曲线集成加密方案（ECIES）等；
+* 在 [混合公钥加密（Hybrid Public Key Encryption，HPKE）](https://www.rfc-editor.org/rfc/rfc9180) 中，KEM 是基本的构建模块，比如 DH 密钥封装机制（DHKEM）、RSA 密钥封装机制（RSA-KEM）、椭圆曲线集成加密方案（ECIES）等；
 * 可以使用 KEM 替换传统的密钥交换协议，比如 [TLS 1.3 中的 Diffie-Hellman 密钥交换步骤](https://www.rfc-editor.org/rfc/rfc8446#section-4.1) 可以建模为 KEM，也就是 Diffie-Hellman KEM (DHKEM)；
 * 在 [NIST 后量子密码（Post-Quantum Cryptography，PQC）标准化过程](https://csrc.nist.gov/News/2022/pqc-candidates-to-be-standardized-and-round-4) 中，明确要求对 KEM 和数字签名算法进行评估，作为下一代标准公钥密码算法的候选；KEM 将成为抵御量子攻击的重要工具；
 
@@ -86,7 +86,7 @@ private static void testAES() throws Exception {
 }
 ```
 
-我们首先通过 `KeyGenerator` 生成一个对称密钥（也可以直接使用 `SecretKeySpec` 来定义一个固定的密钥，但是要注意密钥的长度），然后通过 `算法名称/工作模式/填充模式` 来获取一个 `Cipher` 实例，这里使用的是 AES 算法，ECB 分组模式以及 PKCS5Padding 填充模式，关于其他算法和模式可参考 [Java Security Standard Algorithm Names](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html)。得到 `Cipher` 实例后，就可以对数据进行加密和解密，可以看到，这里加密和解密使用的是同一个密钥。
+我们首先通过 `KeyGenerator` 生成一个对称密钥（也可以直接使用 `SecretKeySpec` 来定义一个固定的密钥，但是要注意密钥的长度），然后通过 `算法名称/工作模式/填充模式` 来获取一个 `Cipher` 实例，这里使用的是 AES 算法，ECB 分组模式以及 PKCS5Padding 填充模式，关于其他算法和模式可参考 [Java Security Standard Algorithm Names](https://docs.oracle.com/en/java/javase/21/docs/specs/security/standard-names.html)。得到 `Cipher` 实例后，就可以对数据进行加密和解密，可以看到，这里加密和解密使用的是同一个密钥。
 
 对称加密算法的问题有两点：
 
@@ -285,23 +285,47 @@ private static void testRSA_AES() throws Exception {
 
 ### 密钥封装机制
 
-密钥封装机制（Key Encapsulation Mechanism, KEM）是一种基于非对称加密的密钥交换技术。其主要目的是在不直接暴露私钥的情况下安全地传输会话密钥。
+综上所述，密钥封装机制就是一种基于非对称加密的密钥交换技术，其主要目的是在不直接暴露私钥的情况下安全地传输会话密钥。
 
-在KEM中，发起方运行一个封装算法产生一个会话密钥以及与之对应的密文，随后将会话密钥封装发送给接收方。
+在 KEM 中，发起方运行一个封装算法产生一个会话密钥以及与之对应的 **密钥封装消息（key encapsulation message）**，这个消息在 ISO 18033-2 中被称为 **密文（ciphertext）**，随后发起方将密钥封装消息发送给接收方，接收方收到后，使用自己的私钥进行解封，从而获得相同的会话密钥。一个 KEM 由三部分组成：
 
-接收方收到密文后，使用自己的私钥进行解封，从而获得相同的会话密钥。
+* 密钥对生成函数：由接收方调用，用于生成密钥对，包含公钥和私钥；
+* 密钥封装函数：由发送方调用，根据接收方的公钥产生一个会话密钥和密钥封装消息，然后发送方将密钥封装消息发送给接收方；
+* 密钥解封函数：由接收方调用，根据自己的私钥和接受到的密钥封装消息，计算出会话密钥。
 
-RSA-OAEP, RSA-KEM, ECIES-KEM 和 PSEC-KEM. 都是 KEM 加密方案。
+其中第一步可以由现有的 `KeyPairGenerator` API 完成，但是后两步 Java 中暂时没有合适的 API 来自然的表示，这就是 [JEP 452](https://openjdk.org/jeps/452) 被提出的初衷。通过 **密钥封装机制 API（KEM API）** 可以方便的实现密钥封装和解封：
 
-https://openjdk.org/jeps/452
+```
+private static void testKEM() throws Exception {
 
-https://www.panziye.com/back/10595.html
+    // 1. Bob 生成密钥对
+    KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("X25519");
+    KeyPair keyPair = keyPairGen.generateKeyPair();
 
-https://www.zhihu.com/question/443779639
+    // 2. Alice 根据 Bob 的公钥生成一个 Encapsulated 对象，这个对象里包含了：
+    //    * 共享密钥 shared secret
+    //    * 密钥封装消息 key encapsulation message
+    //    * 可选参数 optional parameters
+    //    然后 Alice 将密钥封装消息发送给 Bob
+    KEM kem1 = KEM.getInstance("DHKEM");
+    Encapsulator sender = kem1.newEncapsulator(keyPair.getPublic());
+    Encapsulated encapsulated = sender.encapsulate();
+    SecretKey k1 = encapsulated.key();
 
-https://www.javatpoint.com/key-encapsulation-mechanism-api-in-java-21
+    // 3. Bob 根据自己的私钥和 Alice 发过来的密钥封装消息，计算出共享密钥
+    KEM kem2 = KEM.getInstance("DHKEM");
+    Decapsulator receiver = kem2.newDecapsulator(keyPair.getPrivate());
+    SecretKey k2 = receiver.decapsulate(encapsulated.encapsulation());
 
-https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
+    // 4. 比较双方的密钥是否一致
+    System.out.println(Base64.getEncoder().encodeToString(k1.getEncoded()));
+    System.out.println(Base64.getEncoder().encodeToString(k2.getEncoded()));
+}
+```
+
+从代码可以看出密钥封装机制和混合密码系统有点像，但是看起来要更简单一点，省去了使用 `KeyGenerator.generateKey()` 生成对称密钥的步骤，而是使用密钥封装算法直接给出，至于这个密钥封装算法可以抽象成任意的实现，可以是密钥生成算法，也可以是随机数算法。
+
+从 [Java 文档](https://docs.oracle.com/en/java/javase/21/docs/specs/security/standard-names.html#kem-algorithms) 中可以看到 KEM 算法暂时只支持 DHKEM 这一种。但是 KEM API 提供了 **服务提供商接口（Service Provider Interface，SPI）**，允许安全提供商在 Java 代码或本地代码中实现自己的 KEM 算法，比如 RSA-KEM、ECIES-KEM、PSEC-KEM、PQC-KEM 等。
 
 ## 结构化并发（预览版本）
 
@@ -326,3 +350,4 @@ https://openjdk.org/jeps/453
 * [格子密码（Lattice-based Cryptography）简介及其数学原理](https://zhuanlan.zhihu.com/p/439089338)
 * [加密与安全 - Java教程 - 廖雪峰的官方网站](https://liaoxuefeng.com/books/java/security/index.html)
 * [Java实现7种常见密码算法](https://www.cnblogs.com/codelogs/p/16815708.html)
+* [密钥封装机制和一个公钥加密方案有什么本质的区别？](https://www.zhihu.com/question/443779639)
