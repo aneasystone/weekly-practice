@@ -220,30 +220,68 @@ private static void testRSA() throws Exception {
 
 其实，根据非对称加密的性质，我们不仅可以 **公钥加密，私钥解密**，而且也可以 **私钥加密，公钥解密**，不过用私钥加密的信息所有人都能够用公钥解密，这看起来貌似没啥用，但是密码学家们却发现它大有用处，由于私钥加密的信息只能用公钥解密，也就意味着这个消息只能是私钥持有者发出的，其他人是不能伪造或篡改的，所以我们可以把它用作 **数字签名**，数字签名在数字证书等应用中。
 
-除了 RSA 算法，还有一些其他重要的非对称加密算法，比如基于 DHKE 的 [ElGamal 加密](https://zh.wikipedia.org/wiki/ElGamal%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95) 以及基于椭圆曲线的 [ECC 加密（Elliptic Curve Cryptography）](https://zh.wikipedia.org/wiki/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81%E5%AD%A6) 等。
-
-### 混合公钥加密
-
-https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/
-
-https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
-
-https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/
+除了 RSA 算法，还有一些其他重要的非对称加密算法，比如 [Rabin 密码](https://en.wikipedia.org/wiki/Rabin_cryptosystem)、[ElGamal 密码](https://zh.wikipedia.org/wiki/ElGamal%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95) 以及基于椭圆曲线的 [ECC 密码（Elliptic Curve Cryptography）](https://zh.wikipedia.org/wiki/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81%E5%AD%A6) 等。
 
 ### 后量子密码学
 
-RSA 的安全性取决于 **大整数的因数分解**，暂时还没有好方法解决，一旦这个数学难题被破解，RSA 算法也就不再安全。
+非对称加密算法的安全性，基本上都是由不同的数学难题保障的，比如：
 
-这些算法各自基于不同的数学难题，如椭圆曲线上的点运算等。
+* RSA 算法 - [IFP（整数分解问题）](https://zh.wikipedia.org/wiki/%E6%95%B4%E6%95%B0%E5%88%86%E8%A7%A3)
+* DH 算法 - [DLP（离散对数问题）](https://zh.wikipedia.org/wiki/%E7%A6%BB%E6%95%A3%E5%AF%B9%E6%95%B0)
+* ECC 算法 - [ECDLP（椭圆曲线离散对数问题）](https://zh.wikipedia.org/wiki/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81%E5%AD%A6)
 
-如果攻击者拥有大型量子计算机，那么他可以使用秀尔算法解决离散对数问题，从而破解私钥和共享秘密。目前的估算认为：破解256位素数域上的椭圆曲线，需要2330个量子比特与1260亿个托佛利门。相比之下，使用秀尔算法破解2048位的RSA则需要4098个量子比特与5.2万亿个托佛利门。因此，椭圆曲线会更先遭到量子计算机的破解。目前还不存在建造如此大型量子计算机的科学技术，因此椭圆曲线密码学至少在未来十年（或更久）依然是安全的。但是密码学家已经积极展开了后量子密码学的研究。其中，超奇异椭圆曲线同源密钥交换（SIDH）有望取代当前的常规椭圆曲线密钥交换（ECDH）。
+这些数学难题暂时都没有好方法解决，所以这些非对称加密算法暂时仍然被认为是安全的；一旦这些数学难题被破解，那么这些加密算法就不再安全了。
 
-* [格子密码（Lattice-based Cryptography）](https://en.wikipedia.org/wiki/Lattice-based_cryptography)
-* SVP（Shortest Vector Problem，最短向量问题）和CVP（Closest Vector Problem，最近向量问题）是格密码学中的两个重要问题。
-* [SIS 问题，即小整数解问题（Short Integer Solution）](https://en.wikipedia.org/wiki/Short_integer_solution_problem)
-* [LWE（Learning With Errors）问题，通常翻译为容错学习问题](https://en.wikipedia.org/wiki/Learning_with_errors)
+近年来，随着 [量子计算机](https://zh.wikipedia.org/wiki/%E9%87%8F%E5%AD%90%E8%AE%A1%E7%AE%97%E6%9C%BA) 的不断发展，很多运行于量子计算机的量子算法被提出来，其中最著名的是数学家彼得·秀尔于 1994 年提出的 [秀尔算法](https://zh.wikipedia.org/wiki/%E7%A7%80%E7%88%BE%E6%BC%94%E7%AE%97%E6%B3%95)，可以在多项式时间内解决整数分解问题。
 
-https://xueqiu.com/8483208408/287316931
+这也就意味着，如果攻击者拥有大型量子计算机，那么他可以使用秀尔算法解决整数分解问题，从而破解 RSA 算法。不仅如此，后来人们还发现，使用秀尔算法也可以破解离散对数和椭圆曲线等问题，这导致目前流行的公钥密码系统都是 **量子不安全（quantum-unsafe）** 的。如果人类进入量子时代，这些密码算法都将被淘汰。
+
+密码学家们估算认为，破解 2048 位的 RSA 需要 4098 个量子比特与 5.2 万亿个托佛利门，目前还不存在建造如此大型量子计算机的科学技术，因此现有的公钥密码系统至少在未来十年（或更久）依然是安全的。尽管如此，密码学家已经积极展开了后量子时代的密码学研究，也就是 **后量子密码学（Post-quantum Cryptography，PQC）**。
+
+目前已经有一些量子安全的公钥密码系统问世，但是由于它们需要更长的密钥、更长的签名等原因，并没有被广泛使用。这些量子安全的公钥密码算法包括：[NewHope](https://en.wikipedia.org/wiki/NewHope)、[NTRU](https://en.wikipedia.org/wiki/NTRU)、[BLISS](https://en.wikipedia.org/wiki/BLISS_signature_scheme)、[Kyber](https://en.wikipedia.org/wiki/Kyber) 等，有兴趣的同学可以自行查阅相关文档。
+
+### 混合密码系统
+
+非对称加密好处多多，既可以用来加密和解密，也可以用来签名和验证，而且还大大降低了密钥管理的成本。不过非对称加密也有不少缺点：
+
+* 使用密钥对进行加解密，算法要比对称加密更复杂；而且一些非对称密码系统（如 ECC）不直接提供加密能力，需要结合使用更复杂的方案才能实现加解密；
+* 只能加解密很短的消息；
+* 加解密非常缓慢，比如 RSA 加密比 AES 慢 1000 倍；
+
+为了解决这些问题，现代密码学提出了 **混合密码系统（Hybrid Cryptosystem）** 或 **混合公钥加密（Hybrid Public Key Encryption，HPKE）** 的概念，将对称加密和非对称加密的优势相结合，好比同时装备电动机和发动机两种动力系统的混合动力汽车。发送者首先生成一个对称密码，使用这个对称密码来加密消息，然后使用接受者的公钥来加密对称密码；接受者首先使用自己的私钥解密出对称密码，然后再用对称密码解密消息。这里的对称密码也被称为 **会话密钥（Session Key）**。
+
+下面的代码演示了 Alice 是如何利用 Bob 的公钥将一个 AES 对称密钥发送给 Bob 的：
+
+```
+private static void testRSA_AES() throws Exception {
+
+    // 1. Bob 生成密钥对
+    KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+    keyPairGen.initialize(2048);
+    KeyPair keyPair = keyPairGen.generateKeyPair();
+
+    // 2. Alice 生成一个对称密钥
+    KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+    keyGen.init(256);
+    SecretKey secretKey = keyGen.generateKey();
+
+    // 3. Alice 使用 Bob 的公钥加密对称密钥
+    Cipher cipher1 = Cipher.getInstance("RSA");
+    cipher1.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+    byte[] secretKeyEncrypted = cipher1.doFinal(secretKey.getEncoded());
+
+    // 4. Bob 使用自己的私钥解密出对称密钥
+    Cipher cipher2 = Cipher.getInstance("RSA");
+    cipher2.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+    byte[] secretKeyDecrypted = cipher2.doFinal(secretKeyEncrypted);
+
+    // 5. 比较双方的密钥是否一致
+    System.out.println("Alice Secret key: " + HexFormat.of().formatHex(secretKey.getEncoded()));
+    System.out.println("Bob Secret key: " + HexFormat.of().formatHex(secretKeyDecrypted));
+}
+```
+
+可以看出，在混合密码系统中，非对称加密算法的作用和上文中的 DHKE 一样，只是用于密钥交换，并不用于加密消息，这和 DHKE 的工作原理几乎是一样的，所以严格来说，DHKE 也算是一种混合密码系统，只是两种密钥交换的实现不一样罢了。如何将会话密钥加密并发送给对方，就是 **密钥封装机制（Key Encapsulation Mechanisms，KEM）** 要解决的问题。
 
 ### 密钥封装机制
 
@@ -253,6 +291,8 @@ https://xueqiu.com/8483208408/287316931
 
 接收方收到密文后，使用自己的私钥进行解封，从而获得相同的会话密钥。
 
+RSA-OAEP, RSA-KEM, ECIES-KEM 和 PSEC-KEM. 都是 KEM 加密方案。
+
 https://openjdk.org/jeps/452
 
 https://www.panziye.com/back/10595.html
@@ -261,9 +301,7 @@ https://www.zhihu.com/question/443779639
 
 https://www.javatpoint.com/key-encapsulation-mechanism-api-in-java-21
 
-https://juejin.cn/post/7281633636818190388
-
-https://www.geeksforgeeks.org/introduction-to-key-encapsulation-mechanism-api-in-java/
+https://blog.csdn.net/Leon_Jinhai_Sun/article/details/89919919
 
 ## 结构化并发（预览版本）
 
@@ -286,3 +324,5 @@ https://openjdk.org/jeps/453
 * [RSA算法原理（二）](https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html)
 * [如何用通俗易懂的话来解释非对称加密?](https://www.zhihu.com/question/33645891)
 * [格子密码（Lattice-based Cryptography）简介及其数学原理](https://zhuanlan.zhihu.com/p/439089338)
+* [加密与安全 - Java教程 - 廖雪峰的官方网站](https://liaoxuefeng.com/books/java/security/index.html)
+* [Java实现7种常见密码算法](https://www.cnblogs.com/codelogs/p/16815708.html)
