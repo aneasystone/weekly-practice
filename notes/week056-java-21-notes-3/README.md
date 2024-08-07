@@ -23,7 +23,9 @@
 
 ## 向量 API（第六次孵化）
 
-https://openjdk.org/jeps/448
+**向量 API** 最初由 [JEP 338](https://openjdk.java.net/jeps/338) 提出，并作为孵化 API 集成到 Java 16 中，在 Java 17 到 20 中，又经过了 [JEP 414](https://openjdk.java.net/jeps/414)、[JEP 417](https://openjdk.java.net/jeps/417)、[JEP 426](https://openjdk.java.net/jeps/426)、[JEP 438](https://openjdk.org/jeps/438) 四次的孵化，这次在 Java 21 中，已经是第六次孵化了。
+
+**向量 API** 又被称为 **Vector API**，要注意，这里讲的并不是 Java 中的 [Vector 集合类](https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html)，而是一种专门用于向量计算的全新 API。尽管这个 API 还在孵化期，并没有正式发布，但是这项技术很值得我们提前学习和了解，因为这项技术代表了 Java 语言发展的一个重要方向，在未来一定会有着重要的影响。随着生成式人工智能的发展，Embedding 技术也如日中天，它将各种类型的数据（如文本、图像、声音等）转换为高维数值向量，从而实现对数据特征和语义信息的表示。Embedding 技术在个性化推荐、多模态检索和自然语言处理等领域中发挥着重要作用，而这些场景都离不开向量计算。
 
 ## 弃用 Windows 32-bit x86 移植，为删除做准备
 
