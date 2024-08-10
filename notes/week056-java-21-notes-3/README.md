@@ -45,6 +45,79 @@
 
 ![](./images/vector.png)
 
+### 标量计算 vs. 向量计算
+
+标量就是一个数字，在 Java 中通常可以表示为一个整数或浮点数等，我们所熟知的算术运算基本上都是作用于标量之上的，比如下面的代码对 `a` 和 `b` 两个标量求和：
+
+```
+int a = 1;
+int b = 1;
+int c = a + b;
+```
+
+如果将 `a` 和 `b` 换成向量，也就是数组，该如何求和呢？最简单的方法是使用 `for` 循环依次相加数组中对应的元素：
+
+```
+int[] a = new int[] {1, 2, 3, 4};
+int[] b = new int[] {1, 2, 3, 4};
+int[] c = new int[4];
+for (int i = 0; i < a.length; i++) {
+    c[i] = a[i] + b[i];
+}
+```
+
+很显然这不是什么高明的做法，仔细观察上面的代码就会发现，对于数组中每个元素的相加是互不影响的，那么我们能不能并行计算呢？一种有效的解决方法是使用 **并行流（Parallel Stream）**：
+
+```
+IntStream.range(0, a.length)
+    .parallel()
+    .forEach(i -> c[i] = a[i] + b[i]);
+```
+
+另一种解决方法就是我们将要学习的 **向量 API（Vector API）**：
+
+```
+IntVector aVector = IntVector.fromArray(IntVector.SPECIES_128, a, 0);
+IntVector bVector = IntVector.fromArray(IntVector.SPECIES_128, b, 0);
+IntVector cVector = aVector.add(bVector);
+```
+
+> 注意，由于向量 API 并没有正式发布，运行时需要手动加上 `jdk.incubator.vector` 模块：
+> 
+> ```
+> $ java --add-modules jdk.incubator.vector VectorDemo.java
+> ```
+
+向量 API 定义了专门的向量类，比如这里的 `IntVector`，并提供了 `fromArray` 方法方便我们将数组转换为向量，然后再通过 `aVector.add(bVector)` 执行两个向量的加法运算。
+
+除了加法运算，向量 API 还提供了一组方法来执行各种其他的向量计算：
+
+* 算术运算（Arithmetic Operations）
+    * 加法：`vector1.add(vector2)`
+    * 减法：`vector1.sub(vector2)`
+    * 乘法：`vector1.mul(vector2)`
+    * 除法：`vector1.div(vector2)`
+* 逐元素操作（Element-Wise Operations）
+    * 绝对值：`vector.abs()`
+    * 负数：`vector.neg()`
+    * 平方根：`vector.sqrt()`
+    * 指数：`vector.exp()`
+    * 对数：`vector.log()`
+* 规约运算（Reductions）
+    * 元素之和：`vector.reduce(VectorOperators.ADD)`
+    * 最小元素：`vector.reduce(VectorOperators.MIN)`
+    * 最大元素：`vector.reduce(VectorOperators.MAX)`
+    * 平均值：`vector.reduce(VectorOperators.ADD).mul(1.0 / vector.length())`
+* 逻辑运算（Logical Operations）
+    * 与：`vector1.and(vector2)`
+    * 或：`vector1.or(vector2)`
+    * 非：`vector.not()`
+* 比较操作（Comparisons）
+    * 等于：`vector1.eq(vector2)`
+    * 小于：`vector1.lt(vector2)`
+    * 大于：`vector1.compare(VectorOperators.GT, vector2)`
+
+
 ## 弃用 Windows 32-bit x86 移植，为删除做准备
 
 https://openjdk.org/jeps/449
