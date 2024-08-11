@@ -143,6 +143,54 @@ for (int i = 0; i < a.length; i++) {
 
 > 我们可以通过 `-XX:-UseSuperWord` 参数关闭 HotSpot 的自动向量化功能。
 
+### 使用向量 API
+
+在学习了向量的基础知识之后，接下来我们将继续深入学习向量 API 的使用。
+
+上面介绍向量计算时，我们已经学习了向量 API 的基本用法，使用 `IntVector` 实现两个向量相加。这个示例为了易于理解，做了简单处理，并没有考虑在实际使用时的边界情况，假设我们将 `a` 和 `b` 两个数组改成 10 个数字：
+
+```
+int[] a = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int[] b = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+IntVector aVector = IntVector.fromArray(IntVector.SPECIES_128, a, 0);
+IntVector bVector = IntVector.fromArray(IntVector.SPECIES_128, b, 0);
+IntVector cVector = aVector.add(bVector);
+```
+
+运行后得到的结果 `c` 仍然是 `[2, 4, 6, 8]`，后面新加的数字并没有计算。这是因为每个向量的存储空间有限，并不能一次存下所有的数据。这里涉及向量 API 的一个重要概念：**向量种类（Vector Species）**，它是 **数据类型（Data Types）** 和 **向量形状（Vector Shapes）** 的组合；所谓数据类型就是 Java 的基础类型，比如 byte、short、int、long 这些整数类型和 float、double 浮点类型，而所谓向量形状就是向量的位大小或位数；比如这里的向量种类为 `IntVector.SPECIES_128`，它代表数据类型为 int，向量形状为 128 位；而我们知道，一般情况下 int 值的大小为 32 位，所以这个向量一次只能存储 `128/32 = 4` 个 int 值，这也被形象地称为 **通道（Lanes）**，表示向量一次可以处理的数据个数。
+
+知道这一点后，我们就可以写出更加通用的向量计算代码了。首先我们需要将数据按通道数分组，然后一组一组的进行处理：
+
+```
+int[] a = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int[] b = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int[] c = new int[10];
+int lanes = IntVector.SPECIES_128.length();
+int loopBound = IntVector.SPECIES_128.loopBound(a.length);
+for (int i = 0; i < loopBound; i += lanes) {
+    IntVector aVector = IntVector.fromArray(IntVector.SPECIES_128, a, i);
+    IntVector bVector = IntVector.fromArray(IntVector.SPECIES_128, b, i);
+    IntVector cVector = aVector.add(bVector);
+    cVector.intoArray(c, i);
+}
+for (int i = loopBound; i < a.length; i++) {
+    c[i] = a[i] + b[i];
+}
+IntStream.of(c).forEach(x -> System.out.println(x));
+```
+
+我们可以注意到，在遍历时 i 每次增加 `lanes`，它的值等于 `IntVector.SPECIES_128.length()`，也就是通道数，一般来说该值等于 4，所以我们是按 4 个一组进行处理的。但是要注意数据不一定能被通道数完全整除，比如这里 10 个数字，前 8 个可以分为两组处理掉，还剩下 2 个怎么办呢？这时我们只能使用最原始的标量计算来处理了。
+
+此外，在实际编码时向量种类不建议写死，可以使用 `IntVector.SPECIES_PREFERRED` 替代，它会根据平台自动选择最合适的向量种类：
+
+```
+static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
+```
+
+可以看出尽管向量 API 的使用有不少好处，但是我们也需要谨慎对待：
+
+* 首先，在使用向量 API 时，数据对齐是一个重要的考虑因素，不对齐的数据访问可能会导致性能下降。开发者需要确保数据在内存中的对齐方式，以充分发挥 SIMD 指令的优势；
+* 另外，向量 API 有硬件依赖性，它依赖于底层硬件支持的 SIMD 指令集，许多功能可能在其他平台和架构上不可用，性能也可能会有所不同。开发者需要了解目标平台的特性，并进行适当的性能优化。
 
 ## 弃用 Windows 32-bit x86 移植，为删除做准备
 
@@ -477,3 +525,8 @@ https://openjdk.org/jeps/453
 * [矢量运算：Java的机器学习要来了吗？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/11%20%E7%9F%A2%E9%87%8F%E8%BF%90%E7%AE%97%EF%BC%9AJava%E7%9A%84%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E8%A6%81%E6%9D%A5%E4%BA%86%E5%90%97%EF%BC%9F.md)
 * [Java’s new Vector API: How fast is it? — Part 1](https://medium.com/@tomerr90/javas-new-vector-api-how-fast-is-it-part-1-1b4c2b573610)
 * [Java’s new Vector API: How fast is it? — Part 2](https://medium.com/@tomerr90/javas-new-vector-api-how-fast-is-it-part-2-2fc22e344e5)
+* [【新Java 18】Vector API 第三孵化版：性能提升的新方法](https://blog.csdn.net/weixin_52938153/article/details/139756493)
+* [The Vector API in Java 19](https://www.baeldung.com/java-vector-api)
+* [Java 17 更新（11）：支持矢量运算，利好科学计算？](https://www.bennyhuo.com/2021/10/02/Java17-Updates-11-vector/)
+* [Harnessing the Power of SIMD With Java Vector API](https://dzone.com/articles/power-of-simd-with-java-vector-api)
+* [The Vector API in Java 19](https://examples.javacodegeeks.com/the-vector-api-in-java-19/)
