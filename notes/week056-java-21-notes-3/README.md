@@ -117,6 +117,32 @@ IntVector cVector = aVector.add(bVector);
     * 小于：`vector1.lt(vector2)`
     * 大于：`vector1.compare(VectorOperators.GT, vector2)`
 
+### 单指令多数据（SIMD）
+
+使用向量 API 来执行向量计算，不仅代码精简，容易理解，而且它还有另一个好处，那就是性能提升。尽管使用并行流也能提升一定的性能，但是并行流和向量 API 是两种完全不同的优化技术，前者使用多线程在不同的 CPU 核上并行计算，而后者通过 SIMD 技术，在单个 CPU 周期内对多个数据同时执行相同操作，从而达到并行计算的目的。
+
+**SIMD（Single Instruction, Multiple Data，单指令多数据）** 是一种并行处理技术，它的核心思想是将一个控制器与多个处理单元结合在一起，使得这些处理单元可以针对不同的数据同时执行相同的操作，简单来说就是一个指令能够同时处理多个数据。这与传统的 **SISD（Single Instruction, Single Data，单指令单数据）** 形成对比，在后者中，一个指令只能处理一个数据。
+
+在上面那个向量求和的例子中，我们先是使用 `for` 循环实现：
+
+```
+for (int i = 0; i < a.length; i++) {
+    c[i] = a[i] + b[i];
+}
+```
+
+数组中的每个元素将使用（大致）1 个 CPU 指令进行计算，这意味着我们需要 4 个指令或 4 个 CPU 周期才能完成计算，这就是典型的 SISD。而使用向量 API 可以将向量的计算编译为对应 CPU 架构上的 SIMD 指令集，只要 1 个指令即可完成向量计算：
+
+![](./images/simd.png)
+
+在实际应用中，许多现代处理器都支持 SIMD 指令集，如 Intel 的 **MMX**、**SSE** 和 **AVX**，ARM 的 **NEON** 和 **SVE** 等，这些指令集能够显著提升程序的执行效率，特别是在需要大量数值计算的场景下。不过使用这些指令集的门槛并不低，通常涉及到汇编语言或一些特殊的函数库，比如 Intel 的跨平台函数库 [IPP（Integrated Performance Primitives）](https://en.wikipedia.org/wiki/Integrated_Performance_Primitives) 或使用 [内置函数 (Intrinsic function)](https://en.wikipedia.org/wiki/Intrinsic_function) 等。
+
+相比于传统的手写 SIMD 代码，Java 的向量 API 提供了更高的可读性和维护性，开发者可以使用熟悉的 Java 语法和类型系统，无需处理底层寄存器和指令，编写出简洁明了的、平台无关的、高性能的向量计算代码。
+
+> 其实，在向量 API 提出之前，Java 已经在 SIMD 上探索了很长一段时间了，比如 HotSpot 的 [自动向量化（Auto-Vectorization）](https://cr.openjdk.org/~vlivanov/talks/2017_Vectorization_in_HotSpot_JVM.pdf) 功能，它将标量操作转换为 **超字操作（SuperWord Operations）**，然后再映射到 SIMD 指令。然而，这个过程完全依赖 JIT，并没有什么可靠的方法来保证编写的代码一定可以使用 SIMD 指令优化，有些代码甚至根本无法进行优化，开发人员必须深入了解 HotSpot 的自动向量化算法及其限制，才能实现可靠的性能提升。向量 API 使得这个过程完全由开发人员自己控制，因此可以写出更加可预测、更加稳健的代码。
+
+> 我们可以通过 `-XX:-UseSuperWord` 参数关闭 HotSpot 的自动向量化功能。
+
 
 ## 弃用 Windows 32-bit x86 移植，为删除做准备
 
@@ -445,3 +471,9 @@ https://openjdk.org/jeps/453
 * [Java实现7种常见密码算法](https://www.cnblogs.com/codelogs/p/16815708.html)
 * [密钥封装机制和一个公钥加密方案有什么本质的区别？](https://www.zhihu.com/question/443779639)
 * [一文看懂向量（基本概念+3种表达方式+与标量、矩阵、张量的关系）](https://easyai.tech/ai-definition/vector/)
+* [SIMD简介](https://zhuanlan.zhihu.com/p/55327037)
+* [SuperWord (Auto-Vectorization) - An Introduction](https://eme64.github.io/blog/2023/02/23/SuperWord-Introduction.html)
+* [Vectorization in HotSpot JVM](https://cr.openjdk.org/~vlivanov/talks/2017_Vectorization_in_HotSpot_JVM.pdf)
+* [矢量运算：Java的机器学习要来了吗？](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/11%20%E7%9F%A2%E9%87%8F%E8%BF%90%E7%AE%97%EF%BC%9AJava%E7%9A%84%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E8%A6%81%E6%9D%A5%E4%BA%86%E5%90%97%EF%BC%9F.md)
+* [Java’s new Vector API: How fast is it? — Part 1](https://medium.com/@tomerr90/javas-new-vector-api-how-fast-is-it-part-1-1b4c2b573610)
+* [Java’s new Vector API: How fast is it? — Part 2](https://medium.com/@tomerr90/javas-new-vector-api-how-fast-is-it-part-2-2fc22e344e5)
