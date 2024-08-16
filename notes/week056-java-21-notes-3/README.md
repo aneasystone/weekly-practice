@@ -194,7 +194,29 @@ static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
 ## 弃用 Windows 32-bit x86 移植，为删除做准备
 
-https://openjdk.org/jeps/449
+这个特性比较简单。随着 64 位架构的普及，32 位操作系统逐渐被淘汰，比如微软从 Windows 10 开始就只提供 64 位版本了，Windows 10 将是最后一个支持 32 位的 Windows 操作系统，而且 [2025 年 10 月后将不再支持](https://learn.microsoft.com/zh-cn/lifecycle/products/windows-10-home-and-pro)。
+
+64 位架构相比于 32 位，在性能和安全方面都有巨大的提升。比如 64 位架构可以提供更大的内存地址空间，从而提高应用程序的性能和扩展性，同时它也引入了更多的保护机制，提高了应用程序的安全性。
+
+但由于架构的差异，同时兼容 32 位和 64 位需要不少的维护成本，很多 Java 的新特性已经不支持 32 位系统了，比如虚拟线程，所以弃用 32 位势在必行。
+
+在 Windows 32-bit x86 系统下构建 Java 21 的源码将报如下错误：
+
+```
+$ bash ./configure
+...
+checking compilation type... native
+configure: error: The Windows 32-bit x86 port is deprecated and may be removed in a future release. \
+Use --enable-deprecated-ports=yes to suppress this error.
+configure exiting with result code 1
+$
+```
+
+暂时可以通过 `--enable-deprecated-ports=yes` 参数来解决：
+
+```
+$ bash ./configure --enable-deprecated-ports=yes
+```
 
 ## 准备禁用代理的动态加载
 
