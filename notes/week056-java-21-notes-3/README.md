@@ -220,7 +220,37 @@ $ bash ./configure --enable-deprecated-ports=yes
 
 ## 准备禁用代理的动态加载
 
-https://openjdk.org/jeps/451
+Java Agent 通常被直译为 Java 代理，它是一个 jar 包，这个 jar 包很特别，不能独立运行，而是要依附到我们的目标 JVM 进程中。它利用 JVM 提供的 [Instrumentation API](https://docs.oracle.com/en/java/javase/21/docs/api/java.instrument/java/lang/instrument/Instrumentation.html) 来修改已加载到 JVM 中的字节码，从而实现很多高级功能，比如：
+
+* Eclipse、IntelliJ 等 IDE 的调试功能；
+* [JRebel](https://www.jrebel.com/products/jrebel)、[spring-loaded](https://github.com/spring-projects/spring-loaded) 等工具的热加载功能；
+* [Arthas](https://arthas.aliyun.com/)、[Btrace](https://github.com/btraceio/btrace)、[Greys](https://github.com/oldmanpushcart/greys-anatomy) 等工具的线上诊断功能；
+* [Visual VM](https://visualvm.github.io/)、[JConsole](https://openjdk.org/tools/svc/jconsole/) 等工具的性能分析功能；
+* 此外，[SkyWalking](https://skywalking.apache.org/)、[Pinpoint](https://github.com/pinpoint-apm/pinpoint) 等 APM 系统也是基于 Java Agent 实现的；
+
+### Java Agent 简单示例
+
+https://lotabout.me/2024/Java-Agent-101/
+
+https://github.com/bigcoder84/study-notes/blob/master/%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A1%A5%E5%85%85/subfile/_34JavaAgent%E8%AF%A6%E8%A7%A3.md
+
+https://juejin.cn/post/6844904035305127950
+
+https://juejin.cn/post/6844904039830781966
+
+https://www.cnblogs.com/rickiyang/p/11368932.html
+
+### Java Agent 的两种加载方式
+
+https://www.baeldung.com/java-instrumentation
+
+### 禁用代理的动态加载
+
+https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/
+
+https://saltmarch.com/insight/jdk-21-how-java-is-boosting-system-integrity-in-stealth-mode
+
+https://lsieun.github.io/java-agent/s01ch01/java-agent-overview.html
 
 ## 密钥封装机制 API
 
