@@ -230,21 +230,85 @@ Java Agent 通常被直译为 Java 代理，它是一个 jar 包，这个 jar �
 
 ### Java Agent 简单示例
 
-https://lotabout.me/2024/Java-Agent-101/
+为了对 Java Agent 的概念有一个更直观的认识，我们从一个简单的示例入手，从零开始实现一个 Java Agent。先创建如下目录结构：
 
-https://github.com/bigcoder84/study-notes/blob/master/%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A1%A5%E5%85%85/subfile/_34JavaAgent%E8%AF%A6%E8%A7%A3.md
+```
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── example
+        │           └── AgentDemo.java
+        └── resources
+            └── META-INF
+                └── MANIFEST.MF
+```
 
-https://juejin.cn/post/6844904035305127950
+包含三个主要文件：
 
-https://juejin.cn/post/6844904039830781966
+* `pom.xml` - Maven 项目的配置文件
+* `AgentDemo.java` - Java Agent 的入口类
+* `MANIFEST.MF` - 元数据文件，用于描述打包的 JAR 文件中的各种属性和信息
 
-https://www.cnblogs.com/rickiyang/p/11368932.html
+Java Agent 的入口类定义如下：
+
+```
+package com.example;
+
+import java.lang.instrument.Instrumentation;
+
+public class AgentDemo {
+
+    public static void premain(String agentArgs, Instrumentation inst) {
+        System.out.println("premain");
+    }
+}
+```
+
+我们知道，常规 Java 程序的入口方法是 `main` 函数，而 Java Agent 的入口方法是 `premain` 函数。其中，`String agentArgs` 是传递给 Agent 的参数，比如当我们运行 `java -javaagent:agent-demo.jar=some-args app.jar` 命名时，参数 `agentArgs` 的值就是字符串 `some-args`；另一个参数 `Instrumentation inst` 是 JVM 提供的修改字节码的接口，我们可以通过这个接口定位到希望修改的类并做出修改。
+
+> **Instrumentation API** 是 Java Agent 的核心，它可以在加载 class 文件之前做拦截，对字节码做修改（`Instrumentation::addTransformer`），也可以在运行时对已经加载的类的字节码做变更（`Instrumentation::retransformClasses`）；由于这个操作非常的底层，一般会配合一些字节码修改的库，比如 [ASM](https://asm.ow2.io/)、[Javassist](https://www.javassist.org/)、[Byte Buddy](https://bytebuddy.net/) 等。关于 Instrumentation API 是一个较为艰深复杂的话题，本文为简单起见，没有深入展开，感兴趣的同学可以自行查找相关资料。
+
+有了 Java Agent 的入口类之后，我们还需要告诉 JVM 这个入口类的位置，可以在 `MANIFEST.MF` 元数据文件中通过 `Premain-Class` 参数来描述：
+
+```
+Premain-Class: com.example.AgentDemo
+```
+
+打包的时候，要注意将 `MANIFEST.MF` 文件一起打到 jar 包里，这可以通过打包插件 `maven-assembly-plugin` 来实现：
+
+```
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <version>3.6.0</version>
+    <configuration>
+        <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <archive>
+            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+        </archive>
+    </configuration>
+    <executions>
+        <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+最后，执行 `mvn clean package` 打包命令，生成 `target/agent-demo-1.0-SNAPSHOT-jar-with-dependencies.jar` 文件，我们就得到了一个最简单的 Java Agent 了。
 
 ### Java Agent 的两种加载方式
 
 https://www.baeldung.com/java-instrumentation
 
-### 禁用代理的动态加载
+### 禁用 Java Agent 的动态加载
 
 https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/
 
@@ -582,3 +646,6 @@ https://openjdk.org/jeps/453
 * [Java 17 更新（11）：支持矢量运算，利好科学计算？](https://www.bennyhuo.com/2021/10/02/Java17-Updates-11-vector/)
 * [Harnessing the Power of SIMD With Java Vector API](https://dzone.com/articles/power-of-simd-with-java-vector-api)
 * [The Vector API in Java 19](https://examples.javacodegeeks.com/the-vector-api-in-java-19/)
+* [Java Agent 入门教程](https://lotabout.me/2024/Java-Agent-101/)
+* [Java Agent 使用详解](https://github.com/bigcoder84/study-notes/blob/master/%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A1%A5%E5%85%85/subfile/_34JavaAgent%E8%AF%A6%E8%A7%A3.md)
+* [Guide to Java Instrumentation](https://www.baeldung.com/java-instrumentation)
