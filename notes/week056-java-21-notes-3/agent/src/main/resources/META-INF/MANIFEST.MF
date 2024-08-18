@@ -1,1 +1,2 @@
 Premain-Class: com.example.AgentDemo
+Agent-Class: com.example.AgentDemo

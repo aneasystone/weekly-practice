@@ -268,7 +268,7 @@ public class AgentDemo {
 
 我们知道，常规 Java 程序的入口方法是 `main` 函数，而 Java Agent 的入口方法是 `premain` 函数。其中，`String agentArgs` 是传递给 Agent 的参数，比如当我们运行 `java -javaagent:agent-demo.jar=some-args app.jar` 命名时，参数 `agentArgs` 的值就是字符串 `some-args`；另一个参数 `Instrumentation inst` 是 JVM 提供的修改字节码的接口，我们可以通过这个接口定位到希望修改的类并做出修改。
 
-> **Instrumentation API** 是 Java Agent 的核心，它可以在加载 class 文件之前做拦截，对字节码做修改（`Instrumentation::addTransformer`），也可以在运行时对已经加载的类的字节码做变更（`Instrumentation::retransformClasses`）；由于这个操作非常的底层，一般会配合一些字节码修改的库，比如 [ASM](https://asm.ow2.io/)、[Javassist](https://www.javassist.org/)、[Byte Buddy](https://bytebuddy.net/) 等。关于 Instrumentation API 是一个较为艰深复杂的话题，本文为简单起见，没有深入展开，感兴趣的同学可以自行查找相关资料。
+> **Instrumentation API** 是 Java Agent 的核心，它可以在加载 class 文件之前做拦截，对字节码做修改（`addTransformer`），也可以在运行时对已经加载的类的字节码做变更（`retransformClasses` 或 `redefineClasses`）；Instrumentation 的英文释义是插桩或植入，所以这个操作又被称为 **字节码插桩**，由于这个操作非常的底层，一般会配合一些字节码修改的库，比如 [ASM](https://asm.ow2.io/)、[Javassist](https://www.javassist.org/)、[Byte Buddy](https://bytebuddy.net/) 等。关于 Instrumentation API 是一个较为艰深复杂的话题，本文为简单起见，没有深入展开，感兴趣的同学可以自行查找相关资料。
 
 有了 Java Agent 的入口类之后，我们还需要告诉 JVM 这个入口类的位置，可以在 `MANIFEST.MF` 元数据文件中通过 `Premain-Class` 参数来描述：
 
@@ -306,7 +306,79 @@ Premain-Class: com.example.AgentDemo
 
 ### Java Agent 的两种加载方式
 
-https://www.baeldung.com/java-instrumentation
+Java Agent 最常见的使用方式是在运行 `java` 命令时通过 `-javaagent` 参数指定要加载的 Agent 文件：
+
+```
+$ java -javaagent:agent-demo-1.0-SNAPSHOT-jar-with-dependencies.jar Hello.java
+```
+
+这种方式被称为 **静态加载（static loading）**。在这种情况下，Java Agent 和应用程序一起启动，并在运行主程序的 `main` 方法之前先调用 Java Agent 的 `premain` 方法，下面是程序的运行结果：
+
+```
+premain
+Hello
+```
+
+既然有静态加载，自然就有动态加载。**动态加载（dynamic loading）** 指的是将 Java Agent 动态地加载到已运行的 JVM 进程中，当我们不希望中断生产环境中已经运行的应用程序时，这个特性非常有用。
+
+我们先正常启动一个 Java 应用程序：
+
+```
+$ java Hello.java
+Hello
+```
+
+通过 `jps` 得到该程序的 PID，然后使用 Java 的 [Attach API](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html) **附加（attach）** 到该程序上：
+
+```
+String pidOfOtherJVM = "3378";
+VirtualMachine vm = VirtualMachine.attach(pidOfOtherJVM);
+```
+
+附加成功后得到 `VirtualMachine` 实例，`VirtualMachine` 提供了一个 `loadAgent()` 方法用于动态加载 Java Agent：
+
+```
+File agentJar = new File("/com.docker.devenvironments.code/agent-demo-1.0-SNAPSHOT-jar-with-dependencies.jar");
+vm.loadAgent(agentJar.getAbsolutePath());
+
+// do other works
+
+vm.detach();
+```
+
+查看应用程序的日志，可以发现如下报错：
+
+```
+Failed to find Agent-Class manifest attribute from /com.docker.devenvironments.code/agent-demo.jar
+```
+
+这是因为目前我们这个 Java Agent 还不支持动态加载，动态加载的入口并不是 `premain` 函数，而是 `agentmain` 函数，我们在 `AgentDemo` 类中新增代码如下：
+
+```
+...
+    public static void agentmain(String agentArgs, Instrumentation inst) {
+        System.out.println("agentmain");
+    }
+...
+```
+
+并在 `MANIFEST.MF` 文件中新增 `Agent-Class` 参数：
+
+```
+Agent-Class: com.example.AgentDemo
+```
+
+重新打包，并再次动态加载，可以在应用程序中看到日志如下：
+
+```
+WARNING: A Java agent has been loaded dynamically (/com.docker.devenvironments.code/agent-demo-1.0-SNAPSHOT-jar-with-dependencies.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+agentmain
+```
+
+可以看到 `agentmain` 函数被成功执行，动态加载生效了。
 
 ### 禁用 Java Agent 的动态加载
 
