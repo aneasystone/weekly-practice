@@ -382,11 +382,15 @@ agentmain
 
 ### 禁用 Java Agent 的动态加载
 
-https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/
+在上面的应用程序日志中，我们可以看到几行 WARNING 提示，这其实就是 Java 21 引入的新内容了，当 JVM 检测到有 Java Agent 被动态加载，就会打印这几行警告信息，告知用户动态加载机制将在未来的版本中默认禁用。如果不想看到这样的日志，可以在启动应用程序时加上 `-XX:+EnableDynamicAgentLoading` 选项：
 
-https://saltmarch.com/insight/jdk-21-how-java-is-boosting-system-integrity-in-stealth-mode
+```
+$ java -XX:+EnableDynamicAgentLoading Hello.java
+```
 
-https://lsieun.github.io/java-agent/s01ch01/java-agent-overview.html
+那么 Java 21 为什么要禁用 Java Agent 的动态加载呢？这就要提到 Java 所追求的 [Integrity by Default](https://openjdk.org/jeps/8305968) 原则了。Integrity 一般被翻译为 **完整性**，片面的理解就是要保证我们程序中的任何内容，包括数据或代码都是完整的、没有被篡改的。而 Instrumentation API 通过修改已加载到 JVM 中的字节码来改变现有应用程序，在不更改源代码的情况下改变应用程序的行为。当我们静态加载 Java Agent 时，这并不是什么大问题，因为这是用户明确且有意的使用；然而，动态加载则是间接的，它超出了用户的控制范围，可能对用户的应用程序造成严重破坏，很显然并不符合完整性原则。
+
+因此，作为应用程序的所有者，必须有意识地、明确地决定允许和加载哪些 Java Agent：要么使用静态加载，要么通过 `-XX:+EnableDynamicAgentLoading` 选项允许动态加载。
 
 ## 密钥封装机制 API
 
@@ -721,3 +725,4 @@ https://openjdk.org/jeps/453
 * [Java Agent 入门教程](https://lotabout.me/2024/Java-Agent-101/)
 * [Java Agent 使用详解](https://github.com/bigcoder84/study-notes/blob/master/%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A1%A5%E5%85%85/subfile/_34JavaAgent%E8%AF%A6%E8%A7%A3.md)
 * [Guide to Java Instrumentation](https://www.baeldung.com/java-instrumentation)
+* [Looking at Java 21: Feature Deprecations](https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/)
