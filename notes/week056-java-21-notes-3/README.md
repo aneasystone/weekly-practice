@@ -688,7 +688,39 @@ private static void testKEM() throws Exception {
 
 ## 结构化并发（预览版本）
 
-https://openjdk.org/jeps/453
+**结构化并发（Structured Concurrency）** 最初由 [JEP 428](https://openjdk.org/jeps/428) 提出，并在 JDK 19 中作为孵化 API 发布，接着又在 JDK 20 中通过 [JEP 437](https://openjdk.org/jeps/437) 再次孵化，现在该特性进入预览版本了。结构化并发是一种多线程编程方法，它将在不同线程中运行的相关任务组视为单个工作单元，从而简化错误处理和取消操作，提高程序的可靠性和可观察性。
+
+结构化并发和虚拟线程、作用域值一样，都是由 [Loom](https://wiki.openjdk.org/display/loom) 项目发展而来。
+
+那么到底什么是结构化并发呢？我们不妨从结构化编程的概念开始聊起。
+
+### 结构化编程（Structured Programming）
+
+计算机发展的早期，程序员必须使用很低级的编程语言去写程序，比如汇编语言，通过一条条的硬件指令去操作计算机，这种编程方式非常痛苦；于是一些计算机界大佬便开始着手重新设计编程语言，使用类似英语的语句来表达操作，这就诞生了一批比汇编语言稍微高级一点的编程语言，如 FORTRAN、FLOW-MATIC、COBOL 等。
+
+这些语言和现在我们所使用的 Java 或者 C 等高级语言还是有一些差距的，没有函数代码块，没有条件或循环控制语句，这些现在看来稀松平常的特性当时还没有被发明出来。设想一下如果程序只能从上往下顺序执行，那么我们就不能复用之前已经编写过的逻辑，想要重新执行一遍之前的逻辑，就得把前面的代码重写一遍，很显然这是非常麻烦的，所以一些设计者在语言中加入了 `GOTO` 语句，可以让程序在执行时跳转到指定位置，从而实现代码复用。
+
+`GOTO` 语句的发明使得编程语言变得更加强大，但是这种跳转执行的逻辑使得程序充满了不确定性，一旦程序中大量使用了 `GOTO` 语句，整个代码就会变得一团糟：
+
+![](./images/spaghetti.jpg)
+
+这种代码如同面条一般，所以被形象地戏称为 **面条式代码（Spaghetti Code）**。
+
+1968 年 3 月，荷兰计算机科学家 [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) 发表了著名论文 [Goto Statement Considered Harmful](https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf)，首次提出了 GOTO 有害论；后来，他又编写了一部札记 [Notes on Structured Programming](https://www.cs.utexas.edu/~EWD/ewd02xx/EWD249.PDF)，通过大量的篇幅详细阐述了他理想中的编程范式，并提出了 **结构化编程（Structured Programming）** 的概念。
+
+![](./images/structured-programming.jpg)
+
+结构化编程的核心思想是 **基于块语句，实现代码逻辑的抽象与封装，从而保证控制流拥有单一的入口与出口**，现代编程语言中的条件语句、循环语句、方法调用都是结构化编程的体现，我们基于现代编程语言所编写的程序，基本上都是结构化的。
+
+相比 `GOTO` 语句，结构化编程使代码逻辑变得更加清晰，思维模型变得更加简单；如今，大部分现代编程语言都已经禁用 `GOTO` 语句，尽管 `break` 和 `continue` 语句仍然可以实现跳转逻辑，但是他们还是遵循结构化的基本原则：控制流拥有单一的入口与出口。
+
+> 少部分编程语言仍然支持 `GOTO`，但是它们大都遵循高德纳所提出的前进分支和后退分支不得交叉的理论。
+
+### 结构化并发（Structured Concurrency）
+
+### 使用 `StructuredTaskScope` 实现结构化并发
+
+### 结构化并发策略
 
 ## 参考
 
@@ -696,8 +728,6 @@ https://openjdk.org/jeps/453
 * [Java 21 新特性概览](https://javaguide.cn/java/new-features/java21.html)
 * [深入剖析Java新特性](https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Java%E6%96%B0%E7%89%B9%E6%80%A7/)
 * [Java21新特性教程](https://www.panziye.com/back/10563.html)
-* [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
-* [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
 * [写给开发人员的实用密码学（五）—— 密钥交换 DHKE 与完美前向保密 PFS](https://thiscute.world/posts/practical-cryptography-basics-5-key-exchange/)
 * [写给开发人员的实用密码学（六）—— 对称密钥加密算法](https://thiscute.world/posts/practical-cryptography-basics-6-symmetric-key-ciphers/)
 * [写给开发人员的实用密码学（七）—— 非对称密钥加密算法 RSA/ECC](https://thiscute.world/posts/practical-cryptography-basics-7-asymmetric-key-ciphers/)
@@ -726,3 +756,7 @@ https://openjdk.org/jeps/453
 * [Java Agent 使用详解](https://github.com/bigcoder84/study-notes/blob/master/%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A1%A5%E5%85%85/subfile/_34JavaAgent%E8%AF%A6%E8%A7%A3.md)
 * [Guide to Java Instrumentation](https://www.baeldung.com/java-instrumentation)
 * [Looking at Java 21: Feature Deprecations](https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/)
+* [JDK 21: How Java is Boosting System Integrity in Stealth Mode](https://saltmarch.com/insight/jdk-21-how-java-is-boosting-system-integrity-in-stealth-mode)
+* [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
+* [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
+* [Structured Concurrency in Java with StructuredTaskScope](https://www.happycoders.eu/java/structured-concurrency-structuredtaskscope/)
