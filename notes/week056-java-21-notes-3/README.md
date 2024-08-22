@@ -706,7 +706,7 @@ private static void testKEM() throws Exception {
 
 这种代码如同面条一般，所以被形象地戏称为 **面条式代码（Spaghetti Code）**。
 
-1968 年 3 月，荷兰计算机科学家 [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) 发表了著名论文 [Goto Statement Considered Harmful](https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf)，首次提出了 GOTO 有害论；后来，他又编写了一部札记 [Notes on Structured Programming](https://www.cs.utexas.edu/~EWD/ewd02xx/EWD249.PDF)，通过大量的篇幅详细阐述了他理想中的编程范式，并提出了 **结构化编程（Structured Programming）** 的概念。
+1968 年 3 月，荷兰计算机科学家 [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) 发表了一篇文章 [Goto Statement Considered Harmful](https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf)，提出了著名的 GOTO 有害论；后来，他又编写了一部札记 [Notes on Structured Programming](https://www.cs.utexas.edu/~EWD/ewd02xx/EWD249.PDF)，通过大量的篇幅详细阐述了他理想中的编程范式，首次提出了 **结构化编程（Structured Programming）** 的概念。
 
 ![](./images/structured-programming.jpg)
 
@@ -714,9 +714,41 @@ private static void testKEM() throws Exception {
 
 相比 `GOTO` 语句，结构化编程使代码逻辑变得更加清晰，思维模型变得更加简单；如今，大部分现代编程语言都已经禁用 `GOTO` 语句，尽管 `break` 和 `continue` 语句仍然可以实现跳转逻辑，但是他们还是遵循结构化的基本原则：控制流拥有单一的入口与出口。
 
-> 少部分编程语言仍然支持 `GOTO`，但是它们大都遵循高德纳所提出的前进分支和后退分支不得交叉的理论。
+> 少部分编程语言仍然支持 `GOTO`，但是它们大都遵循高德纳所提出的前进分支和后退分支不得交叉的原则。
 
 ### 结构化并发（Structured Concurrency）
+
+了解了结构化编程的历史后，我们再来看看什么是结构化并发。假设我们有两个独立的任务 `task1` 和 `task2` 需要执行，由于它们之间互不影响，我们可以使用 `ExecutorService` 来并发执行：
+
+```
+private static void testExecutorService() throws Exception {
+    System.out.println("main thread start");
+    ExecutorService executorService = Executors.newCachedThreadPool();
+    Future<Integer> f1 = executorService.submit(() -> task1(0));
+    Future<Integer> f2 = executorService.submit(() -> task2(0));
+    System.out.println(f1.get());
+    System.out.println(f2.get());
+    System.out.println("main thread end");
+    executorService.shutdown();
+}
+```
+
+通过 `submit` 提交任务，并通过 `get` 等待任务执行结束，代码非常简单，整个流程也非常顺利。然而，真实情况却未必如此，由于子任务并发执行，每个子任务都可能成功或失败，当某个子任务失败时，我们要考虑的事情可能会变得出乎意料地复杂：
+
+* 如果 `task1` 运行失败，那么在调用 `f1.get()` 时会抛出异常，但 `task2` 将继续在其自己的线程中运行，这是一种线程泄漏，不仅浪费资源，而且可能会干扰其他任务；
+* 如果 `task2` 运行失败，由于先执行 `f1.get()`，会阻塞等待 `task1` 运行结束才会执行 `f2.get()` 抛出异常，`task1` 可能会执行很久，这是一种不必要的等待；
+* 如果主线程被中断，该中断不会传播到子任务中，`task1` 和 `task2` 线程都会泄漏；
+* 另一种场景中，如果我们只需要 `task1` 和 `task2` 中的任意一个结果，这又该如何实现？
+
+其实以上这些场景都可以实现，但需要极其复杂、难以维护的代码，比如 [这里](https://github.com/SvenWoltmann/structured-concurrency/blob/main/src/main/java/eu/happycoders/structuredconcurrency/demo1_invoice/InvoiceGenerator2b_CompletableFutureCancelling.java) 使用 `CompletableFuture` 演示了三个子任务之间互相取消的场景，其代码的复杂程度应该会吓坏不少人。
+
+此外，这类代码也不好调试，通过线程转储，我们会得到一堆名为 “pool-X-thread-Y” 的线程，我们无法知道哪个子线程属于哪个主线程，每个子线程的运行就像非结构化编程中的 `GOTO` 一样，不知道会跳转到哪里。这种情况被称为 **非结构化并发（Unstructured Concurrency）**。我们的任务在一张错综复杂的线程网中运行，其开始与结束在代码中难以察觉，缺乏清晰的错误处理机制，当主线程结束时，常常会出现孤立线程的情况。
+
+**结构化并发（Structured Concurrency）** 正是为解决这些问题而提出的，它的核心思想和结构化编程一样：**在并发模型下，也要保证控制流拥有单一的入口与出口**。程序可以产生多个子线程来实现并发，但是所有子线程最终都要在统一的出口处完成合并：
+
+![](./images/structured-concurrency-vs-unstructured-concurrency.png)
+
+在出口处，所有子线程都应该处于完成或取消状态，子线程发生的错误能传播到父线程中，父线程的取消也能传播到子线程中，通过结构化并发，子线程的开始和结束变得清晰可见，这使得代码更易于阅读和维护。
 
 ### 使用 `StructuredTaskScope` 实现结构化并发
 
@@ -758,5 +790,6 @@ private static void testKEM() throws Exception {
 * [Looking at Java 21: Feature Deprecations](https://belief-driven-design.com/looking-at-java-21-feature-deprecations-03fff/)
 * [JDK 21: How Java is Boosting System Integrity in Stealth Mode](https://saltmarch.com/insight/jdk-21-how-java-is-boosting-system-integrity-in-stealth-mode)
 * [结构化并发 | 楚权的世界](http://chuquan.me/2023/03/11/structured-concurrency/)
+* [结构化并发程序设计](https://www.ibyte.me/29.html)
 * [聊一聊Java 21，虚拟线程、结构化并发和作用域值](https://cloud.tencent.com/developer/article/2355577)
 * [Structured Concurrency in Java with StructuredTaskScope](https://www.happycoders.eu/java/structured-concurrency-structuredtaskscope/)
