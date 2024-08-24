@@ -723,13 +723,13 @@ private static void testKEM() throws Exception {
 ```
 private static void testExecutorService() throws Exception {
     System.out.println("main thread start");
-    ExecutorService executorService = Executors.newCachedThreadPool();
-    Future<Integer> f1 = executorService.submit(() -> task1(0));
-    Future<Integer> f2 = executorService.submit(() -> task2(0));
+    ExecutorService executor = Executors.newCachedThreadPool();
+    Future<Integer> f1 = executor.submit(() -> task1(0));
+    Future<Integer> f2 = executor.submit(() -> task2(0));
     System.out.println(f1.get());
     System.out.println(f2.get());
     System.out.println("main thread end");
-    executorService.shutdown();
+    executor.shutdown();
 }
 ```
 
@@ -748,9 +748,39 @@ private static void testExecutorService() throws Exception {
 
 ![](./images/structured-concurrency-vs-unstructured-concurrency.png)
 
-在出口处，所有子线程都应该处于完成或取消状态，子线程发生的错误能传播到父线程中，父线程的取消也能传播到子线程中，通过结构化并发，子线程的开始和结束变得清晰可见，这使得代码更易于阅读和维护。
+使用结构化并发有着诸多好处：
+
+* 在出口处，所有子线程都应该处于完成或取消状态，所以子线程的开始和结束变得清晰可见，这使得代码更易于阅读和维护；
+* 子线程发生的错误能传播到父线程中，父线程的取消也能传播到子线程中，从而简化了线程之间的错误处理和状态控制；
+* 另外，线程转储还可以保持父线程与子线程之间的调用层次结构，增强了可观察性，有助于程序调试。
 
 ### 使用 `StructuredTaskScope` 实现结构化并发
+
+在 Java 中，实现结构化并发的基本 API 是 `StructuredTaskScope`，它的基本用法如下：
+
+```
+private static void testStructuredTaskScope() throws Exception {
+    System.out.println("main thread start");
+    try (var scope = new StructuredTaskScope<Object>()) {
+        Subtask<Integer> t1 = scope.fork(() -> task1(0));
+        Subtask<Integer> t2 = scope.fork(() -> task2(0));
+        scope.join();
+        System.out.println(t1.get());
+        System.out.println(t2.get());
+    }
+    System.out.println("main thread end");
+}
+```
+
+这里实现了和之前代码同样的逻辑，只是写法上略有区分，我们将 `ExecutorService` 替换为 `StructuredTaskScope`，并将 `executor.submit()` 替换为 `scope.fork()`，然后使用 `scope.join()` 等待所有任务完成。之后，我们可以通过 `Subtask.get()` 读取子任务的结果，如果某个子任务发生异常，`Subtask.get()` 会抛出 `IllegalStateException` 异常。因此，在调用 `get()` 之前，最好先用 `state()` 查询子任务的状态：
+
+```
+if (t1.state() == Subtask.State.SUCCESS) {
+    System.out.println(t1.get());
+} else {
+    System.out.println("task1 error: " + t1.exception().getMessage());
+}
+```
 
 ### 结构化并发策略
 
