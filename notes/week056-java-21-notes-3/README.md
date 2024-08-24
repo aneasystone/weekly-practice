@@ -782,7 +782,97 @@ if (t1.state() == Subtask.State.SUCCESS) {
 }
 ```
 
-### 结构化并发策略
+### `StructuredTaskScope` 的关闭策略
+
+`scope.join()` 可以保证所有子线程全部处于完成或取消状态，这样可以消除孤儿线程的风险。但是在有些场景下，如果某个子线程异常，等待其他子任务的结果就没有了意义，这时我们可以取消其他子任务，避免无谓的等待；还有些情况是，只要有一个子任务运行成功即可，无需等待所有任务都运行结束。这就引出了 `StructuredTaskScope` 的 **关闭策略（Shutdown policies）**，`StructuredTaskScope` 定义了两种关闭策略，分别处理这两种情况：
+
+#### `ShutdownOnFailure` 策略
+
+使用 `ShutdownOnFailure` 策略，当某个子任务中发生异常时，将导致所有其他子任务终止。它的使用方法如下所示：
+
+```
+private static void testStructuredTaskScopeShutdownOnFailure() throws Exception {
+    System.out.println("main thread start");
+    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        Subtask<Integer> t1 = scope.fork(() -> task1(1));
+        Subtask<Integer> t2 = scope.fork(() -> task2(0));
+        scope.join().throwIfFailed();
+        System.out.println(t1.get());
+        System.out.println(t2.get());
+    }
+    System.out.println("main thread end");
+}
+```
+
+首先，我们使用 `new StructuredTaskScope.ShutdownOnFailure()` 创建一个 `ShutdownOnFailure` 策略的 `StructuredTaskScope`，然后在 `scope.join()` 的时候，通过 `throwIfFailed()` 让其在子任务失败时抛出异常。假设 `task1` 异常，运行结果如下：
+
+```
+main thread start
+task1 start
+task2 start
+java.lang.InterruptedException
+        at java.base/java.lang.VirtualThread.sleepNanos(VirtualThread.java:805)
+        at java.base/java.lang.Thread.sleep(Thread.java:507)
+        at StructuredConcurrencyDemo.task2(StructuredConcurrencyDemo.java:91)
+        at StructuredConcurrencyDemo.lambda$9(StructuredConcurrencyDemo.java:130)
+        at java.base/java.util.concurrent.StructuredTaskScope$SubtaskImpl.run(StructuredTaskScope.java:889)
+        at java.base/java.lang.VirtualThread.run(VirtualThread.java:311)
+task2 end
+Exception in thread "main" java.util.concurrent.ExecutionException: java.lang.RuntimeException: code is illegal
+        at java.base/java.util.concurrent.StructuredTaskScope$ShutdownOnFailure.throwIfFailed(StructuredTaskScope.java:1318)
+        at java.base/java.util.concurrent.StructuredTaskScope$ShutdownOnFailure.throwIfFailed(StructuredTaskScope.java:1295)
+        at StructuredConcurrencyDemo.testStructuredTaskScopeShutdownOnFailure(StructuredConcurrencyDemo.java:131)
+        at StructuredConcurrencyDemo.main(StructuredConcurrencyDemo.java:14)
+Caused by: java.lang.RuntimeException: code is illegal
+        at StructuredConcurrencyDemo.task1(StructuredConcurrencyDemo.java:74)
+        at StructuredConcurrencyDemo.lambda$8(StructuredConcurrencyDemo.java:129)
+        at java.base/java.util.concurrent.StructuredTaskScope$SubtaskImpl.run(StructuredTaskScope.java:889)
+        at java.base/java.lang.VirtualThread.run(VirtualThread.java:311)
+```
+
+可以看到当 `task1` 异常时，`task2` 出现了 `InterruptedException`，说明 `task2` 被中断了，从而避免了无谓的等待。
+
+#### `ShutdownOnSuccess` 策略
+
+使用 `ShutdownOnSuccess` 策略，只要某个子任务中成功，将导致所有其他子任务终止。它的使用方法如下所示：
+
+```
+private static void testStructuredTaskScopeShutdownOnSuccess() throws Exception {
+    System.out.println("main thread start");
+    try (var scope = new StructuredTaskScope.ShutdownOnSuccess<Object>()) {
+        scope.fork(() -> task1(0));
+        scope.fork(() -> task2(0));
+        scope.join();
+        System.out.println(scope.result());
+    }
+    System.out.println("main thread end");
+}
+```
+
+首先，我们使用 `new StructuredTaskScope.ShutdownOnSuccess<Object>()` 创建一个 `ShutdownOnSuccess` 策略的 `StructuredTaskScope`，然后通过 `scope.join()` 等待子任务结束，任意一个子任务结束，整个 `StructuredTaskScope` 都会结束，并保证其他子任务被取消，最后通过 `scope.result()` 获取第一个运行成功的子任务结果。运行结果如下：
+
+```
+main thread start
+task1 start
+task2 start
+task2 end
+2
+java.lang.InterruptedException
+        at java.base/java.lang.VirtualThread.sleepNanos(VirtualThread.java:805)
+        at java.base/java.lang.Thread.sleep(Thread.java:507)
+        at StructuredConcurrencyDemo.task1(StructuredConcurrencyDemo.java:78)
+        at StructuredConcurrencyDemo.lambda$10(StructuredConcurrencyDemo.java:142)
+        at java.base/java.util.concurrent.StructuredTaskScope$SubtaskImpl.run(StructuredTaskScope.java:889)
+        at java.base/java.lang.VirtualThread.run(VirtualThread.java:311)
+task1 end
+main thread end
+```
+
+可以看到当 `task2` 最先运行结束，所以输出了 `task2` 的结果，同时 `task1` 出现了 `InterruptedException`，说明 `task1` 被中断了，避免了线程泄露。
+
+#### 自定义关闭策略
+
+如果这两个标准策略都不满足你的需求，我们还可以编写自定义的策略，通过继承 `StructuredTaskScope` 类，并重写其 `handleComplete(...)` 方法，从而实现不同于 `ShutdownOnSuccess` 和 `ShutdownOnFailure` 的策略。[这里](https://www.happycoders.eu/java/structured-concurrency-structuredtaskscope/) 有一个自定义关闭策略的示例可供参考。
 
 ## 参考
 
