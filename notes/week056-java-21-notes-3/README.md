@@ -874,6 +874,63 @@ main thread end
 
 如果这两个标准策略都不满足你的需求，我们还可以编写自定义的策略，通过继承 `StructuredTaskScope` 类，并重写其 `handleComplete(...)` 方法，从而实现不同于 `ShutdownOnSuccess` 和 `ShutdownOnFailure` 的策略。[这里](https://www.happycoders.eu/java/structured-concurrency-structuredtaskscope/) 有一个自定义关闭策略的示例可供参考。
 
+### 可观察性
+
+使用结构化并发的另一个好处是，线程是有层次结构的，我们可以从线程转储中看到某个主线程都派生了哪些子线程，也可以看出某个子线程来自于哪个主线程，从而方便问题排查。使用下面的命令以 JSON 格式进行线程转储：
+
+```
+$ jcmd <pid> Thread.dump_to_file -format=json threads.json
+```
+
+从转储结果中可以清晰的看到线程之间的层次结构：
+
+```
+{
+    "container": "java.util.concurrent.StructuredTaskScope$ShutdownOnSuccess@58644d46",
+    "parent": "<root>",
+    "owner": "1",
+    "threads": [
+        {
+            "tid": "19",
+            "name": "",
+            "stack": [
+                "java.base\/java.lang.VirtualThread.parkNanos(VirtualThread.java:631)",
+                "java.base\/java.lang.VirtualThread.sleepNanos(VirtualThread.java:803)",
+                "java.base\/java.lang.Thread.sleep(Thread.java:507)",
+                "StructuredConcurrencyDemo.task1(StructuredConcurrencyDemo.java:78)",
+                "StructuredConcurrencyDemo.lambda$10(StructuredConcurrencyDemo.java:142)",
+                "java.base\/java.util.concurrent.StructuredTaskScope$SubtaskImpl.run(StructuredTaskScope.java:889)",
+                "java.base\/java.lang.VirtualThread.run(VirtualThread.java:311)"
+            ]
+        },
+        {
+            "tid": "21",
+            "name": "",
+            "stack": [
+                "java.base\/java.lang.VirtualThread.parkNanos(VirtualThread.java:631)",
+                "java.base\/java.lang.VirtualThread.sleepNanos(VirtualThread.java:803)",
+                "java.base\/java.lang.Thread.sleep(Thread.java:507)",
+                "StructuredConcurrencyDemo.task2(StructuredConcurrencyDemo.java:92)",
+                "StructuredConcurrencyDemo.lambda$11(StructuredConcurrencyDemo.java:143)",
+                "java.base\/java.util.concurrent.StructuredTaskScope$SubtaskImpl.run(StructuredTaskScope.java:889)",
+                "java.base\/java.lang.VirtualThread.run(VirtualThread.java:311)"
+            ]
+        }
+    ],
+    "threadCount": "2"
+}
+```
+
+## 总结
+
+这个 Java 21 的学习笔记系列，是从去年 12 月份开始学习并整理的，中间由于学习大模型相关技术停滞了半年时间，今年 7 月份开始继续写，前前后后花了大约 3 个多月的时间，总算将 Java 21 里的所有特性都过了一遍。Java 21 是最新的 LTS 版本，自 2023 年 9 月发布以来，已经在很多企业和项目中使用。Java 技术在飞速发展和演进，Java 22 于今年 3 月发布，Java 23 计划在 9 月推出，这样的发展速度让我觉得它并不是一个年近 30 的编程语言，而是一个朝气蓬勃、活力无限的语言，为了不使自己落伍，学习 Java 新版本已经势在必行。
+
+Java 21 带来了一系列重要的功能和特性，在学习过程中，为了彻底搞清每个特性的来龙去脉，我都尽量从最基础的概念讲起。比如学习密钥封装机制 API 时，我们从对称加密、非对称加密、混合密码系统开始学起，最终才引出 KEM 的概念和作用；比如学习外部函数和内存 API 时，我们从 JNI 的缺点引出 FFI，从 `ByteBuffer` 和 `Unsafe` 的缺点引出 Memory API，从而对 FFM API 有一个更深入的认识；又比如学习向量 API 时，我们从最基础的向量是什么开始学起，然后引入标量计算、向量计算以及 SIMD 的概念，让我们明白 Java 为何要引入向量 API，以及看到 Java 语言发展的一个重要方向。
+
+关于 Java 21 网上已经有大量的学习资料和教程，但是和网上那些教程不同的是，我在学习时喜欢抽丝剥茧，追根溯源，打破砂锅问到底。我认为只有充分了解一个事物的历史，才能真正掌握这个事物的未来，我对 Java 21 中的每一个特性都做了一定的延伸和展开。但是同时，我在学习时也有很多参考这些教程的地方，笔记中使用的图片大多引用自这些教程，在这里对所有原作者表示感谢。
+
+整个系列篇幅较长，如有遗漏，还望指正。
+
 ## 参考
 
 * [Java 9 - 21：新特性解读](https://www.didispace.com/java-features/)
