@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK057 - [基于 LangGraph 创建智能体应用](./notes/week057-create-agents-with-langgraph/README.md)
 * WEEK056 - [Java 21 初体验（三）](./notes/week056-java-21-notes-3/README.md)
 * WEEK055 - [Java 21 初体验（二）](./notes/week055-java-21-notes-2/README.md)
 * WEEK054 - [高级 RAG 技术学习笔记](./notes/week054-advanced-rag-notes/README.md)

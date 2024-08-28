@@ -34,10 +34,6 @@
 * [Adding Long Term Memory to OpenGPTs](https://blog.langchain.dev/adding-long-term-memory-to-opengpts/)
 * [LLM Powered Autonomous Agents | Lil'Log](https://lilianweng.github.io/posts/2023-06-23-agent/)
 * [盘古智能体（Pangu-Agent）的五个创新点](https://mp.weixin.qq.com/s/H4g1LLEk2vNEP822TlPbxg)
-* [LangGraph](https://blog.langchain.dev/langgraph/)
-* [Reflection Agents](https://blog.langchain.dev/reflection-agents/)
-* [LangGraph for Code Generation](https://blog.langchain.dev/code-execution-with-langgraph/)
-* [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
 * [基于大语言模型的AI Agents—Part 1](https://www.breezedeus.com/article/ai-agent-part1)
 * [基于大语言模型的AI Agents—Part 2](https://www.breezedeus.com/article/ai-agent-part2)
 * [基于大语言模型的AI Agents—Part 3](https://www.breezedeus.com/article/ai-agent-part3)
@@ -54,8 +50,6 @@
 
 * [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
 * [CrewAI Unleashed: Future of AI Agent Teams](https://blog.langchain.dev/crewai-unleashed-future-of-ai-agent-teams/)
-* [LangGraph: Multi-Agent Workflows](https://blog.langchain.dev/langgraph-multi-agent-workflows/)
-* [彻底搞懂LangGraph：构建强大的Multi-Agent多智能体应用的LangChain新利器 【1】](https://mp.weixin.qq.com/s/MzLz4lJF0WMsWrThiOWPog)
 
 ### 模型训练和微调
 
