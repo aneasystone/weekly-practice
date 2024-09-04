@@ -95,29 +95,32 @@ existing_message = snapshot.values["messages"][-1]
 from langchain_core.messages import ToolMessage
 from langchain_core.messages import AIMessage
 
-answer = (
-    "LangGraph is a library for building stateful, multi-actor applications with LLMs."
-)
+new_tool_call = existing_message.tool_calls[0].copy()
+new_tool_call["args"]["query"] = "LangGraph human-in-the-loop workflow"
+
 new_messages = [
-    # The LLM API expects some ToolMessage to match its tool call. We'll satisfy that here.
-    ToolMessage(content=answer, tool_call_id=existing_message.tool_calls[0]["id"]),     # 调用工具的结果，也就是搜索结果
-    # And then directly "put words in the LLM's mouth" by populating its response.
-    AIMessage(content=answer),                                                          # 基于搜索结果，LLM 给出的回答
+    AIMessage(
+        content=existing_message.content,
+        tool_calls=[new_tool_call],
+        # Important! The ID is how LangGraph knows to REPLACE the message in the state rather than APPEND this messages
+        id=existing_message.id,
+    ),
 ]
 
 graph.update_state(
-    # Which state to update
     config,
-    # The updated values to provide. The messages in our `State` are "append-only", meaning this will be appended
-    # to the existing state. We will review how to update existing messages in the next section!
     {"messages": new_messages},
 )
 
 snapshot = graph.get_state(config)
-print("\n\nLast 3 messages;")
-for m in snapshot.values["messages"][-3:]:
-    m.pretty_print()
-    
-# next is empty
-# AIMessage doesn't contain `tool_calls`, the graph knows that it has entered a finished state.
+snapshot.values["messages"][-1].pretty_print()
+
+# AIMessage contains `tool_calls`, so next is tools.
 print(snapshot.next)
+
+### Resume the graph
+
+events = graph.stream(None, config, stream_mode="values")
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()
