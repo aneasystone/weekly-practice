@@ -16,19 +16,74 @@ LangGraph 提供了对应用程序的流程和状态更精细的控制，它允�
 
 ## 快速开始
 
-https://langchain-ai.github.io/langgraph/
+我们从一个最简单的例子开始：
 
-## 基本概念
+```
+### 定义状态图
+
+from langgraph.graph import StateGraph, MessagesState
+
+graph_builder = StateGraph(MessagesState)
+
+### 定义模型和 chatbot 节点
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI()
+
+def chatbot(state: MessagesState):
+    return {"messages": [llm.invoke(state["messages"])]}
+
+### 构建和编译图
+
+from langgraph.graph import END, START
+
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
+graph = graph_builder.compile()
+
+### 运行
+
+from langchain_core.messages import HumanMessage
+
+response = graph.invoke(
+    {"messages": [HumanMessage(content="合肥今天天气怎么样？")]}
+)
+response["messages"][-1].pretty_print()
+```
+
+在这个例子中，我们使用 LangGraph 定义了一个只有一个节点的图：
+
+![](./images/basic-chatbot.jpg)
+
+运行结果如下：
+
+```
+================================== Ai Message ==================================
+
+抱歉，我无法提供今天合肥的实时天气信息。你可以通过天气预报网站或者天气App查看当天的天气预报。
+```
+
+### 基本概念
+
+上面的示例非常简单，还称不上什么智能体，尽管如此，它却向我们展示了 LangGraph 中的几个重要概念：
 
 https://langchain-ai.github.io/langgraph/concepts/
 
-## 一步步构建智能体应用
+#### 图（Graph）
 
-### Part 1: Build a Basic Chatbot
+#### 状态（State）
 
-### Part 2: Enhancing the Chatbot with Tools
+#### 节点（Nodes）
 
-### Part 3: Adding Memory to the Chatbot
+#### 边（Edges）
+
+### 工具调用
+
+### 记忆
+
+## 高级特性
 
 ### Part 4: Human-in-the-loop
 
