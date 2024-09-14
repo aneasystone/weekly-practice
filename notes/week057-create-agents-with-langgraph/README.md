@@ -4,7 +4,7 @@
 
 在之前的 LangChain 版本中，我们可以通过 `AgentExecutor` 实现智能体，在 [大模型应用开发框架 LangChain 学习笔记（二）](../week044-llm-application-frameworks-langchain-2/README.md) 中，我们曾经学习过 `AgentExecutor` 的用法，实现了包括 Zero-shot ReAct Agent、Conversational ReAct Agent、ReAct DocStore Agent、Self-Ask Agent、OpenAI Functions Agent 和 Plan and execute Agent 这些不同类型的智能体。但是这种方式过于黑盒，所有的决策过程都隐藏在 `AgentExecutor` 的背后，缺乏更精细的控制能力，在构建复杂智能体的时候非常受限。
 
-LangGraph 提供了对应用程序的流程和状态更精细的控制，它允许定义包含循环的流程，并使用 **状态图（State Graph）** 来表示 `AgentExecutor` 的黑盒调用过程。LangGraph 受到 [Pregel](https://research.google/pubs/pub37252/) 和 [Apache Beam](https://beam.apache.org/) 的启发，其接口借鉴了 [NetworkX](https://networkx.org/documentation/latest/) 的设计理念。
+LangGraph 提供了对应用程序的流程和状态更精细的控制，它允许定义包含循环的流程，并使用 **状态图（State Graph）** 来表示 `AgentExecutor` 的黑盒调用过程。
 
 下面是 LangGraph 的关键特性：
 
@@ -69,15 +69,18 @@ response["messages"][-1].pretty_print()
 
 上面的示例非常简单，还称不上什么智能体，尽管如此，它却向我们展示了 LangGraph 中的几个重要概念：
 
-https://langchain-ai.github.io/langgraph/concepts/
+* **图（Graph）** 是 LangGraph 中最为重要的概念，它将智能体的工作流程建模为图结构。大学《数据结构》课程学过，图由 **节点（Nodes）** 和 **边（Edges）** 构成，在 LangGraph 中也是如此，此外，LangGraph 中还增加了 **状态（State）** 这个概念；
+* **状态（State）** 表示整个图运行过程中的状态数据，可以理解为应用程序当前快照，为图中所有节点所共享，它可以是任何 Python 类型，但通常是 `TypedDict` 类型或者 Pydantic 的 `BaseModel` 类型；
+* **节点（Nodes）** 表示智能体的具体执行逻辑，它接收当前的状态作为输入，执行某些计算，并返回更新后的状态；节点不一定非得是调用大模型，可以是任意的 Python 函数；
+* **边（Edges）** 表示某个节点执行后，接下来要执行哪个节点；边的定义可以是固定的，也可以是带条件的；如果是条件边，我们还需要定义一个 **路由函数（Routing function）**，根据当前的状态来确定接下来要执行哪个节点。
 
-#### 图（Graph）
+通过组合节点和边，我们可以创建复杂的循环工作流，随着节点的执行，不断更新状态。简而言之：*节点用于执行动作，边用于指示下一步动作*。
 
-#### 状态（State）
+LangGraph 的实现采用了 [消息传递（Message passing）](https://en.wikipedia.org/wiki/Message_passing) 的机制。其灵感源自 Google 的 [Pregel](https://research.google/pubs/pub37252/) 和 Apache 的 [Beam](https://beam.apache.org/) 系统，当一个节点完成其操作后，它会沿着一条或多条边向其他节点发送消息。这些接收节点随后执行其功能，将生成的消息传递给下一组节点，如此循环往复。
 
-#### 节点（Nodes）
+### 代码详解
 
-#### 边（Edges）
+了解这些基本概念后，再回过头来看下上面的代码，脉络就很清楚了。
 
 ### 工具调用
 
