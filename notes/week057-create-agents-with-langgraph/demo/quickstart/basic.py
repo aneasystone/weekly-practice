@@ -24,9 +24,15 @@ graph = graph_builder.compile()
 
 ### 运行
 
-from langchain_core.messages import HumanMessage
+# from langchain_core.messages import HumanMessage
 
-response = graph.invoke(
-    {"messages": [HumanMessage(content="合肥今天天气怎么样？")]}
-)
-response["messages"][-1].pretty_print()
+# response = graph.invoke(
+#     {"messages": [HumanMessage(content="合肥今天天气怎么样？")]}
+# )
+# response["messages"][-1].pretty_print()
+
+### 运行
+
+for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}):
+    for value in event.values():
+        value["messages"][-1].pretty_print()

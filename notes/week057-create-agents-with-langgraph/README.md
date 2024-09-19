@@ -82,6 +82,95 @@ LangGraph 的实现采用了 [消息传递（Message passing）](https://en.wiki
 
 了解这些基本概念后，再回过头来看下上面的代码，脉络就很清楚了。
 
+首先我们通过 `StateGraph` 定义了状态图：
+
+```
+graph_builder = StateGraph(MessagesState)
+```
+
+它接受状态的 Schema 作为构造参数，在这里直接使用了内置的 `MessagesState` 类，它的定义如下：
+
+```
+class MessagesState(TypedDict):
+    messages: Annotated[list[AnyMessage], add_messages]
+```
+
+`MessagesState` 很简单，仅包含一个 LangChain 格式的消息列表，一般在构造聊天机器人或示例代码时使用，在正式环境中用的并不多，因为大多数应用程序需要的状态比消息列表更为复杂。
+
+后面的 `add_messages` 被称为 **规约函数（Reducers）**，表示当节点执行后状态如何更新。当没有定义规约函数时，默认是覆盖的逻辑，比如下面这样的状态 Schema：
+
+```
+from typing import TypedDict
+
+class State(TypedDict):
+    foo: int
+    bar: list[str]
+```
+
+假设图的输入为 `{"foo": 1, "bar": ["hi"]}`，接着假设第一个节点返回 `{"foo": 2}`，这时状态被更新为 `{"foo": 2, "bar": ["hi"]}`，注意，节点无需返回整个状态对象，只有返回的字段会被更新，再接着假设第二个节点返回 `{"bar": ["bye"]}`，这时状态将变为 `{"foo": 2, "bar": ["bye"]}`。
+
+当定义了规约函数，更新逻辑就不一样了，比如对上面的状态 Schema 稍作修改：
+
+```
+from typing import TypedDict, Annotated
+from operator import add
+
+class State(TypedDict):
+    foo: int
+    bar: Annotated[list[str], add]
+```
+
+仍然假设图的输入为 `{"foo": 1, "bar": ["hi"]}`，接着假设第一个节点返回 `{"foo": 2}`，这时状态被更新为 `{"foo": 2, "bar": ["hi"]}`，再接着假设第二个节点返回 `{"bar": ["bye"]}`，这时状态将变为 `{"foo": 2, "bar": ["hi", "bye"]}`。
+
+定义了图之后，我们接下来就要定义节点，这里我们只定义了一个 `chatbot` 节点：
+
+```
+def chatbot(state: MessagesState):
+    return {"messages": [llm.invoke(state["messages"])]}
+```
+
+节点就是普通的 Python 函数，在这里调用大模型得到回复，也可以是任意其他的逻辑，函数的入参就是上面所定义的状态对象，我们可以从状态中取出最新的值，函数的出参也是状态对象，节点执行后，根据规约函数，返回值会被更新到状态中。
+
+定义节点后，我们就可以使用 `add_node` 方法将其添加到图中：
+
+```
+graph_builder.add_node("chatbot", chatbot)
+```
+
+然后再使用 `add_edge` 方法添加两条边，一条边从 `START` 节点到 `chatbot` 节点，一个边从 `chatbot` 节点到 `END` 结束：
+
+```
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
+```
+
+`START` 和 `END` 是两个特殊节点，`START` 表示开始节点，接受用户的输入，是整个图的入口，`END` 表示结束节点，执行到它之后就没有后续动作了。
+
+值得注意的是，这里构建图的接口形式借鉴了 [NetworkX](https://networkx.org/documentation/latest/) 的设计理念。整个图构建好后，我们还需要调用 `compile` 方法编译图：
+
+```
+graph = graph_builder.compile()
+```
+
+只有编译后的图才能使用。编译是一个相当简单的步骤，它会对图的结构进行一些基本检查，比如无孤立节点等，也可以在编译时设置一些运行时参数，比如检查点、断点等。
+
+编译后的图是一个 `Runnable` 对象，所以我们可以使用 `invoke/ainvoke` 来调用它：
+
+```
+response = graph.invoke(
+    {"messages": [HumanMessage(content="合肥今天天气怎么样？")]}
+)
+response["messages"][-1].pretty_print()
+```
+
+也可以使用 `stream/astream` 来调用它：
+
+```
+for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
 ### 工具调用
 
 ### 记忆
