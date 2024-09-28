@@ -171,9 +171,138 @@ for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？"
         value["messages"][-1].pretty_print()
 ```
 
-### 工具调用
+输出结果如下：
 
-### 记忆
+```
+================================== Ai Message ==================================
+
+对不起，我无法提供实时天气信息。您可以通过天气预报应用程序或网站来获取合肥今天的天气情况。
+```
+
+## 工具调用
+
+可以看到，现在这个程序只是对大模型进行了一层包装，还谈不上是智能体。Lilian Weng 在 [LLM Powered Autonomous Agents](https://lilianweng.github.io/posts/2023-06-23-agent/) 这篇博客中总结到，智能体至少要包含三个核心组件：**规划（Planning）**、**记忆（Memory）** 和 **工具使用（Tool use）**。
+
+![](./images/agent-overview.png)
+
+其中，规划和记忆好比人的大脑，可以储存历史知识，对问题进行分析思考，现在的大模型都或多或少具备这样的能力；工具使用好比人的五官和手脚，可以感知世界，与外部源（例如知识库或环境）进行交互，以获取额外信息，并执行动作。工具的使用是人类区别于其他动物的重要特征，也是智能体区别于其他应用程序的重要特征。
+
+这一节我们将对上面的 LangGraph 示例做些修改，使其具备工具调用的能力。首先，我们定义一个天气查询的工具：
+
+```
+### 定义工具
+
+from pydantic import BaseModel, Field
+from langchain_core.tools import tool
+
+class GetWeatherSchema(BaseModel):
+    city: str = Field(description = "城市名称，如合肥、北京、上海等")
+    date: str = Field(description = "日期，如今天、明天等")
+
+@tool(args_schema = GetWeatherSchema)
+def get_weather(city: str, date: str):
+    """查询天气"""
+    if city == "合肥":
+        return "今天晴天，气温30度。"
+    return "今天有小雨，气温25度。"
+```
+
+这里使用了 LangChain 的 `@tool` 注解将一个方法定义成工具，并使用了 `pydantic` 对工具的参数做一些说明，在 [这篇博客](../week044-llm-application-frameworks-langchain-2/README.md) 中我还介绍了一些其他定义工具的方法，也可以使用。
+
+接下来，和之前的示例一样，我们仍然需要定义一个状态图：
+
+```
+### 定义状态图
+
+from langgraph.graph import StateGraph, MessagesState
+
+graph_builder = StateGraph(MessagesState)
+```
+
+再接下来定义节点：
+
+```
+### 定义 tools 节点
+
+from langgraph.prebuilt import ToolNode
+
+tools = [get_weather]
+tool_node = ToolNode(tools)
+
+### 定义模型和 chatbot 节点
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI()
+llm = llm.bind_tools(tools)
+
+def chatbot(state: MessagesState):
+    return {"messages": [llm.invoke(state["messages"])]}
+```
+
+这和之前的示例有两点区别：
+
+1. 多了一个 `tools` 节点，我们使用 LangGraph 内置的 `ToolNode` 来定义，一个工具节点中可以包含多个工具方法；
+2. 在 `chatbot 节点` 中，我们的大模型需要绑定这些工具，通过 `llm.bind_tools()` 实现；
+
+再接下来，将节点添加到图中，并在节点和节点之间连上线：
+
+```
+### 构建和编译图
+
+from langgraph.graph import END, START
+from langgraph.prebuilt import tools_condition
+
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_node("tools", tool_node)
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("tools", 'chatbot')
+graph_builder.add_conditional_edges("chatbot", tools_condition)
+graph = graph_builder.compile()
+```
+
+构建出的图如下所示：
+
+![](./images/tools-chatbot.jpg)
+
+可以看到这里有两条比较特别的连线，是虚线，这被称为 **条件边（Conditional Edges）**，LangGraph 通过调用某个函数来确定下一步将执行哪个节点，这里使用了内置的 `tools_condition` 函数，当大模型返回 `tool_calls` 时执行 `tools` 节点，否则则执行 `END` 节点。
+
+此时，一个简单的智能体就构建好了，我们再次运行之：
+
+```
+### 运行
+
+for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+运行结果如下：
+
+```
+================================== Ai Message ==================================
+Tool Calls:
+  get_weather (call_Jjp7SNIQkJWpLUdTL4uL1h1O)
+ Call ID: call_Jjp7SNIQkJWpLUdTL4uL1h1O
+  Args:
+    city: 合肥
+    date: 今天
+================================= Tool Message =================================
+Name: get_weather
+
+今天晴天，气温30度。
+================================== Ai Message ==================================
+
+合肥今天是晴天，气温30度。
+```
+
+用户消息首先进入 `chatbot` 节点，也就是调用大模型，大模型返回 `tool_calls` 响应，因此进入 `tools` 节点，调用我们定义的 `get_weather` 函数，得到合肥的天气，然后再次进入 `chatbot` 节点，将函数结果送给大模型，最后大模型就可以回答出用户的问题了。
+
+### 深入 Tool Call 的原理
+
+### 适配 Function Call 接口
+
+## 记忆
 
 ## 高级特性
 
