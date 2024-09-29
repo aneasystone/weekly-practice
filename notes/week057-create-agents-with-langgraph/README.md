@@ -296,9 +296,227 @@ Name: get_weather
 合肥今天是晴天，气温30度。
 ```
 
-用户消息首先进入 `chatbot` 节点，也就是调用大模型，大模型返回 `tool_calls` 响应，因此进入 `tools` 节点，调用我们定义的 `get_weather` 函数，得到合肥的天气，然后再次进入 `chatbot` 节点，将函数结果送给大模型，最后大模型就可以回答出用户的问题了。
-
 ### 深入 Tool Call 的原理
+
+从上面的运行结果中可以看出，用户消息首先进入 `chatbot` 节点，也就是调用大模型，大模型返回 `tool_calls` 响应，因此进入 `tools` 节点，接着调用我们定义的 `get_weather` 函数，得到合肥的天气，然后再次进入 `chatbot` 节点，将函数结果送给大模型，最后大模型就可以回答出用户的问题了。
+
+这个调用的流程图如下：
+
+![](./images/tool-calling-flow.png)
+
+[OpenAI 官方文档](https://platform.openai.com/docs/guides/function-calling) 中有一张更详细的流程图：
+
+![](./images/function-calling-diagram.png)
+
+其中要注意的是，第二次调用大模型时，可能仍然会返回 `tool_calls` 响应，这时可以循环处理。
+
+为了更好的理解 LangGraph 是如何调用工具的，我们不妨深入接口层面一探究竟。总的来说，LangGraph [利用大模型的 Tool Call 功能](https://python.langchain.com/v0.2/docs/how_to/tool_calling/)，实现动态的选择工具，提取工具参数，执行工具函数，并根据工具运行结果回答用户问题。
+
+有很多大模型具备 Tool Call 功能，比如 OpenAI、Anthropic、Gemini、Mistral AI 等，我们可以通过 `llm.bind_tools(tools)` 给大模型绑定可用的工具，实际上，绑定工具就是在请求大模型的时候，在入参中多加一个 `tools` 字段：
+
+```
+{
+    "model": "gpt-4",
+    "messages": [
+        {
+            "role": "user",
+            "content": "合肥今天天气怎么样？"
+        }
+    ],
+    "stream": false,
+    "n": 1,
+    "temperature": 0.7,
+    "tools": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_weather",
+                "description": "查询天气",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "description": "城市名称，如合肥、北京、上海等"
+                        },
+                        "date": {
+                            "type": "string",
+                            "description": "日期，如今天、明天等"
+                        }
+                    },
+                    "required": [
+                        "city",
+                        "date"
+                    ]
+                }
+            }
+        }
+    ],
+    "tool_choice": "auto"
+}
+```
+
+这时大模型返回的结果类似于下面这样，也就是上面所说的 `tool_calls` 响应：
+
+```
+{
+    "id": "chatcmpl-ABDVbXhhQLF8yN3xZV5FpW10vMQpP",
+    "object": "chat.completion",
+    "created": 1727236899,
+    "model": "gpt-4-0613",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "call_aZaHgkaSmzq7kWX5f73h7nGg",
+                        "type": "function",
+                        "function": {
+                            "name": "get_weather",
+                            "arguments": "{\n  \"city\": \"合肥\",\n  \"date\": \"今天\"\n}"
+                        }
+                    }
+                ]
+            },
+            "finish_reason": "tool_calls"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 91,
+        "completion_tokens": 25,
+        "total_tokens": 116
+    },
+    "system_fingerprint": ""
+}
+```
+
+我们只需要判断大模型返回的结果中是否有 `tool_calls` 字段就能知道下一步是不是要调用工具，这其实就是 `tools_condition` 这个条件函数的逻辑：
+
+```
+def tools_condition(
+    state: Union[list[AnyMessage], dict[str, Any]],
+) -> Literal["tools", "__end__"]:
+
+    if isinstance(state, list):
+        ai_message = state[-1]
+    elif messages := state.get("messages", []):
+        ai_message = messages[-1]
+    else:
+        raise ValueError(f"No messages found in input state to tool_edge: {state}")
+    if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
+        return "tools"
+    return "__end__"
+```
+
+`tools_condition` 函数判断 `messages` 中如果有 `tool_calls` 字段且不为空，则返回 `tools`，也就是工具节点，否则返回 `__end__` 也就是结束节点。
+
+工具节点的执行，我们使用的是 LangGraph 内置的 `ToolNode` 类，它的实现比较复杂，感兴趣的可以翻看下它的源码，但是大体流程可以用下面几行代码表示：
+
+```
+tools_by_name = {tool.name: tool for tool in tools}
+def tool_node(state: dict):
+    result = []
+    for tool_call in state["messages"][-1].tool_calls:
+        tool = tools_by_name[tool_call["function"]["name"]]
+        observation = tool.invoke(tool_call["function"]["arguments"])
+        result.append(ToolMessage(content=observation, tool_call_id=tool_call["id"]))
+    return {"messages": result}
+```
+
+工具节点遍历 `tool_calls` 数组，根据大模型返回的函数名 `name` 和函数参数 `arguments` 依次调用工具，并将工具结果以 `ToolMessage` 形式附加到 `messages` 中。这样再次进入 `chatbot` 节点时，向大模型发起的请求就如下所示（多了一个角色为 `tool` 的消息）：
+
+```
+{
+    "model": "gpt-4",
+    "messages": [
+        {
+            "role": "user",
+            "content": "合肥今天天气怎么样？"
+        },
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                { 
+                    "id": "call_aZaHgkaSmzq7kWX5f73h7nGg",
+                    "type": "function",
+                    "function": {
+                        "name": "get_weather",
+                        "arguments": "{\n  \"city\": \"合肥\",\n  \"date\": \"今天\"\n}" 
+                    }
+                }
+            ]
+        },
+        {
+            "role": "tool",
+            "content": "晴，27度",
+            "tool_call_id": "call_aZaHgkaSmzq7kWX5f73h7nGg"
+        }
+    ],
+    "stream": false,
+    "n": 1,
+    "temperature": 0.7,
+    "tools": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_weather",
+                "description": "查询天气",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "description": "城市名称，如合肥、北京、上海等"
+                        },
+                        "date": {
+                            "type": "string",
+                            "description": "日期，如今天、明天等"
+                        }
+                    },
+                    "required": [
+                        "city",
+                        "date"
+                    ]
+                }
+            }
+        }
+    ],
+    "tool_choice": "auto"
+}
+```
+
+大模型返回消息如下：
+
+```
+{
+    "id": "chatcmpl-ABDeUc21mx3agWVPmIEHndJbMmYTP",
+    "object": "chat.completion",
+    "created": 1727237450,
+    "model": "gpt-4-0613",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "合肥今天的天气是晴朗，气温为27度。"
+            },
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 129,
+        "completion_tokens": 24,
+        "total_tokens": 153
+    },
+    "system_fingerprint": ""
+}
+```
+
+此时 `messages` 中没有 `tool_calls` 字段，因此，进入 `END` 节点，这一轮的会话就结束了。
 
 ### 适配 Function Call 接口
 
@@ -319,6 +537,7 @@ Name: get_weather
 * [LangGraph Quick Start](https://langchain-ai.github.io/langgraph/tutorials/introduction/)
 * [LangGraph How-to Guides](https://langchain-ai.github.io/langgraph/how-tos/)
 * [LangGraph Conceptual Guides](https://langchain-ai.github.io/langgraph/concepts/)
+* [LangGraph Examples](https://github.com/langchain-ai/langgraph/tree/main/examples)
 
 ### LangGraph Blogs
 
@@ -331,10 +550,6 @@ Name: get_weather
 * [LangGraph Studio: The first agent IDE](https://blog.langchain.dev/langgraph-studio-the-first-agent-ide/)
 * [Reflection Agents](https://blog.langchain.dev/reflection-agents/)
 * [Plan-and-Execute Agents](https://blog.langchain.dev/planning-agents/)
-
-### LangGraph Examples
-
-* [Adaptive RAG Cohere Command R](https://github.com/langchain-ai/langgraph/blob/main/examples/rag/langgraph_adaptive_rag_cohere.ipynb)
 
 ### Cobus Greyling
 
@@ -360,6 +575,7 @@ Name: get_weather
 * [LangGraph实战](https://www.cnblogs.com/smartloli/p/18276355)
 * [LangGraph介绍](https://theguodong.com/articles/LangChain/LangGraph%E4%BB%8B%E7%BB%8D/)
 * [LangChain补充五：Agent之LangGraph的使用](https://www.cnblogs.com/ssyfj/p/18308248)
+* [使用 LangGraph 构建可靠的 RAG 代理](https://blog.csdn.net/wjjc1017/article/details/138518087)
 
 ## 更多
 
