@@ -57,14 +57,6 @@ response["messages"][-1].pretty_print()
 
 ![](./images/basic-chatbot.jpg)
 
-运行结果如下：
-
-```
-================================== Ai Message ==================================
-
-抱歉，我无法提供今天合肥的实时天气信息。你可以通过天气预报网站或者天气App查看当天的天气预报。
-```
-
 ### 基本概念
 
 上面的示例非常简单，还称不上什么智能体，尽管如此，它却向我们展示了 LangGraph 中的几个重要概念：
@@ -296,6 +288,8 @@ Name: get_weather
 合肥今天是晴天，气温30度。
 ```
 
+完整的代码 [参考这里](./demo/quickstart/tools.py)。
+
 ### 深入 Tool Call 的原理
 
 从上面的运行结果中可以看出，用户消息首先进入 `chatbot` 节点，也就是调用大模型，大模型返回 `tool_calls` 响应，因此进入 `tools` 节点，接着调用我们定义的 `get_weather` 函数，得到合肥的天气，然后再次进入 `chatbot` 节点，将函数结果送给大模型，最后大模型就可以回答出用户的问题了。
@@ -460,30 +454,7 @@ def tool_node(state: dict):
     "n": 1,
     "temperature": 0.7,
     "tools": [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_weather",
-                "description": "查询天气",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "city": {
-                            "type": "string",
-                            "description": "城市名称，如合肥、北京、上海等"
-                        },
-                        "date": {
-                            "type": "string",
-                            "description": "日期，如今天、明天等"
-                        }
-                    },
-                    "required": [
-                        "city",
-                        "date"
-                    ]
-                }
-            }
-        }
+        ...
     ],
     "tool_choice": "auto"
 }
@@ -519,6 +490,190 @@ def tool_node(state: dict):
 此时 `messages` 中没有 `tool_calls` 字段，因此，进入 `END` 节点，这一轮的会话就结束了。
 
 ### 适配 Function Call 接口
+
+经过上面的学习，我们知道，LangGraph 默认会使用大模型接口的 Tool Call 功能。Tool Call 是 OpenAI 推出 [Assistants API](https://platform.openai.com/docs/assistants/overview) 时引入的一种新特性，它相比于传统的 [Function Call](https://openai.com/blog/function-calling-and-other-api-updates) 来说，控制更灵活，比如支持一次返回多个函数，从而可以并发调用。
+
+目前大多数大模型产商的接口都已经紧跟 OpenAI 的规范，推出了 Tool Call 功能，但是也有部分产商或开源模型只支持 Function Call，对于这些模型如何在 LangGraph 中适配呢？
+
+Function Call 和 Tool Call 的区别在于，请求的参数中是 `functions` 而不是 `tools`，如下所示：
+
+```
+{
+    "messages": [
+        {
+            "role": "user",
+            "content": "合肥今天天气怎么样？"
+        }
+    ],
+    "model": "gpt-4",
+    "stream": false,
+    "n": 1,
+    "temperature": 0.7,
+    "functions": [
+        {
+            "name": "get_weather",
+            "description": "查询天气",
+            "parameters": {
+                "properties": {
+                    "city": {
+                        "description": "城市名称，如合肥、北京、上海等",
+                        "type": "string"
+                    },
+                    "date": {
+                        "description": "日期，如今天、明天等",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "city",
+                    "date"
+                ],
+                "type": "object"
+            }
+        }
+    ]
+}
+```
+
+LangChain 提供了 `llm.bind_functions(tools)` 方法来给大模型绑定可用的工具，这里的工具定义和 `llm.bind_tools(tools)` 是一模一样的：
+
+```
+### 定义模型和 chatbot 节点
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4")
+llm = llm.bind_functions(tools)
+
+def chatbot(state: MessagesState):
+    return {"messages": [llm.invoke(state["messages"])]}
+```
+
+大模型返回结果如下，`messages` 中会包含 `function_call` 字段而不是 `tool_calls`：
+
+```
+{
+    "id": "chatcmpl-ACcnVWbuWbyxuO0eWqQrKBE0dB921",
+    "object": "chat.completion",
+    "created": 1727572437,
+    "model": "gpt-4-0613",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "",
+                "function_call": {
+                    "name": "get_weather",
+                    "arguments": "{\"city\":\"合肥\",\"date\":\"今天\"}"
+                }
+            },
+            "finish_reason": "function_call"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 91,
+        "completion_tokens": 21,
+        "total_tokens": 112
+    },
+    "system_fingerprint": "fp_5b26d85e12"
+}
+```
+
+因此我们条件边的判断函数就不能以 `tool_calls` 来作为判断依据了，我们对其稍加修改：
+
+```
+def tools_condition(
+    state: MessagesState,
+) -> Literal["tools", "__end__"]:
+
+    if isinstance(state, list):
+        ai_message = state[-1]
+    elif messages := state.get("messages", []):
+        ai_message = messages[-1]
+    else:
+        raise ValueError(f"No messages found in input state to tool_edge: {state}")
+    if "function_call" in ai_message.additional_kwargs:
+        return "tools"
+    return "__end__"
+```
+
+> 注意 LangChain 将 `function_call` 放在消息的额外字段 `additional_kwargs` 里。
+
+最后是工具节点的实现，上面我们使用的是 LangGraph 内置的 `ToolNode` 类，它的实现比较复杂，要考虑工具的异步执行和并发执行等情况，我们不用实现和它完全一样的功能。最简单的做法是自定义一个 `BasicToolNode` 类，并实现一个 `__call__` 方法：
+
+```
+import json
+from langchain_core.messages import FunctionMessage
+
+class BasicToolNode:
+
+    def __init__(self, tools: list) -> None:
+        self.tools_by_name = {tool.name: tool for tool in tools}
+
+    def __call__(self, inputs: dict):
+        if messages := inputs.get("messages", []):
+            message = messages[-1]
+        else:
+            raise ValueError("No message found in input")
+        outputs = []
+        if "function_call" in message.additional_kwargs:
+            tool_call = message.additional_kwargs["function_call"]
+            tool_result = self.tools_by_name[tool_call["name"]].invoke(
+                json.loads(tool_call["arguments"])
+            )
+            outputs.append(
+                FunctionMessage(
+                    content=json.dumps(tool_result),
+                    name=tool_call["name"]
+                )
+            )
+        return {"messages": outputs}
+
+tools = [get_weather]
+tool_node = BasicToolNode(tools=tools)
+```
+
+我们从 `function_call` 字段中提取出工具名称 `name` 和工具参数 `arguments`，然后调用相应的工具，最后最重要的一步是将工具调用结果包装成一个 `FunctionMessage` 并附加到 `messages` 中。当程序流程再次进入 `chatbot` 节点时，向大模型发起的请求就如下所示（多了一个角色为 `function` 的消息）：
+
+```
+{
+    "messages": [
+        {
+            "role": "user",
+            "content": "合肥今天天气怎么样？"
+        },
+        {
+            "role": "assistant",
+            "content": "",
+            "function_call": {
+                "name": "get_weather",
+                "arguments": "{\"city\":\"合肥\",\"date\":\"今天\"}"
+            }
+        },
+        {
+            "role": "function",
+            "content": "晴，27度",
+            "name": "get_weather"
+        }
+    ],
+    "model": "gpt-4",
+    "stream": false,
+    "n": 1,
+    "temperature": 0.7,
+    "functions": [
+        ...
+    ]
+}
+```
+
+至此，我们就通过 Function Call 实现了 LangGraph 的调用逻辑，完整的代码 [参考这里](./demo/quickstart/functions.py)。
+
+可以看出其中有三步是关键：
+
+1. 给大模型绑定工具，可以通过 `llm.bind_tools()` 或 `llm.bind_functions()` 实现，对于不支持 Function Call 的模型，甚至可以通过自定义 Prompt 来实现；
+2. 解析大模型的返回结果，根据返回的结果中是否有 `tool_calls` 或 `function_call` 字段，判断是否需要使用工具；
+3. 根据大模型的返回结果，调用一个或多个工具方法。
 
 ## 记忆
 
