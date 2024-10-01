@@ -677,6 +677,61 @@ tool_node = BasicToolNode(tools=tools)
 
 ## 记忆
 
+我们的智能体现在可以使用工具来回答用户的问题，但它不记得先前互动的上下文，这限制了它进行多轮对话的能力。比如我们接着上面的问题后面再问一个与之相关问题：
+
+```
+for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+
+for event in graph.stream({"messages": ("user", "要带伞吗？")}):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+智能体的回复如下：
+
+```
+================================== Ai Message ==================================
+
+请问您在哪个城市以及哪一天需要查询天气情况呢？
+```
+
+很显然，这个智能体还不具备记忆功能，而上一节我们曾提到，**记忆（Memory）** 是智能体必须具备的三大核心组件之一，所以这一节我们就来学习如何使用 LangGraph 实现它。
+
+LangGraph 通过 [持久化检查点（persistent checkpointing）]((https://langchain-ai.github.io/langgraph/how-tos/persistence/)) 实现记忆。首先，我们在编译图时设置检查点（`checkpointer`）参数：
+
+```
+from langgraph.checkpoint.memory import MemorySaver
+
+memory = MemorySaver()
+graph = graph_builder.compile(checkpointer=memory)
+```
+
+然后在调用图时提供一个额外的线程 ID 配置：
+
+```
+config = {"configurable": {"thread_id": "1"}}
+
+for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+
+for event in graph.stream({"messages": ("user", "要带伞吗？")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+LangGraph 在第一次运行时自动保存状态，当再次使用相同的线程 ID 调用图时，图会加载其保存的状态，使得智能体可以从停下的地方继续。这一次，智能体的回复如下：
+
+```
+================================== Ai Message ==================================
+
+不需要带伞，今天是晴天哦。
+```
+
+可以看出智能体记住了上一轮的对话内容，现在我们可以和它进行多轮对话了。
+
 ## 高级特性
 
 ### Part 4: Human-in-the-loop
