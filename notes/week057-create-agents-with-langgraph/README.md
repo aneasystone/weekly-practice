@@ -732,6 +732,79 @@ LangGraph 在第一次运行时自动保存状态，当再次使用相同的线�
 
 可以看出智能体记住了上一轮的对话内容，现在我们可以和它进行多轮对话了。
 
+### 持久化数据库
+
+在上面的例子中，我们使用了 `MemorySaver` 这个检查点，这是一个简单的内存检查点，所有的对话历史都保存在内存中。对于一个正式的应用来说，我们需要将对话历史持久化到数据库中，可以考虑使用 `SqliteSaver` 或 `PostgresSaver` 等，LangGraph 也支持自定义检查点，实现其他数据库的持久化，比如 [MongoDB](https://langchain-ai.github.io/langgraph/how-tos/persistence_mongodb/) 或 [Redis](https://langchain-ai.github.io/langgraph/how-tos/persistence_redis/)。
+
+这一节我们将使用 `PostgresSaver` 来将智能体的记忆持久化到数据库。
+
+首先，安装 `PostgresSaver` 所需的依赖：
+
+```
+$ pip3 install "psycopg[binary,pool]" langgraph-checkpoint-postgres
+```
+
+然后使用 Docker 启动一个 Postgre 实例：
+
+```
+$ docker run --name my-postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 -d postgres:latest
+```
+
+然后将上一节代码中的 `MemorySaver` 检查点替换成 `PostgresSaver` 如下：
+
+```
+from langgraph.checkpoint.postgres import PostgresSaver
+
+DB_URI = "postgresql://postgres:123456@localhost:5432/postgres?sslmode=disable"
+with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+    
+    # 第一次运行时初始化
+    checkpointer.setup()
+    
+    graph = graph_builder.compile(checkpointer=checkpointer)
+    config = {"configurable": {"thread_id": "1"}}
+    for event in graph.stream({"messages": ("user", "合肥今天天气怎么样？")}, config):
+        for value in event.values():
+            value["messages"][-1].pretty_print()
+    for event in graph.stream({"messages": ("user", "要带伞吗？")}, config):
+        for value in event.values():
+            value["messages"][-1].pretty_print()
+```
+
+第一次运行时，我们需要使用 `checkpointer.setup()` 来初始化数据库，新建必须的库和表，后续运行可以省略这一步。后面的代码和上一节是完全一样的，设置线程 ID 进行两轮问答，只不过现在问答记录存到数据库里了。感兴趣的同学可以打开 `checkpoints` 表看看数据结构：
+
+![](./images/memory-db.png)
+
+注意这里我们直接基于连接字符串创建连接，这种方法简单方便，非常适用于快速测试验证，我们也可以创建一个 `Connection` 对象，设置一些额外的连接参数：
+
+```
+from psycopg import Connection
+
+connection_kwargs = {
+    "autocommit": True,
+    "prepare_threshold": 0,
+}
+with Connection.connect(DB_URI, **connection_kwargs) as conn:
+    checkpointer = PostgresSaver(conn)
+    graph = graph_builder.compile(checkpointer=checkpointer)
+    ...
+```
+
+在正式环境下，我们往往会复用数据库的连接，这时可以使用连接池 `ConnectionPool` 对象：
+
+```
+from psycopg_pool import ConnectionPool
+
+with ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs) as pool:
+    checkpointer = PostgresSaver(pool)
+    graph = graph_builder.compile(checkpointer=checkpointer)
+    ...
+```
+
+### 使用 LangSmith 调试智能体会话
+
+https://www.langchain.com/langsmith
+
 ## 高级特性
 
 ### Part 4: Human-in-the-loop
