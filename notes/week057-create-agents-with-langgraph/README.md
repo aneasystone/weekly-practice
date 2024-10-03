@@ -803,17 +803,77 @@ with ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs) as p
 
 ### 使用 LangSmith 调试智能体会话
 
-https://www.langchain.com/langsmith
+当智能体的工具和节点不断增多，我们将会面临大量的问题，比如运行结果出乎意料，智能体出现死循环，反应速度比预期慢，运行花费了多少令牌，等等，这时如何调试智能体将变成一件棘手的事情。
+
+一种简单的方法是使用 [这里](https://github.com/langchain-ai/langchain/discussions/6511) 介绍的包装类：
+
+```
+class Wrapper:
+    ''' 包装类，用于调试 OpenAI 接口的原始入参和出参
+    '''
+    def __init__(self, wrapped_class):
+        self.wrapped_class = wrapped_class
+
+    def __getattr__(self, attr):
+        original_func = getattr(self.wrapped_class, attr)
+
+        def wrapper(*args, **kwargs):
+            print(f"Calling function: {attr}")
+            print(f"Arguments: {args}, {kwargs}")
+            result = original_func(*args, **kwargs)
+            print(f"Response: {result}")
+            return result
+        return wrapper
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4")
+llm.client = Wrapper(llm.client)
+llm = llm.bind_functions(tools)
+```
+
+这种方法相当于给大模型接口增加了一个切面，用于记录接口的原始入参和出参，方便我们调试。
+
+另一种更专业的做法是使用 LangSmith。
+
+[LangSmith](https://www.langchain.com/langsmith) 是 LangChain 开发的一个用于构建生产级 LLM 应用程序的平台，允许你调试、测试、评估和监控基于任何 LLM 框架构建的程序，无论是 LangChain 开发的链，还是 LangGraph 开发的智能体。
+
+要使用 LangSmith，我们首先登录平台并注册一个账号，然后进入 `Settings -> API Keys` 页面，点击 `Create API Key` 按钮创建一个 API Key，然后设置如下环境变量：
+
+```
+export LANGCHAIN_TRACING_V2=true
+export LANGCHAIN_API_KEY=lsv2_pt_xxx
+export LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+export LANGCHAIN_PROJECT=default
+```
+
+其中，`LANGCHAIN_TRACING_V2=true` 表示开启日志跟踪模式；`LANGCHAIN_API_KEY` 就是上一步创建的 API Key；`LANGCHAIN_ENDPOINT` 表示 LangSmith 端点地址，一般来说不用配置，由于 LangSmith 是一个开源项目，我们可以私有化部署，这时才需要配置；`LANGCHAIN_PROJECT` 表示将日志保存到哪个 LangSmith 项目，如果不设置，默认使用的 `default` 项目。
+
+设置好环境变量，整个工作就完成了，代码无需任何变动，完全没有侵入性。此时，我们再次运行之前的代码，就可以在 LangSmith 平台上看到相应的记录了：
+
+![](./images/langsmith-runs.png)
+
+`Runs` 列表表示智能体每次的运行记录，也可以切换到 `Threads` 列表查看所有的会话线程：
+
+![](./images/langsmith-threads.png)
+
+点击进入记录详情，可以很直观地看到 LangGraph 的调用顺序，每一步的耗时和令牌数一目了然：
+
+![](./images/langsmith-thread-details.png)
+
+每一步还可以继续展开，查看该步骤更为详细的入参和出参，便于我们排查问题。
+
+除了调试，我们还可以在 LangSmith 平台上将某一步的结果添加到 **测试数据集（Dataset）** 或 **标注队列（Annotation Queue）** 用于后续的测试和评估。还可以对 LLM 的调用情况进行监控分析：
+
+![](./images/langsmith-monitor.png)
 
 ## 高级特性
 
-### Part 4: Human-in-the-loop
+通过检查点我们实现了智能体的记忆功能，从而可以让智能体支持多轮对话。实际上，检查点远比我们想象的更强大，通过它可以在任何时候保存和恢复智能体运行过程中的状态，从而实现错误恢复、人机交互、时间旅行等高级特性。
 
-### Part 5: Manually Updating the State
+https://langchain-ai.github.io/langgraph/tutorials/introduction/
 
-### Part 6: Customizing State
-
-### Part 7: Time Travel
+https://langchain-ai.github.io/langgraph/how-tos/
 
 ## 参考
 
