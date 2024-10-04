@@ -871,9 +871,166 @@ export LANGCHAIN_PROJECT=default
 
 通过检查点我们实现了智能体的记忆功能，从而可以让智能体支持多轮对话。实际上，检查点远比我们想象的更强大，通过它可以在任何时候保存和恢复智能体运行过程中的状态，从而实现错误恢复、人机交互、时间旅行等高级特性。
 
-https://langchain-ai.github.io/langgraph/tutorials/introduction/
+### 人机交互（Human-in-the-loop）
 
-https://langchain-ai.github.io/langgraph/how-tos/
+基于 LLM 的应用程序可能会不可靠，有时需要人类的输入才能成功完成任务；对于某些操作，比如预定机票、支付订单等，可能在运行之前要求人工批准，以确保一切都按照预期运行。LangGraph 支持一种被称为 **Human-in-the-loop** 的工作流程，允许我们在执行工具节点之前停下来，等待人类的介入。
+
+首先我们将上面代码中的工具改为 `book_ticket`，用于预定机票：
+
+```
+class BookTicketSchema(BaseModel):
+    from_city: str = Field(description = "出发城市名称，如合肥、北京、上海等")
+    to_city: str = Field(description = "到达城市名称，如合肥、北京、上海等")
+    date: str = Field(description = "日期，如今天、明天等")
+
+@tool(args_schema = BookTicketSchema)
+def book_ticket(from_city: str, to_city: str, date: str):
+    """预定机票"""
+    return "您已成功预定 %s 从 %s 到 %s 的机票" % (date, from_city, to_city)
+```
+
+再将用户的问题改为：
+
+```
+for event in graph.stream({"messages": ("user", "帮我预定一张明天从合肥到北京的机票")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+运行得到结果：
+
+```
+================================== Ai Message ==================================
+Tool Calls:
+  book_ticket (call_WGzlRnbPXbN8YvwjIkIMNDS1)
+ Call ID: call_WGzlRnbPXbN8YvwjIkIMNDS1
+  Args:
+    date: 明天
+    from_city: 合肥
+    to_city: 北京
+================================= Tool Message =================================
+Name: book_ticket
+
+您已成功预定 明天 从 合肥 到 北京 的机票
+================================== Ai Message ==================================
+
+您已成功预定 明天从合肥到北京的机票。祝您旅途愉快！如果还需要帮助，请随时告诉我。
+```
+
+接下来我们稍微对代码做些修改，在编译图的时候设置 `interrupt_before` 参数：
+
+```
+graph = graph_builder.compile(
+    checkpointer=memory,
+    interrupt_before=["tools"]
+)
+```
+
+这样在执行到工具节点时，整个流程就会中断，重新运行结果如下：
+
+```
+================================== Ai Message ==================================
+Tool Calls:
+  book_ticket (call_1jQtm6czoPrNhbRIR5FzyN47)
+ Call ID: call_1jQtm6czoPrNhbRIR5FzyN47
+  Args:
+    date: 明天
+    from_city: 合肥
+    to_city: 北京
+```
+
+可以看到工具并没有执行，此时我们可以使用 `graph.get_state(config)` 获取流程图的当前状态，从当前状态里我们可以拿到上一步的消息和下一步将要执行的节点：
+
+```
+snapshot = graph.get_state(config)
+print(snapshot.values["messages"][-1])
+print(snapshot.next)
+```
+
+向用户展示当前状态，以便用户对工具的执行进行确认，如果用户确认无误，则继续流程图的运行，直接传入 `None` 即可：
+
+```
+### 继续运行
+
+for event in graph.stream(None, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+运行结果如下：
+
+```
+================================= Tool Message =================================
+Name: book_ticket
+
+您已成功预定 明天 从 合肥 到 北京 的机票
+================================== Ai Message ==================================
+
+好的，已为您成功预定一张明天从合肥到北京的机票。
+```
+
+### 手动更新状态
+
+https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/review-tool-calls/
+
+### ReAct 智能体
+
+https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
+
+## LangGraph 应用场景
+
+官网文档提供了很多 LangGraph 的应用场景，包括 聊天机器人、RAG、智能体架构、评估分析等。
+
+### Chatbots
+
+* [Build a Customer Support Bot](https://langchain-ai.github.io/langgraph/tutorials/customer-support/customer-support/)
+* [Prompt Generation from User Requirements](https://langchain-ai.github.io/langgraph/tutorials/chatbots/information-gather-prompting/)
+* [Code generation with RAG and self-correction](https://langchain-ai.github.io/langgraph/tutorials/code_assistant/langgraph_code_assistant/)
+
+### RAG
+
+* [Adaptive RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag/)
+* [Adaptive RAG using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/)
+* [Agentic RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_agentic_rag/)
+* [Corrective RAG (CRAG)](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_crag/)
+* [Corrective RAG (CRAG) using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_crag_local/)
+* [Self-RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/)
+* [Self RAG using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag_local/)
+* [An agent for interacting with a SQL database](https://langchain-ai.github.io/langgraph/tutorials/sql-agent/)
+
+### Agent Architectures
+
+#### Multi-Agent Systems
+
+* [Basic Multi-agent Collaboration](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/)
+* [Supervision](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/)
+* [Hierarchical Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)
+
+#### Planning Agents
+
+* [Plan-and-Execute](https://langchain-ai.github.io/langgraph/tutorials/plan-and-execute/plan-and-execute/)
+* [Reasoning without Observation](https://langchain-ai.github.io/langgraph/tutorials/rewoo/rewoo/)
+* [LLMCompiler](https://langchain-ai.github.io/langgraph/tutorials/llm-compiler/LLMCompiler/)
+
+#### Reflection & Critique
+
+* [Reflection](https://langchain-ai.github.io/langgraph/tutorials/reflection/reflection/)
+* [Reflexion](https://langchain-ai.github.io/langgraph/tutorials/reflexion/reflexion/)
+* [Language Agent Tree Search](https://langchain-ai.github.io/langgraph/tutorials/lats/lats/)
+* [Self-Discover Agent](https://langchain-ai.github.io/langgraph/tutorials/self-discover/self-discover/)
+
+### Evaluation & Analysis
+
+* [Chat Bot Evaluation as Multi-agent Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/agent-simulation-evaluation/)
+* [Chat Bot Benchmarking using Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/langsmith-agent-simulation-evaluation/)
+
+### Experimental
+
+* [Web Research (STORM)](https://langchain-ai.github.io/langgraph/tutorials/storm/storm/)
+* [TNT-LLM: Text Mining at Scale](https://langchain-ai.github.io/langgraph/tutorials/tnt-llm/tnt-llm/)
+* [Web Navigation](https://langchain-ai.github.io/langgraph/tutorials/web-navigation/web_voyager/)
+* [Competitive Programming](https://langchain-ai.github.io/langgraph/tutorials/usaco/usaco/)
+* [Complex data extraction with function calling](https://langchain-ai.github.io/langgraph/tutorials/extraction/retries/)
 
 ## 参考
 
@@ -919,60 +1076,3 @@ https://langchain-ai.github.io/langgraph/how-tos/
 * [LangGraph介绍](https://theguodong.com/articles/LangChain/LangGraph%E4%BB%8B%E7%BB%8D/)
 * [LangChain补充五：Agent之LangGraph的使用](https://www.cnblogs.com/ssyfj/p/18308248)
 * [使用 LangGraph 构建可靠的 RAG 代理](https://blog.csdn.net/wjjc1017/article/details/138518087)
-
-## 更多
-
-### LangGraph 应用场景
-
-官网文档提供了很多 LangGraph 的应用场景，包括 聊天机器人、RAG、智能体架构、评估分析等。
-
-#### Chatbots
-
-* [Build a Customer Support Bot](https://langchain-ai.github.io/langgraph/tutorials/customer-support/customer-support/)
-* [Prompt Generation from User Requirements](https://langchain-ai.github.io/langgraph/tutorials/chatbots/information-gather-prompting/)
-* [Code generation with RAG and self-correction](https://langchain-ai.github.io/langgraph/tutorials/code_assistant/langgraph_code_assistant/)
-
-#### RAG
-
-* [Adaptive RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag/)
-* [Adaptive RAG using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/)
-* [Agentic RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_agentic_rag/)
-* [Corrective RAG (CRAG)](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_crag/)
-* [Corrective RAG (CRAG) using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_crag_local/)
-* [Self-RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/)
-* [Self RAG using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag_local/)
-* [An agent for interacting with a SQL database](https://langchain-ai.github.io/langgraph/tutorials/sql-agent/)
-
-#### Agent Architectures
-
-##### Multi-Agent Systems
-
-* [Basic Multi-agent Collaboration](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/)
-* [Supervision](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/)
-* [Hierarchical Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)
-
-##### Planning Agents
-
-* [Plan-and-Execute](https://langchain-ai.github.io/langgraph/tutorials/plan-and-execute/plan-and-execute/)
-* [Reasoning without Observation](https://langchain-ai.github.io/langgraph/tutorials/rewoo/rewoo/)
-* [LLMCompiler](https://langchain-ai.github.io/langgraph/tutorials/llm-compiler/LLMCompiler/)
-
-##### Reflection & Critique
-
-* [Reflection](https://langchain-ai.github.io/langgraph/tutorials/reflection/reflection/)
-* [Reflexion](https://langchain-ai.github.io/langgraph/tutorials/reflexion/reflexion/)
-* [Language Agent Tree Search](https://langchain-ai.github.io/langgraph/tutorials/lats/lats/)
-* [Self-Discover Agent](https://langchain-ai.github.io/langgraph/tutorials/self-discover/self-discover/)
-
-#### Evaluation & Analysis
-
-* [Chat Bot Evaluation as Multi-agent Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/agent-simulation-evaluation/)
-* [Chat Bot Benchmarking using Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/langsmith-agent-simulation-evaluation/)
-
-#### Experimental
-
-* [Web Research (STORM)](https://langchain-ai.github.io/langgraph/tutorials/storm/storm/)
-* [TNT-LLM: Text Mining at Scale](https://langchain-ai.github.io/langgraph/tutorials/tnt-llm/tnt-llm/)
-* [Web Navigation](https://langchain-ai.github.io/langgraph/tutorials/web-navigation/web_voyager/)
-* [Competitive Programming](https://langchain-ai.github.io/langgraph/tutorials/usaco/usaco/)
-* [Complex data extraction with function calling](https://langchain-ai.github.io/langgraph/tutorials/extraction/retries/)
