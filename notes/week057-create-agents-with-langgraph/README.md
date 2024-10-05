@@ -971,7 +971,67 @@ Name: book_ticket
 
 ### 手动更新状态
 
-https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/review-tool-calls/
+在上一节中，我们学习了如何在执行工具之前中断，以便我们可以检查和确认，如果确认没问题，就继续运行，但如果确认有问题，这时我们就要手动更新状态，改变智能体的行为方向。
+
+书接上回，我们仍然使用机票预定的例子，假设用户确认时，希望将日期从明天改为后天。我们可以使用下面的代码：
+
+```
+snapshot = graph.get_state(config)
+existing_message = snapshot.values["messages"][-1]
+new_tool_call = existing_message.tool_calls[0].copy()
+new_tool_call["args"]["date"] = "后天"
+new_message = AIMessage(
+    content=existing_message.content,
+    tool_calls=[new_tool_call],
+    # Important! The ID is how LangGraph knows to REPLACE the message in the state rather than APPEND this messages
+    id=existing_message.id,
+)
+graph.update_state(config, {"messages": [new_message]})
+```
+
+这里我们首先获取当前状态，从当前状态中获取最后一条消息，我们知道最后一条消息是 `tool_call` 消息，于是将 `tool_call` 复制了一份，并修改 `date` 参数，然后重新构造 `AIMessage` 对象，并使用 `graph.update_state()` 来更新状态。值得注意的是，`AIMessage` 中的 id 参数非常重要，LangGraph 会从状态中找到和 id 匹配的消息，如果找到就更新，否则就是新增。
+
+这样就实现了状态的更新，我们传入 None 参数继续运行之：
+
+```
+### 继续运行
+
+for event in graph.stream(None, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+```
+
+运行结果如下：
+
+```
+================================= Tool Message =================================
+Name: book_ticket
+
+您已成功预定 后天 从 合肥 到 北京 的机票
+================================== Ai Message ==================================
+
+您已成功预定 后天从合肥到北京的机票。祝您旅途愉快！如果还需要帮助，请随时告诉我。
+```
+
+除了修改工具的参数之外，LangGraph 还支持我们修改状态中的任意消息，比如手动构造工具执行的结果以及大模型的回复：
+
+```
+snapshot = graph.get_state(config)
+existing_message = snapshot.values["messages"][-1]
+new_messages = [
+    # The LLM API expects some ToolMessage to match its tool call. We'll satisfy that here.
+    ToolMessage(content="预定失败", tool_call_id=existing_message.tool_calls[0]["id"]),
+    # And then directly "put words in the LLM's mouth" by populating its response.
+    AIMessage(content="预定失败"),
+]
+graph.update_state(config, {"messages": new_messages})
+```
+
+完整的代码 [参考这里](./demo/quickstart/human_in_the_loop.py)，更多内容，参考 LangGraph 文档：
+
+* [How to view and update past graph state](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/time-travel/)
+* [How to edit graph state](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/edit-graph-state/)
+* [How to Review Tool Calls](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/review-tool-calls/)
 
 ### ReAct 智能体
 

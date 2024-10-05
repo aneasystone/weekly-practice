@@ -74,3 +74,101 @@ print(snapshot.next)
 for event in graph.stream(None, config):
     for value in event.values():
         value["messages"][-1].pretty_print()
+
+### 运行
+
+print("-" * 30)
+config = {"configurable": {"thread_id": "2"}}
+
+for event in graph.stream({"messages": ("user", "帮我预定一张明天从合肥到北京的机票")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+
+# 修改工具调用的参数
+from langchain_core.messages import AIMessage
+
+snapshot = graph.get_state(config)
+existing_message = snapshot.values["messages"][-1]
+new_tool_call = existing_message.tool_calls[0].copy()
+new_tool_call["args"]["date"] = "后天"
+new_message = AIMessage(
+    content=existing_message.content,
+    tool_calls=[new_tool_call],
+    # Important! The ID is how LangGraph knows to REPLACE the message in the state rather than APPEND this messages
+    id=existing_message.id,
+)
+graph.update_state(config, {"messages": [new_message]})
+
+### 继续运行
+
+for event in graph.stream(None, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+        
+### 运行
+
+print("-" * 30)
+config = {"configurable": {"thread_id": "3"}}
+
+for event in graph.stream({"messages": ("user", "帮我预定一张明天从合肥到北京的机票")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+
+# 手动构造回复
+from langchain_core.messages import AIMessage, ToolMessage
+
+snapshot = graph.get_state(config)
+existing_message = snapshot.values["messages"][-1]
+new_messages = [
+    # The LLM API expects some ToolMessage to match its tool call. We'll satisfy that here.
+    ToolMessage(content="预定失败", tool_call_id=existing_message.tool_calls[0]["id"]),
+    # And then directly "put words in the LLM's mouth" by populating its response.
+    AIMessage(content="预定失败"),
+]
+graph.update_state(config, {"messages": new_messages})
+
+### 继续运行
+
+for event in graph.stream(None, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+        
+print("\n\nLast 2 messages;")
+for message in graph.get_state(config).values["messages"][-2:]:
+    message.pretty_print()
+    
+### 运行
+
+print("-" * 30)
+config = {"configurable": {"thread_id": "4"}}
+
+for event in graph.stream({"messages": ("user", "帮我预定一张明天从合肥到北京的机票")}, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+
+# 手动构造回复
+from langchain_core.messages import AIMessage, ToolMessage
+
+snapshot = graph.get_state(config)
+existing_message = snapshot.values["messages"][-1]
+new_messages = [
+    # And then directly "put words in the LLM's mouth" by populating its response.
+    AIMessage(content="抱歉，我暂时不能预定机票"),
+]
+graph.update_state(
+    config,
+    {"messages": new_messages},
+    # Which node for this function to act as. It will automatically continue
+    # processing as if this node just ran.
+    as_node="chatbot",
+)
+
+### 继续运行
+
+for event in graph.stream(None, config):
+    for value in event.values():
+        value["messages"][-1].pretty_print()
+        
+print("\n\nLast 1 messages;")
+for message in graph.get_state(config).values["messages"][-1:]:
+    message.pretty_print()
