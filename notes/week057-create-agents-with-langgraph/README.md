@@ -1033,21 +1033,21 @@ graph.update_state(config, {"messages": new_messages})
 * [How to edit graph state](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/edit-graph-state/)
 * [How to Review Tool Calls](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/review-tool-calls/)
 
-### ReAct 智能体
-
-https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
-
 ## LangGraph 应用场景
 
 官网文档提供了很多 LangGraph 的应用场景，包括 聊天机器人、RAG、智能体架构、评估分析等。
 
 ### Chatbots
 
+聊天机器人是智能体最常见的应用场景。
+
 * [Build a Customer Support Bot](https://langchain-ai.github.io/langgraph/tutorials/customer-support/customer-support/)
 * [Prompt Generation from User Requirements](https://langchain-ai.github.io/langgraph/tutorials/chatbots/information-gather-prompting/)
 * [Code generation with RAG and self-correction](https://langchain-ai.github.io/langgraph/tutorials/code_assistant/langgraph_code_assistant/)
 
 ### RAG
+
+**检索增强生成（Retrieval-Augmented Generation，简称 RAG）** 通过引入外部信息源实现知识问答，解决大模型缺乏领域知识、无法获取实时信息以及生成虚假内容等问题。我们在 [这篇博客](../week054-advanced-rag-notes/README.md) 中学习了不少高级 RAG 技巧，通过 LangGraph 可以将智能体和 RAG 相结合，实现更好的问答效果。
 
 * [Adaptive RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag/)
 * [Adaptive RAG using local LLMs](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/)
@@ -1059,6 +1059,21 @@ https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
 * [An agent for interacting with a SQL database](https://langchain-ai.github.io/langgraph/tutorials/sql-agent/)
 
 ### Agent Architectures
+
+ReAct 是最常见的智能体架构，这个词出自论文 [ReAct: Synergizing Reasoning and Acting in Language Models](https://react-lm.github.io/)，它是由 `Reason` 和 `Act` 两个词组合而成，表示一种将 **推理** 和 **行动** 与大模型相结合的通用范式。上面我们学习的 LangGraph 示例，其实就是参考了 ReAct 的思路，方便起见，LangGraph 将其内置在 SDK 中，我们可以直接使用 `create_react_agent` 方法来创建一个 [ReAct 智能体](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/)：
+
+```
+from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.prebuilt import create_react_agent
+
+llm = ChatOpenAI()
+memory = MemorySaver()
+tools = [get_weather]
+graph = create_react_agent(llm, tools=tools, checkpointer=memory)
+```
+
+除 ReAct 之外，还有不少其他的智能体架构，比如多智能体、规划型智能体、智能体的反思和批判。
 
 #### Multi-Agent Systems
 
@@ -1081,10 +1096,14 @@ https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
 
 ### Evaluation & Analysis
 
+使用智能体评估智能体。
+
 * [Chat Bot Evaluation as Multi-agent Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/agent-simulation-evaluation/)
 * [Chat Bot Benchmarking using Simulation](https://langchain-ai.github.io/langgraph/tutorials/chatbot-simulation-evaluation/langsmith-agent-simulation-evaluation/)
 
 ### Experimental
+
+这里列举一些 LangGraph 的实验特性。
 
 * [Web Research (STORM)](https://langchain-ai.github.io/langgraph/tutorials/storm/storm/)
 * [TNT-LLM: Text Mining at Scale](https://langchain-ai.github.io/langgraph/tutorials/tnt-llm/tnt-llm/)
