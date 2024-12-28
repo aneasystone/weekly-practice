@@ -62,6 +62,7 @@
 
 ### 项目实践
 
+* PRO004 - [LM Studio - Discover, download, and run local LLMs](./projects/pro004-lmstudio/README.md)
 * PRO003 - [mem0ai/mem0 - 个性化 AI 记忆层](./projects/pro003-mem0ai-mem0/README.md)
 * PRO002 - [Nepxion/Discovery - 企业级云原生微服务解决方案](./projects/pro002-Nepxion-Discovery/README.md)
 * PRO001 - [dromara/liteflow - 轻量，快速，稳定可编排的组件式规则引擎](./projects/pro001-dromara-liteflow/README.md)

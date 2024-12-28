@@ -12,6 +12,38 @@
 * [AGI 通用知识模型和认知架构：打造一个能够思考、学习和创造的人工智能的关键所在](https://mp.weixin.qq.com/s/9opOMPzugyPCklVS9k21XQ)
 * [The History of Open-Source LLMs: Better Base Models (Part Two)](https://cameronrwolfe.substack.com/p/the-history-of-open-source-llms-better)
 
+### 提示工程
+
+* [Fuck You, Show Me The Prompt.](https://hamel.dev/blog/posts/prompt/)
+* [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
+* [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
+
+### 模型推理和部署
+
+* [本地运行面壁智能的“贺岁模型”：MiniCPM 2B - 苏洋博客](https://soulteary.com/2024/02/02/locally-run-modelbest-mini-cpm-2b.html)
+* [基于 Azure OpenAI 免费注册使用 ChatGPT 教程](https://mp.weixin.qq.com/s/fVGqRTEPIsREnKTTmLSg-Q)
+* [基于阿里云免费算力自建LLM(类GPT)大模型](https://mp.weixin.qq.com/s/DFFMDCDltOWN9ZCSDruEug)
+* [本地部署开源大模型的完整教程：LangChain + Streamlit+ Llama](https://segmentfault.com/a/1190000043935266)
+* [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
+* [为Kubernetes集群部署一个ChatGPT机器人](https://mp.weixin.qq.com/s/g6hAY-mEC5CKP-ygwL82Gw)
+* [Licoy/ChatGPT-Midjourney](https://github.com/Licoy/ChatGPT-Midjourney) - 一键拥有你自己的 ChatGPT+Midjourney 网页服务
+* [Ice-Hazymoon/openai-scf-proxy](https://github.com/Ice-Hazymoon/openai-scf-proxy) - 使用腾讯云函数一分钟搭建 OpenAI 免翻墙代理
+* [保姆教程 | 用GPU云主机搭建AI大语言模型并用Flask封装成API，实现用户与模型对话](https://developer.jdcloud.com/article/2904)
+* [快速部署ChatGLM-6B大模型实战总结](https://mp.weixin.qq.com/s/Teqq5UaJHAeqBiunYUB1fQ)
+
+### 模型训练和微调
+
+* [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
+* [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
+
+### 模型评测
+
+* [Sharing LangSmith Benchmarks](https://blog.langchain.dev/public-langsmith-benchmarks/)
+
+### 模型安全
+
+* [Adversarial Attacks on LLMs](https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/)
+
 ### Structured Extraction
 
 * [Instructor (openai_function_call)](https://jxnl.github.io/instructor/)
@@ -40,6 +72,8 @@
 * [Agent的颠覆性影响 | LearnPrompt](https://www.learnprompt.pro/article/agent)
 * [Building Your First LLM Agent Application](https://developer.nvidia.com/blog/building-your-first-llm-agent-application/)
 * [AI Agent，为什么是AIGC最后的杀手锏？](https://www.tisi.org/27147)
+* [LLM Agent 现状和一些思考 （202401） - 知乎](https://zhuanlan.zhihu.com/p/679032270)
+* [初识AI Agent——以大模型为核心的智能体](https://mp.weixin.qq.com/s/LgBlWDlcExkYhy72FgqM8Q)
 
 ### Research Assistant
 
@@ -51,18 +85,52 @@
 * [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
 * [CrewAI Unleashed: Future of AI Agent Teams](https://blog.langchain.dev/crewai-unleashed-future-of-ai-agent-teams/)
 
-### 模型训练和微调
+### 文生图
 
-* [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
-* [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
+* [AI杀疯了，NovelAI开源教程](https://cuijiahua.com/blog/2022/10/ai-29.html)
+* [【AI绘画】AI又进化了，革命性突破](https://cuijiahua.com/blog/2023/02/ai-30.html)
+* [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
+* [novicezk/midjourney-proxy](https://github.com/novicezk/midjourney-proxy) - 代理 MidJourney 的discord频道，实现api形式调用AI绘图
 
-### 模型评测
+### RAG
 
-* [Sharing LangSmith Benchmarks](https://blog.langchain.dev/public-langsmith-benchmarks/)
+* [LLM之RAG实战（二十九）| 探索RAG PDF解析](https://mp.weixin.qq.com/s/3_9L7MSfE38pGv8nmB6Mrg)
+* [LLM之RAG实战（三十）| 探索RAG语义分块策略](https://mp.weixin.qq.com/s/sT7mjAFVbWg5-_CTJPqxkw)
+* [Advanced RAG Retrieval Strategy: Embedded Tables](https://ai.gopubby.com/advanced-rag-retrieval-strategy-embedded-tables-fdb3e44003a5)
 
-### 模型安全
+### Spring AI
 
-* [Adversarial Attacks on LLMs](https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/)
+* [Spring AI 1.0.0 M1 released](https://spring.io/blog/2024/05/30/spring-ai-1-0-0-m1-released)
+* [Spring AI: Getting Started](https://www.vojtechruzicka.com/spring-ai/)
+* [Spring AI Tutorial](https://howtodoinjava.com/series/spring-ai-tutorial/)
+* [Getting started with Spring AI](https://dev.to/anthonyikeda/getting-started-with-spring-ai-4j09)
+* [Building Intelligent Applications with Spring AI](https://medium.com/@rajt7258/building-intelligent-applications-with-spring-ai-39c114ed4a24)
+* [Spring AI: How to Write GenAI Applications with Java](https://foojay.io/today/spring-ai-how-to-write-genai-applications-with-java/)
+* [Leverage the Power of 45k, free, Hugging Face Models with Spring AI and Ollama](https://spring.io/blog/2024/10/22/leverage-the-power-of-45k-free-hugging-face-models-with-spring-ai-and-ollama)
+* [Create a ChatGPT Like Chatbot With Ollama and Spring AI](https://www.baeldung.com/spring-ai-ollama-chatgpt-like-chatbot)
+* [Spring AI with NVIDIA LLM API](https://spring.io/blog/2024/08/20/spring-ai-with-nvidia-llm-api)
+* [AI Meets Spring Petclinic: Implementing an AI Assistant with Spring AI (Part I)](https://spring.io/blog/2024/09/26/ai-meets-spring-petclinic-implementing-an-ai-assistant-with-spring-ai-part-i)
+* [Text Classification with Java, Spring AI and LLMs](https://www.thomasvitale.com/text-classification-with-spring-ai/)
+
+#### Function Calling
+
+* [Function Calling in Java and Spring AI Using the Mistral AI API](https://www.baeldung.com/spring-ai-mistral-api-function-calling)
+* [Function Calling in Java and Spring AI using the latest Mistral AI API](https://spring.io/blog/2024/03/06/function-calling-in-java-and-spring-ai-using-the-latest-mistral-ai-api)
+* [Spring AI with Ollama Tool Support](https://spring.io/blog/2024/07/26/spring-ai-with-ollama-tool-support)
+* [Spring AI - Structured Output](https://spring.io/blog/2024/05/09/spring-ai-structured-output)
+* [A Guide to Structured Output in Spring AI](https://www.baeldung.com/spring-artificial-intelligence-structure-output)
+* [Spring AI Embraces OpenAI's Structured Outputs: Enhancing JSON Response Reliability](https://spring.io/blog/2024/08/09/spring-ai-embraces-openais-structured-outputs-enhancing-json-response)
+
+#### RAG
+
+* [Building a RAG application with Redis and Spring AI](https://redis.io/blog/building-a-rag-application-with-redis-and-spring-ai/)
+* [Create a RAG (Retrieval Augmented Generation) Application with Redis and Spring AI](https://www.baeldung.com/spring-ai-redis-rag-app)
+* [Spring AI, Llama 3 and pgvector: bRAGging rights!](https://dev.to/mcadariu/springai-llama3-and-pgvector-bragging-rights-2n8o)
+
+#### Multimodality
+
+* [Spring AI - Multimodality - Orbis Sensualium Pictus](https://spring.io/blog/2024/04/19/spring-ai-multimodality-orbis-sensualium-pictus)
+* [Audio Multimodality: Expanding AI Interaction with Spring AI and OpenAI](https://spring.io/blog/2024/12/05/spring-ai-audio-modality)
 
 ## Java
 
@@ -72,8 +140,8 @@
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
 * [Runtime efficiency with Spring (today and tomorrow)](https://spring.io/blog/2023/10/16/runtime-efficiency-with-spring)
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
-* [初步探索GraalVM--云原生时代JVM黑科技](https://developer.jdcloud.com/article/2446)
 * [GraalVM Native Image Support](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
+* [初步探索GraalVM--云原生时代JVM黑科技-京东云开发者社区](https://developer.jdcloud.com/article/2446)
 
 ### Java Agent
 
@@ -149,7 +217,7 @@
 
 * [Flux、Mono、Reactor 实战（史上最全）](https://blog.csdn.net/crazymakercircle/article/details/124120506)
 
-## 聊聊 Java 中的锁技术
+### 聊聊 Java 中的锁技术
 
 * [聊聊 13 种锁的实现方式](https://mp.weixin.qq.com/s/AOshaWGmLw6uw92xKhLAvQ)
 * [并发情况如何实现加锁来保证数据一致性？](https://my.oschina.net/u/4090830/blog/10319213)
@@ -342,6 +410,7 @@
 
 ### Kubernetes Secrets
 
+* [Kubernetes 的小秘密——从 Secret 到 Bank Vault](https://blog.fleeto.us/post/secret-to-vault-k8s/)
 * [Keeping secrets secure on Kubernetes](https://www.cncf.io/blog/2023/10/10/keeping-secrets-secure-on-kubernetes/)
 * [Secure Kubernetes Secrets with Vault](https://www.baeldung.com/spring-vault-kubernetes-secrets)
 * [Kubernetes security: best practices for Kubernetes secrets management](https://www.cncf.io/blog/2023/09/28/kubernetes-security-best-practices-for-kubernetes-secrets-management/)
@@ -354,6 +423,7 @@
 * [kubernetes 常见错误总结](https://csms.tech/202209281614/)
 * [强制删除 Kubernetes Namespace](https://www.iszy.cc/posts/force-delete-k8s-namespace/)
 * [KubeShark: Kubernetes 的 Wireshark](https://xie.infoq.cn/article/30ea5e58984a2772f68b5fd39)
+* [得物 SRE K8s 故障诊断：从 CPU 高负载到挂载泄露根源揭示](https://my.oschina.net/u/5783135/blog/11208794)
 
 ### 获取客户端真实 IP
 
@@ -459,6 +529,10 @@
 ### 证书管理
 
 * [如何在 APISIX 使用 Vault 管理证书](https://www.apiseven.com/blog/apisix-integrate-with-vault-to-store-certs)
+
+### 容灾架构
+
+* [基于 K8s 容器集群的容灾架构与方案](https://my.oschina.net/u/3874284/blog/11047123)
 
 ## 数据库
 
@@ -646,6 +720,11 @@
 
 * [Nginx 常用配置及和基本功能讲解](https://my.oschina.net/u/4090830/blog/8694569)
 * [用 Nginx 禁止国外 IP 访问我的网站](https://mp.weixin.qq.com/s/M5WGozQdBvX_ZvW9rATzbQ)
+
+### 负载均衡
+
+* [HAProxy & Keepalived L4-L7 高可用负载均衡解决方案 - 云物互联 - 博客园](https://www.cnblogs.com/jmilkfan-fanguiju/p/10589765.html)
+* [mosn基于延迟负载均衡算法 -- 走得更快，期待走得更稳](https://mosn.io/blog/posts/mosn-loadbalancer-peakewma/)
 
 ### 算法
 

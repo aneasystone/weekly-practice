@@ -4,6 +4,7 @@
 * [未来百科](https://nav.6aiq.com/) - 为发现全球优质AI工具产品而生
 * [AI 工具集导航](https://ai.nancheng.fun/)
 * [AI 导航](https://ai.dreamthere.cn/)
+* [AIbase](https://top.aibase.com/) - 智能匹配最适合您的AI产品和网站
 
 ## 工具和产品
 
@@ -68,6 +69,7 @@
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
 * [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
 * [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
+* [Devin](https://www.cognition.ai/)
 
 #### 代码大模型
 
@@ -127,6 +129,8 @@
 * [eosphoros-ai/DB-GPT](https://github.com/eosphoros-ai/DB-GPT) - Revolutionizing Database Interactions with Private LLM Technology
 * [SQL Translator](https://github.com/whoiskatrin/sql-translator) - SQL to Natural Language and Natural Language to SQL
 * [defog-ai/sqlcoder](https://github.com/defog-ai/sqlcoder) - SoTA LLM for converting natural language questions to SQL queries
+* [Dataherald](https://github.com/Dataherald/dataherald) - Interact with your SQL database, Natural Language to SQL using LLMs
+* [DeepInsight-AI/DeepBI](https://github.com/DeepInsight-AI/DeepBI) - LLM based data scientist, AI native data application. AI-driven infinite thinking redefines BI.
 
 #### 文档生成
 
@@ -236,6 +240,7 @@
 * [koishijs/novelai-bot](https://github.com/koishijs/novelai-bot) - Generate images by NovelAI | 基于 NovelAI 的画图机器人
 * [Imagine with Meta AI](https://imagine.meta.com/)
 * [ByteDance/SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning)
+* [Ideogram](https://ideogram.ai/t/explore)
 
 #### 二维码生成
 
@@ -254,6 +259,7 @@
 * [Magician for Figma](https://magician.design/) - A magical design tool for Figma powered by AI.
 * [Flair](https://flair.ai/) - THE AI DESIGN TOOL FOR BRANDED CONTENT
 * [Galileo AI](https://www.usegalileo.ai/) - Galileo AI creates delightful, editable UI designs from a simple text description. It empowers you to design faster than ever.
+* [Creatie](https://creatie.ai/) - Intuitive, affordable, AI-powered product design software
 
 #### 商品设计
 
@@ -319,6 +325,8 @@
 * [Runway](https://runwayml.com) - Advancing creativity with artificial intelligence.
 * [Fliki](https://fliki.ai/) - Video creation made 10x simpler & faster with AI
 * [腾讯智影](https://zenvideo.qq.com/) - 在线智能视频创作平台
+* [可灵 AI](https://klingai.kuaishou.com/) - 新一代 AI 创意生产力平台
+    * [可灵大模型（Kling）](https://kling.kuaishou.com/) - 由快手大模型团队自研打造的视频生成大模型
 * [Wonder Studio](https://wonderdynamics.com/) - An AI tool that automatically animates, lights and composes CG characters into a live-action scene
 * [SCUTlihaoyu/open-chat-video-editor](https://github.com/SCUTlihaoyu/open-chat-video-editor) - 开源的短视频生成和编辑工具
 * [gyroflow/gyroflow](https://github.com/gyroflow/gyroflow) - Video stabilization using gyroscope data
@@ -385,7 +393,8 @@
 * [玉言](https://fuxi.163.com/) - 网易伏羲
 * 子曰 - 网易有道
 * [MiniMax](https://api.minimax.chat/)
-* [悟道·天鹰（Aquila）](https://github.com/FlagAI-Open/FlagAI/tree/master/examples/Aquila) - 北京智源人工智能研究院
+* [悟道大模型](https://www.baai.ac.cn/) - 北京智源人工智能研究院
+    * [悟道·天鹰（Aquila）](https://github.com/FlagAI-Open/FlagAI/tree/master/examples/Aquila)
 * [封神榜大模型](https://github.com/IDEA-CCNL/Fengshenbang-LM) - IDEA研究院
     * [姜子牙-LLaMA-13B-v1](https://modelscope.cn/models/Fengshenbang/Ziya-LLaMA-13B-v1/summary)
 * [源2.0](https://github.com/IEIT-Yuan/Yuan-2.0) - 浪潮
@@ -431,18 +440,25 @@
     * [DeepSeek MoE](https://github.com/deepseek-ai/DeepSeek-MoE)
 * [ChatLM-Chinese-0.2B](https://huggingface.co/charent/ChatLM-mini-Chinese) - 中文对话0.2B小模型
 * [Orion-14B](https://github.com/OrionStarAI/Orion) - 猎户星空
+* [OpenBMB](https://www.openbmb.cn/home) - 面壁智能
+    * [OpenBMB/CPM-Bee](https://github.com/OpenBMB/CPM-Bee) - 百亿参数的中英文双语基座大模型
 
 ### 领域大模型
 
 * 学而思 [MathGPT](https://www.mathgpt.com/) - 教育
 * 彭博社 [BloombergGPT](https://arxiv.org/abs/2303.17564) - 金融
-* 哈工大 [本草（原名华驼）](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 医学
 * [MediaGPT](https://github.com/IMOSR/MediaGPT) - 中文自媒体大模型
-* [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
 * [TransGPT](https://github.com/DUOMO/TransGPT) - 交通大模型
 * [MathGLM](https://github.com/THUDM/MathGLM) - GPT Can Solve Mathematical Problems Without a Calculator
-* [OpenBioMed](https://github.com/PharMolix/OpenBioMed) - 多模态生物医药大模型
 * [HyenaDNA](https://github.com/HazyResearch/hyena-dna) - a long-range genomic foundation model built with Hyena
+
+#### 医疗
+
+* [Huatuo-Llama-Med-Chinese](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) - 本草（原名：华驼）模型仓库，基于中文医学知识的大语言模型指令微调
+* [PULSE](https://github.com/openmedlab/PULSE) - 中文医疗大模型
+* [OpenBioMed](https://github.com/PharMolix/OpenBioMed) - 多模态生物医药大模型
+* [CareGPT](https://github.com/WangRongsheng/CareGPT) - CareGPT (关怀GPT)是一个医疗大语言模型，同时它集合了数十个公开可用的医疗微调数据集和开放可用的医疗大语言模型，包含LLM的训练、测评、部署等以促进医疗LLM快速发展。
+* [XrayGLM](https://github.com/WangRongsheng/XrayGLM) - 首个会看胸部X光片的中文多模态医学大模型
 
 #### 法律
 
@@ -477,7 +493,6 @@
 * [nanoGPT](https://github.com/karpathy/nanoGPT) - The simplest, fastest repository for training/finetuning medium-sized GPTs.
 * [Lit-GPT](https://github.com/Lightning-AI/lit-gpt) - Hackable implementation of state-of-the-art open-source LLMs based on nanoGPT. Supports flash attention, 4-bit and 8-bit quantization, LoRA and LLaMA-Adapter fine-tuning, pre-training. Apache 2.0-licensed.
 * [OLMo](https://github.com/allenai/OLMo) - Open Language Model
-* [microsoft/phi-2](https://huggingface.co/microsoft/phi-2)
 
 ### 其他大模型
 
@@ -492,7 +507,6 @@
 * [microsoft/LoRA](https://github.com/microsoft/LoRA) - Code for loralib, an implementation of "LoRA: Low-Rank Adaptation of Large Language Models"
 * [Web LLM](https://mlc.ai/web-llm/)
 * [MiniRBT](https://github.com/iflytek/MiniRBT) - 中文小型预训练模型系列
-* [OpenBMB/CPM-Bee](https://github.com/OpenBMB/CPM-Bee) - 百亿参数的中英文双语基座大模型
 * [bentoml/OpenLLM](https://github.com/bentoml/OpenLLM) - Operating LLMs in production
 * [OpenBuddy](https://github.com/OpenBuddy/OpenBuddy) - Open Multilingual Chatbot for Everyone
 * [LongLoRA](https://github.com/dvlab-research/LongLoRA) - LongLoRA and LongAlpaca for Long-context LLMs
@@ -511,11 +525,18 @@
 * [Qwen-VL](https://github.com/QwenLM/Qwen-VL) - Qwen Large Vision Language Model
 * [InternLM-XComposer](https://github.com/InternLM/InternLM-XComposer) - 浦语·灵笔
 * [THUDM/CogVLM](https://github.com/THUDM/CogVLM) - a state-of-the-art-level open visual language model | 多模态预训练模型
-* [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
 * [Fuyu-8B](https://www.adept.ai/blog/fuyu-8b) - A Multimodal Architecture for AI Agents
     * [adept/fuyu-8b](https://huggingface.co/adept/fuyu-8b)
 * [Emu Series](https://github.com/baaivision/Emu) - Generative Multimodal Models from BAAI
 * [Ferret](https://github.com/apple/ml-ferret) - Refer and Ground Anything Anywhere at Any Granularity
+* [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
+
+### 端侧大模型
+
+* [MiniCPM：揭示端侧大语言模型的无限潜力](https://shengdinghu.notion.site/MiniCPM-c805a17c5c8046398914e47f0542095a)
+    * [OpenBMB/MiniCPM](https://github.com/OpenBMB/MiniCPM)
+    * [OpenBMB/MiniCPM-V](https://github.com/OpenBMB/MiniCPM-V) - A GPT-4V Level MLLM for Single Image, Multi Image and Video on Your Phone
+* [microsoft/phi-2](https://huggingface.co/microsoft/phi-2)
 
 ### 模型推理 & 部署
 
@@ -531,6 +552,9 @@
 * [llamafile](https://simonwillison.net/2023/Nov/29/llamafile/) - the new best way to run a LLM on your own computer
 * [Replicate](https://replicate.com/) - Run AI with an API.
 * [Jan](https://github.com/janhq/jan) - an open source alternative to ChatGPT that runs 100% offline on your computer
+* [LM Studio](https://lmstudio.ai/) - Discover, download, and run local LLMs
+* [Ray](https://github.com/ray-project/ray) - Ray is an AI compute engine. Ray consists of a core distributed runtime and a set of AI Libraries for accelerating ML workloads.
+* [Inferless](https://docs.inferless.com/introduction/introduction) - the go-to platform for effortlessly deploying machine learning models in the cloud
 
 ### 模型训练 & 微调
 
@@ -562,18 +586,6 @@
 * [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
 * [songquanpeng/one-api](https://github.com/songquanpeng/one-api) - 通过标准的 OpenAI API 格式访问所有的大模型，开箱即用
 
-### 部署教程
-
-* [基于 Azure OpenAI 免费注册使用 ChatGPT 教程](https://mp.weixin.qq.com/s/fVGqRTEPIsREnKTTmLSg-Q)
-* [基于阿里云免费算力自建LLM(类GPT)大模型](https://mp.weixin.qq.com/s/DFFMDCDltOWN9ZCSDruEug)
-* [本地部署开源大模型的完整教程：LangChain + Streamlit+ Llama](https://segmentfault.com/a/1190000043935266)
-* [如何快速开发一个OpenAI/GPT应用](https://github.com/easychen/openai-gpt-dev-notes-for-cn-developer)
-* [为Kubernetes集群部署一个ChatGPT机器人](https://mp.weixin.qq.com/s/g6hAY-mEC5CKP-ygwL82Gw)
-* [Licoy/ChatGPT-Midjourney](https://github.com/Licoy/ChatGPT-Midjourney) - 一键拥有你自己的 ChatGPT+Midjourney 网页服务
-* [Ice-Hazymoon/openai-scf-proxy](https://github.com/Ice-Hazymoon/openai-scf-proxy) - 使用腾讯云函数一分钟搭建 OpenAI 免翻墙代理
-* [保姆教程 | 用GPU云主机搭建AI大语言模型并用Flask封装成API，实现用户与模型对话](https://developer.jdcloud.com/article/2904)
-* [快速部署ChatGLM-6B大模型实战总结](https://mp.weixin.qq.com/s/Teqq5UaJHAeqBiunYUB1fQ)
-
 ### 大模型应用开发
 
 * [LangChain](https://github.com/hwchase17/langchain) - Building applications with LLMs through composability
@@ -592,6 +604,7 @@
 * [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
 * [Towhee](https://github.com/towhee-io/towhee) - a framework that is dedicated to making neural data processing pipelines simple and fast.
 * [LLMStack](https://llmstack.ai/) - Open-source platform to build AI Agents, workflows and applications with your data
+* [Spring AI](https://github.com/spring-projects/spring-ai) - An Application Framework for AI Engineering
 
 ### LLMOps
 
@@ -606,6 +619,11 @@
 * [灵境矩阵](https://agents.baidu.com/) - 文心大模型智能体平台
 * [Coze](https://www.coze.com/home) - a next-generation AI Bot development platform
 * [SkyAgents](https://model-platform.tiangong.cn/) - 天工开放平台
+* [302.AI](https://302.ai/) - 企业级AI应用平台，按用量付费，开箱即用，开源生态
+
+### RAG
+
+* [infiniflow/ragflow](https://github.com/infiniflow/ragflow) - an open-source RAG (Retrieval-Augmented Generation) engine based on deep document understanding.
 
 ### 工作流
 
@@ -633,12 +651,15 @@
 * [GPT Engineer](https://github.com/AntonOsika/gpt-engineer) - Specify what you want it to build, the AI asks for clarification, and then builds it.
 * [GPT Pilot](https://github.com/Pythagora-io/gpt-pilot) - Dev tool that writes scalable apps from scratch while the developer oversees the implementation
 * [AutoAgents](https://agentspro.cn/) - 
+* [BCG-X-Official/agentkit](https://github.com/BCG-X-Official/agentkit) - Starter-kit to build constrained agents with Nextjs, FastAPI and Langchain
+* [ModelScope-Agent](https://github.com/modelscope/modelscope-agent) - An agent framework connecting models in ModelScope with the world
 
 ### Multi-Agent
 
 * [MetaGPT](https://github.com/geekan/MetaGPT) - The Multi-Agent Framework: Given one line Requirement, return PRD, Design, Tasks, Repo
 * [AutoGen](https://github.com/microsoft/autogen) - Enable Next-Gen Large Language Model Applications.
     * [微软Agent框架AutoGen论文及原理解读](https://mp.weixin.qq.com/s/HgdAn2Bp10T7jCf5nZhdkw)
+* [AgentVerse](https://github.com/OpenBMB/AgentVerse) - is designed to facilitate the deployment of multiple LLM-based agents in various applications, which primarily provides two frameworks: task-solving and simulation
 * [ChatDev](https://github.com/OpenBMB/ChatDev) - Communicative Agents for Software Development
 * [CrewAI](https://github.com/joaomdmoura/crewai) - Framework for orchestrating role-playing, autonomous AI agents.
 
@@ -691,13 +712,7 @@
 * [camenduru/stable-diffusion-webui-colab](https://github.com/camenduru/stable-diffusion-webui-colab) - stable diffusion webui colab
 * [lllyasviel/ControlNet](https://github.com/lllyasviel/ControlNet) - Let us control diffusion models!
 * [ComfyUI](https://github.com/comfyanonymous/ComfyUI) - The most powerful and modular stable diffusion GUI, api and backend with a graph/nodes interface.
-
-#### 文章
-
-* [AI杀疯了，NovelAI开源教程](https://cuijiahua.com/blog/2022/10/ai-29.html)
-* [【AI绘画】AI又进化了，革命性突破](https://cuijiahua.com/blog/2023/02/ai-30.html)
-* [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
-* [novicezk/midjourney-proxy](https://github.com/novicezk/midjourney-proxy) - 代理 MidJourney 的discord频道，实现api形式调用AI绘图
+* [Diffusers](https://github.com/huggingface/diffusers) - State-of-the-art diffusion models for image and audio generation in PyTorch and FLAX.
 
 ## 提示工程
 
@@ -713,8 +728,6 @@
 * [Brex's Prompt Engineering Guide](https://github.com/brexhq/prompt-engineering)
 * [willwulfken/MidJourney-Styles-and-Keywords-Reference](https://github.com/willwulfken/MidJourney-Styles-and-Keywords-Reference) - A reference containing Styles and Keywords that you can use with MidJourney AI. There are also pages showing resolution comparison, image weights, and much more!
 * [mattnigh/ChatGPT3-Free-Prompt-List](https://github.com/mattnigh/ChatGPT3-Free-Prompt-List) - A free guide for learning to create ChatGPT3 Prompts
-* [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
-* [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
 * [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/advanced-prompt-engineering)
 * [datawhalechina/hugging-llm](https://github.com/datawhalechina/hugging-llm) - HuggingLLM, Hugging Future.
 * [Learn Prompt](https://www.learnprompt.pro/) - Your Cookbook to Becoming to Communicating with AIGC
@@ -733,6 +746,8 @@
 ## 词嵌入
 
 * [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings)
+* [Cohere Embed](https://cohere.com/embed) - The Leading Text Representation Language Model
+* [Cohere Rerank](https://cohere.com/rerank) - Optimize Your Search With One Line of Code
 * [Voyage](https://www.voyageai.com/) - Voyage AI provides cutting-edge embedding/vectorizations models.
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Dense Retrieval and Retrieval-augmented LLMs
 * [GloVe](https://nlp.stanford.edu/projects/glove/) - Global Vectors for Word Representation
@@ -752,3 +767,5 @@
 
 * [MemGPT](https://github.com/cpacker/MemGPT) - Teaching LLMs memory management for unbounded context
 * [GPTCache](https://github.com/zilliztech/GPTCache) - A Library for Creating Semantic Cache for LLM Queries
+* [mem0ai/mem0](https://github.com/mem0ai/mem0) - The Memory layer for your AI apps
+    * https://docs.mem0.ai/overview
