@@ -414,6 +414,8 @@
 * [Keeping secrets secure on Kubernetes](https://www.cncf.io/blog/2023/10/10/keeping-secrets-secure-on-kubernetes/)
 * [Secure Kubernetes Secrets with Vault](https://www.baeldung.com/spring-vault-kubernetes-secrets)
 * [Kubernetes security: best practices for Kubernetes secrets management](https://www.cncf.io/blog/2023/09/28/kubernetes-security-best-practices-for-kubernetes-secrets-management/)
+* [How to deploy Hashicorp Vault in Kubernetes](https://devtron.ai/blog/how-to-deploy-hashicorp-vault-in-kubernetes/)
+* [Workshop recap: Linkerd certificate management with Vault | CNCF](https://www.cncf.io/blog/2024/03/05/workshop-recap-linkerd-certificate-management-with-vault/)
 
 ### Kubernetes 故障排查
 

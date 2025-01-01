@@ -80,15 +80,7 @@
 * [CodeFuse](https://codefuse.alipay.com/welcome/open) - 蚂蚁自研的代码生成专属大模型
     * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [AlphaCodium](https://github.com/Codium-ai/AlphaCodium) - Code Generation with AlphaCodium: From Prompt Engineering to Flow Engineering
-
-#### 数据分析
-
-* [The Open Interpreter Project](https://openinterpreter.com/)
-    * [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - A natural language interface for computers
-* [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
-* [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
-* [Raccoon 办公小浣熊](https://raccoon.sensetime.com/office) - 商汤科技
-* [PandasAI](https://github.com/Sinaptik-AI/pandas-ai) - Chat with your data (SQL, CSV, pandas, polars, noSQL, etc). PandasAI makes data analysis conversational using LLMs (GPT 3.5 / 4, Anthropic, VertexAI) and RAG.
+* [Raccoon 代码小浣熊](https://xiaohuanxiong.com/code) - 商汤科技
 
 #### 调试助手
 
@@ -117,7 +109,15 @@
 * [k8sgpt-ai/k8sgpt](https://github.com/k8sgpt-ai/k8sgpt) - Giving Kubernetes Superpowers to everyone
 * [GreyDGL/PentestGPT](https://github.com/GreyDGL/PentestGPT) - A GPT-empowered penetration testing tool
 
-#### 数据库
+#### 代码解释器（数据分析）
+
+* [The Open Interpreter Project](https://openinterpreter.com/)
+    * [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter) - A natural language interface for computers
+* [shroominic/codeinterpreter-api](https://github.com/shroominic/codeinterpreter-api) - Open source implementation of the ChatGPT Code Interpreter
+* [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
+* [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
+
+#### 数据问答
 
 * [caesarhq/textSQL](https://github.com/caesarhq/textSQL) - uses LLMs to democratize access to data analysis.
 	* [Census GPT](https://censusgpt.com/)
@@ -131,6 +131,7 @@
 * [defog-ai/sqlcoder](https://github.com/defog-ai/sqlcoder) - SoTA LLM for converting natural language questions to SQL queries
 * [Dataherald](https://github.com/Dataherald/dataherald) - Interact with your SQL database, Natural Language to SQL using LLMs
 * [DeepInsight-AI/DeepBI](https://github.com/DeepInsight-AI/DeepBI) - LLM based data scientist, AI native data application. AI-driven infinite thinking redefines BI.
+* [PandasAI](https://github.com/Sinaptik-AI/pandas-ai) - Chat with your data (SQL, CSV, pandas, polars, noSQL, etc). PandasAI makes data analysis conversational using LLMs (GPT 3.5 / 4, Anthropic, VertexAI) and RAG.
 
 #### 文档生成
 
@@ -204,6 +205,11 @@
 
 * [MindShow](https://www.mindshow.fun/) - 输入内容自动生成 PPT，让想法快速展示
 * [爱设计PPT](https://ppt.isheji.com/) - 全智能AI一键生成PPT
+* [讯飞智文](https://zhiwen.xfyun.cn/) - AI在线生成PPT、Word
+* [iSlide](https://www.islide.cc/) - 让PPT设计简单起来 | PPT模板下载平台
+* [必优科技](https://www.yoo-ai.com/)
+    * [ChatPPT](https://chat-ppt.com/) - AI一键对话生成PPT_智能排版美化-必优科技智能PPT
+    * [MotionGo官网](https://motion.yoo-ai.com/) - 原PPT动画插件口袋动画_免费商用PPT插件
 
 #### Excel
 
@@ -288,10 +294,12 @@
 * [Lama Cleaner](https://github.com/Sanster/lama-cleaner) - Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.
 * [Segment Anything](https://github.com/facebookresearch/segment-anything)
 * [kevmo314/magic-copy](https://github.com/kevmo314/magic-copy) - Magic Copy is a Chrome extension that uses Meta's Segment Anything Model to extract a foreground object from an image and copy it to the clipboard.
-* [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
-* [remove.bg](https://www.remove.bg/zh) - 图片去除背景
 * [GFPGAN](https://github.com/TencentARC/GFPGAN) - aims at developing Practical Algorithms for Real-world Face Restoration.
 * [LaMa](https://github.com/advimman/lama) - Resolution-robust Large Mask Inpainting with Fourier Convolutions
+* [Restore Photos](https://restorephotos.one/) - Use AI to restore old black and white photos and blurry face photos
+* [remove.bg](https://www.remove.bg/zh) - 图片去除背景
+* [danielgatis/rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background
+* [Removebg](https://removebg.one/) - Free background removal tool
 
 ### 音视频助手
 
@@ -474,6 +482,7 @@
 * [Alpaca](https://github.com/tatsu-lab/stanford_alpaca) - Stanford University
 	* [tloen/alpaca-lora](https://github.com/tloen/alpaca-lora) - Instruct-tune LLaMA on consumer hardware
 * [Claude](https://www.anthropic.com/index/introducing-claude) - Anthropic
+* [Grok-1](https://github.com/xai-org/grok-1)
 * [Dolly](https://github.com/databrickslabs/dolly) - Databricks
 * [LaMDA](https://blog.google/technology/ai/lamda/) - Google
 * [PaLM 2](https://ai.google/discover/palm2/) - Google
@@ -556,6 +565,11 @@
 * [Ray](https://github.com/ray-project/ray) - Ray is an AI compute engine. Ray consists of a core distributed runtime and a set of AI Libraries for accelerating ML workloads.
 * [Inferless](https://docs.inferless.com/introduction/introduction) - the go-to platform for effortlessly deploying machine learning models in the cloud
 
+### 模型网关
+
+* [LiteLLM](https://github.com/BerriAI/litellm) - Call all LLM APIs using the OpenAI format
+* [songquanpeng/one-api](https://github.com/songquanpeng/one-api) - 通过标准的 OpenAI API 格式访问所有的大模型，开箱即用
+
 ### 模型训练 & 微调
 
 * [OpenGVLab/LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapter) - Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters
@@ -576,7 +590,6 @@
 * [AIGC-Audio/AudioGPT](https://github.com/AIGC-Audio/AudioGPT) - Understanding and Generating Speech, Music, Sound, and Talking Head
 * [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) - Reverse engineered API of Microsoft's Bing Chat AI
 * [gd3kr/BlenderGPT](https://github.com/gd3kr/BlenderGPT) - Use commands in English to control Blender with OpenAI's GPT-4
-* [whoiskatrin/chart-gpt](https://github.com/whoiskatrin/chart-gpt) - AI tool to build charts based on text input
 * [yakGPT/yakGPT](https://github.com/yakGPT/yakGPT) - Locally running, hands-free ChatGPT UI
 
 #### ChatGPT 资源
@@ -584,7 +597,6 @@
 * [xtekky/gpt4free](https://github.com/xtekky/gpt4free) - decentralising the Ai Industry, just some language model api's...
 * [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) - Reverse engineered ChatGPT API
 * [acheong08/ChatGPTProxy](https://github.com/acheong08/ChatGPTProxy) - Simple Cloudflare bypass for ChatGPT
-* [songquanpeng/one-api](https://github.com/songquanpeng/one-api) - 通过标准的 OpenAI API 格式访问所有的大模型，开箱即用
 
 ### 大模型应用开发
 
