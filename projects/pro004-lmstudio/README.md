@@ -14,7 +14,7 @@ $ pip install -U huggingface_hub
 ### 下载模型
 
 ```
-$ huggingface-cli download --resume-download Qwen/Qwen2-7B-Instruct --local-dir E:\lm-studio\models\Qwen--Qwen2-7B-Instruct
+$ huggingface-cli download --resume-download Qwen/Qwen2-7B-Instruct --local-dir E:\lm-studio\models\Qwen\Qwen2-7B-Instruct
 ```
 
 ## 使用 `llama.cpp` 转换格式
@@ -31,7 +31,7 @@ $ cd llama.cpp
 ### 转换为 GGUF 格式
 
 ```
-$ python .\convert_hf_to_gguf.py E:\lm-studio\models\Qwen--Qwen2-7B-Instruct
+$ python .\convert_hf_to_gguf.py E:\lm-studio\models\Qwen\Qwen2-7B-Instruct
 ```
 
 > Hugging Face 上有很多 GGUF 格式的模型，我们也可以直接下载使用，比如 [MaziyarPanahi/Qwen2-7B-Instruct-GGUF](https://huggingface.co/MaziyarPanahi/Qwen2-7B-Instruct-GGUF)。
@@ -80,5 +80,5 @@ $ cmake --build build --config Release
 编译后生成 `llama-cli.exe` 可执行文件，运行之：
 
 ```
-$ .\build\bin\Release\llama-cli.exe -m E:\lm-studio\models\Qwen--Qwen2-7B-Instruct\Qwen-Qwen2-7B-Instruct-F16.gguf -p "hello" -n 128
+$ .\build\bin\Release\llama-cli.exe -m E:\lm-studio\models\Qwen\Qwen2-7B-Instruct\Qwen-Qwen2-7B-Instruct-F16.gguf -p "hello" -n 128
 ```
