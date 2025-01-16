@@ -16,6 +16,145 @@ GraalVM 的原生镜像功能通过 **提前编译（AOT）** 机制，显著改
 
 这一节我们将学习 GraalVM 的安装以及 Native Image 的基本使用。
 
+### GraalVM 的安装
+
+GraalVM 支持常见的操作系统，包括 [Linux](https://www.graalvm.org/latest/getting-started/linux/)、[macOS](https://www.graalvm.org/latest/getting-started/macos/) 和 [Windows](https://www.graalvm.org/latest/getting-started/windows/)。
+
+在 Linux 和 macOS 下，推荐使用 [SDKMAN!](https://sdkman.io/) 来安装 GraalVM。首先我们安装 `SDKMAN!`：
+
+```
+$ curl -s "https://get.sdkman.io" | bash
+```
+
+安装完成后，使用 `sdk list java` 列出当前系统可用的 JDK 版本：
+
+> 也可以使用 `sdk install java [TAB]` 列出所有可用版本。
+
+```
+================================================================================
+Available Java Versions for macOS ARM 64bit
+================================================================================
+ Vendor        | Use | Version      | Dist    | Status     | Identifier
+--------------------------------------------------------------------------------
+ Corretto      |     | 23.0.1       | amzn    |            | 23.0.1-amzn         
+               |     | 21.0.5       | amzn    |            | 21.0.5-amzn         
+               |     | 17.0.13      | amzn    |            | 17.0.13-amzn        
+               |     | 11.0.25      | amzn    |            | 11.0.25-amzn        
+               |     | 8.0.432      | amzn    |            | 8.0.432-amzn        
+ Gluon         |     | 22.1.0.1.r17 | gln     |            | 22.1.0.1.r17-gln    
+               |     | 22.1.0.1.r11 | gln     |            | 22.1.0.1.r11-gln    
+ GraalVM CE    |     | 23.0.1       | graalce |            | 23.0.1-graalce      
+               | >>> | 21.0.2       | graalce | installed  | 21.0.2-graalce      
+               |     | 17.0.9       | graalce | installed  | 17.0.9-graalce      
+ GraalVM Oracle|     | 25.ea.4      | graal   |            | 25.ea.4-graal       
+               |     | 25.ea.3      | graal   |            | 25.ea.3-graal       
+               |     | 25.ea.2      | graal   |            | 25.ea.2-graal       
+               |     | 25.ea.1      | graal   |            | 25.ea.1-graal       
+               |     | 24.ea.27     | graal   |            | 24.ea.27-graal      
+               |     | 24.ea.26     | graal   |            | 24.ea.26-graal      
+               |     | 24.ea.25     | graal   |            | 24.ea.25-graal      
+               |     | 24.ea.24     | graal   |            | 24.ea.24-graal      
+               |     | 24.ea.23     | graal   |            | 24.ea.23-graal      
+               |     | 24.ea.22     | graal   |            | 24.ea.22-graal      
+               |     | 23.0.1       | graal   |            | 23.0.1-graal        
+               |     | 21.0.5       | graal   |            | 21.0.5-graal        
+               |     | 17.0.12      | graal   |            | 17.0.12-graal       
+ Java.net      |     | 25.ea.5      | open    |            | 25.ea.5-open        
+               |     | 25.ea.4      | open    |            | 25.ea.4-open        
+               |     | 25.ea.3      | open    |            | 25.ea.3-open        
+               |     | 25.ea.2      | open    |            | 25.ea.2-open        
+               |     | 25.ea.1      | open    |            | 25.ea.1-open        
+               |     | 24.ea.31     | open    |            | 24.ea.31-open       
+               |     | 24.ea.30     | open    |            | 24.ea.30-open       
+               |     | 24.ea.29     | open    |            | 24.ea.29-open       
+               |     | 24.ea.28     | open    |            | 24.ea.28-open       
+               |     | 24.ea.27     | open    |            | 24.ea.27-open       
+               |     | 24.ea.26     | open    |            | 24.ea.26-open       
+               |     | 23           | open    |            | 23-open             
+               |     | 21.0.2       | open    |            | 21.0.2-open         
+ JetBrains     |     | 21.0.5       | jbr     |            | 21.0.5-jbr          
+               |     | 17.0.12      | jbr     |            | 17.0.12-jbr         
+               |     | 11.0.14.1    | jbr     |            | 11.0.14.1-jbr       
+ Liberica      |     | 23.0.1.fx    | librca  |            | 23.0.1.fx-librca    
+               |     | 23.0.1       | librca  |            | 23.0.1-librca       
+               |     | 21.0.5.fx    | librca  |            | 21.0.5.fx-librca    
+               |     | 21.0.5       | librca  |            | 21.0.5-librca       
+               |     | 17.0.13.fx   | librca  |            | 17.0.13.fx-librca   
+               |     | 17.0.13      | librca  |            | 17.0.13-librca      
+               |     | 11.0.25.fx   | librca  |            | 11.0.25.fx-librca   
+               |     | 11.0.25      | librca  |            | 11.0.25-librca      
+               |     | 8.0.432.fx   | librca  |            | 8.0.432.fx-librca   
+               |     | 8.0.432      | librca  |            | 8.0.432-librca      
+ Liberica NIK  |     | 24.1.1.r23   | nik     |            | 24.1.1.r23-nik      
+               |     | 23.1.5.r21   | nik     |            | 23.1.5.r21-nik      
+               |     | 23.1.5.fx    | nik     |            | 23.1.5.fx-nik       
+               |     | 23.0.6.r17   | nik     |            | 23.0.6.r17-nik      
+               |     | 23.0.6.fx    | nik     |            | 23.0.6.fx-nik       
+               |     | 22.3.5.r17   | nik     |            | 22.3.5.r17-nik      
+               |     | 22.3.5.r11   | nik     |            | 22.3.5.r11-nik      
+ Mandrel       |     | 24.1.1.r23   | mandrel |            | 24.1.1.r23-mandrel  
+               |     | 24.0.2.r22   | mandrel |            | 24.0.2.r22-mandrel  
+               |     | 23.1.5.r21   | mandrel |            | 23.1.5.r21-mandrel  
+ Microsoft     |     | 21.0.5       | ms      |            | 21.0.5-ms           
+               |     | 17.0.13      | ms      |            | 17.0.13-ms          
+               |     | 11.0.25      | ms      |            | 11.0.25-ms          
+ Oracle        |     | 23.0.1       | oracle  |            | 23.0.1-oracle       
+               |     | 22.0.2       | oracle  |            | 22.0.2-oracle       
+               |     | 21.0.5       | oracle  |            | 21.0.5-oracle       
+               |     | 17.0.12      | oracle  |            | 17.0.12-oracle      
+ SapMachine    |     | 23.0.1       | sapmchn |            | 23.0.1-sapmchn      
+               |     | 21.0.5       | sapmchn |            | 21.0.5-sapmchn      
+               |     | 17.0.13      | sapmchn |            | 17.0.13-sapmchn     
+               |     | 11.0.25      | sapmchn |            | 11.0.25-sapmchn     
+ Semeru        |     | 21.0.5       | sem     |            | 21.0.5-sem          
+               |     | 17.0.13      | sem     |            | 17.0.13-sem         
+               |     | 11.0.25      | sem     |            | 11.0.25-sem         
+ Temurin       |     | 23.0.1       | tem     |            | 23.0.1-tem          
+               |     | 21.0.5       | tem     |            | 21.0.5-tem          
+               |     | 17.0.13      | tem     |            | 17.0.13-tem         
+               |     | 11.0.25      | tem     |            | 11.0.25-tem         
+ Tencent       |     | 21.0.5       | kona    |            | 21.0.5-kona         
+               |     | 17.0.13      | kona    |            | 17.0.13-kona        
+               |     | 11.0.25      | kona    |            | 11.0.25-kona        
+               |     | 8.0.432      | kona    |            | 8.0.432-kona        
+ Zulu          |     | 23.0.1.fx    | zulu    |            | 23.0.1.fx-zulu      
+               |     | 23.0.1       | zulu    |            | 23.0.1-zulu         
+               |     | 21.0.5.fx    | zulu    |            | 21.0.5.fx-zulu      
+               |     | 21.0.5       | zulu    |            | 21.0.5-zulu         
+               |     | 17.0.13.fx   | zulu    |            | 17.0.13.fx-zulu     
+               |     | 17.0.13      | zulu    |            | 17.0.13-zulu        
+               |     | 11.0.25.fx   | zulu    |            | 11.0.25.fx-zulu     
+               |     | 11.0.25      | zulu    |            | 11.0.25-zulu        
+               |     | 8.0.432.fx   | zulu    |            | 8.0.432.fx-zulu     
+               |     | 8.0.432      | zulu    |            | 8.0.432-zulu        
+================================================================================
+Omit Identifier to install default version 21.0.5-tem:
+    $ sdk install java
+Use TAB completion to discover available versions
+    $ sdk install java [TAB]
+Or install a specific version by Identifier:
+    $ sdk install java 21.0.5-tem
+Hit Q to exit this list view
+================================================================================
+```
+
+其中 GraalVM 有两个，`GraalVM CE` 是由社区维护，是开源的，基于 OpenJDK 开发；而 `GraalVM Oracle` 是由 Oracle 发布，基于 Oracle JDK 开发，我们这里安装社区版：
+
+```
+$ sdk install java 21.0.2-graalce
+```
+
+使用 `java -version` 确认安装是否成功：
+
+```
+$ java -version
+openjdk version "21.0.2" 2024-01-16
+OpenJDK Runtime Environment GraalVM CE 21.0.2+13.1 (build 21.0.2+13-jvmci-23.1-b30)
+OpenJDK 64-Bit Server VM GraalVM CE 21.0.2+13.1 (build 21.0.2+13-jvmci-23.1-b30, mixed mode, sharing)
+```
+
+### Native Image 的基本使用
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
