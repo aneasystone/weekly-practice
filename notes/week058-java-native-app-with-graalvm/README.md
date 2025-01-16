@@ -155,6 +155,102 @@ OpenJDK 64-Bit Server VM GraalVM CE 21.0.2+13.1 (build 21.0.2+13-jvmci-23.1-b30,
 
 ### Native Image 的基本使用
 
+接下来，我们将通过最简单的 Hello World 例子了解 Native Image 的基本使用。
+
+首先，我们创建一个 `Hello.java` 文件，如下：
+
+```
+class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+```
+
+直接使用 `java` 命令运行，确保程序没有错误：
+
+```
+$ java Hello.java
+Hello
+```
+
+然后使用 `javac` 将 `.java` 文件编译成 `.class` 文件：
+
+```
+$ javac Hello.java
+```
+
+此时，当前目录下会生成一个 `Hello.class` 文件。接下来使用 `native-image` 命令，将 `.class` 文件打包成可执行程序：
+
+```
+$ native-image Hello
+========================================================================================================================
+GraalVM Native Image: Generating 'hello' (executable)...
+========================================================================================================================
+[1/8] Initializing...                                                                                    (7.2s @ 0.10GB)
+ Java version: 21.0.2+13, vendor version: GraalVM CE 21.0.2+13.1
+ Graal compiler: optimization level: 2, target machine: armv8-a
+ C compiler: cc (apple, arm64, 15.0.0)
+ Garbage collector: Serial GC (max heap size: 80% of RAM)
+ 1 user-specific feature(s):
+ - com.oracle.svm.thirdparty.gson.GsonFeature
+------------------------------------------------------------------------------------------------------------------------
+Build resources:
+ - 12.09GB of memory (75.6% of 16.00GB system memory, determined at start)
+ - 8 thread(s) (100.0% of 8 available processor(s), determined at start)
+[2/8] Performing analysis...  [****]                                                                     (5.6s @ 0.32GB)
+    3,225 reachable types   (72.5% of    4,450 total)
+    3,810 reachable fields  (50.1% of    7,606 total)
+   15,653 reachable methods (45.6% of   34,359 total)
+    1,059 types,    87 fields, and   678 methods registered for reflection
+       57 types,    57 fields, and    52 methods registered for JNI access
+        4 native libraries: -framework Foundation, dl, pthread, z
+[3/8] Building universe...                                                                               (1.3s @ 0.29GB)
+[4/8] Parsing methods...      [*]                                                                        (0.6s @ 0.29GB)
+[5/8] Inlining methods...     [***]                                                                      (0.5s @ 0.46GB)
+[6/8] Compiling methods...    [**]                                                                       (4.9s @ 0.34GB)
+[7/8] Layouting methods...    [*]                                                                        (0.7s @ 0.50GB)
+[8/8] Creating image...       [*]                                                                        (1.5s @ 0.47GB)
+   5.08MB (39.25%) for code area:     8,896 compilation units
+   7.48MB (57.87%) for image heap:   97,240 objects and 76 resources
+ 381.68kB ( 2.88%) for other data
+  12.93MB in total
+------------------------------------------------------------------------------------------------------------------------
+Top 10 origins of code area:                                Top 10 object types in image heap:
+   3.80MB java.base                                            1.58MB byte[] for code metadata
+ 936.91kB svm.jar (Native Image)                               1.29MB byte[] for java.lang.String
+ 108.35kB java.logging                                       976.00kB java.lang.String
+  56.84kB org.graalvm.nativeimage.base                       748.94kB java.lang.Class
+  43.64kB jdk.proxy1                                         328.26kB byte[] for general heap data
+  42.03kB jdk.proxy3                                         277.15kB com.oracle.svm.core.hub.DynamicHubCompanion
+  21.98kB org.graalvm.collections                            244.27kB java.util.HashMap$Node
+  19.52kB jdk.internal.vm.ci                                 219.04kB java.lang.Object[]
+  10.46kB jdk.proxy2                                         184.95kB java.lang.String[]
+   8.04kB jdk.internal.vm.compiler                           155.52kB byte[] for reflection metadata
+   2.95kB for 2 more packages                                  1.55MB for 905 more object types
+------------------------------------------------------------------------------------------------------------------------
+Recommendations:
+ INIT: Adopt '--strict-image-heap' to prepare for the next GraalVM release.
+ HEAP: Set max heap for improved and more predictable memory usage.
+ CPU:  Enable more CPU features with '-march=native' for improved performance.
+------------------------------------------------------------------------------------------------------------------------
+                        1.3s (5.7% of total time) in 115 GCs | Peak RSS: 0.93GB | CPU load: 4.04
+------------------------------------------------------------------------------------------------------------------------
+Produced artifacts:
+ /Users/aneasystone/Codes/github/weekly-practice/notes/week058-java-native-app-with-graalvm/demo/hello (executable)
+========================================================================================================================
+Finished generating 'hello' in 22.6s.
+```
+
+上面可以看到 `native-image` 详情的运行过程，最终生成一个 `hello` 文件，可以直接执行：
+
+```
+$ ./hello 
+Hello
+```
+
+`native-image` 不仅可以将类文件转换为可执行文件，也支持输入 JAR 文件或模块（Java 9 及更高版本），参考 [这里](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-executable-from-jar/) 和 [这里](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-java-modules-into-native-executable/)；除了可以编译可执行文件，`native-image` 还可以将类文件 [编译成共享库（native shared library）](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)。
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
