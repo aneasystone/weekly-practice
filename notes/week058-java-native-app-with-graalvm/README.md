@@ -251,6 +251,187 @@ Hello
 
 `native-image` 不仅可以将类文件转换为可执行文件，也支持输入 JAR 文件或模块（Java 9 及更高版本），参考 [这里](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-executable-from-jar/) 和 [这里](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-java-modules-into-native-executable/)；除了可以编译可执行文件，`native-image` 还可以将类文件 [编译成共享库（native shared library）](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)。
 
+## 构建复杂应用
+
+上一节我们演示了如何将单个 Java 文件编译成可执行文件，不过在日常工作中，我们的项目可没这么简单，一般会使用 Maven 来对代码进行组织，在微服务盛行的今天，更多的项目是使用一些微服务框架来开发，如何将这些复杂应用编译成可执行文件也是一个值得学习的课题。
+
+### 一个简单的 Maven 项目
+
+GraalVM 提供了 [Maven 插件](https://graalvm.github.io/native-build-tools/latest/maven-plugin.html)，方便我们在 Maven 项目中使用 Native Image 构建原生应用。
+
+> GraalVM 同时也支持 Gradle 插件，如果你使用的是 Gradle 管理项目，可以参考 [Gradle 插件文档](https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html)。
+
+首先，我们用 `mvn archetype:generate` 生成一个 Maven 项目：
+
+```
+$ mvn archetype:generate \
+    -DgroupId=com.example \
+    -DartifactId=hello \
+    -DarchetypeArtifactId=maven-archetype-quickstart \
+    -DinteractiveMode=false
+```
+
+这里选择的项目脚手架为 `maven-archetype-quickstart`，关于项目脚手架的使用，可以参考我之前写的 [这篇笔记](../week004-creating-spring-project/README.md)。
+
+生成项目的目录结构如下所示：
+
+```
+hello
+├── pom.xml
+└── src
+    ├── main
+    │   └── java
+    │       └── com
+    │           └── example
+    │               └── App.java
+    └── test
+        └── java
+            └── com
+                └── example
+                    └── AppTest.java
+```
+
+打开 `pom.xml` 文件，添加如下两个 Maven 插件，用于编译和打包：
+
+```
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.12.1</version>
+            <configuration>
+                <fork>true</fork>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>com.example.App</mainClass>
+                        <addClasspath>true</addClasspath>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+此时我们就可以使用 `mvn clean package` 命令，将项目打包成可执行的 JAR 文件了：
+
+```
+$ mvn clean package
+```
+
+使用 `java -jar` 运行 JAR 文件：
+
+```
+$ java -jar ./target/hello-1.0-SNAPSHOT.jar 
+Hello World!
+```
+
+接下来我们可以使用 `native-image -jar` 将 JAR 文件转换为可执行文件，或者我们可以更进一步，在 `pom.xml` 文件中添加如下配置：
+
+```
+<profiles>
+    <profile>
+        <id>native</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>0.10.4</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <id>build-native</id>
+                            <goals>
+                                <goal>compile-no-fork</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                        <execution>
+                            <id>test-native</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+```
+
+> 注意，从 JDK 21 开始，Native Image Maven Plugin 改成了 `org.graalvm.buildtools:native-maven-plugin`，之前的版本中使用的是 `org.graalvm.nativeimage:native-image-maven-plugin`，参考 [这里](https://docs.oracle.com/en/graalvm/enterprise/20/docs/reference-manual/native-image/NativeImageMavenPlugin/)。
+
+然后执行如下命令：
+
+```
+$ mvn clean package -Pnative -DskipTests=true
+```
+
+这样不仅可以将项目打包成 JAR 文件，同时也会生成一个可执行文件：
+
+```
+$ ./target/hello 
+Hello World!
+```
+
+注意在上面的命令中我们加了一个忽略测试的参数 `-DskipTests=true`，如果不加的话，可能会报错：
+
+```
+[ERROR] Failed to execute goal org.graalvm.buildtools:native-maven-plugin:0.10.4:test (test-native) on project hello: 
+Execution test-native of goal org.graalvm.buildtools:native-maven-plugin:0.10.4:test failed: Test configuration file wasn't found.
+```
+
+根据 [Testing support](https://graalvm.github.io/native-build-tools/latest/maven-plugin.html#testing-support) 部分的说明，目前插件只支持 JUnit 5.8.1 以上的版本，而通过 `maven-archetype-quickstart` 脚手架生成的项目里用的是 JUnit 3.8.1，所以我们可以将依赖改为：
+
+```
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.10.5</version>
+    <scope>test</scope>
+</dependency>
+```
+
+同时将测试类替换成 JUnit 5 的写法：
+
+```
+package com.example;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.*;
+
+public class AppTest
+{
+    @Test
+    public void testApp()
+    {
+        assertEquals( "hello".length(), 5 );
+    }
+}
+```
+
+这时就可以去掉 `-DskipTests=true` 参数了：
+
+```
+$ mvn clean package -Pnative
+```
+
+> 注意，从构建输出上可以看出来，单元测试运行了两遍，第一遍是标准的 `surefire:test`，第二遍是 Native Image 的 `native:test`，这两次运行的目的和场景是不一样的，`surefire:test` 在 JVM 上运行，验证代码在 JVM 环境下的正确性，`native:test` 在 Native Image 构建的上下文中运行，验证代码在 Native Image 环境下的正确性。如果你的代码在两种环境下的行为可能不同（如反射、动态类加载等），可能需要都运行，否则只运行 `surefire:test` 即可，可以通过 `-DskipNativeTests=true` 跳过 `native:test`。
+
+### 一个简单的 Spring Boot 项目
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
