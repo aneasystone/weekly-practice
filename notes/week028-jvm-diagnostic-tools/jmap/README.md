@@ -138,6 +138,11 @@ PS Old Generation
 
 输出结果中包含了堆的配置信息和使用情况，这和命令 `jstat -gc` 或 `jstat -gcutil` 是类似的，不过这里以汇总的形式显示，看起来更直观和友好。 
 
+注意这里的两个参数：
+
+* `NewRatio=2` 表示年轻代的大小是老年代大小的 1/2，年轻代大小为 25+4+4 = 33MB，老年代大小为 67MB
+* `SurvivorRatio=8` 表示年轻代的 Eden 区与 Survivor 区的比例为 8:1:1，所以 From 区和 To 区的大小为 33/10 = 3.3 ≈ 4MB，Eden 区大小为 33-8 = 25MB
+
 ### `jmap -clstats <pid>`
 
 `-clstats` 选项用于输出 Java 程序中 ClassLoader 的统计信息：
