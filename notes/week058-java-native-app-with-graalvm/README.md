@@ -432,6 +432,62 @@ $ mvn clean package -Pnative
 
 ### 一个简单的 Spring Boot 项目
 
+这一节将演示如何从 Spring Boot 应用程序构建一个本地可执行文件，[Spring Boot 从 3.0 开始支持原生镜像](https://www.graalvm.org/reference-manual/native-image/guides/build-spring-boot-app-into-native-executable/)，可以更轻松地配置项目，并显著提高 Spring Boot 应用程序的性能。
+
+> 其他主流的微服务框架均已支持 GraalVM 的原生镜像功能，如：[Quarkus](https://quarkus.io/guides/building-native-image)、[Helidon SE](https://helidon.io/docs/v4/se/guides/graalnative)、[Micronaut](https://guides.micronaut.io/latest/micronaut-creating-first-graal-app.html) 等。
+
+首先，我们需要一个测试的 Spring Boot 应用，有很多快速创建 Spring Boot 脚手架的方法，可以参考我之前写的 [这篇笔记](../week004-creating-spring-project/README.md)，我最喜欢的方法有两种：[Spring Initializr](https://start.spring.io/#!dependencies=native,web) 和 [Spring Boot CLI](https://docs.spring.io/spring-boot/installing.html#getting-started.installing.cli)，这里通过 `Spring Boot CLI` 来创建：
+
+可以使用 `SDKMAN!` 安装 `Spring Boot CLI`：
+
+```
+$ sdk install springboot
+$ spring --version
+Spring CLI v3.4.1
+```
+
+安装完毕后，执行如下命令生成：
+
+```
+$ spring init --name hello \
+	--artifact-id hello \
+	--group-id com.example \
+	--language java \
+	--java-version 21 \
+	--boot-version 3.4.1 \
+	--type maven-project \
+	--dependencies web,native \
+	hello
+```
+
+打开 `pom.xml` 文件可以发现，生成的代码中已经自动为我们加了 `native-maven-plugin` 依赖。
+
+这时，我们可以执行 `mvn clean package` 将程序打成 JAR 包并运行，也可以执行 `mvn spring-boot:run` 直接运行：
+
+```
+$ mvn spring-boot:run
+...
+2025-01-17T08:56:17.206+08:00  INFO 33037 --- [hello] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-01-17T08:56:17.210+08:00  INFO 33037 --- [hello] [           main] com.example.hello.HelloApplication       : Started HelloApplication in 0.548 seconds (process running for 0.662)
+```
+
+如果要将程序打包成可执行文件，可以执行如下命令：
+
+```
+$ mvn native:compile -Pnative
+```
+
+然后运行之：
+
+```
+$ ./target/hello
+...
+2025-01-17T09:02:19.732+08:00  INFO 33935 --- [hello] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-01-17T09:02:19.733+08:00  INFO 33935 --- [hello] [           main] com.example.hello.HelloApplication       : Started HelloApplication in 0.054 seconds (process running for 0.071)
+```
+
+可以看到启动速度是 JAR 文件的 10 倍。
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
