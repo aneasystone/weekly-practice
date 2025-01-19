@@ -488,12 +488,181 @@ $ ./target/hello
 
 可以看到启动速度是 JAR 文件的 10 倍。
 
+## 容器化
+
+在云原生环境下，所有服务都被打包成镜像，这也被称为 **容器化（Containerize）**。我在很早以前写过一篇 [博客](../week011-spring-boot-on-docker/README.md) 介绍了如何编写 Dockerfile 将 Spring Boot 应用构建成 Docker 镜像，针对 GraalVM 原生应用，我们一样可以照葫芦画瓢。
+
+### 将 JAR 打包成镜像
+
+最简单的方式是基于 JDK 基础镜像，直接将 JAR 文件拷贝进去即可，新建 `Dockerfile.jvm` 文件，内容如下：
+
+```
+FROM ghcr.io/graalvm/jdk-community:21
+
+EXPOSE 8080
+COPY ./target/hello-0.0.1-SNAPSHOT.jar app.jar
+CMD ["java","-jar","app.jar"]
+```
+
+之前说过 GraalVM 也可以作为普通的 JDK 使用，所以这里直接使用 [GraalVM 的 JDK 镜像](https://www.graalvm.org/latest/getting-started/container-images/)。首先通过 `mvn package` 正常将项目打成 JAR 包，然后执行如下命令构建镜像：
+
+```
+$ docker build -f Dockerfile.jvm -t hello:jvm .
+```
+
+运行该镜像：
+
+```
+$ docker run --rm -p 8080:8080 hello:jvm
+```
+
+这种方式虽然简单，但是每次构建镜像之前先得 `mvn package` 一下，可以使用 [多阶段构建（Multi-stage builds）](https://docs.docker.com/build/building/multi-stage/) 的技巧，将两步合成一步。新建 `Dockerfile.jvm.ms` 文件，内容如下：
+
+```
+FROM ghcr.io/graalvm/native-image-community:21 AS builder
+
+WORKDIR /build
+COPY . /build
+RUN ./mvnw --no-transfer-progress package -DskipTests=true
+
+FROM ghcr.io/graalvm/jdk-community:21
+
+EXPOSE 8080
+COPY --from=builder /build/target/hello-0.0.1-SNAPSHOT.jar app.jar
+CMD ["java","-jar","app.jar"]
+```
+
+整个 Dockerfile 分为两个构建阶段，第一阶段使用 `mvn package` 生成 JAR 文件，第二阶段和 `Dockerfile.jvm` 几乎是一样的，只不过是从第一阶段的构建结果中拷贝 JAR 文件。
+
+直接执行如下命令构建镜像：
+
+```
+$ docker build -f Dockerfile.jvm.ms -t hello:jvm.ms .
+```
+
+运行该镜像：
+
+```
+$ docker run --rm -p 8080:8080 hello:jvm.ms
+```
+
+### 将二进制文件打包成镜像
+
+有了上面的基础，我们可以更进一步，直接将二进制文件打包成镜像，这样可以省去 JDK，大大减小镜像体积。我们可以基于某个系统镜像，比如 `alpine` 或 `almalinux`，新建 `Dockerfile.native` 文件如下：
+
+```
+FROM almalinux:9
+
+EXPOSE 8080
+COPY target/hello app
+ENTRYPOINT ["/app"]
+```
+
+然后执行如下命令构建镜像：
+
+```
+$ docker build -f Dockerfile.native -t hello:native .
+```
+
+运行该镜像：
+
+```
+$ docker run --rm -p 8080:8080 hello:native
+```
+
+不过这一次没有那么顺利，运行报错了：
+
+```
+exec /app: exec format error
+```
+
+这里就不得不提可执行文件格式的概念了。我们知道 GraalVM 的原生镜像功能是将 Java 代码编译成二进制文件，但是要注意的是，这个二进制文件是平台相关的，在不同的操作系统下，可执行文件的格式大相径庭。常见的可执行文件格式有以下几种：
+
+* **ELF 格式（Executable and Linkable Format）**：是一种通用的可执行文件格式，广泛用于类 UNIX 系统，如 Linux 和 BSD；
+* **Mach-O 格式（Mach Object）**：是苹果公司开发的可执行文件格式，用于 macOS 和 iOS 系统；
+* **PE 格式（Portable Executable）**：Windows 系统下的 `.exe` 文件就是这种格式。
+
+Docker 容器基于 Linux 内核开发，所以只能运行 ELF 格式的文件，而上面的二进制文件是我在 Mac 电脑上构建的，所以复制到容器里无法运行。
+
+如果你使用的是 Linux 开发环境，可能就不会遇到这个问题；但是如果你和我一样，使用的是 Mac 或 Windows 操作系统，建议还是使用多阶段构建的技巧。新建 `Dockerfile.native.ms` 文件如下：
+
+```
+FROM ghcr.io/graalvm/native-image-community:21 AS builder
+
+WORKDIR /build
+COPY . /build
+RUN ./mvnw --no-transfer-progress native:compile -Pnative -DskipTests=true
+
+FROM almalinux:9
+
+EXPOSE 8080
+COPY --from=builder /build/target/hello app
+ENTRYPOINT ["/app"]
+```
+
+构建镜像：
+
+```
+$ docker build -f Dockerfile.native.ms -t hello:native.ms .
+```
+
+运行镜像：
+
+```
+$ docker run --rm -p 8080:8080 hello:native.ms
+```
+
+在实验过程中还有一点值得特别注意，那就是 GLIBC 的兼容性问题，可以使用 `ldd --version` 确认构建和运行使用的两个基础镜像中 GLIBC 版本。
+
+查看 `ghcr.io/graalvm/native-image-community:21` 的 GLIBC 版本：
+
+```
+$ docker run --rm --entrypoint sh ghcr.io/graalvm/native-image-community:21 ldd --version
+ldd (GNU libc) 2.34
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+```
+
+查看 `almalinux:9` 的 GLIBC 版本：
+
+```
+$ docker run --rm --entrypoint sh almalinux:9 ldd --version
+ldd (GNU libc) 2.34
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+```
+
+可以看出这两个基础镜像的 GLIBC 是一致的。如果我们将 `almalinux:9` 换成 `centos:7`：
+
+```
+$ docker run --rm --entrypoint sh centos:7 ldd --version
+ldd (GNU libc) 2.17
+Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+```
+
+运行时就可能报下面这样的报错：
+
+```
+/app: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by /app)
+/app: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by /app)
+```
+
+### 使用 CNB 构建镜像
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
 * [Getting Started with Native Image](https://www.graalvm.org/latest/reference-manual/native-image/)
 * [GraalVM Documentation](https://www.graalvm.org/latest/docs/)
 * [GraalVM User Guides](https://www.graalvm.org/latest/guides/)
+* [Containerize a Native Executable and Run in a Container](https://www.graalvm.org/latest/reference-manual/native-image/guides/containerise-native-executable-and-run-in-docker-container/)
 * [Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
@@ -501,3 +670,4 @@ $ ./target/hello
 * [GraalVM for JDK 21 is here!](https://medium.com/graalvm/graalvm-for-jdk-21-is-here-ee01177dd12d)
 * [GraalVM Native Image Support](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
 * [初步探索GraalVM--云原生时代JVM黑科技-京东云开发者社区](https://developer.jdcloud.com/article/2446)
+* [不同操作系统可执行文件格式](https://www.cnblogs.com/sooooooul/p/17435401.html)
