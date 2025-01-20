@@ -42,58 +42,30 @@ Available Java Versions for macOS ARM 64bit
                |     | 11.0.25      | amzn    |            | 11.0.25-amzn        
                |     | 8.0.432      | amzn    |            | 8.0.432-amzn        
  Gluon         |     | 22.1.0.1.r17 | gln     |            | 22.1.0.1.r17-gln    
-               |     | 22.1.0.1.r11 | gln     |            | 22.1.0.1.r11-gln    
  GraalVM CE    |     | 23.0.1       | graalce |            | 23.0.1-graalce      
                | >>> | 21.0.2       | graalce | installed  | 21.0.2-graalce      
                |     | 17.0.9       | graalce | installed  | 17.0.9-graalce      
  GraalVM Oracle|     | 25.ea.4      | graal   |            | 25.ea.4-graal       
-               |     | 25.ea.3      | graal   |            | 25.ea.3-graal       
-               |     | 25.ea.2      | graal   |            | 25.ea.2-graal       
-               |     | 25.ea.1      | graal   |            | 25.ea.1-graal       
                |     | 24.ea.27     | graal   |            | 24.ea.27-graal      
-               |     | 24.ea.26     | graal   |            | 24.ea.26-graal      
-               |     | 24.ea.25     | graal   |            | 24.ea.25-graal      
-               |     | 24.ea.24     | graal   |            | 24.ea.24-graal      
-               |     | 24.ea.23     | graal   |            | 24.ea.23-graal      
-               |     | 24.ea.22     | graal   |            | 24.ea.22-graal      
                |     | 23.0.1       | graal   |            | 23.0.1-graal        
                |     | 21.0.5       | graal   |            | 21.0.5-graal        
                |     | 17.0.12      | graal   |            | 17.0.12-graal       
  Java.net      |     | 25.ea.5      | open    |            | 25.ea.5-open        
-               |     | 25.ea.4      | open    |            | 25.ea.4-open        
-               |     | 25.ea.3      | open    |            | 25.ea.3-open        
-               |     | 25.ea.2      | open    |            | 25.ea.2-open        
-               |     | 25.ea.1      | open    |            | 25.ea.1-open        
                |     | 24.ea.31     | open    |            | 24.ea.31-open       
-               |     | 24.ea.30     | open    |            | 24.ea.30-open       
-               |     | 24.ea.29     | open    |            | 24.ea.29-open       
-               |     | 24.ea.28     | open    |            | 24.ea.28-open       
-               |     | 24.ea.27     | open    |            | 24.ea.27-open       
-               |     | 24.ea.26     | open    |            | 24.ea.26-open       
                |     | 23           | open    |            | 23-open             
                |     | 21.0.2       | open    |            | 21.0.2-open         
  JetBrains     |     | 21.0.5       | jbr     |            | 21.0.5-jbr          
                |     | 17.0.12      | jbr     |            | 17.0.12-jbr         
                |     | 11.0.14.1    | jbr     |            | 11.0.14.1-jbr       
- Liberica      |     | 23.0.1.fx    | librca  |            | 23.0.1.fx-librca    
-               |     | 23.0.1       | librca  |            | 23.0.1-librca       
-               |     | 21.0.5.fx    | librca  |            | 21.0.5.fx-librca    
+ Liberica      |     | 23.0.1       | librca  |            | 23.0.1-librca       
                |     | 21.0.5       | librca  |            | 21.0.5-librca       
-               |     | 17.0.13.fx   | librca  |            | 17.0.13.fx-librca   
                |     | 17.0.13      | librca  |            | 17.0.13-librca      
-               |     | 11.0.25.fx   | librca  |            | 11.0.25.fx-librca   
                |     | 11.0.25      | librca  |            | 11.0.25-librca      
-               |     | 8.0.432.fx   | librca  |            | 8.0.432.fx-librca   
                |     | 8.0.432      | librca  |            | 8.0.432-librca      
  Liberica NIK  |     | 24.1.1.r23   | nik     |            | 24.1.1.r23-nik      
                |     | 23.1.5.r21   | nik     |            | 23.1.5.r21-nik      
-               |     | 23.1.5.fx    | nik     |            | 23.1.5.fx-nik       
-               |     | 23.0.6.r17   | nik     |            | 23.0.6.r17-nik      
-               |     | 23.0.6.fx    | nik     |            | 23.0.6.fx-nik       
                |     | 22.3.5.r17   | nik     |            | 22.3.5.r17-nik      
-               |     | 22.3.5.r11   | nik     |            | 22.3.5.r11-nik      
  Mandrel       |     | 24.1.1.r23   | mandrel |            | 24.1.1.r23-mandrel  
-               |     | 24.0.2.r22   | mandrel |            | 24.0.2.r22-mandrel  
                |     | 23.1.5.r21   | mandrel |            | 23.1.5.r21-mandrel  
  Microsoft     |     | 21.0.5       | ms      |            | 21.0.5-ms           
                |     | 17.0.13      | ms      |            | 17.0.13-ms          
@@ -117,15 +89,10 @@ Available Java Versions for macOS ARM 64bit
                |     | 17.0.13      | kona    |            | 17.0.13-kona        
                |     | 11.0.25      | kona    |            | 11.0.25-kona        
                |     | 8.0.432      | kona    |            | 8.0.432-kona        
- Zulu          |     | 23.0.1.fx    | zulu    |            | 23.0.1.fx-zulu      
-               |     | 23.0.1       | zulu    |            | 23.0.1-zulu         
-               |     | 21.0.5.fx    | zulu    |            | 21.0.5.fx-zulu      
+ Zulu          |     | 23.0.1       | zulu    |            | 23.0.1-zulu         
                |     | 21.0.5       | zulu    |            | 21.0.5-zulu         
-               |     | 17.0.13.fx   | zulu    |            | 17.0.13.fx-zulu     
                |     | 17.0.13      | zulu    |            | 17.0.13-zulu        
-               |     | 11.0.25.fx   | zulu    |            | 11.0.25.fx-zulu     
                |     | 11.0.25      | zulu    |            | 11.0.25-zulu        
-               |     | 8.0.432.fx   | zulu    |            | 8.0.432.fx-zulu     
                |     | 8.0.432      | zulu    |            | 8.0.432-zulu        
 ================================================================================
 Omit Identifier to install default version 21.0.5-tem:
@@ -656,12 +623,51 @@ Written by Roland McGrath and Ulrich Drepper.
 
 ### 使用 CNB 构建镜像
 
+[CNB（Cloud Native Buildpacks）](https://buildpacks.io/) 是一种用于构建和打包应用程序的技术，旨在简化应用程序的开发、部署和运行，使用 CNB 开发人员无需编写 Dockerfile 就可以构建容器镜像。它会自动检测应用程序的类型和所需的环境，根据检测结果，下载必要的依赖项，并将它们与应用程序代码打包，最终生成一个符合 OCI 标准的容器镜像。
+
+Spring Boot 的 Maven 插件 `spring-boot-maven-plugin` 已经集成了 CNB，它使用 [Paketo Java Native Image buildpack](https://paketo.io/docs/reference/java-native-image-reference/) 来生成包含本地可执行文件的轻量级容器镜像。
+
+针对上面的 Spring Boot 应用，我们可以直接运行下面的命令：
+
+```
+$ mvn spring-boot:build-image -Pnative
+...
+[INFO] Successfully built image 'docker.io/library/hello:0.0.1-SNAPSHOT'
+...
+```
+
+> 构建之前，请确保有一个兼容 Docker-API 的容器运行时，比如 [Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation/)、[Docker](https://www.docker.io/gettingstarted/) 或 [Podman](https://podman.io/docs/installation) 等。
+
+使用 `docker run` 运行：
+
+```
+$ docker run --rm -p 8080:8080 hello:0.0.1-SNAPSHOT
+```
+
+生成的镜像名默认为 `docker.io/library/${project.artifactId}:${project.version}`，可以通过下面的配置进行修改：
+
+```
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <image>
+            <name>docker.io/library/aneasystone/${project.artifactId}:${project.version}</name>
+        </image>
+    </configuration>
+</plugin>
+```
+
+更多构建参数可以参考 Spring Boot 官方文档 [Packaging OCI Images](https://docs.spring.io/spring-boot/maven-plugin/build-image.html)。
+
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
 * [Getting Started with Native Image](https://www.graalvm.org/latest/reference-manual/native-image/)
 * [GraalVM Documentation](https://www.graalvm.org/latest/docs/)
 * [GraalVM User Guides](https://www.graalvm.org/latest/guides/)
+* [How to Build Java Apps with Paketo Buildpacks](https://paketo.io/docs/howto/java/)
 * [Containerize a Native Executable and Run in a Container](https://www.graalvm.org/latest/reference-manual/native-image/guides/containerise-native-executable-and-run-in-docker-container/)
 * [Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
