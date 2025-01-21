@@ -673,6 +673,96 @@ $ docker run --rm -p 8080:8080 hello:0.0.1-SNAPSHOT
 
 下面针对最后一个问题进行更进一步的实践。
 
+### 资源文件
+
+资源文件是项目开发中经常遇到的一种场景，但是默认情况下， `native-image` 工具不会将资源文件集成到可执行文件中。首先，我们准备两个文件，`App.java` 为主程序，`app.res` 为资源文件：
+
+```
+├── App.java
+└── app.res
+```
+
+`App.java` 中的代码非常简单，读取并输出 `app.res` 中的内容：
+
+```
+public class App {
+    
+    public static void main( String[] args ) throws IOException {
+        String message = readResource("app.res");
+        System.out.println(message);
+    }
+
+    public static String readResource(String fileName) throws IOException {
+        StringBuilder content = new StringBuilder();
+        try (
+            InputStream inputStream = App.class.getClassLoader().getResourceAsStream(fileName);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append(System.lineSeparator());
+            }
+        }
+        return content.toString();
+    }
+}
+```
+
+我们使用 `native-image` 生成可执行文件：
+
+```
+$ javac App.java && native-image App
+```
+
+运行这个文件会抛出如下的空指针异常：
+
+```
+$ ./app
+Exception in thread "main" java.lang.NullPointerException
+        at java.base@21.0.2/java.io.Reader.<init>(Reader.java:168)
+        at java.base@21.0.2/java.io.InputStreamReader.<init>(InputStreamReader.java:123)
+        at App.readResource(App.java:18)
+        at App.main(App.java:10)
+```
+
+根据异常信息推断，`getResourceAsStream` 返回了空指针，也就是说没有读到 `app.res` 资源文件，可以看出 `native-image` 确实没有把资源文件集成到可执行文件中。
+
+为了让 `native-image` 知道资源文件的存在，我们新建一个 `META-INF/native-image` 目录，目录下新建一个 `resource-config.json` 文件，目录结构如下所示：
+
+```
+├── App.java
+├── META-INF
+│   └── native-image
+│       └── resource-config.json
+└── app.res
+```
+
+`resource-config.json` 文件的内容如下：
+
+```
+{
+    "resources": {
+        "includes": [
+            {
+                "pattern": "app.res"
+            }
+        ]
+    },
+    "bundles": []
+}
+```
+
+重新运行 `native-image` 进行构建：
+
+```
+$ javac App.java && native-image App
+```
+
+`native-image` 会自动扫描 `META-INF/native-image` 目录下的配置文件，将资源文件集成到可执行文件中，此时就可以正常运行这个文件了：
+
+```
+$ ./app                             
+Hello message from the resource file.
+```
 
 ## 参考
 
@@ -682,6 +772,7 @@ $ docker run --rm -p 8080:8080 hello:0.0.1-SNAPSHOT
 * [GraalVM User Guides](https://www.graalvm.org/latest/guides/)
 * [How to Build Java Apps with Paketo Buildpacks](https://paketo.io/docs/howto/java/)
 * [Containerize a Native Executable and Run in a Container](https://www.graalvm.org/latest/reference-manual/native-image/guides/containerise-native-executable-and-run-in-docker-container/)
+* [Include Resources in a Native Executable](https://www.graalvm.org/latest/reference-manual/native-image/guides/include-resources/)
 * [Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)

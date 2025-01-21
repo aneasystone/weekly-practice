@@ -1,0 +1,10 @@
+{
+    "resources": {
+        "includes": [
+            {
+                "pattern": "app.res"
+            }
+        ]
+    },
+    "bundles": []
+}
