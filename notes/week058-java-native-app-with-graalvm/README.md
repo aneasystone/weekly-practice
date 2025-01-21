@@ -660,6 +660,19 @@ $ docker run --rm -p 8080:8080 hello:0.0.1-SNAPSHOT
 
 更多构建参数可以参考 Spring Boot 官方文档 [Packaging OCI Images](https://docs.spring.io/spring-boot/maven-plugin/build-image.html)。
 
+## GraalVM 的局限性
+
+软件行业有一句名言：**没有银弹（No Silver Bullet）**，对于 GraalVM 技术也同样如此，它虽然具有镜像体积小、启动速度快、内存消耗低等优势，但是同时它也带来了一些新问题：
+
+* **编译速度慢**：GraalVM 通过 AOT 技术对整个应用程序及其依赖进行静态分析，以确保所有代码路径都被覆盖，这种静态编译方式需要处理更多的复杂性，因而编译速度也更慢；
+* **平台相关性**：编译出来的二进制文件是平台相关的，也就是说软件开发人员需要针对不同的平台编译不同的二进制文件，增加了软件分发的复杂性；
+* **调试监控难**：由于运行的程序由 Java 程序变成了本地程序，传统面向 Java 程序的调试、监控、Agent 等技术均不再适用，只能使用 GDB 调试；
+* **封闭性假设**：这是 AOT 编译的基本原则，即程序在编译期必须掌握运行时所需的所有信息，在运行时不能出现任何编译器未知的内容，这会导致 Java 程序中的很多动态特性无法继续使用，例如：资源、反射、动态类加载、动态代理、JCA 加密机制（内部依赖了反射）、JNI、序列化等。
+
+针对每个新问题也都有对应的解决方案。比如引入 CI/CD 流水线自动化构建，让开发人员降低编译速度慢的感知；比如通过 Docker 容器镜像统一软件的分发方式；GraalVM 目前也在不断优化，增加传统 Java 调试和监控工具的支持，如 [JFR](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-and-run-native-executable-with-jfr/) 和 [JMX](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-and-run-native-executable-with-remote-jmx/) 等；对于程序中的动态特性，也可以通过额外的适配工作来解决。
+
+下面针对最后一个问题进行更进一步的实践。
+
 
 ## 参考
 
