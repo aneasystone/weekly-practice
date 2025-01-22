@@ -913,6 +913,71 @@ Exception in thread "main" java.lang.NoSuchMethodException: Calculator.mul(java.
 > Warning: Image 'app' is a fallback image that requires a JDK for execution (use --no-fallback to suppress fallback image generation and to print more detailed information why a fallback image was necessary).
 > ```
 
+### Reachability Metadata 和 Tracing Agent
+
+上面的 `resource-config.json` 和 `reflect-config.json` 文件也被称为 [可达性元数据（Reachability Metadata）](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/)，一般位于 `META-INF/native-image/<group.id>/<artifact.id>` 目录下，元数据文件有以下几种类型，每一种类型的元数据配置放在对应的 `<feature>-config.json` 文件中：
+
+* `resource-config.json` - [资源和资源包](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#resources-and-resource-bundles) 允许加载应用程序中存在的任意文件
+* `reflect-config.json` - [Java 反射](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#reflection) 使 Java 代码能够在运行时检查自己的类、方法、字段和属性
+* `proxy-config.json` - [动态代理](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#dynamic-proxy) 会根据需要创建类，这些类实现了给定的接口列表
+* `jni-config.json` - [JNI](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#java-native-interface) 允许本地代码在运行时访问类、方法、字段及其属性
+* `predefined-classes-config.json` - [预定义类](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#predefined-classes) 为动态生成的类提供支持
+* `serialization-config.json` - [序列化](https://www.graalvm.org/jdk21/reference-manual/native-image/metadata/#serialization) 使 Java 对象可以写入和从流中读取
+
+> 值得注意的是，[最新版本的 Reachability Metadata](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) 配置文件格式有所调整，所有的配置都统一放在 `META-INF/native-image/reachability-metadata.json` 文件中，在查看在线文档时要特别留意，区分 GraalVM 的版本。
+
+但是手工编写元数据文件非常繁琐，而且容易出错，为此，GraalVM 提供了名为 [Tracing Agent](https://www.graalvm.org/latest/reference-manual/native-image/metadata/AutomaticMetadataCollection/) 的工具，帮我们自动生成元数据文件。
+
+> 这个工具可以在 `$GRAALVM_HOME/lib` 目录下找到。
+
+它的用法非常简单，使用 `java App` 正常运行程序，同时加上 `-agentlib` 参数即可：
+
+```
+$ java -agentlib:native-image-agent=config-output-dir=META-INF/native-image App
+```
+
+程序运行结束后，`META-INF/native-image` 目录下会自动生成如下文件：
+
+```
+├── App.java
+├── META-INF
+│   └── native-image
+│       ├── agent-extracted-predefined-classes
+│       ├── jni-config.json
+│       ├── predefined-classes-config.json
+│       ├── proxy-config.json
+│       ├── reflect-config.json
+│       ├── resource-config.json
+│       └── serialization-config.json
+└── app.res
+```
+
+我们可以打开 `resource-config.json` 文件进行查看，内容如下：
+
+```
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\Qapp.res\\E"
+  }]},
+  "bundles":[]
+}
+```
+
+这和上面我们写的差不多，有了元数据文件之后，再通过 `native-image` 就可以编译出带资源文件的可执行文件了。
+
+> 细心的同学可能已经发现，这里的写法和我们的写法不太一样，自动生成的配置是 `\\Qapp.res\\E`，而我们写的配置是 `app.res`；其实，自动生成的是更为严谨的写法，`\\Q` 和 `\\E` 是特殊的正则表达式语法，表示从 `\\Q` 到 `\\E` 之间的所有字符都应被视为普通字符，不会被解释为正则表达式的特殊符号，而我们写的 `app.res` 包含 `.` 会被当成是任意字符。
+
+对于反射的示例，可以用一样的方式运行：
+
+```
+$ java -agentlib:native-image-agent=config-output-dir=META-INF/native-image App Calculator add 1 1
+```
+
+这时也会生成 `reflect-config.json` 文件，内容和我们的写法一样。
+
+> 不过 Tracing Agent 有个不好的地方，每次运行会覆盖之前生成的元数据文件，所以当我们运行 `java -agentlib:... App Calculator sub 1 1` 时，生成的 `sub` 方法会把第一次生成的 `add` 方法覆盖掉，如果能自动合并就好了。
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
@@ -922,6 +987,7 @@ Exception in thread "main" java.lang.NoSuchMethodException: Calculator.mul(java.
 * [How to Build Java Apps with Paketo Buildpacks](https://paketo.io/docs/howto/java/)
 * [Containerize a Native Executable and Run in a Container](https://www.graalvm.org/latest/reference-manual/native-image/guides/containerise-native-executable-and-run-in-docker-container/)
 * [Include Resources in a Native Executable](https://www.graalvm.org/latest/reference-manual/native-image/guides/include-resources/)
+* [Configure Native Image with the Tracing Agent](https://www.graalvm.org/latest/reference-manual/native-image/guides/configure-with-tracing-agent/)
 * [Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)
 * [Create a GraalVM Docker Image](https://www.baeldung.com/java-graalvm-docker-image)
 * [如何借助 Graalvm 和 Picocli 构建 Java 编写的原生 CLI 应用](https://www.infoq.cn/article/4RRJuxPRE80h7YsHZJtX)
