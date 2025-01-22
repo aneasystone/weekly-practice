@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Calculator",
+        "methods": [
+            {
+                "name": "add",
+                "parameterTypes": [
+                    "java.lang.Integer",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    }
+]

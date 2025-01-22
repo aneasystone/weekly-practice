@@ -764,6 +764,155 @@ $ ./app
 Hello message from the resource file.
 ```
 
+### 反射
+
+接下来，我们再看一个反射的例子。反射是 Java 中一项非常重要的特性，可以根据字符串来动态地加载类和方法，`native-image` 如果得不到足够的上下文信息，可能编译时就会缺少这些反射的类和方法。不过 `native-image` 也是足够聪明的，如果在调用某些反射方法时使用了常量，`native-image` 也能自动编译这些常量对应的类和方法，比如：
+
+```
+Class.forName("java.lang.Integer")
+Class.forName("java.lang.Integer", true, ClassLoader.getSystemClassLoader())
+Class.forName("java.lang.Integer").getMethod("equals", Object.class)
+Integer.class.getDeclaredMethod("bitCount", int.class)
+Integer.class.getConstructor(String.class)
+Integer.class.getDeclaredConstructor(int.class)
+Integer.class.getField("MAX_VALUE")
+Integer.class.getDeclaredField("value")
+```
+
+下面我们构造一个 `native-image` 无法推断反射信息的示例，比如根据命令行参数来动态的调用某个类的某个方法：
+
+```
+public class App {
+    
+    public static void main( String[] args ) throws Exception {
+        if (args.length != 4) {
+            System.out.println("Usage: ./app clz method a b");
+            return;
+        }
+        Integer result = callReflection(args[0], args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+        System.out.println(result);
+    }
+
+    public static Integer callReflection(String clz, String method, Integer a, Integer b) throws Exception {
+        Class<?> clazz = Class.forName(clz);
+        return (Integer) clazz.getMethod(method, Integer.class, Integer.class).invoke(null, a, b);
+    }
+}
+```
+
+我们定义一个 `Calculator` 类，实现加减乘除四则运算：
+
+```
+public class Calculator {
+
+    public static Integer add(Integer a, Integer b) {
+        return a + b;
+    }
+
+    public static Integer sub(Integer a, Integer b) {
+        return a - b;
+    }
+
+    public static Integer mul(Integer a, Integer b) {
+        return a * b;
+    }
+
+    public static Integer div(Integer a, Integer b) {
+        return a / b;
+    }
+}
+```
+
+然后将两个类编译成 `class` 文件：
+
+```
+$ javac App.java Calculator.java
+```
+
+运行测试：
+
+```
+$ java App Calculator add 2 2
+4
+$ java App Calculator sub 2 2
+0
+$ java App Calculator mul 2 2
+4
+$ java App Calculator div 2 2
+1
+```
+
+我们使用 `native-image` 生成可执行文件：
+
+```
+$ native-image App --no-fallback
+```
+
+此时的文件运行会报错：
+
+```
+$ ./app Calculator add 2 2
+Exception in thread "main" java.lang.ClassNotFoundException: Calculator
+        at org.graalvm.nativeimage.builder/com.oracle.svm.core.hub.ClassForNameSupport.forName(ClassForNameSupport.java:122)
+        at org.graalvm.nativeimage.builder/com.oracle.svm.core.hub.ClassForNameSupport.forName(ClassForNameSupport.java:86)
+        at java.base@21.0.2/java.lang.Class.forName(DynamicHub.java:1356)
+        at java.base@21.0.2/java.lang.Class.forName(DynamicHub.java:1319)
+        at java.base@21.0.2/java.lang.Class.forName(DynamicHub.java:1312)
+        at App.callReflection(App.java:13)
+        at App.main(App.java:8)
+```
+
+可以看出 `native-image` 通过静态分析，是不知道程序会使用 `Calculator` 类的，所以构建二进制文件时并没有包含在里面。为了让 `native-image` 知道 `Calculator` 类的存在，我们新建一个 `META-INF/native-image/reflect-config.json` 配置文件：
+
+```
+[
+    {
+        "name": "Calculator",
+        "methods": [
+            {
+                "name": "add",
+                "parameterTypes": [
+                    "java.lang.Integer",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    }
+]
+```
+
+重新编译后，运行正常：
+
+```
+$ ./app Calculator add 2 2      
+4
+```
+
+由于配置文件里我只加了 `add` 方法，所以运行其他方法时，依然会报错：
+
+```
+$ ./app Calculator mul 2 2
+Exception in thread "main" java.lang.NoSuchMethodException: Calculator.mul(java.lang.Integer, java.lang.Integer)
+        at java.base@21.0.2/java.lang.Class.checkMethod(DynamicHub.java:1075)
+        at java.base@21.0.2/java.lang.Class.getMethod(DynamicHub.java:1060)
+        at App.callReflection(App.java:14)
+        at App.main(App.java:8)
+```
+
+将所有方法都加到配置文件中即可。
+
+> 注意这里的 `--no-fallback` 参数，防止 `native-image` 开启回退模式（fallback image）。`native-image` 检测到反射时会自动开启回退模式，生成的可执行文件也是可以执行的，但是必须依赖 JDK：
+> 
+> ```
+> % native-image App 
+> ...
+> Warning: Reflection method java.lang.Class.getMethod invoked at App.callReflection(App.java:14)
+> Warning: Aborting stand-alone image build due to reflection use without configuration.
+> ...
+> Generating fallback image...
+> Warning: Image 'app' is a fallback image that requires a JDK for execution (use --no-fallback to suppress fallback image generation and to print more detailed information why a fallback image was necessary).
+> ```
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
