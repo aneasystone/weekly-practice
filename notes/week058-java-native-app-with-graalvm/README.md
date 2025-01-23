@@ -978,6 +978,117 @@ $ java -agentlib:native-image-agent=config-output-dir=META-INF/native-image App 
 
 > 不过 Tracing Agent 有个不好的地方，每次运行会覆盖之前生成的元数据文件，所以当我们运行 `java -agentlib:... App Calculator sub 1 1` 时，生成的 `sub` 方法会把第一次生成的 `add` 方法覆盖掉，如果能自动合并就好了。
 
+### 在 Maven 项目中使用 Tracing Agent
+
+如果要在 Maven 项目中使用 Tracing Agent，我们需要对上面的 Maven 项目做两点修改：
+
+第一点，在 `native-maven-plugin` 插件中新增如下配置：
+
+```
+<configuration>
+    <fallback>false</fallback>
+    <agent>
+        <enabled>true</enabled>
+    </agent>
+</configuration>
+```
+
+`<fallback>` 部分表示关闭回退模式；`<agent>` 部分表示开启 Tracing Agent，这一部分也可以通过命令行参数 `-Dagent=true` 开启。
+
+第二点，新增 `org.codehaus.mojo:exec-maven-plugin` 插件，添加一个 `id` 为 `java-agent` 的执行块，要执行的命令就是用 `java` 运行当前项目。
+
+修改完的完整配置如下：
+
+```
+<profiles>
+    <profile>
+        <id>native</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>0.10.4</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <id>build-native</id>
+                            <goals>
+                                <goal>compile-no-fork</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                        <execution>
+                            <id>test-native</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                    <!-- NEW -->
+                    <configuration>
+                        <fallback>false</fallback>
+                        <agent>
+                            <enabled>true</enabled>
+                        </agent>
+                    </configuration>
+                </plugin>
+                <!-- NEW -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>java-agent</id>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>java</executable>
+                                <workingDirectory>${project.build.directory}</workingDirectory>
+                                <arguments>
+                                    <argument>-classpath</argument>
+                                    <classpath />
+                                    <argument>com.example.App</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+```
+
+然后执行如下命令正常打包：
+
+```
+$ mvn clean package
+```
+
+接着是关键一步，执行如下命令运行 `java-agent` 执行块：
+
+```
+$ mvn exec:exec@java-agent -Pnative
+```
+
+由于上面开启了 Agent 模式，`native-maven-plugin` 插件会自动将 `-agentlib:...` 参数注入到 `exec-maven-plugin` 的参数列表中，从而在 `target/native/agent-output/main` 目录下生成元数据文件。如果 `target` 目录下没有文件生成，请检查 `pom.xml` 配置是否正常。
+
+最后，生成可执行文件：
+
+```
+$ mvn package -Pnative
+```
+
+这里比较有意思的一点是，`native-maven-plugin` 插件是如何将 Agent 参数注入到 `exec-maven-plugin` 的参数列表里的？我们从 `pom.xml` 配置中看不出任何线索，关键藏在 [native-maven-plugin 的源码](https://github.com/graalvm/native-build-tools/blob/c09540e1884ed9e741de5130f2820550e6ab943c/native-maven-plugin/src/main/java/org/graalvm/buildtools/maven/NativeExtension.java#L162) 里：
+
+![](./images/native-maven-plugin-agent.png)
+
+这个类实现了 `AbstractMavenLifecycleParticipant` 的 `afterProjectsRead` 方法，这个方法是 Maven 的一个重要的扩展点，允许开发者在 Maven 读取完所有项目配置后，但在构建项目依赖图之前，插入自定义逻辑，比如这里的逻辑就是查找 `exec-maven-plugin` 插件中 `id` 为 `java-agent` 的执行块，并将 Agent 参数注入到 `<arguments>` 列表中。
+
 ## 参考
 
 * [Getting Started with Oracle GraalVM](https://www.graalvm.org/latest/getting-started/)
@@ -996,3 +1107,26 @@ $ java -agentlib:native-image-agent=config-output-dir=META-INF/native-image App 
 * [GraalVM Native Image Support](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
 * [初步探索GraalVM--云原生时代JVM黑科技-京东云开发者社区](https://developer.jdcloud.com/article/2446)
 * [不同操作系统可执行文件格式](https://www.cnblogs.com/sooooooul/p/17435401.html)
+
+## 更多
+
+原生应用相比于传统的 Java 应用，在服务监控、问题排查、日志调试、性能优化等方面要麻烦一点，GraalVM 也提供了一些指南供参考。
+
+### 监控
+
+* [Build and Run Native Executables with JFR](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-and-run-native-executable-with-jfr/)
+* [Build and Run Native Executables with Remote JMX](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-and-run-native-executable-with-remote-jmx/)
+* [Create a Heap Dump from a Native Executable](https://www.graalvm.org/latest/reference-manual/native-image/guides/create-heap-dump/)
+
+### 调试
+
+* [Troubleshoot Native Image Run-Time Errors](https://www.graalvm.org/latest/reference-manual/native-image/guides/troubleshoot-run-time-errors/)
+* [Add Logging to a Native Executable](https://www.graalvm.org/latest/reference-manual/native-image/guides/add-logging-to-native-executable/)
+* [Debug Native Executables with GDB](https://www.graalvm.org/latest/reference-manual/native-image/guides/debug-native-image-process/)
+
+### 优化
+
+* [Optimize a Native Executable with Profile-Guided Optimization](https://www.graalvm.org/latest/reference-manual/native-image/guides/optimize-native-executable-with-pgo/)
+* [Optimize a Native Executable for File Size](https://www.graalvm.org/latest/reference-manual/native-image/guides/optimize-for-file-size/)
+* [Optimize Size of a Native Executable using Build Reports](https://www.graalvm.org/latest/reference-manual/native-image/guides/optimize-native-executable-size-using-build-report/)
+* [Optimize Memory Footprint of a Native Executable](https://www.graalvm.org/jdk24/reference-manual/native-image/guides/optimize-memory-footprint/)
