@@ -1,4 +1,4 @@
-# WEEK058 - 使用 GraalVM 编写 Java 原生应用
+# WEEK058 - 使用 GraalVM 构建 Java 原生应用
 
 随着云原生技术的普及，Java 应用在云环境中的臃肿问题变得更加突出，比如：
 

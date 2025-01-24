@@ -94,7 +94,6 @@
 
 ### RAG
 
-* [LLM之RAG实战（二十九）| 探索RAG PDF解析](https://mp.weixin.qq.com/s/3_9L7MSfE38pGv8nmB6Mrg)
 * [LLM之RAG实战（三十）| 探索RAG语义分块策略](https://mp.weixin.qq.com/s/sT7mjAFVbWg5-_CTJPqxkw)
 * [Advanced RAG Retrieval Strategy: Embedded Tables](https://ai.gopubby.com/advanced-rag-retrieval-strategy-embedded-tables-fdb3e44003a5)
 
