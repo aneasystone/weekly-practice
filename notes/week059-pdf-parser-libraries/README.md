@@ -11,6 +11,8 @@ PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由
 * [PyPDF](https://github.com/py-pdf/pypdf)
 * [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
 * [pdfplumber](https://github.com/jsvine/pdfplumber)
+* [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
+* [pypdfium2](https://github.com/pypdfium2-team/pypdfium2)
 * [pikepdf](https://github.com/pikepdf/pikepdf)
 * [markitdown](https://github.com/microsoft/markitdown)
 * [unstructured](https://github.com/Unstructured-IO/unstructured)
@@ -24,6 +26,10 @@ PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由
 * [PDFMathTranslate](https://github.com/Byaidu/PDFMathTranslate)
 * [comic-translate](https://github.com/ogkalu2/comic-translate)
 * [mPLUG-DocOwl](https://github.com/X-PLUG/mPLUG-DocOwl)
+* [Tabula](https://github.com/tabulapdf/tabula)
+* [Camelot](https://github.com/camelot-dev/camelot)
+* [Table Transformer](https://github.com/microsoft/table-transformer)
+* [Nougat](https://github.com/facebookresearch/nougat)
 
 ---
 
