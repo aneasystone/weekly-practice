@@ -8,7 +8,7 @@
 
 PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。这一节对 Python 中常用的 PDF 解析库做一个盘点。
 
-* [PyPDF](https://github.com/py-pdf/pypdf)
+* [pypdf](https://github.com/py-pdf/pypdf)
 * [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
 * [pdfplumber](https://github.com/jsvine/pdfplumber)
 * [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
@@ -37,6 +37,30 @@ PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由
 * [Llama Hub - Data Loaders](https://llamahub.ai/?tab=readers)
 * [QuivrHQ/quivr](https://github.com/QuivrHQ/quivr)
 * [Cinnamon/kotaemon](https://github.com/Cinnamon/kotaemon)
+
+## 基本使用
+
+## pypdf
+
+pypdf 是一个免费且开源的纯 Python PDF 库，能够分割、合并、裁剪和转换 PDF 文件的页面，可以向 PDF 文件添加自定义数据，对 PDF 文件进行加密和解密。当然，pypdf 还可以从 PDF 中提取文本、图片、附件、批注和元数据等。
+
+```
+# pip install pypdf
+from pypdf import PdfReader
+
+reader = PdfReader("./pdfs/example.pdf")
+number_of_pages = len(reader.pages)
+print('Total %d pages.' % (number_of_pages))
+for i in range(number_of_pages):
+    print('----- Page %d -----' % (i+1))
+    page = reader.pages[i]
+    text = page.extract_text()
+    print(text)
+
+    for count, image_file_object in enumerate(page.images):
+        with open(str(count) + image_file_object.name, "wb") as fp:
+            fp.write(image_file_object.data)
+```
 
 ## 解析 PDF 的难点
 
