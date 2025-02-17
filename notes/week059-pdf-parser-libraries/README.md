@@ -40,12 +40,11 @@ PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由
 
 ## 基本使用
 
-## pypdf
+### pypdf
 
 pypdf 是一个免费且开源的纯 Python PDF 库，能够分割、合并、裁剪和转换 PDF 文件的页面，可以向 PDF 文件添加自定义数据，对 PDF 文件进行加密和解密。当然，pypdf 还可以从 PDF 中提取文本、图片、附件、批注和元数据等。
 
 ```
-# pip install pypdf
 from pypdf import PdfReader
 
 reader = PdfReader("./pdfs/example.pdf")
@@ -62,13 +61,63 @@ for i in range(number_of_pages):
             fp.write(image_file_object.data)
 ```
 
-## 解析 PDF 的难点
+可以看出 pypdf 的用法较为简单，我们只能拿到每一页的文本和图片内容，拿不到更多的详细信息，比如文本字体和大小，块位置等，这些信息在处理复杂场景时是必不可少的。所以 pypdf 只适合 PDF 的内容比较规整的场景。
 
-### 表格提取
+### pdfminer.six
 
-### 排版识别
+[pdfminer 最初由 Euske 开发](https://github.com/euske/pdfminer)，但是只支持 Python 2，不支持 Python 3，于是社区在他的基础上引入了 [six](https://github.com/benjaminp/six)，这是一个无需修改代码，就可以同时兼容 Python 2 和 3 的库，所以叫做 `pdfminer.six`。它也是一个纯 Python 编写的 PDF 库，专注于获取和分析文本数据。
 
-### 图片处理
+使用 `extract_text` 方法实现类似 pypdf 的效果，直接返回文本：
+
+```
+from pdfminer.high_level import extract_text
+
+text = extract_text("./pdfs/example.pdf")
+print(text)
+```
+
+或者使用 `extract_pages` 方法提取元素的详细信息，包括文本的精确位置、字体、大小或颜色：
+
+```
+from pdfminer.high_level import extract_pages
+
+for page in extract_pages("./pdfs/example.pdf"):
+    for element in page:
+        print(element)
+```
+
+这里的元素可能是 `LTTextBox`、`LTFigure`、`LTLine`、`LTRect` 或 `LTImage`，它们的层次结构如下所示：
+
+![](./images/pdfminersix-layout.png)
+
+其中 `LTTextBox` 还可以继续遍历得到 `LTTextLine`，`LTTextLine` 再继续遍历得到 `LTChar`：
+
+```
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTTextContainer, LTChar
+
+for page in extract_pages("./pdfs/example.pdf"):
+    for element in page:
+        if isinstance(element, LTTextContainer):
+            for text_line in element:
+                for character in text_line:
+                    if isinstance(character, LTChar):
+                        print(character.get_text())
+                        print(character.fontname)
+                        print(character.size)
+        else:
+            print(element)
+```
+
+#### 使用 `LAParams` 进行布局分析
+
+PDF 文件和 `.txt` 或 Word 在格式上有着很大的不同，它不包含任何类似于段落、句子甚至单词的内容。它由一系列对象及其结构信息组成，这些对象共同描述一个或多个页面的外观，可能还附带有其他交互元素和更高级别的应用程序数据。这使得从 PDF 文件中提取有意义的文本片段变得困难，组成段落的字符与组成表格、页面底部或图表描述的字符没有任何区别。
+
+上一节我们知道，通过 pdfminer.six 可以拿到元素的位置信息，通过这些位置信息我们可以重建句子或段落的布局。布局分析由三个不同阶段组成：将字符分组为单词和行，然后将行分组为框，最后以层次结构方式将文本框分组。这是一种最经典的基于规则的 **布局分析算法（Layout analysis algorithm）**。
+
+布局分析依赖于几个重要参数，比如字符间距、行间距、行重叠等，这些参数都是 [LAParams 类](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#laparams) 的一部分。
+
+更多说明请参考 [Converting a PDF file to text](https://pdfminersix.readthedocs.io/en/latest/topic/converting_pdf_to_text.html) 这篇文档。
 
 ## 参考
 
