@@ -6,13 +6,13 @@
 
 ## 开源 PDF 解析库一览
 
-PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。这一节对 Python 中常用的 PDF 解析库做一个盘点。
+PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这一节常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
 
 * [pypdf](https://github.com/py-pdf/pypdf)
 * [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
+* [pypdfium2](https://github.com/pypdfium2-team/pypdfium2)
 * [pdfplumber](https://github.com/jsvine/pdfplumber)
 * [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
-* [pypdfium2](https://github.com/pypdfium2-team/pypdfium2)
 * [pikepdf](https://github.com/pikepdf/pikepdf)
 * [markitdown](https://github.com/microsoft/markitdown)
 * [unstructured](https://github.com/Unstructured-IO/unstructured)
@@ -109,7 +109,7 @@ for page in extract_pages("./pdfs/example.pdf"):
             print(element)
 ```
 
-#### 使用 `LAParams` 进行布局分析
+#### 布局分析
 
 PDF 文件和 `.txt` 或 Word 在格式上有着很大的不同，它不包含任何类似于段落、句子甚至单词的内容。它由一系列对象及其结构信息组成，这些对象共同描述一个或多个页面的外观，可能还附带有其他交互元素和更高级别的应用程序数据。这使得从 PDF 文件中提取有意义的文本片段变得困难，组成段落的字符与组成表格、页面底部或图表描述的字符没有任何区别。
 
@@ -118,6 +118,50 @@ PDF 文件和 `.txt` 或 Word 在格式上有着很大的不同，它不包含�
 布局分析依赖于几个重要参数，比如字符间距、行间距、行重叠等，这些参数都是 [LAParams 类](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#laparams) 的一部分。
 
 更多说明请参考 [Converting a PDF file to text](https://pdfminersix.readthedocs.io/en/latest/topic/converting_pdf_to_text.html) 这篇文档。
+
+### pypdfium2
+
+[PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main) 被认为是开源世界中最高质量的 PDF 渲染引擎之一，它最初是基于福昕软件（Foxit Software）的 PDF SDK 开发的，在 2014 年被 Google 开源。PDFium 支持多种操作系统，包括 Windows、macOS、Linux 等，它还被编译到 iOS、Android 等移动平台上，支持跨平台应用；除了基本的 PDF 渲染功能，PDFium 还支持生成、编辑、文本提取、搜索、注解、表单填充等高级功能。PDFium 是一个高效、可靠的 PDF 渲染引擎，广泛应用于 Chrome 浏览器和其他第三方项目中。其开源性质和丰富的功能使其成为处理 PDF 文档的理想选择，由于基于 C++ 开发，处理大文件速度优于纯 Python 库。
+
+pypdfium2 是 PDFium 库的 Python 3 绑定，它提供了一些辅助方法简化 PDFium 库的使用，同时原始的 PDFium/ctypes API 仍然可访问。下面的示例代码演示了如何通过 pypdfium2 的 `get_text_bounded()` 方法将 PDF 中的文本提取出来：
+
+```
+import pypdfium2 as pdfium
+
+pdf = pdfium.PdfDocument("./pdfs/example.pdf")
+for i in range(len(pdf)):
+    print('----- Page %d -----' % (i+1))
+    page = pdf[i]
+    textpage = page.get_textpage()
+    text_all = textpage.get_text_bounded()
+    print(text_all)
+```
+
+和 pdfminer.six 一样，我们也可以通过 `get_rect()` 获取每个文本块的位置：
+
+```
+textpage = page.get_textpage()
+rect_count = textpage.count_rects()
+print(rect_count)
+for i in range(rect_count):
+    rect = textpage.get_rect(i)
+    print(rect)
+    text = textpage.get_text_bounded(rect[0], rect[1], rect[2], rect[3])
+    print(text)
+```
+
+得到文本块的位置后，就可以使用布局分析算法对版面进行分析，比如行检测（通过 Y 坐标差异判断是否在同一行）、列检测（通过 X 坐标差异判断是否属于同一列）或表格边界检测等等。
+
+此外，PDFium 还提供了一个 `render()` 方法，可以方便地将 PDF 转换为图片：
+
+```
+bitmap = page.render(
+    scale = 1,    # 72dpi resolution
+    rotation = 0, # no additional rotation
+)
+pil_image = bitmap.to_pil()
+pil_image.save('x.png')
+```
 
 ## 参考
 
