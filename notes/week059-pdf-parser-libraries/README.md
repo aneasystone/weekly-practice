@@ -30,6 +30,7 @@ PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由
 * [Camelot](https://github.com/camelot-dev/camelot)
 * [Table Transformer](https://github.com/microsoft/table-transformer)
 * [Nougat](https://github.com/facebookresearch/nougat)
+* [pdftables](https://github.com/drj11/pdftables)
 
 ---
 
@@ -162,6 +163,133 @@ bitmap = page.render(
 pil_image = bitmap.to_pil()
 pil_image.save('x.png')
 ```
+
+### pdfplumber
+
+pdfplumber 是另一个用于解析 PDF 的 Python 库，它基于 pdfminer.six 构建，但提供了更简洁的 API 和对复杂布局（尤其是表格）的更好支持。它的核心功能如下：
+
+* 文本提取：提取 PDF 中的文本（包括位置、字体等元数据），支持按页面、按区域或按特定条件提取；
+* 表格提取：自动检测和提取 PDF 中的表格数据（支持合并单元格、多行文本等复杂结构）；
+* 页面操作：获取页面尺寸、裁剪页面区域，提取页面内的图像、线条、矩形等可视化元素；
+* 可视化调试：支持绘制页面中的文本、线条、表格框等元素，帮助用户调试提取逻辑。
+
+pdfplumber 的基本用法如下：
+
+```
+import pdfplumber
+
+path = "./pdfs/example.pdf"
+with pdfplumber.open(path) as pdf:
+    for i in range(len(pdf.pages)):
+        print('----- Page %d -----' % (i+1))
+        page = pdf.pages[i]
+        text = page.extract_text()
+        print(text)
+```
+
+pdfplumber 中有很多借鉴 pdfminer.six 的概念，比如通过 `page.chars` 可以访问页面中所有的文本字符，获取字体，大小，位置等信息：
+
+```
+page = pdf.pages[1]
+for char in page.chars:
+    print(char['text'], char['fontname'], char['size'], char['x0'], char['y0'], char['x1'], char['y1'])
+```
+
+除此之外，通过 `page` 还能访问很多其他对象，比如 `.lines` 代表线，`.rects` 代表矩形框，`.curves` 代表曲线（无法识别成线或矩形的连接点），`.images` 代表图像，`.annots` 代表 PDF 批注，`.hyperlinks` 代表链接等。
+
+#### 布局分析
+
+pdfplumber 基于 pdfminer.six 构建，所以也具备 pdfminer.six 布局分析的功能，打开 PDF 时传入 laparams 参数即可：
+
+```
+laparams = {
+    "line_overlap": 0.5,
+    "char_margin": 2.0,
+    "line_margin": 0.5,
+    "word_margin": 0.1,
+}
+with pdfplumber.open(path, laparams=laparams) as pdf:
+    pass
+```
+
+#### 表格提取
+
+pdfplumber 的一大亮点是它的表格提取功能，可以处理比较复杂布局的表格。它的基本用法如下：
+
+```
+page = pdf.pages[2]
+tables = page.extract_tables()
+for table in tables:
+    print(table)
+```
+
+得到的表格是一个二维数组，类似下面这样：
+
+```
+[
+    ['姓名', '学号', '学科', '成绩'], 
+    ['小明', '001', '语文', '98'], 
+    ['小明', '001', '数学', '97'], 
+    ['小华', '002', '语文', '94'], 
+    ['小华', '002', '数学', '99'], 
+    ['小红', '003', '语文', '100'], 
+    ['小红', '003', '数学', '95']
+]
+```
+
+可以直接加载到 pandas 的 `DataFrame` 中对表格数据进行处理：
+
+```
+import pandas as pd
+df = pd.DataFrame(table[1:], columns=table[0])
+print(df)
+```
+
+pdfplumber 的表格提取算法参考了 Anssi Nurminen 的这篇论文 [《Algorithmic Extraction of Data in Tables in PDF Documents》](http://dspace.cc.tut.fi/dpub/bitstream/handle/123456789/21520/Nurminen.pdf?sequence=3)，大概的思路如下：
+
+1. 首先查找页面中明确定义的行，或者根据单词对齐找到隐含的行；
+2. 合并重叠或接近重叠的线条；
+3. 找出这些线条的交点；
+4. 找到使用这些交点作为顶点的最细粒度的矩形，即单元格；
+5. 将连续单元格分组到表中。
+
+和布局分析类似，这种基于规则的算法必然也提供了大量的规则参数，可以通过 `table_settings` 传入：
+
+```
+table_settings = {
+    "vertical_strategy": "lines",
+    "horizontal_strategy": "lines",
+    "snap_tolerance": 3,
+    "join_tolerance": 3
+}
+tables = page.extract_tables(table_settings=table_settings)
+for table in tables:
+    print(table)
+```
+
+官方仓库里提供了几个示例可供参考，其中 [extract-table-ca-warn-report.ipynb](https://github.com/hbh112233abc/pdfplumber/blob/stable/examples/notebooks/extract-table-ca-warn-report.ipynb) 演示了表格提取的基本操作，[extract-table-nics.ipynb](https://github.com/hbh112233abc/pdfplumber/blob/stable/examples/notebooks/extract-table-nics.ipynb) 演示如何使用可视化调试查找最佳的表提取设置。
+
+#### 可视化调试
+
+pdfplumber 的另一大亮点是它可以将页面转换为 `PageImage` 对象，然后在 `PageImage` 将 chars、lines、rects 绘制出来，通过可视化页面，可以更直观地理解页面的布局结构。
+
+绘制文本解析结果：
+
+```
+im = page.to_image()
+im.draw_rects(page.extract_words()).save('extract_words.png')
+```
+
+![](./images/extract_words.png)
+
+绘制表格解析结果：
+
+```
+im = page.to_image()
+im.debug_tablefinder(table_settings={}).save('debug_tablefinder.png')
+```
+
+![](./images/debug_tablefinder.png)
 
 ## 参考
 
