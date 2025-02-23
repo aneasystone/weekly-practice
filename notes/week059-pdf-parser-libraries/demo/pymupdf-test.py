@@ -1,24 +1,30 @@
 # pip install --only-binary=pymupdf pymupdf
 import pymupdf
+
+doc = pymupdf.open("./pdfs/example.pdf")
+number_of_pages = len(doc)
+print('Total %d pages.' % (number_of_pages))
+for i in range(number_of_pages):
+    print('----- Page %d -----' % (i+1))
+    page = doc[i]
+    text = page.get_text()
+    print(text)
+    # html = page.get_text('html')
+    # print(html)
+    json = page.get_text('json')
+    print(json)
+
 from pprint import pprint
-
-doc = pymupdf.open("./pdfs/3.pdf")
-page = doc[0]
-tabs = page.find_tables()
-print(f"{len(tabs.tables)} found on {page}")
-
-if tabs.tables:
-   pprint(tabs[0].extract())
+page = doc[2]
+for t in page.find_tables():
+    table = t.extract()
+    pprint(table)
+    
+    import pandas as pd
+    df = pd.DataFrame(table[1:], columns=table[0])
+    print(df)
    
 # pip install pymupdf4llm
-import pymupdf4llm
-md_text = pymupdf4llm.to_markdown("./pdfs/1.pdf")
-print(md_text)
-md_text = pymupdf4llm.to_markdown("./pdfs/2.pdf")
-print(md_text)
-md_text = pymupdf4llm.to_markdown("./pdfs/3.pdf")
-print(md_text)
-md_text = pymupdf4llm.to_markdown("./pdfs/4.pdf", write_images=False)
-print(md_text)
-md_text = pymupdf4llm.to_markdown("./pdfs/5.pdf")
-print(md_text)
+# import pymupdf4llm
+# md_text = pymupdf4llm.to_markdown("./pdfs/example.pdf", write_images=True)
+# print(md_text)

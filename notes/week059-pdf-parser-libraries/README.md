@@ -6,7 +6,7 @@
 
 ## 开源 PDF 解析库一览
 
-PDF 全称 Portable Document Format（可移植文档格式），于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这一节常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
+PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这一节对常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
 
 * [pypdf](https://github.com/py-pdf/pypdf)
 * [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
@@ -271,7 +271,7 @@ for table in tables:
 
 #### 可视化调试
 
-pdfplumber 的另一大亮点是它可以将页面转换为 `PageImage` 对象，然后在 `PageImage` 将 chars、lines、rects 绘制出来，通过可视化页面，可以更直观地理解页面的布局结构。
+pdfplumber 的另一大亮点是它可以将页面转换为 `PageImage` 对象（有趣的是，这一步是通过 pypdfium2 实现的），然后在 `PageImage` 将 chars、lines、rects 绘制出来，通过可视化页面，可以更直观地理解页面的布局结构。
 
 绘制文本解析结果：
 
@@ -290,6 +290,87 @@ im.debug_tablefinder(table_settings={}).save('debug_tablefinder.png')
 ```
 
 ![](./images/debug_tablefinder.png)
+
+### PyMuPDF
+
+[MuPDF](https://mupdf.com/) 是由 [Artifex Software](https://artifex.com/) 公司开发的一个专注于 PDF 文档处理和渲染的开源库和工具集，具有轻量级、高性能的特点，适合嵌入式系统、移动设备和桌面应用集成。MuPDF 提供了多种语言接口，可以在 [JavaScript](https://github.com/ArtifexSoftware/mupdf.js)、[Java](https://github.com/ArtifexSoftware/mupdf/tree/master/platform/java)、[.NET](https://github.com/ArtifexSoftware/MuPDF.NET) 和 [Python](https://github.com/pymupdf/PyMuPDF) 等语言中调用，PyMuPDF 就是 MuPDF 的 Python 绑定。
+
+> 注意，MuPDF 采用 AGPL 许可证，商业用途需联系 Artifex 获取商业授权。
+
+如果安装 PyMuPDF 时遇到编译错误，可以考虑如下方式安装：
+
+```
+$ pip install --only-binary=pymupdf pymupdf
+```
+
+下面是 PyMuPDF 的基本用法：
+
+```
+import pymupdf
+
+doc = pymupdf.open("./pdfs/example.pdf")
+number_of_pages = len(doc)
+print('Total %d pages.' % (number_of_pages))
+for i in range(number_of_pages):
+    print('----- Page %d -----' % (i+1))
+    page = doc[i]
+    text = page.get_text()
+    print(text)
+```
+
+其中，`get_text()` 用于从页面中提取文本，默认是以纯文本格式输出，还支持很多 [其他的输出格式](https://pymupdf.readthedocs.io/en/latest/tutorial.html#extracting-text-and-images)，比如以 HTML 格式输出：
+
+```
+html = page.get_text('html')
+```
+
+或以 JSON 格式输出，当我们想对 PDF 结构进一步分析时非常有用：
+
+```
+json = page.get_text('json')
+```
+
+PyMuPDF 的功能非常丰富，除了 PDF，它还支持大量其他的文件格式，包括 XPS、EPUB、MOBI 等电子书格式，以及 DOCX、XLSX、PPTX 等 Office 文档（Pro 版），[这里](https://pymupdf.readthedocs.io/en/latest/about.html) 有一个表格列举了它的所有特性，并和其他几个 PDF 库进行对比。
+
+#### 表格提取
+
+PyMuPDF 支持提取 PDF 中的表格数据：
+
+```
+from pprint import pprint
+page = doc[2]
+for t in page.find_tables():
+    table = t.extract()
+    pprint(table)
+```
+
+和 pdfplumber 一样，得到的表格是一个二维数组，可以直接加载到 pandas 的 `DataFrame` 中对表格数据进行处理。
+
+#### Markdown 提取
+
+在 RAG 中，为了实现文档内容的切片，文档版式分析的准确性显得至关重要，Markdown 作为一种语法简单、段落清晰的文本格式，在 LLM 和 RAG 场景下经常被使用。PyMuPDF 支持将 PDF 文件转换为 Markdown 格式，方便在 LLM 和 RAG 场景下使用，这需要安装 `PyMuPDF4LLM` 扩展库，它的功能特性如下：
+
+* 支持保留 PDF 中的大多数格式，比如表格、图片、链接、标题、段落、粗体、斜体、列表、代码块等都以 Markdown 语法保留下来；
+* 支持多列页面；
+* 支持图像和矢量图形提取，在 Markdown 文件中以图片语法；
+* 支持按页面分块输出；
+* 支持将输出作为 [LlamaIndex Documents](https://docs.llamaindex.ai/en/stable/module_guides/loading/documents_and_nodes/usage_documents/)，方便在 LlamaIndex 中快速开发 RAG 应用；
+
+`PyMuPDF4LLM` 扩展库的安装很简单：
+
+```
+$ pip install pymupdf4llm
+```
+
+使用也很简单：
+
+```
+import pymupdf4llm
+md_text = pymupdf4llm.to_markdown("./pdfs/example.pdf", write_images=True)
+print(md_text)
+```
+
+官方提供了 [一些示例](https://pymupdf.readthedocs.io/en/latest/rag.html)，可以实现 Chat PDF 的功能。
 
 ## 参考
 
