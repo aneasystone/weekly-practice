@@ -372,6 +372,77 @@ print(md_text)
 
 官方提供了 [一些示例](https://pymupdf.readthedocs.io/en/latest/rag.html)，可以实现 Chat PDF 的功能。
 
+#### OCR 识别
+
+PyMuPDF 集成了对 OCR 的支持，可以使用 OCR 对图片或文档页面进行识别，要使用该功能，需要先安装 Tesseract-OCR：
+
+```
+$ apt update
+$ apt install tesseract-ocr
+```
+
+> 默认 Tesseract-OCR 只能识别英文，为了支持中文识别，还需要下载中文的训练数据，可以从 [tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) 仓库下载 `chi_sim.traineddata` 文件，并将文件放在 `/usr/share/tesseract-ocr/5/tessdata/` 这个目录下。
+
+PyMuPDF 支持两种 OCR 策略，第一种是识别整个页面，第二种是提取页面中的图片进行识别。由于 OCR 非常缓慢，所以建议在处理 PDF 时每页只进行一次 OCR，当出现下面这些情况时可以使用第一种策略：
+
+* 页面完全被图片覆盖；
+* 页面上不存在文本；
+* 页面上有数千个小矢量图形；
+
+示例代码如下：
+
+```
+page = doc[3]
+textpage = page.get_textpage_ocr()
+text = textpage.extractText()
+print(text)
+```
+
+这里通过 `page.get_textpage_ocr()` 方法将 `Page` 转换为 [TextPage](https://pymupdf.readthedocs.io/en/latest/textpage.html) 从而方便后续我们提取文本。
+
+第二种策略是识别单独的图片，我们先从页面中将图片提取出来：
+
+```
+page = doc[3]
+for img in page.get_images():
+    xref = img[0]
+    data = doc.extract_image(xref)['image']
+    pix = pymupdf.Pixmap(data)
+```
+
+这里先通过 `page.get_images()` 获取页面中的所有图片，注意返回的是图片的 `xref` 引用信息，需要通过 `doc.extract_image()` 提取出图片的原始数据，最后再转换为 `Pixmap` 格式，只有这种格式才能 OCR 识别。得到 `Pixmap` 之后，我们可以将其保存成本地文件：
+
+```
+    pix.save('x.png')
+```
+
+也可以对其进行 OCR 识别：
+
+```
+    pix.pdfocr_save('x.pdf', language='eng')
+```
+
+这个方法将 `Pixmap` 保存为 1 页的 PDF 文件，该页面看起来像原始图片，具有相同的宽度和高度，但是它包含了一个被 Tesseract 识别的文本层，可以使用常规文本提取和搜索方法进行提取和搜索。当然这样做比较繁琐，会生成大量的临时文件，我们也可以直接在内存中进行读取：
+
+```
+    bytes = pix.pdfocr_tobytes()
+    imgdoc = pymupdf.open("pdf", bytes)
+    page = imgdoc[0]
+    text = page.get_text()
+    print(text)
+```
+
+还有另一种方式可以将 `Page` 转换成 `Pixmap`：
+
+```
+page = doc[0]
+pix = page.get_pixmap(dpi=300)
+pix.save('x.png')
+pix.pdfocr_save('x.pdf', language='chi_sim')
+```
+
+注意这里的 `dpi=300` 参数，可以保证生成的图片足够清晰，模糊的图片可能导致 Tesseract 识别失败。
+
 ## 参考
 
 * [How to Process PDFs in Python: A Step-by-Step Guide](https://unstructured.io/blog/how-to-process-pdf-in-python)
