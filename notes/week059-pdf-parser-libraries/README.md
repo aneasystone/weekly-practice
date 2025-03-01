@@ -31,6 +31,7 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [Table Transformer](https://github.com/microsoft/table-transformer)
 * [Nougat](https://github.com/facebookresearch/nougat)
 * [pdftables](https://github.com/drj11/pdftables)
+* [reportlab](https://docs.reportlab.com/)
 
 ---
 
@@ -494,6 +495,40 @@ n
         rawimage = page.images[key]
         pdfimage = pikepdf.PdfImage(rawimage)
         pdfimage.extract_to(fileprefix='x')
+```
+
+### markitdown
+
+markitdown 是微软开源的一款 Python 库，旨在将各种文件格式转换为 Markdown。该库的一大特色是支持大量的文件格式，包括：Word、PPT、Excel、PDF、HTML、JSON、XML、CSV、ZIP、图像、音频、URL，等等等等，因此人气非常高，目前在 Github 上收获了超过 39k 的 Star。
+
+使用 markitdown 非常简单，只需要 4 行代码：
+
+```
+from markitdown import MarkItDown
+md = MarkItDown()
+result = md.convert("./pdfs/example.docx")
+print(result.text_content)
+```
+
+上面的代码将 Word 文档转换为 Markdown 格式，支持保留标题、表格、图片等 Markdown 语法，对 LLM 和 RAG 场景非常友好。深入研究 markitdown 的源码可以发现，它集众家之所长，使用了大量其他流行的开源库，比如：
+
+* 通过 [mammoth](https://github.com/mwilliamson/python-mammoth) 将 Word 文件转换为 HTML 格式；
+* 通过 [pandos](https://github.com/pandas-dev/pandas) 和 [openpyxl](https://openpyxl.readthedocs.io/en/stable/) 将 Excel 文件转换为 HTML 格式；
+* 通过 [pptx](https://github.com/scanny/python-pptx) 解析 PPT 文件；
+* 通过 [markdownify](https://github.com/matthewwithanm/python-markdownify) 将 HTML 转换为 Markdown；
+* 通过 [pdfminer.six](https://github.com/pdfminer/pdfminer.six) 解析 PDF 文件；
+* 通过 [speech_recognition](https://github.com/Uberi/speech_recognition) 对音频文件进行转译；
+
+尽管 markitdown 支持这么多的文件格式，但是它对 PDF 的解析效果并不好，它是直接使用 `pdfminer.high_level.extract_text()` 提取 PDF 中的文本的，所以标题、表格、图片等格式都丢失了，期待 markitdown 能稍微加强下对 PDF 的支持，能做到和 pymupdf4llm 一样的效果就完美了。
+
+markitdown 的另一大特色是对图片的处理，不同于其他库喜欢用 Tesseract 做 OCR 识别，它通过多模态大模型（比如 `gpt-4o`、`Qwen-VL` 等）为图片生成详细描述：
+
+```
+from openai import Client
+client = Client()
+md = MarkItDown(llm_client=client, llm_model="gpt-4o")
+result = md.convert("./pdfs/example.jpg")
+print(result.text_content)
 ```
 
 ## 参考
