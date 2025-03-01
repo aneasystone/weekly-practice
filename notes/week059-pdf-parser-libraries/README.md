@@ -1,12 +1,12 @@
-# WEEK059 - 实战 PDF 解析
+# WEEK059 - 盘点 Python 中那些 PDF 解析库
 
 使用 RAG 实现企业私域知识问答是目前最流行也是最前沿的大模型技术之一，在 [week054-advanced-rag-notes](../week054-advanced-rag-notes/README.md) 这篇笔记中，我介绍了很多种不同的高级 RAG 技术，其关注点更多的是如何检索私域知识以及如何将检索结果灌输到大模型中，并没有深入如何获得这些私域知识。
 
 现实中，绝大数企业私域知识都是非结构化的，散落在各种网页、文档或邮件附件里，如果能将这些内容解析出来，对企业来说无疑是巨大的价值。而在这些非结构化的文档中，PDF 文档占比很高，使得 PDF 解析对 RAG 至关重要。
 
-## 开源 PDF 解析库一览
+PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这篇笔记对常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
 
-PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这一节对常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
+## 总览
 
 * [pypdf](https://github.com/py-pdf/pypdf)
 * [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
@@ -442,6 +442,59 @@ pix.pdfocr_save('x.pdf', language='chi_sim')
 ```
 
 注意这里的 `dpi=300` 参数，可以保证生成的图片足够清晰，模糊的图片可能导致 Tesseract 识别失败。
+
+### pikepdf
+
+pikepdf 是另一个 Python PDF 解析库，帮助开发者读取、写入和修改 PDF 文件。这个库的取名很有意思：
+
+```
+Python + qpdf = "py" + "qpdf" = "pyqpdf"
+```
+
+可以看出 pikepdf 基于 [qpdf](https://github.com/qpdf/qpdf) 开发，而 qpdf 是一个使用 C++ 编写的功能强大的 PDF 操作和修复库。
+
+使用 pikepdf 解析 PDF 不是一件容易的事，因为它使用了一些比较低级的概念，比如 [对象模型](https://pikepdf.readthedocs.io/en/latest/topics/objects.html) 和 [流](https://pikepdf.readthedocs.io/en/latest/topics/streams.html)，这种设计使得用户需要对 PDF 的内部结构和规范有一定的了解，才能高效地使用该库。
+
+当我们准备上手 pikepdf 的入门示例时，我们会发现它甚至都 [没有提取文本的能力](https://pikepdf.readthedocs.io/en/latest/topics/content_streams.html#extracting-text-from-pdfs)，只能访问页面中的 **内容流（Content Streams）**：
+
+```
+import pikepdf
+
+with pikepdf.open('./pdfs/example.pdf') as pdf:
+    page = pdf.pages[0]
+    instructions = pikepdf.parse_content_stream(page)
+    data = pikepdf.unparse_content_stream(instructions)
+    print(data.decode())
+    
+```
+
+解析出来的结果类似于下面这样的被称为 **指令（Instructions）** 的特殊字符串：
+
+```
+q
+1 0 0 -1 0 841.9 cm
+q
+0 0 595.3 841.9 re
+W*
+n
+0.12 w
+2 M
+2 J
+2 j
+0 0 0 RG
+```
+
+> 对 PDF 底层数据结构感兴趣的同学可以看看 [《PDF Explained》](https://zxyle.github.io/PDF-Explained/) 这本电子书。
+
+强烈不推荐从内容流中解析文本，因为这意味着你需要手动处理字体、字号、编码等一系列问题，这只适合部分硬核玩家，我们不如直接使用其他现成的 PDF 解析库。不过我们可以使用 pikepdf [处理图片](https://pikepdf.readthedocs.io/en/latest/topics/images.html)，比如提取、替换、删除等，下面是提取图片的一个示例：
+
+```
+    page = pdf.pages[3]
+    for key in page.images:
+        rawimage = page.images[key]
+        pdfimage = pikepdf.PdfImage(rawimage)
+        pdfimage.extract_to(fileprefix='x')
+```
 
 ## 参考
 

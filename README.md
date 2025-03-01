@@ -2,7 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
-* WEEK059 - [实战 PDF 解析](./notes/week059-pdf-parser-libraries/README.md)
+* WEEK059 - [盘点 Python 中那些 PDF 解析库](./notes/week059-pdf-parser-libraries/README.md)
 * WEEK058 - [使用 GraalVM 构建 Java 原生应用](./notes/week058-java-native-app-with-graalvm/README.md)
 * WEEK057 - [基于 LangGraph 创建智能体应用](./notes/week057-create-agents-with-langgraph/README.md)
 * WEEK056 - [Java 21 初体验（三）](./notes/week056-java-21-notes-3/README.md)
