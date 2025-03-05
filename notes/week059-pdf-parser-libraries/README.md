@@ -14,13 +14,13 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [pdfplumber](https://github.com/jsvine/pdfplumber)
 * [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
 * [pikepdf](https://github.com/pikepdf/pikepdf)
+* [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 * [markitdown](https://github.com/microsoft/markitdown)
 * [unstructured](https://github.com/Unstructured-IO/unstructured)
 * [docTR](https://github.com/mindee/doctr)
 * [docling](https://github.com/DS4SD/docling)
 * [omniparse](https://github.com/adithya-s-k/omniparse)
 * [PDF-Extract-Kit](https://github.com/opendatalab/PDF-Extract-Kit)
-* [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 * [gptpdf](https://github.com/CosmosShadow/gptpdf)
 * [zerox](https://github.com/getomni-ai/zerox)
 * [PDFMathTranslate](https://github.com/Byaidu/PDFMathTranslate)
@@ -497,6 +497,53 @@ n
         pdfimage.extract_to(fileprefix='x')
 ```
 
+### OCRmyPDF
+
+OCRmyPDF 的特点是通过 OCR 识别图像中包含的文本，并为 PDF 中的图像添加一个文本层，使得图像 PDF 也可以被搜索。它的工作流程大致如下：
+
+* 首先通过 pikepdf 处理 PDF，修复 PDF 中可能存在的语法错误，并将 PDF 拆分成单页；
+* 然后使用 [Ghostscript](https://ghostscript.com/) 以 `-dSAFER` 模式对 PDF 的每一页进行光栅化；光栅图也叫做位图、点阵图、像素图，可以方便的进行 OCR 识别；
+* 接着使用 Tesseract 对光栅化的图像执行 OCR 识别；
+* 最后将识别的结果和原始的 PDF 进行合成，生成一个新的 PDF 文件。
+
+> 默认情况下，OCRmyPDF 生成的文件是 `PDF/A` 格式，这是 PDF 规范的子集，旨在用于归档（“A” 代表归档）。PDF/A 与 PDF 的主要区别在于去掉了很多复杂的功能，例如嵌入式 Javascript、视频、音频和对外部字体的引用，因此它可能更安全。
+
+OCRmyPDF 可以通过命令行工具使用，也可以通过 API 集成在 Python 代码中：
+
+```
+import ocrmypdf
+
+ocrmypdf.ocr('./pdfs/example.pdf', 'output.pdf', skip_text=True)
+```
+
+正如前文所述，OCRmyPDF 依赖于 Ghostscript 处理页面，所以我们需要先安装 Ghostscript，不过当前使用 `apt install ghostscript` 命令安装的是 10.0.0 版本，是个有问题的版本，无法在 OCRmyPDF 中直接使用。如果你也遇到和我一样的问题，可以通过下面的步骤手动编译源码来安装：
+
+```
+$ wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10040/ghostscript-10.04.0.tar.gz
+$ tar zxvf ghostscript-10.04.0.tar.gz
+$ cd ghostscript-10.04.0
+$ ./configure
+$ make install
+```
+
+上面的 `skip_text=True` 参数表示跳过有文本的页面，只处理有图片的页面。要注意的是，如果页面既有文本又有图片，也会跳过，可以设置 `force_ocr=True` 参数强制识别所有页面：
+
+```
+ocrmypdf.ocr('./pdfs/example.pdf', 'output.pdf', force_ocr=True)
+```
+
+详细的参数说明可以参考官网的[使用手册](https://ocrmypdf.readthedocs.io/en/latest/cookbook.html)。
+
+打开生成的 PDF 文件，如果一切正常，可以发现图片上的文字不仅可以搜索，也可以用鼠标框选（而且框选的位置和图片中文字的位置非常吻合，一点违和感都没有）：
+
+![](./images/ocrmypdf.png)
+
+#### 插件机制
+
+OCRmyPDF 还支持插件，允许自定义其处理步骤。
+
+https://ocrmypdf.readthedocs.io/en/latest/plugins.html
+
 ### markitdown
 
 markitdown 是微软开源的一款 Python 库，旨在将各种文件格式转换为 Markdown。该库的一大特色是支持大量的文件格式，包括：Word、PPT、Excel、PDF、HTML、JSON、XML、CSV、ZIP、图像、音频、URL，等等等等，因此人气非常高，目前在 Github 上收获了超过 39k 的 Star。
@@ -530,6 +577,14 @@ md = MarkItDown(llm_client=client, llm_model="gpt-4o")
 result = md.convert("./pdfs/example.jpg")
 print(result.text_content)
 ```
+
+### unstructured
+
+https://docs.unstructured.io/open-source/introduction/supported-file-types
+
+[分区策略](https://docs.unstructured.io/open-source/concepts/partitioning-strategies)
+
+https://docs.unstructured.io/open-source/how-to/set-ocr-agent
 
 ## 参考
 
