@@ -16,12 +16,12 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [pikepdf](https://github.com/pikepdf/pikepdf)
 * [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 * [markitdown](https://github.com/microsoft/markitdown)
+* [gptpdf](https://github.com/CosmosShadow/gptpdf)
 * [unstructured](https://github.com/Unstructured-IO/unstructured)
 * [docTR](https://github.com/mindee/doctr)
 * [docling](https://github.com/DS4SD/docling)
 * [omniparse](https://github.com/adithya-s-k/omniparse)
 * [PDF-Extract-Kit](https://github.com/opendatalab/PDF-Extract-Kit)
-* [gptpdf](https://github.com/CosmosShadow/gptpdf)
 * [zerox](https://github.com/getomni-ai/zerox)
 * [PDFMathTranslate](https://github.com/Byaidu/PDFMathTranslate)
 * [comic-translate](https://github.com/ogkalu2/comic-translate)
@@ -538,11 +538,15 @@ ocrmypdf.ocr('./pdfs/example.pdf', 'output.pdf', force_ocr=True)
 
 ![](./images/ocrmypdf.png)
 
-#### 插件机制
+此外，OCRmyPDF 通过 [pluggy](https://github.com/pytest-dev/pluggy) 实现了插件机制，比如：
 
-OCRmyPDF 还支持插件，允许自定义其处理步骤。
+* 添加新的命令行参数；
+* 执行 OCR 之前增加自己的判断逻辑；
+* 在 OCR 识别或 PDF 生成之前对图片进行修改；
+* 用其他 OCR 引擎替换 Tesseract OCR；
+* 用其他光栅化或 PDF/A 生成器替换 Ghostscript；
 
-https://ocrmypdf.readthedocs.io/en/latest/plugins.html
+感兴趣的同学可以参考官网的[插件文档](https://ocrmypdf.readthedocs.io/en/latest/plugins.html)。
 
 ### markitdown
 
@@ -576,6 +580,46 @@ client = Client()
 md = MarkItDown(llm_client=client, llm_model="gpt-4o")
 result = md.convert("./pdfs/example.jpg")
 print(result.text_content)
+```
+
+### gptpdf
+
+gptpdf 是另一个使用多模态大模型来解析 PDF 的库，它的核心思想非常简单：将 PDF 文件的每一页转换为图片，然后丢给大模型，让它将图片中识别到的文字转换为 Markdown 格式输出。它的 [核心代码](https://github.com/CosmosShadow/gptpdf/blob/main/gptpdf/parse.py) 不过 300 行，但几乎可以完美地解析排版、数学公式、表格、图片、图表等。
+
+内置的 Prompt 也很简单：
+
+```
+使用markdown语法，将图片中识别到的文字转换为markdown格式输出。你必须做到：
+1. 输出和使用识别到的图片的相同的语言，例如，识别到英语的字段，输出的内容必须是英语。
+2. 不要解释和输出无关的文字，直接输出图片中的内容。例如，严禁输出 “以下是我根据图片内容生成的markdown文本：”这样的例子，而是应该直接输出markdown。
+3. 内容不要包含在```markdown ```中、段落公式使用 $$ $$ 的形式、行内公式使用 $ $ 的形式、忽略掉长直线、忽略掉页码。
+再次强调，不要解释和输出无关的文字，直接输出图片中的内容。
+```
+
+gptpdf 使用了作者自己开发的 [GeneralAgent](https://github.com/CosmosShadow/GeneralAgent) 库来调用大模型，支持 [GPT-4o](https://platform.openai.com/docs/guides/vision)、[Qwen-VL](https://github.com/QwenLM/Qwen-VL)、[GLM-4V](https://github.com/THUDM/GLM-4)、[Yi-VL](https://github.com/01-ai/Yi) 等：
+
+```
+from gptpdf import parse_pdf
+
+content, image_paths = parse_pdf(
+    pdf_path = "./pdfs/text+image.pdf", 
+    output_dir = "./out",
+    model = "gpt-4o",
+)
+print(content)
+```
+
+上面的代码运行成功后，会将输出结果写入到 out 目录下的 `output.md` 文件。
+
+如果 PDF 中含有图片，gptpdf 的处理方式稍微有些不一样，它会首先使用 PyMuPDF 将图片区域用一个红色的框标记出来，像下面这样：
+
+![](./images/rect_image.png)
+
+然后将这个区域裁剪成子图保存起来，并让大模型在识别到这个图片时使用 Markdown 的图片语法 `![]()` 替换该位置，内置的 Prompt 会加上如下内容：
+
+```
+图片中用红色框和名称(%s)标注出了一些区域。如果区域是表格或者图片，使用 ![]() 的形式插入到输出内容中，否则直接输出文字内容。
+0_0.png, 0_1.png
 ```
 
 ### unstructured
