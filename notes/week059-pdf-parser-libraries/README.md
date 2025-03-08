@@ -13,6 +13,8 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [pypdfium2](https://github.com/pypdfium2-team/pypdfium2)
 * [pdfplumber](https://github.com/jsvine/pdfplumber)
 * [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
+* [Tabula](https://github.com/tabulapdf/tabula)
+* [Camelot](https://github.com/camelot-dev/camelot)
 * [pikepdf](https://github.com/pikepdf/pikepdf)
 * [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 * [markitdown](https://github.com/microsoft/markitdown)
@@ -26,8 +28,6 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [PDFMathTranslate](https://github.com/Byaidu/PDFMathTranslate)
 * [comic-translate](https://github.com/ogkalu2/comic-translate)
 * [mPLUG-DocOwl](https://github.com/X-PLUG/mPLUG-DocOwl)
-* [Tabula](https://github.com/tabulapdf/tabula)
-* [Camelot](https://github.com/camelot-dev/camelot)
 * [Table Transformer](https://github.com/microsoft/table-transformer)
 * [Nougat](https://github.com/facebookresearch/nougat)
 * [pdftables](https://github.com/drj11/pdftables)
@@ -443,6 +443,36 @@ pix.pdfocr_save('x.pdf', language='chi_sim')
 ```
 
 注意这里的 `dpi=300` 参数，可以保证生成的图片足够清晰，模糊的图片可能导致 Tesseract 识别失败。
+
+### Tabula vs. Camelot
+
+上面提到 pdfplumber 和 PyMuPDF 都具备表格提取功能，关于表格提取，还有两个库不得不提，那就是 Tabula 和 Camelot。
+
+Tabula 是一款专门用于提取 PDF 中表格的工具，它本身是一个基于 Java 开发的本地 Web 应用。首先上传 PDF 文件，手动选择或自动检测表格区域：
+
+![](./images/tabula-select-table.png)
+
+然后将选择的表格区域提取成结构化的数据：
+
+![](./images/tabula-extract-table.png)
+
+Tabula 实现了两种表格提取算法：一种叫 Stream 模式（参考 [BasicExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/BasicExtractionAlgorithm.java) 和 [NurminenDetectionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/detectors/NurminenDetectionAlgorithm.java)，实际上也是借鉴了 Anssi Nurminen 那篇论文中的思路），另一种叫 Lattice 模式（参考 [SpreadsheetExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/SpreadsheetExtractionAlgorithm.java)）；Stream 模式通过查找列之间的空白来确定表格，而 Lattice 模式则是查找列之间的边界线。如果其中一种算法无法提取表格数据，可以切换到另一种尝试。
+
+同时，Tabula 也开源了对应的 SDK 方便其他开发者集成，核心仓库是 [tabula-java](https://github.com/tabulapdf/tabula-java/)，也有社区维护的 Python 绑定 [tabula-py](https://github.com/chezou/tabula-py)，基本用法如下：
+
+```
+import tabula
+
+dfs = tabula.read_pdf(
+    "./pdfs/table.pdf",
+    pages='1'
+)
+print(dfs[0])
+```
+
+> 注意：由于 Tabula 是基于 Java 实现的，所以要安装 JVM 环境。
+
+https://camelot-py.readthedocs.io/en/master/user/how-it-works.html
 
 ### pikepdf
 
