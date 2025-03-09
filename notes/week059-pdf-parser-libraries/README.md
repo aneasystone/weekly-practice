@@ -30,7 +30,6 @@ PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 �
 * [mPLUG-DocOwl](https://github.com/X-PLUG/mPLUG-DocOwl)
 * [Table Transformer](https://github.com/microsoft/table-transformer)
 * [Nougat](https://github.com/facebookresearch/nougat)
-* [pdftables](https://github.com/drj11/pdftables)
 * [reportlab](https://docs.reportlab.com/)
 
 ---
@@ -456,7 +455,7 @@ Tabula 是一款专门用于提取 PDF 中表格的工具，它本身是一个�
 
 ![](./images/tabula-extract-table.png)
 
-Tabula 实现了两种表格提取算法：一种叫 Stream 模式（参考 [BasicExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/BasicExtractionAlgorithm.java) 和 [NurminenDetectionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/detectors/NurminenDetectionAlgorithm.java)，实际上也是借鉴了 Anssi Nurminen 那篇论文中的思路），另一种叫 Lattice 模式（参考 [SpreadsheetExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/SpreadsheetExtractionAlgorithm.java)）；Stream 模式通过查找列之间的空白来确定表格，而 Lattice 模式则是查找列之间的边界线。如果其中一种算法无法提取表格数据，可以切换到另一种尝试。
+Tabula 实现了两种表格提取算法：一种叫 **Stream 模式**（参考 [BasicExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/BasicExtractionAlgorithm.java) 和 [NurminenDetectionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/detectors/NurminenDetectionAlgorithm.java)，实际上也是借鉴了 Anssi Nurminen 那篇论文中的思路），另一种叫 **Lattice 模式**（参考 [SpreadsheetExtractionAlgorithm](https://github.com/tabulapdf/tabula-java/blob/master/src/main/java/technology/tabula/extractors/SpreadsheetExtractionAlgorithm.java)）；Stream 模式通过查找列之间的空白来确定表格，而 Lattice 模式则是查找列之间的边界线，如果单元格之间有明确的边界线，建议选择 Lattice 模式，当其中一种算法无法提取表格数据时，可以切换到另一种尝试。
 
 同时，Tabula 也开源了对应的 SDK 方便其他开发者集成，核心仓库是 [tabula-java](https://github.com/tabulapdf/tabula-java/)，也有社区维护的 Python 绑定 [tabula-py](https://github.com/chezou/tabula-py)，基本用法如下：
 
@@ -465,14 +464,31 @@ import tabula
 
 dfs = tabula.read_pdf(
     "./pdfs/table.pdf",
-    pages='1'
+    pages = '1'
 )
 print(dfs[0])
 ```
 
 > 注意：由于 Tabula 是基于 Java 实现的，所以要安装 JVM 环境。
 
-https://camelot-py.readthedocs.io/en/master/user/how-it-works.html
+Camelot 是另一款 PDF 表格提取工具和库，和 Tabula 非常类似，它是纯 Python 实现，不用依赖 JVM 环境。而且相比于 Tabula 它提供了更多的 [高级选项](https://camelot-py.readthedocs.io/en/latest/user/advanced.html)，能应付更多更复杂的场景。[这里](https://github.com/camelot-dev/camelot/wiki/Comparison-with-other-PDF-Table-Extraction-libraries-and-tools) 有一份 Camelot 和 Tabula 的详细对比，根据对比结果，Camelot 在多个场景下效果都比 Tabula 要好。
+
+Camelot 用起来和 Tabula 也很像，如下：
+
+```
+import camelot
+
+tables = camelot.read_pdf(
+    './pdfs/table.pdf',
+    pages = "1",
+    flavor = "stream"
+)
+print(tables[0].df)
+```
+
+其中 `flavor = "stream"` 表示使用 **Stream 模式**，同样的，Camelot 也支持 **Lattice 模式**，不过它的实现有些不同（参考 [lattice.py](https://github.com/camelot-dev/camelot/blob/master/camelot/parsers/lattice.py)），它首先通过 Ghostscript 或 Pdfium 将 PDF 页面转换为图像，然后使用 OpenCV 的图像学算法，获取水平和垂直线段；推荐阅读 Camelot 的官方文档 [How It Works](https://camelot-py.readthedocs.io/en/master/user/how-it-works.html)，这篇文档带我们详细了解 Lattice 是如何一步一步地处理 PDF 页面的。此外，这篇文档还介绍了 Camelot 的另两种模式：**Network 模式** 和 **Hybrid 模式**，此处不再赘述。
+
+> 除了 Camelot 和 Tabula，还有很多类似的库也用于表格提取，比如 [pdftables](https://github.com/drj11/pdftables) 和 [pdf-table-extract](https://github.com/ashima/pdf-table-extract) 等。
 
 ### pikepdf
 
@@ -564,11 +580,11 @@ ocrmypdf.ocr('./pdfs/example.pdf', 'output.pdf', force_ocr=True)
 
 详细的参数说明可以参考官网的[使用手册](https://ocrmypdf.readthedocs.io/en/latest/cookbook.html)。
 
-打开生成的 PDF 文件，如果一切正常，可以发现图片上的文字不仅可以搜索，也可以用鼠标框选（而且框选的位置和图片中文字的位置非常吻合，一点违和感都没有）：
+打开生成的 PDF 文件，如果一切正常，可以发现图片上的文字不仅可以搜索，也可以用鼠标框选复制（而且框选的位置和图片中文字的位置非常吻合，一点违和感都没有）：
 
 ![](./images/ocrmypdf.png)
 
-此外，OCRmyPDF 通过 [pluggy](https://github.com/pytest-dev/pluggy) 实现了插件机制，比如：
+此外，OCRmyPDF 通过 [pluggy](https://github.com/pytest-dev/pluggy) 实现了插件机制，我们可以基于插件机制实现如下功能：
 
 * 添加新的命令行参数；
 * 执行 OCR 之前增加自己的判断逻辑；
