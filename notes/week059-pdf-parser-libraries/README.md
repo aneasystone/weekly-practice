@@ -6,44 +6,9 @@
 
 PDF 全称 **Portable Document Format（可移植文档格式）**，于 1993 年由 Adobe 公司开发，鉴于其跨平台性、高安全性、开放标准、可搜索性和可访问性等优势，已经成为全球范围内广泛使用的文件格式。Python 中有着大量的 PDF 解析库，这篇笔记对常用的 PDF 解析库做一个盘点，方便自己后期技术选型时做参考。
 
-## 总览
+## pypdf
 
-* [pypdf](https://github.com/py-pdf/pypdf)
-* [pdfminer.six](https://github.com/pdfminer/pdfminer.six)
-* [pypdfium2](https://github.com/pypdfium2-team/pypdfium2)
-* [pdfplumber](https://github.com/jsvine/pdfplumber)
-* [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
-* [Tabula](https://github.com/tabulapdf/tabula)
-* [Camelot](https://github.com/camelot-dev/camelot)
-* [pikepdf](https://github.com/pikepdf/pikepdf)
-* [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
-* [markitdown](https://github.com/microsoft/markitdown)
-* [gptpdf](https://github.com/CosmosShadow/gptpdf)
-* [unstructured](https://github.com/Unstructured-IO/unstructured)
-* [docTR](https://github.com/mindee/doctr)
-* [docling](https://github.com/DS4SD/docling)
-* [omniparse](https://github.com/adithya-s-k/omniparse)
-* [PDF-Extract-Kit](https://github.com/opendatalab/PDF-Extract-Kit)
-* [zerox](https://github.com/getomni-ai/zerox)
-* [PDFMathTranslate](https://github.com/Byaidu/PDFMathTranslate)
-* [comic-translate](https://github.com/ogkalu2/comic-translate)
-* [mPLUG-DocOwl](https://github.com/X-PLUG/mPLUG-DocOwl)
-* [Table Transformer](https://github.com/microsoft/table-transformer)
-* [Nougat](https://github.com/facebookresearch/nougat)
-* [reportlab](https://docs.reportlab.com/)
-
----
-
-* [LangChain - Document Loaders](https://python.langchain.com/v0.1/docs/modules/data_connection/document_loaders/pdf/)
-* [Llama Hub - Data Loaders](https://llamahub.ai/?tab=readers)
-* [QuivrHQ/quivr](https://github.com/QuivrHQ/quivr)
-* [Cinnamon/kotaemon](https://github.com/Cinnamon/kotaemon)
-
-## 基本使用
-
-### pypdf
-
-pypdf 是一个免费且开源的纯 Python PDF 库，能够分割、合并、裁剪和转换 PDF 文件的页面，可以向 PDF 文件添加自定义数据，对 PDF 文件进行加密和解密。当然，pypdf 还可以从 PDF 中提取文本、图片、附件、批注和元数据等。
+[pypdf](https://github.com/py-pdf/pypdf) 是一个免费且开源的纯 Python PDF 库，能够分割、合并、裁剪和转换 PDF 文件的页面，可以向 PDF 文件添加自定义数据，对 PDF 文件进行加密和解密。当然，pypdf 还可以从 PDF 中提取文本、图片、附件、批注和元数据等。
 
 ```
 from pypdf import PdfReader
@@ -64,9 +29,11 @@ for i in range(number_of_pages):
 
 可以看出 pypdf 的用法较为简单，我们只能拿到每一页的文本和图片内容，拿不到更多的详细信息，比如文本字体和大小，块位置等，这些信息在处理复杂场景时是必不可少的。所以 pypdf 只适合 PDF 的内容比较规整的场景。
 
-### pdfminer.six
+## pdfminer.six
 
-[pdfminer 最初由 Euske 开发](https://github.com/euske/pdfminer)，但是只支持 Python 2，不支持 Python 3，于是社区在他的基础上引入了 [six](https://github.com/benjaminp/six)，这是一个无需修改代码，就可以同时兼容 Python 2 和 3 的库，所以叫做 `pdfminer.six`。它也是一个纯 Python 编写的 PDF 库，专注于获取和分析文本数据。
+[pdfminer.six](https://github.com/pdfminer/pdfminer.six) 也是一个纯 Python 编写的 PDF 库，专注于获取和分析文本数据。
+
+[pdfminer 最初由 Euske 开发](https://github.com/euske/pdfminer)，但是只支持 Python 2，不支持 Python 3，于是社区在他的基础上引入了 [six](https://github.com/benjaminp/six)，这是一个无需修改代码，就可以同时兼容 Python 2 和 3 的库，所以叫做 `pdfminer.six`。
 
 使用 `extract_text` 方法实现类似 pypdf 的效果，直接返回文本：
 
@@ -110,7 +77,7 @@ for page in extract_pages("./pdfs/example.pdf"):
             print(element)
 ```
 
-#### 布局分析
+### 布局分析
 
 PDF 文件和 `.txt` 或 Word 在格式上有着很大的不同，它不包含任何类似于段落、句子甚至单词的内容。它由一系列对象及其结构信息组成，这些对象共同描述一个或多个页面的外观，可能还附带有其他交互元素和更高级别的应用程序数据。这使得从 PDF 文件中提取有意义的文本片段变得困难，组成段落的字符与组成表格、页面底部或图表描述的字符没有任何区别。
 
@@ -120,11 +87,11 @@ PDF 文件和 `.txt` 或 Word 在格式上有着很大的不同，它不包含�
 
 更多说明请参考 [Converting a PDF file to text](https://pdfminersix.readthedocs.io/en/latest/topic/converting_pdf_to_text.html) 这篇文档。
 
-### pypdfium2
+## pypdfium2
 
 [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main) 被认为是开源世界中最高质量的 PDF 渲染引擎之一，它最初是基于福昕软件（Foxit Software）的 PDF SDK 开发的，在 2014 年被 Google 开源。PDFium 支持多种操作系统，包括 Windows、macOS、Linux 等，它还被编译到 iOS、Android 等移动平台上，支持跨平台应用；除了基本的 PDF 渲染功能，PDFium 还支持生成、编辑、文本提取、搜索、注解、表单填充等高级功能。PDFium 是一个高效、可靠的 PDF 渲染引擎，广泛应用于 Chrome 浏览器和其他第三方项目中。其开源性质和丰富的功能使其成为处理 PDF 文档的理想选择，由于基于 C++ 开发，处理大文件速度优于纯 Python 库。
 
-pypdfium2 是 PDFium 库的 Python 3 绑定，它提供了一些辅助方法简化 PDFium 库的使用，同时原始的 PDFium/ctypes API 仍然可访问。下面的示例代码演示了如何通过 pypdfium2 的 `get_text_bounded()` 方法将 PDF 中的文本提取出来：
+[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) 是 PDFium 库的 Python 3 绑定，它提供了一些辅助方法简化 PDFium 库的使用，同时原始的 PDFium/ctypes API 仍然可访问。下面的示例代码演示了如何通过 pypdfium2 的 `get_text_bounded()` 方法将 PDF 中的文本提取出来：
 
 ```
 import pypdfium2 as pdfium
@@ -164,9 +131,9 @@ pil_image = bitmap.to_pil()
 pil_image.save('x.png')
 ```
 
-### pdfplumber
+## pdfplumber
 
-pdfplumber 是另一个用于解析 PDF 的 Python 库，它基于 pdfminer.six 构建，但提供了更简洁的 API 和对复杂布局（尤其是表格）的更好支持。它的核心功能如下：
+[pdfplumber](https://github.com/jsvine/pdfplumber) 是另一个用于解析 PDF 的 Python 库，它基于 pdfminer.six 构建，但提供了更简洁的 API 和对复杂布局（尤其是表格）的更好支持。它的核心功能如下：
 
 * 文本提取：提取 PDF 中的文本（包括位置、字体等元数据），支持按页面、按区域或按特定条件提取；
 * 表格提取：自动检测和提取 PDF 中的表格数据（支持合并单元格、多行文本等复杂结构）；
@@ -197,7 +164,7 @@ for char in page.chars:
 
 除此之外，通过 `page` 还能访问很多其他对象，比如 `.lines` 代表线，`.rects` 代表矩形框，`.curves` 代表曲线（无法识别成线或矩形的连接点），`.images` 代表图像，`.annots` 代表 PDF 批注，`.hyperlinks` 代表链接等。
 
-#### 布局分析
+### 布局分析
 
 pdfplumber 基于 pdfminer.six 构建，所以也具备 pdfminer.six 布局分析的功能，打开 PDF 时传入 laparams 参数即可：
 
@@ -212,7 +179,7 @@ with pdfplumber.open(path, laparams=laparams) as pdf:
     pass
 ```
 
-#### 表格提取
+### 表格提取
 
 pdfplumber 的一大亮点是它的表格提取功能，可以处理比较复杂布局的表格。它的基本用法如下：
 
@@ -269,7 +236,7 @@ for table in tables:
 
 官方仓库里提供了几个示例可供参考，其中 [extract-table-ca-warn-report.ipynb](https://github.com/hbh112233abc/pdfplumber/blob/stable/examples/notebooks/extract-table-ca-warn-report.ipynb) 演示了表格提取的基本操作，[extract-table-nics.ipynb](https://github.com/hbh112233abc/pdfplumber/blob/stable/examples/notebooks/extract-table-nics.ipynb) 演示如何使用可视化调试查找最佳的表提取设置。
 
-#### 可视化调试
+### 可视化调试
 
 pdfplumber 的另一大亮点是它可以将页面转换为 `PageImage` 对象（有趣的是，这一步是通过 pypdfium2 实现的），然后在 `PageImage` 将 chars、lines、rects 绘制出来，通过可视化页面，可以更直观地理解页面的布局结构。
 
@@ -291,9 +258,9 @@ im.debug_tablefinder(table_settings={}).save('debug_tablefinder.png')
 
 ![](./images/debug_tablefinder.png)
 
-### PyMuPDF
+## PyMuPDF
 
-[MuPDF](https://mupdf.com/) 是由 [Artifex Software](https://artifex.com/) 公司开发的一个专注于 PDF 文档处理和渲染的开源库和工具集，具有轻量级、高性能的特点，适合嵌入式系统、移动设备和桌面应用集成。MuPDF 提供了多种语言接口，可以在 [JavaScript](https://github.com/ArtifexSoftware/mupdf.js)、[Java](https://github.com/ArtifexSoftware/mupdf/tree/master/platform/java)、[.NET](https://github.com/ArtifexSoftware/MuPDF.NET) 和 [Python](https://github.com/pymupdf/PyMuPDF) 等语言中调用，PyMuPDF 就是 MuPDF 的 Python 绑定。
+[MuPDF](https://mupdf.com/) 是由 [Artifex Software](https://artifex.com/) 公司开发的一个专注于 PDF 文档处理和渲染的开源库和工具集，具有轻量级、高性能的特点，适合嵌入式系统、移动设备和桌面应用集成。MuPDF 提供了多种语言接口，可以在 [JavaScript](https://github.com/ArtifexSoftware/mupdf.js)、[Java](https://github.com/ArtifexSoftware/mupdf/tree/master/platform/java)、[.NET](https://github.com/ArtifexSoftware/MuPDF.NET) 和 [Python](https://github.com/pymupdf/PyMuPDF) 等语言中调用，[PyMuPDF](https://github.com/pymupdf/PyMuPDF) 就是 MuPDF 的 Python 绑定。
 
 > 注意，MuPDF 采用 AGPL 许可证，商业用途需联系 Artifex 获取商业授权。
 
@@ -332,7 +299,7 @@ json = page.get_text('json')
 
 PyMuPDF 的功能非常丰富，除了 PDF，它还支持大量其他的文件格式，包括 XPS、EPUB、MOBI 等电子书格式，以及 DOCX、XLSX、PPTX 等 Office 文档（Pro 版），[这里](https://pymupdf.readthedocs.io/en/latest/about.html) 有一个表格列举了它的所有特性，并和其他几个 PDF 库进行对比。
 
-#### 表格提取
+### 表格提取
 
 PyMuPDF 支持提取 PDF 中的表格数据：
 
@@ -346,7 +313,7 @@ for t in page.find_tables():
 
 和 pdfplumber 一样，得到的表格是一个二维数组，可以直接加载到 pandas 的 `DataFrame` 中对表格数据进行处理。
 
-#### Markdown 提取
+### Markdown 提取
 
 在 RAG 中，为了实现文档内容的切片，文档版式分析的准确性显得至关重要，Markdown 作为一种语法简单、段落清晰的文本格式，在 LLM 和 RAG 场景下经常被使用。PyMuPDF 支持将 PDF 文件转换为 Markdown 格式，方便在 LLM 和 RAG 场景下使用，这需要安装 `PyMuPDF4LLM` 扩展库，它的功能特性如下：
 
@@ -372,7 +339,7 @@ print(md_text)
 
 官方提供了 [一些示例](https://pymupdf.readthedocs.io/en/latest/rag.html)，可以实现 Chat PDF 的功能。
 
-#### OCR 识别
+### OCR 识别
 
 PyMuPDF 集成了对 OCR 的支持，可以使用 OCR 对图片或文档页面进行识别，要使用该功能，需要先安装 Tesseract-OCR：
 
@@ -443,9 +410,9 @@ pix.pdfocr_save('x.pdf', language='chi_sim')
 
 注意这里的 `dpi=300` 参数，可以保证生成的图片足够清晰，模糊的图片可能导致 Tesseract 识别失败。
 
-### Tabula vs. Camelot
+## Tabula vs. Camelot
 
-上面提到 pdfplumber 和 PyMuPDF 都具备表格提取功能，关于表格提取，还有两个库不得不提，那就是 Tabula 和 Camelot。
+上面提到 pdfplumber 和 PyMuPDF 都具备表格提取功能，关于表格提取，还有两个库不得不提，那就是 [Tabula](https://github.com/tabulapdf/tabula) 和 [Camelot](https://github.com/camelot-dev/camelot)。
 
 Tabula 是一款专门用于提取 PDF 中表格的工具，它本身是一个基于 Java 开发的本地 Web 应用。首先上传 PDF 文件，手动选择或自动检测表格区域：
 
@@ -490,9 +457,10 @@ print(tables[0].df)
 
 > 除了 Camelot 和 Tabula，还有很多类似的库也用于表格提取，比如 [pdftables](https://github.com/drj11/pdftables) 和 [pdf-table-extract](https://github.com/ashima/pdf-table-extract) 等。
 
-### pikepdf
 
-pikepdf 是另一个 Python PDF 解析库，帮助开发者读取、写入和修改 PDF 文件。这个库的取名很有意思：
+## pikepdf
+
+[pikepdf](https://github.com/pikepdf/pikepdf) 是另一个 Python PDF 解析库，帮助开发者读取、写入和修改 PDF 文件。这个库的取名很有意思：
 
 ```
 Python + qpdf = "py" + "qpdf" = "pyqpdf"
@@ -543,9 +511,9 @@ n
         pdfimage.extract_to(fileprefix='x')
 ```
 
-### OCRmyPDF
+## OCRmyPDF
 
-OCRmyPDF 的特点是通过 OCR 识别图像中包含的文本，并为 PDF 中的图像添加一个文本层，使得图像 PDF 也可以被搜索。它的工作流程大致如下：
+[OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) 的特点是通过 OCR 识别图像中包含的文本，并为 PDF 中的图像添加一个文本层，使得图像 PDF 也可以被搜索。它的工作流程大致如下：
 
 * 首先通过 pikepdf 处理 PDF，修复 PDF 中可能存在的语法错误，并将 PDF 拆分成单页；
 * 然后使用 [Ghostscript](https://ghostscript.com/) 以 `-dSAFER` 模式对 PDF 的每一页进行光栅化；光栅图也叫做位图、点阵图、像素图，可以方便的进行 OCR 识别；
@@ -594,9 +562,9 @@ ocrmypdf.ocr('./pdfs/example.pdf', 'output.pdf', force_ocr=True)
 
 感兴趣的同学可以参考官网的[插件文档](https://ocrmypdf.readthedocs.io/en/latest/plugins.html)。
 
-### markitdown
+## markitdown
 
-markitdown 是微软开源的一款 Python 库，旨在将各种文件格式转换为 Markdown。该库的一大特色是支持大量的文件格式，包括：Word、PPT、Excel、PDF、HTML、JSON、XML、CSV、ZIP、图像、音频、URL，等等等等，因此人气非常高，目前在 Github 上收获了超过 39k 的 Star。
+[markitdown](https://github.com/microsoft/markitdown) 是微软开源的一款 Python 库，旨在将各种文件格式转换为 Markdown。该库的一大特色是支持大量的文件格式，包括：Word、PPT、Excel、PDF、HTML、JSON、XML、CSV、ZIP、图像、音频、URL，等等等等，因此人气非常高，目前在 Github 上收获了超过 39k 的 Star。
 
 使用 markitdown 非常简单，只需要 4 行代码：
 
@@ -628,9 +596,9 @@ result = md.convert("./pdfs/example.jpg")
 print(result.text_content)
 ```
 
-### gptpdf
+## gptpdf
 
-gptpdf 是另一个使用多模态大模型来解析 PDF 的库，它的核心思想非常简单：将 PDF 文件的每一页转换为图片，然后丢给大模型，让它将图片中识别到的文字转换为 Markdown 格式输出。它的 [核心代码](https://github.com/CosmosShadow/gptpdf/blob/main/gptpdf/parse.py) 不过 300 行，但几乎可以完美地解析排版、数学公式、表格、图片、图表等。
+[gptpdf](https://github.com/CosmosShadow/gptpdf) 是另一个使用多模态大模型来解析 PDF 的库，它的核心思想非常简单：将 PDF 文件的每一页转换为图片，然后丢给大模型，让它将图片中识别到的文字转换为 Markdown 格式输出。它的 [核心代码](https://github.com/CosmosShadow/gptpdf/blob/main/gptpdf/parse.py) 不过 300 行，但几乎可以完美地解析排版、数学公式、表格、图片、图表等。
 
 内置的 Prompt 也很简单：
 
@@ -668,27 +636,15 @@ print(content)
 0_0.png, 0_1.png
 ```
 
-### unstructured
-
-https://docs.unstructured.io/open-source/introduction/supported-file-types
-
-[分区策略](https://docs.unstructured.io/open-source/concepts/partitioning-strategies)
-
-https://docs.unstructured.io/open-source/how-to/set-ocr-agent
-
 ## 参考
 
-* [How to Process PDFs in Python: A Step-by-Step Guide](https://unstructured.io/blog/how-to-process-pdf-in-python)
-* [MarkItDown深入研究](http://www.hubwiz.com/blog/markitdown-a-deep-dive/)
+* [pypdf's documentation](https://pypdf.readthedocs.io/)
+* [pdfminer.six’s documentation](https://pdfminersix.readthedocs.io/)
+* [pypdfium2's documentation](https://pypdfium2.readthedocs.io/)
+* [PyMuPDF's documentation](https://pymupdf.readthedocs.io/)
+* [Tabula: Extract Tables from PDFs](https://tabula.technology/)
+* [Camelot: PDF Table Extraction for Humans](https://camelot-py.readthedocs.io/)
+* [pikepdf's documentation](https://pikepdf.readthedocs.io/)
+* [OCRmyPDF's documentation](https://ocrmypdf.readthedocs.io/)
 * [文档处理之10种PDF解析工具测评](https://mp.weixin.qq.com/s/HaHnWb5LCJM6kuSphgKykQ)
-* [Pix2Text V1.1 新版发布，支持 PDF 转 Markdown | Breezedeus.com](https://www.breezedeus.com/article/p2t-v1.1)
-* [使用视觉语言模型进行 PDF 检索 [译] | 宝玉的分享](https://baoyu.io/translations/rag/retrieval-with-vision-language-models-colpali)
-* [PDF智能解析：RAG策略下的技术架构与实现](https://mp.weixin.qq.com/s/nOXtdDyE6nP6UXlRJMMK8Q)
-* [LLM之RAG实战（二十九）| 探索RAG PDF解析](https://mp.weixin.qq.com/s/3_9L7MSfE38pGv8nmB6Mrg)
-
-### PDF + RAG
-
-* [Using LlamaParse for Knowledge Graph Creation from Documents | by Fanghua (Joshua) Yu | Apr, 2024 | Medium](https://medium.com/@yu-joshua/using-llamaparse-for-knowledge-graph-creation-from-documents-3bd1e1849754)
-* [Multi-document Agentic RAG using Llama-Index and Mistral | by Plaban Nayak | The AI Forum | May, 2024 | Medium](https://medium.com/the-ai-forum/multi-document-agentic-rag-using-llama-index-and-mistral-b334fa45d3ee)
-* [Building a Multi-Document ReAct Agent for Financial Analysis using LlamaIndex and Qdrant | by M K Pavan Kumar | Jun, 2024 | Stackademic](https://blog.stackademic.com/building-a-multi-document-react-agent-for-financial-analysis-using-llamaindex-and-qdrant-72a535730ac3)
-* [RAG + LlamaParse: Advanced PDF Parsing for Retrieval | by Ryan Siegler | KX Systems | May, 2024 | Medium](https://medium.com/kx-systems/rag-llamaparse-advanced-pdf-parsing-for-retrieval-c393ab29891b)
+* [MarkItDown深入研究](http://www.hubwiz.com/blog/markitdown-a-deep-dive/)
