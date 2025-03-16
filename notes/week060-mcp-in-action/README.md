@@ -6,9 +6,27 @@
 
 ## MCP 架构
 
+为了搞清楚什么是 MCP，让我们先来了解下它的基本架构。下面这张图非常形象地展示了 MCP 的基本架构（[图片来源](https://norahsakal.com/blog/mcp-vs-api-model-context-protocol-explained/)）：
+
 ![](./images/mcp-overview.png)
 
-https://modelcontextprotocol.io/docs/concepts/architecture
+可以看到 MCP 采用了非常经典的 C/S 架构（客户端/服务器），主要包括三个部分：
+
+* **主机（Host）**： 一般是基于大模型的 AI 应用，比如 Claude Desktop、ChatGPT Desktop、Cursor 等桌面应用，需要访问外部数据或工具；
+* **客户端（Client）**：内置在应用中，与 MCP 服务器建立一对一的连接；
+* **服务器（Server）**：连接本地或远程的数据源，提供特定功能；
+    * 本地数据源：文件或数据库；
+    * 远程服务：外部 API 或互联网服务；
+
+MCP 协议将所有的外部数据或工具以一种统一的方式接入 AI 应用，这就好比 USB-C 接口，将各种不同的电子设备统一成一种接口，从而让用户不再为准备各种各样不同的线缆插头而烦恼。简单说，MCP 就像一座桥梁，它本身不处理复杂逻辑，只负责协调 AI 应用与外部资源之间的信息流动。
+
+### MCP 和 API 的区别
+
+在推出 MCP 之前，AI 应用如果要对接外部工具，通常需要单独整合多个不同的 API，每个 API 的接口可能都各不相同，认证方式和错误处理也可能不同，极大地增加了开发复杂度和维护成本。
+
+所以说，传统 API 就像不同的门，每扇门都有一把不同的钥匙，而 MCP 像一把万能钥匙，AI 应用开发者只要集成了这个万能钥匙，就可以打开任意的门。下面是 MCP 和传统 API 的对比：
+
+![](./images/mcp-vs-api.png)
 
 ## MCP 初体验
 
