@@ -92,11 +92,80 @@ Claude 在调用工具之前会提醒用户，只有当用户确认允许后才�
 
 ## MCP 开发者指南
 
+上一节我们从用户视角体验了一把 MCP，直观的感受了 MCP 是如何将外部资源集成到 AI 应用的。接下来，我们将从开发者视角，介绍如何开发自己的 MCP Server 以及如何将 MCP 集成到自己的 AI 应用中。
+
 ### 开发 MCP Server
 
-https://modelcontextprotocol.io/quickstart/server
+这一节我们将通过 MCP 官方提供的 SDK 实现一个简单的天气查询 MCP Server。
 
-https://modelcontextprotocol.io/examples
+> 官方目前提供了 [Python](https://github.com/modelcontextprotocol/python-sdk)、[TypeScript](https://github.com/modelcontextprotocol/typescript-sdk)、[Java](https://github.com/modelcontextprotocol/java-sdk) 和 [Kotlin](https://github.com/modelcontextprotocol/kotlin-sdk) 四种 SDK 供开发者选择，这里我们使用 Pyhon SDK。
+
+MCP Server 可以提供三种主要类型的能力：
+
+* [资源（Resources）](https://modelcontextprotocol.io/docs/concepts/resources)：客户端可以读取的类似文件的数据，如 API 响应或文件内容；
+* [工具（Tools）](https://modelcontextprotocol.io/docs/concepts/tools)：可以被 AI 调用的能力，调用之前会经过用户批准；
+* [提示（Prompts）](https://modelcontextprotocol.io/docs/concepts/prompts)：预先编写好的指令模板，帮助用户完成特定任务；
+
+这里我们暂时只关注工具。
+
+首先，安装 `mcp[cli]` 依赖：
+
+```
+$ pip install --index-url https://pypi.tuna.tsinghua.edu.cn/simple/ mcp[cli]
+```
+
+然后，创建 `mcp-server-weather.py` 文件：
+
+```
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("weather")
+
+@mcp.tool()
+async def get_weather(city: str, date: str) -> str:
+    """查询某个城市某个日期的天气.
+
+    Args:
+        city: 城市名称
+        date: 日期
+    """
+    return '天气晴，气温25摄氏度'
+
+if __name__ == "__main__":
+    mcp.run(transport='stdio')
+```
+
+上面的代码可以说非常简单，先通过 `FastMCP` 初始化 MCP Server，然后通过 `@mcp.tool()` 注解定义工具，最后通过 `mcp.run()` 启动 MCP Server。
+
+其中 `transport` 参数表示传输协议的类型，决定了客户端如何和 MCP Server 通信，MCP [默认支持两种传输协议](https://modelcontextprotocol.io/docs/concepts/transports#built-in-transport-types)：
+
+* **标准输入和输出 (stdio)**：通过标准输入和输出流进行通信，这对本地集成和命令行工具特别有用；
+* **服务器发送事件 (SSE)**：通过 HTTP POST 请求支持客户端与服务器之间的流式通信；
+
+这里 `transport='stdio'` 表示使用标准输入和输出流进行通信，至此，一个简单的 MCP Server 就开发好了。
+
+接下来，打开 Claude 的配置文件 `claude_desktop_config.json`，添加 MCP Server 配置如下：
+
+```
+{
+    "mcpServers": {
+        "weather": {
+            "command": "python3",
+            "args": [
+                "/path/to/mcp-server-weather.py"
+            ]
+        }
+    }
+}
+```
+
+重启 Claude for Desktop，在对话框右下角可以看到我们的工具已成功加载：
+
+![](./images/claude-mcp-my-tools.png)
+
+测试下效果：
+
+![](./images/claude-using-my-tools.png)
 
 ### 开发 MCP Client
 
