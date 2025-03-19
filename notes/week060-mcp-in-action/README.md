@@ -167,6 +167,12 @@ if __name__ == "__main__":
 
 ![](./images/claude-using-my-tools.png)
 
+### 探索 MCP Server
+
+除了上面介绍的 Filesystem MCP Server 和自己开发之外，网上还有大量的 MCP Server 开箱即用，可以用于文件处理、数据分析、软件开发、浏览器自动化、沟通提效等等，这些官网提供的 [例子](https://modelcontextprotocol.io/examples) 可以作为很好的入门。
+
+此外，社区也有不少人将各种 MCP Server 收集在一起，比如 [Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)、[MCP.so](https://mcp.so/) 和 [Smithery](https://smithery.ai/)，感兴趣的同学可以逛逛看。
+
 ### 开发 MCP Client
 
 https://modelcontextprotocol.io/quickstart/client
@@ -184,20 +190,18 @@ https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/
 * [How to debug the Claude Model Context Protocol?](https://pcarion.com/blog/claude_mcp/)
 * [Using LangChain With Model Context Protocol (MCP)](https://cobusgreyling.medium.com/using-langchain-with-model-context-protocol-mcp-e89b87ee3c4c)
 * [Model Context Protocol (MCP). I would like to make a point regarding…](https://cobusgreyling.medium.com/model-context-protocol-mcp-da3e0f912bbc)
-* [Exploring Model Context Protocol (MCP) With Spring AI](https://www.baeldung.com/spring-ai-model-context-protocol-mcp)
-* [Introducing the Model Context Protocol Java SDK](https://spring.io/blog/2025/02/14/mcp-java-sdk-released-2/)
 * [为 AI 模型赋予「三头六臂」：MCP 服务实用指南](https://sspai.com/prime/story/mcp-tutorial)
 * [Claude 的 MCP (模型上下文协议）有啥用？](https://sspai.com/post/94360)
-* [Spring AI 再进化，支持 MCP 协议](https://my.oschina.net/giegie/blog/17113995)
 * [什么是模型上下文协议（MCP）？它如何比传统API更简单地集成AI？](https://baoyu.io/translations/mcp-vs-api-model-context-protocol-explained)
 * [通俗易懂说清楚MCP的原理](https://mp.weixin.qq.com/s/v06i4dRTp6K7X2c0T0lslg)
 * [通俗易懂说清楚什么是MCP](https://mp.weixin.qq.com/s/MU3I9PETpVDOdw12XkJSOg)
 * [深入浅出理解MCP：从技术原理到实战落地](https://mp.weixin.qq.com/s/7QlMWCceHldt_B0TSDijbA)
 
-### MCP Servers
+### 更多
 
-* [Github - modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers)
-* [Smithery - Model Context Protocol Registry](https://smithery.ai/server/mcp-server-sqlite-npx/tools)
-* [Github - punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)
-* [GitHub - ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp)
+#### Spring AI + MCP
+
+* [Exploring Model Context Protocol (MCP) With Spring AI](https://www.baeldung.com/spring-ai-model-context-protocol-mcp)
+* [Introducing the Model Context Protocol Java SDK](https://spring.io/blog/2025/02/14/mcp-java-sdk-released-2/)
+* [Spring AI 再进化，支持 MCP 协议](https://my.oschina.net/giegie/blog/17113995)
 * [Chat2DB 实现：Spring AI MCP 直连数据库](https://my.oschina.net/giegie/blog/17138364)
