@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
 除了上面介绍的 Filesystem MCP Server 和自己开发之外，网上还有大量的 MCP Server 开箱即用，可以用于文件处理、数据分析、软件开发、浏览器自动化、沟通提效等等，这些官网提供的 [例子](https://modelcontextprotocol.io/examples) 可以作为很好的入门。
 
-此外，社区也有不少人将各种 MCP Server 收集在一起，比如 [Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)、[MCP.so](https://mcp.so/) 和 [Smithery](https://smithery.ai/)，感兴趣的同学可以逛逛看。
+此外，社区也有不少人将各种 MCP Server 收集在一起，比如 [Model Context Protocol Servers](https://github.com/modelcontextprotocol/servers)、[Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)、[MCP.so](https://mcp.so/) 和 [Smithery](https://smithery.ai/)，感兴趣的同学可以逛逛看。
 
 ### 开发 MCP Client
 
@@ -300,7 +300,101 @@ Connected to server with tools: ['get_weather']
 
 ### 深入 MCP 原理
 
-https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/
+[MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) 是一个用于测试和调试 MCP Server 的交互式开发工具，使用 MCP Inspector 可以让我们对 MCP 的工作原理有一个更深入的了解。
+
+使用下面的命令启动 MCP Inspector：
+
+```
+$ npx -y @modelcontextprotocol/inspector python3 /path/to/mcp-server-weather.py
+```
+
+注意参数的后面是我们的 MCP Server 的启动命令。启动成功后，在浏览器输入 `http://localhost:5173` 就可以访问了：
+
+![](./images/mcp-inspector.png)
+
+在这里可以查看 MCP Server 的工具列表，也可以对工具进行调用。除了工具，也支持资源、提示以及其他功能的调试。
+
+在页面左下方，可以查看调试的历史记录：
+
+![](./images/mcp-inspector-history.png)
+
+这里可以更深入的了解 MCP 的底层细节。MCP Client 和 MCP Server 之间的所有消息都遵循 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) 格式，比如所有的请求格式如下：
+
+```
+{
+  jsonrpc: "2.0";
+  id: string | number;
+  method: string;
+  params?: {
+    [key: string]: unknown;
+  };
+}
+```
+
+所有的响应格式如下：
+
+```
+{
+  jsonrpc: "2.0";
+  id: string | number;
+  result?: {
+    [key: string]: unknown;
+  }
+  error?: {
+    code: number;
+    message: string;
+    data?: unknown;
+  }
+}
+```
+
+所以我们也可以在启动 MCP Server 之后，直接在 stdio 上输入这个格式的请求来调试。比如查询工具列表：
+
+```
+{"method":"tools/list","params":{},"jsonrpc":"2.0","id":1}
+```
+
+不过如果我们直接输入上面的请求，MCP Server 可能会报如下这个错误：
+
+```
+      | Traceback (most recent call last):
+      |   File "/usr/local/lib/python3.13/site-packages/mcp/shared/session.py", line 326, in _receive_loop
+      |     await self._received_request(responder)
+      |   File "/usr/local/lib/python3.13/site-packages/mcp/server/session.py", line 148, in _received_request
+      |     raise RuntimeError(
+      |         "Received request before initialization was complete"
+      |     )
+      | RuntimeError: Received request before initialization was complete
+      +------------------------------------
+```
+
+根据 MCP 的规范，为了确保适当的功能协商和状态管理，MCP Client 和 MCP Server 之间的通信遵循严格的 [生命周期](https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/)，整个生命周期可以分成三个阶段：初始化阶段、操作阶段和关闭阶段，如下图所示：
+
+![](./images/mcp-lifecycle.png)
+
+可以看出 MCP Client 向 MCP Server 发送请求，属于操作阶段，在进入操作阶段之前，我们必须先执行初始化。整个初始化的过程有点类似 TCP 的三次握手，首先，发送初始化消息：
+
+```
+{"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+```
+
+如果初始化成功，我们可以得到类似这样的消息：
+
+```
+{"jsonrpc":"2.0","id":0,"result":{"protocolVersion":"2024-11-05","capabilities":{"experimental":{},"prompts":{"listChanged":false},"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":false}},"serverInfo":{"name":"weather","version":"1.4.1"}}}
+```
+
+接着再发送初始化完成消息：
+
+```
+{"method":"notifications/initialized","jsonrpc":"2.0"}
+```
+
+三次握手之后，就算初始化完成了。接下来我们就可以发送请求了，比如调用工具：
+
+```
+{"method":"tools/call","params":{"name":"get_weather","arguments":{"city":"合肥", "date":"明天"}},"jsonrpc":"2.0","id":2}
+```
 
 ## 参考
 
@@ -324,3 +418,17 @@ https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/
 * [Introducing the Model Context Protocol Java SDK](https://spring.io/blog/2025/02/14/mcp-java-sdk-released-2/)
 * [Spring AI 再进化，支持 MCP 协议](https://my.oschina.net/giegie/blog/17113995)
 * [Chat2DB 实现：Spring AI MCP 直连数据库](https://my.oschina.net/giegie/blog/17138364)
+
+#### 打造本地 Manus
+
+通过内置深度思考，文件处理，联网搜索，浏览器，代码解释器等技能实现类 Manus 智能体。
+
+* [Sequential Thinking](https://github.com/modelcontextprotocol/servers/blob/main/src/sequentialthinking)
+* [Filesystem](https://github.com/modelcontextprotocol/servers/blob/main/src/filesystem)
+* [Brave Search](https://github.com/modelcontextprotocol/servers/blob/main/src/brave-search)
+* [Tavily](https://github.com/tavily-ai/tavily-mcp)
+* [Fetch](https://github.com/modelcontextprotocol/servers/blob/main/src/fetch)
+* [Puppeteer](https://github.com/modelcontextprotocol/servers/blob/main/src/puppeteer)
+* [Playwright](https://github.com/executeautomation/mcp-playwright)
+* [E2B](https://github.com/e2b-dev/mcp-server)
+* [code-sandbox-mcp](https://github.com/Automata-Labs-team/code-sandbox-mcp)
