@@ -175,9 +175,128 @@ if __name__ == "__main__":
 
 ### 开发 MCP Client
 
-https://modelcontextprotocol.io/quickstart/client
+上面我们体验了在 Claude Desktop 中通过 MCP Server 让大模型调用外部工具，实现更强大的功能，这很容易让人想起智能体的概念。智能体是目前最热门最前沿的研究方向之一，我曾在之前的博客中多次学习过相关的技术，比如在 [week044-llm-application-frameworks-langchain-2](../week044-llm-application-frameworks-langchain-2/README.md) 中学习 OpenAI 的 Function Call 功能以及 LangChain 内置的几种 Agent 的使用，在 [week057-create-agents-with-langgraph](../week057-create-agents-with-langgraph/README.md) 中学习如何使用 LangGraph 开发智能体应用。
 
-https://modelcontextprotocol.io/clients
+之前开发智能体应用时，我们要对不同的工具分别对接，现在有了 MCP，我们只需要对接 MCP 协议，将所有工具的对接统一化。这一节，我们将学习如何构建一个连接到 MCP 服务器的 AI 应用。
+
+首先，安装 `mcp[cli]` 和 `openai` 依赖：
+
+```
+$ pip install --index-url https://pypi.tuna.tsinghua.edu.cn/simple/ mcp[cli] openai
+```
+
+然后，创建 `app.py` 文件，程序大致的结构如下：
+
+```
+class MCPClient:
+    ''' 客户端逻辑
+    '''
+    
+async def main():
+    client = MCPClient()
+    try:
+        await client.connect_to_server()
+        await client.chat("查下合肥和杭州明天的天气")
+    finally:
+        await client.cleanup()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+其中 `MCPClient` 类实现了客户端的主要逻辑，包括两个核心方法，第一个是 `connect_to_server()` 方法：
+
+```
+    async def connect_to_server(self):
+
+        # 通过 stdio 连接 MCP Server
+        server_params = StdioServerParameters(
+            command = "python",
+            args = ["mcp-server-weather.py"],
+            env = None
+        )
+        self.stdio, self.write = await self.exit_stack.enter_async_context(stdio_client(server_params))
+        self.session = await self.exit_stack.enter_async_context(ClientSession(self.stdio, self.write))
+        await self.session.initialize()
+
+        # 列出所有工具
+        response = await self.session.list_tools()
+        print("\nConnected to server with tools:", [tool.name for tool in response.tools])
+```
+
+上面的代码通过 MCP SDK 提供的 `stdio_client()` 方法让我们以 stdio 方式连接到上一节开发的天气查询 MCP Server 上，并创建一个 `ClientSession` 会话对象；有了会话之后，我们就可以通过 `self.session.initialize()` 对会话进行初始化，通过 `self.session.list_tools()` 查询 MCP Server 的工具列表。
+
+> 注意，在 MCP SDK 中大量使用了 `async` 关键字定义异步函数，异步编程允许你编写非阻塞的代码，从而提高程序的效率，尤其是在处理 I/O 操作时（如网络请求、文件读取等）。在调用这些异步函数时需要使用 `await` 关键字，同时我们的函数本身也得定义成异步函数。或者用 `asyncio.run()` 运行异步函数，它会启动一个事件循环，直到异步函数运行完成。
+
+第二个是 `chat()` 方法：
+
+```
+    async def chat(self, query: str) -> str:
+        
+        # 组装 function call 参数
+        response = await self.session.list_tools()
+        available_tools = [{
+            "type": "function",
+            "function": {    
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.inputSchema
+            }
+        } for tool in response.tools]
+
+        messages = [{
+            "role": "user",
+            "content": query,
+        }]
+        while True:
+            print(f"Sending messages {messages}")
+            completion = self.openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                tools=available_tools
+            )
+            tool_calls = completion.choices[0].message.tool_calls
+            if tool_calls == None:
+                print(completion.choices[0].message.content)
+                break
+            
+            messages.append({
+                "role": "assistant",
+                "content": "",
+                "tool_calls": tool_calls
+            })
+            
+            # 调用工具
+            for tool_call in tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = tool_call.function.arguments
+                result = await self.session.call_tool(tool_name, json.loads(tool_args))
+                print(f"[Calling tool {tool_name} with args {tool_args}]")
+                print(f"[Calling tool result {result.content}]")
+            
+                messages.append({
+                    "role": "tool",
+                    "content": result.content,
+                    "tool_call_id": tool_call.id
+                })
+```
+
+这个方法比较简单，调用 OpenAI 接口进行对话，通过 [Function calling](https://platform.openai.com/docs/guides/function-calling) 功能实现 MCP Server 的调用。
+
+运行结果如下：
+
+```
+Connected to server with tools: ['get_weather']
+
+[Calling tool get_weather with args {"city": "合肥", "date": "明天"}]
+[Calling tool result [TextContent(type='text', text='天气晴，气温25摄氏度', annotations=None)]]
+[Calling tool get_weather with args {"city": "杭州", "date": "明天"}]
+[Calling tool result [TextContent(type='text', text='天气晴，气温25摄氏度', annotations=None)]]
+
+明天合肥和杭州的天气都是晴天，气温大约在25摄氏度。
+```
+
+目前已经有很多客户端集成了 MCP，比如 [Cursor](https://cursor.com/)、[Cline](https://github.com/cline/cline)、[LibreChat](https://github.com/danny-avila/LibreChat)、[Roo Code](https://roocode.com/)、[Windsurf Editor](https://codeium.com/windsurf) 等，官方这里有一个 [已集成 MCP 的应用列表](https://modelcontextprotocol.io/clients)，其中不乏有一些著名的开源项目，当我们实现 MCP Client 遇到问题时，不妨参考下他们的实现。
 
 ### 深入 MCP 原理
 
