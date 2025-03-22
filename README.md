@@ -2,6 +2,7 @@
 
 这里记录的是我每周的学习笔记，希望每周都能学点新技术。
 
+* WEEK061 - [实战 Deep Search 和 Deep Research](./notes/week061-deep-search-and-research/README.md)
 * WEEK060 - [实战 Model Context Protocol](./notes/week060-mcp-in-action/README.md)
 * WEEK059 - [盘点 Python 中那些 PDF 解析库](./notes/week059-pdf-parser-libraries/README.md)
 * WEEK058 - [使用 GraalVM 构建 Java 原生应用](./notes/week058-java-native-app-with-graalvm/README.md)

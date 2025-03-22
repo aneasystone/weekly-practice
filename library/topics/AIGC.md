@@ -35,16 +35,6 @@
 
 * [Shaunwei/RealChar](https://github.com/Shaunwei/RealChar) - Create, Customize and Talk to your AI Character/Companion in Realtime (All in One Codebase!).
 
-#### 智能搜索
-
-* [Perplexity AI](https://www.perplexity.ai/) - Where knowledge begins
-* [Kagi Labs](https://kagi.com/fastgpt)
-* [Tavily](https://tavily.com/)
-    * [GPT Researcher](https://github.com/assafelovic/gpt-researcher) - GPT based autonomous agent that does online comprehensive research on any given topic
-* [Automating Web Research](https://blog.langchain.dev/automating-web-research/)
-* [天工AI搜索](https://search.tiangong.cn/) — 知识从这里开始
-* [Lepton Search](https://search.lepton.run/)
-
 #### 学习助手
 
 * [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
