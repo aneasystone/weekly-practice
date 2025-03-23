@@ -5,6 +5,7 @@
 * [AI 工具集导航](https://ai.nancheng.fun/)
 * [AI 导航](https://ai.dreamthere.cn/)
 * [AIbase](https://top.aibase.com/) - 智能匹配最适合您的AI产品和网站
+* [学习 AIGC](https://xuexiaigc.com/) - 一站式的 AIGC 品质网站，收集了国内外通用的 AIGC 网站，提供最新的 AIGC 资讯。
 
 ## 工具和产品
 
@@ -19,10 +20,15 @@
 * [Character.AI](https://beta.character.ai/)
 * [文心一言](https://yiyan.baidu.com/)
 * [通义千问](https://qianwen.aliyun.com/)
+* [Qwen Chat](https://chat.qwen.ai/)
 * [讯飞星火](https://xinghuo.xfyun.cn/)
 * [豆包](https://www.doubao.com/)
 * [Kimi Chat](https://kimi.moonshot.cn) - Moonshot AI 出品的智能助手
 * [Groq](https://groq.com/)
+
+#### 客户端
+
+* [Chatbox AI](https://chatboxai.app/zh) - 办公学习的 AI 好助手，全平台 AI 客户端，官方免费下载
 
 #### 聚合聊天
 
@@ -30,6 +36,10 @@
 * [Poe](https://poe.com/)
 * [YesChat](https://www.yeschat.ai/zh-CN) - ChatGPT4V Dalle3 Claude 2 一体化免费服务
 * [ChatALL](https://github.com/sunner/ChatALL) - Chat with ALL AI Bots Concurrently, Discover the Best
+
+#### 群聊
+
+* [AI 机器人群聊](https://botgroup.chat/)
 
 #### 角色扮演
 
@@ -60,6 +70,7 @@
 * [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
 * [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
 * [Devin](https://www.cognition.ai/)
+* [Trae](https://www.trae.ai/) - Ship Faster with Trae
 
 #### 代码大模型
 
@@ -346,6 +357,7 @@
 
 #### 虚拟形象
 
+* [GitHub - modstart-lib/aigcpanel](https://github.com/modstart-lib/aigcpanel) - 一个简单易用的一站式 AI 数字人系统，支持视频合成、声音合成、声音克隆，简化本地模型管理、一键导入和使用 AI 模型。
 * [Synthesia](https://www.synthesia.io/) - Synthesia is a #1 AI Video Creation Platform
 * [D-ID](https://www.d-id.com/) - The Digital People Platform
 * [TheRamU/Fay](https://github.com/TheRamU/Fay) - 包含Fay控制器及数字人模型
@@ -675,12 +687,18 @@
 
 ### Web UI
 
+* [ChatWise](https://chatwise.app/) - The fastest AI chatbot for ChatGPT, DeepSeek, Claude, Gemini and Llama
 * [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键拥有你自己的跨平台 ChatGPT/Gemini 应用。
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
 * [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
 * [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
 * [Lobe Chat](https://github.com/lobehub/lobe-chat) - an open-source, modern-design ChatGPT/LLMs UI/Chat Framework. Supports speech-synthesis, multi-modal, and extensible plugin system. One-click FREE deployment of your private ChatGPT/Gemini/Ollama chat application.
 * [GeminiProChat](https://github.com/babaohuang/GeminiProChat) - Minimal web UI for GeminiPro.
+* [Github - huggingface/chat-ui](https://github.com/huggingface/chat-ui) - Open source codebase powering the HuggingChat app
+
+### 开源硬件
+
+* [GitHub - 78/xiaozhi-esp32](https://github.com/78/xiaozhi-esp32) - Build your own AI friend
 
 ### Awesome
 
