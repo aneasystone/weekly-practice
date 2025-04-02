@@ -140,5 +140,24 @@ Agentic RAG 的典型能力如下：
 
 ### Deep Search
 
+接下来，我们再来看下什么是 **深度搜索（Deep Search）**？其实，目前学术界并没有这个概念的明确定义，只是有几个产品或开源项目是以这个命名的，比如 [Grok 3](https://x.ai/news/grok-3) 中推出的 DeepSearch 和 DeeperSearch 功能：
+
+![](./images/grok-deep-search.png)
+
+在回答问题时会经过 **思考-搜索-分析-验证** 等步骤：
+
+![](./images/grok-deep-search-2.png)
+
+这和上面的 Agentic RAG 使用的 **思考-行动-观察** 循环如出一辙，所以本质上来说，**Deep Search 就是 Agentic RAG**。
+
+另一个是 Jina AI 推出的 [深度搜索 API](https://jina.ai/deepsearch/) 服务，它会对用户的问题进行广泛搜索并经过多次迭代，然后给出答案。
+
+![](./images/jina-deep-search.png)
+
+这个 API 和 OpenAI 的接口基本一致，所以很容易接入我们的应用中，官方也提供了 [对话页面](https://search.jina.ai/) 可以体验。同时，这还是一个开源项目，项目名叫 [jina-ai/node-DeepResearch](https://github.com/jina-ai/node-DeepResearch)，虽然名称里有 DeepResearch 但是实际上它只有 DeepSearch 的功能，感兴趣的同学可以去扒一扒它的源码，官方还贴心地写了两篇公众号文章对其实现原理做了详细的讲解，推荐一读：
+
+* [DeepSearch 与 DeepResearch 的设计和实现](https://mp.weixin.qq.com/s/-pPhHDi2nz8hp5R3Lm_mww)
+* [DeepSearch/DeepResearch 中最优文本段选择和 URL 重排](https://mp.weixin.qq.com/s/apnorBj4TZs3-Mo23xUReQ)
+
 ## AI + 深度研究（Deep Research）
 
