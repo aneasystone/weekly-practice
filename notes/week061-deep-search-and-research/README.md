@@ -225,4 +225,34 @@ Agentic RAG 的典型能力如下：
 
 ### Deep Research 示例
 
+Deep Research 和 Deep Search 的概念由于并没有明确定义，往往被混淆，但在我看来，Deep Research 相比于 Deep Search 有几个更明显的特征：
+
+* 引入推理模型，思考时间更长，能处理更复杂的任务；
+* 能使用更多的工具，比如操作电脑、访问浏览器、编写代码等；
+* 更擅长论文写作和报告生成；
+
+下图是 [Manus](https://manus.im/usecases) 的部分用例展示：
+
+![](./images/manus-usecases.png)
+
+下图是 [AutoGLM 沉思](https://autoglm-research.zhipuai.cn/) 的部分用例展示：
+
+![](./images/autoglm-usecase.png)
+
+这两个用例展示里列出了一些 Deep Research 的典型场景：解决复杂任务、撰写行业研究报告、生成旅游攻略、竞品对比、教案制作等。比如 AutoGLM 沉思可以通过任务拆解和浏览器轻松解决 `《哪吒2》中哪吒配音的老家天气怎么样？` 这种多跳问题：
+
+![](./images/autoglm.png)
+
+Gemini 的 Deep Research 功能可以结合思考模型和联网搜索对话题进行深度剖析：
+
+![](./images/gemini-deep-research.png)
+
+生成一份长达 7 页的 PDF 文件：
+
+![](./images/gemini-deep-research-pdf.png)
+
+最近秘塔推出了一个 [生成互动网页](https://mp.weixin.qq.com/s/sk0KF9c1MPhpS2oGH-UIKA) 的功能，可以将搜索的内容整合成一份图文并茂的研究报告：
+
+![](./images/metaso-report.png)
+
 ### Deep Research 开源实现
