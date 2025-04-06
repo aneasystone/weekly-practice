@@ -159,7 +159,7 @@ Agentic RAG 的典型能力如下：
 * [DeepSearch 与 DeepResearch 的设计和实现](https://mp.weixin.qq.com/s/-pPhHDi2nz8hp5R3Lm_mww)
 * [DeepSearch/DeepResearch 中最优文本段选择和 URL 重排](https://mp.weixin.qq.com/s/apnorBj4TZs3-Mo23xUReQ)
 
-还有一个是 [Zilliz](https://zilliz.com/) 公司开源的项目 [zilliztech/deep-searcher](https://github.com/zilliztech/deep-searcher)：
+还有一个是 [Zilliz](https://zilliz.com/) 公司（就是开源 Milvus 向量数据库的那家公司）开源的项目 [zilliztech/deep-searcher](https://github.com/zilliztech/deep-searcher)：
 
 ![](./images/zilliz-deep-searcher.png)
 
@@ -167,8 +167,8 @@ Agentic RAG 的典型能力如下：
 
 1. 离线数据处理：通过各种 `file_loader` 和 `web_crawler` 加载文件和网页，切片后生成向量，构建离线数据；其中 `web_crawler` 使用了 [Jina Reader](https://jina.ai/reader)、[Firecrawl](https://www.firecrawl.dev/)、[Crawl4AI](https://docs.crawl4ai.com/) 等接口实现网页内容的爬取；
 2. 在线实时问答：代码中实现了两个 Agent，根据问题的类型路由到对应的 Agent 来处理：
-    * [ChainOfRAG](https://github.com/zilliztech/deep-searcher/blob/master/deepsearcher/agent/chain_of_rag.py)：这个代理可以分解复杂的查询，并逐步找到子查询的事实信息。它非常适合处理具体的事实查询和多跳问题；
-    * [DeepSearch](https://github.com/zilliztech/deep-searcher/blob/master/deepsearcher/agent/deep_search.py)：这个代理适合处理一般和简单的查询，例如给定一个主题，然后撰写报告、调查或文章。
+    * [ChainOfRAG](https://github.com/zilliztech/deep-searcher/blob/master/deepsearcher/agent/chain_of_rag.py)：这个 Agent 可以分解复杂的查询，并逐步找到子查询的事实信息，它非常适合处理具体的事实查询和多跳问题；
+    * [DeepSearch](https://github.com/zilliztech/deep-searcher/blob/master/deepsearcher/agent/deep_search.py)：这个 Agent 适合处理一般和简单的查询，例如给定一个主题，然后撰写报告、调查或文章。
 
 下面是我画的一个粗略的流程图：
 
@@ -176,10 +176,37 @@ Agentic RAG 的典型能力如下：
 
 其中 `ChainOfRAG` 借鉴了 [Chain-of-Retrieval Augmented Generation](https://arxiv.org/abs/2501.14342) 这篇论文中的思路。可以看到两种 Agent 都具备 Agentic RAG 循环的特点，循环里的每一步都是通过调用大模型来实现的，使用了不少的 Prompt 技巧。
 
-和 Jina AI 的 `node-DeepResearch` 项目对比一下可以发现，Zilliz 的 `deep-searcher` 依赖于向量数据库，着重聚焦于对私有数据的深度检索。虽然两者都有使用 [Jina Reader](https://jina.ai/reader) 接口，但是 `node-DeepResearch` 是作为搜索接口，用户对话时实时请求，而 `deep-searcher` 是用来构建离线数据。另外，Zilliz 也发布了几篇公众号文章，不过其标题和内容颇具争议，也可以参考下。
+和 Jina AI 的 `node-DeepResearch` 项目对比一下可以发现，Zilliz 的 `deep-searcher` 依赖于向量数据库，着重聚焦于对私有数据的深度检索。虽然两者都有使用 [Jina Reader](https://jina.ai/reader) 接口，但是 `node-DeepResearch` 是作为搜索接口，用户对话时实时请求，而 `deep-searcher` 是用来构建离线数据。另外，Zilliz 也发布了几篇公众号文章，不过其标题和内容颇具争议，在网上引发了不少的讨论，也可以参考下。
 
 * [别搞 Graph RAG 了，拥抱新一代 RAG 范式 DeepSearcher](https://mp.weixin.qq.com/s/gLyaLhWWDj1WoDSxEwpT6Q)
 * [DeepSearcher 深度解读：Agentic RAG 的出现，传统 RAG 的黄昏](https://mp.weixin.qq.com/s/N-oPDmkb3EKqB2IM_reO1A)
 
 ## AI + 深度研究（Deep Research）
 
+其实，深度搜索早已不是什么新鲜概念，早在两年前就有不少产品提供类似的功能，比如 [天工 AI 搜索](https://www.tiangong.cn/)，号称 “国内第一款AI搜索产品”，于 2023 年 8 月就已经上线了：
+
+![](./images/tiangong.png)
+
+再比如国内的 [秘塔](https://metaso.cn/)：
+
+![](./images/metaso.png)
+
+国外的 [Perplexity](https://www.perplexity.ai/)：
+
+![](./images/perplexity.png)
+
+他们都是在大模型兴起之初就开始 AI + 深度搜索 这方面的研究了，那为什么到今天，这个概念才开始引起各方的关注呢？
+
+我们不妨梳理和回顾下 AI 圈近几个月发生的一些重要事件：
+
+* 2024 年 9 月，OpenAI 发布 [o1-preview](https://openai.com/index/introducing-openai-o1-preview/)，该模型在回答之前会花更多时间思考，使其在复杂推理任务、科学和编程方面显著优于其他模型；
+* 2024 年 10 月，Anthropic 推出 [Computer Use](https://www.anthropic.com/news/3-5-models-and-computer-use) 功能，使 AI 能像人类一样操作电脑，通过观看屏幕截图，实现移动光标、点击按钮、使用虚拟键盘输入文本等操作，真正模拟人类与计算机的交互；
+* 2024 年 12 月，Google 发布 Gemini 2.0 Flash，同时还给 Gemini 带了一项名为 [Deep Research](https://blog.google/products/gemini/google-gemini-deep-research/) 的新能力，利用高级推理和长文本处理能力，Deep Research 可以充当个人的研究助理，比如用来做一些复杂的研究报告；
+* 2025 年 1 月 20 号，深度求索的 [DeepSeek-R1](https://api-docs.deepseek.com/news/news250120) 横空出世，用极低的成本达到了比肩 OpenAI o1 的水平，在全球市场上掀起了一股前所未有的热潮，也潜移默化地把 “推理模型” 这个概念带给了千家万户，将思考过程渲染在聊天界面已经变成了一种标准做法；
+* 2025 年 1 月 23 号，OpenAI 发布 [Operator](https://openai.com/index/introducing-operator/) 智能体，和 Anthropic 的 Computer Use 类似，可以操作浏览器，为用户执行各种复杂任务；
+* 2025 年 2 月 2 号，OpenAI 又发布了 [Deep Research](https://openai.com/index/introducing-deep-research/) 功能，它可以自动搜集大量的网络信息，利用推理能力综合分析，为用户完成更为复杂的研究任务，能在几十分钟内完成人类需要数小时才能完成的工作；
+* 2025 年 2 月 14 号，Perplexity 紧随其后，同样也发布了 [Deep Research](https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research) 功能，能够执行多次搜索、阅读大量来源并生成全面报告；
+* 2025 年 2 月 19 号，xAI 推出 [Grok-3](https://x.ai/news/grok-3)，内置 DeepSearch 和 DeeperSearch 功能；
+* 2025 年 3 月 5 号，Google 面向 Google One AI Premium 订阅用户推出 [AI Mode](https://blog.google/products/search/ai-mode-search/) 功能，提供对话式搜索体验，支持复杂多轮提问；
+* 2025 年 3 月 6 号，中国 AI 创业公司 Monica 发布 [Manus](https://manus.im/)，号称 “全球首款通用 AI 代理”，其应用场景覆盖旅行规划、股票分析、教育内容生成等 40 余个领域；据称，Manus 在 GAIA 基准测试中刷新了 SOTA 记录，性能远超同类产品，凭借 KOL 助力，一时间刷屏全网，内测邀请码一码难求，甚至被炒到 5 万块钱；
+* 2025 年 3 月 31 号，在中关村论坛智谱 Open Day 上，智谱发布了 [AutoGLM 沉思](https://autoglm-research.zhipuai.cn/)，这又是一款 Deep Research 类智能体，它能够模拟人类的思维过程，完成从数据检索、分析到生成报告的全过程；
