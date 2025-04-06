@@ -197,16 +197,32 @@ Agentic RAG 的典型能力如下：
 
 他们都是在大模型兴起之初就开始 AI + 深度搜索 这方面的研究了，那为什么到今天，这个概念才开始引起各方的关注呢？
 
+### Deep Research 演进历史
+
 我们不妨梳理和回顾下 AI 圈近几个月发生的一些重要事件：
 
 * 2024 年 9 月，OpenAI 发布 [o1-preview](https://openai.com/index/introducing-openai-o1-preview/)，该模型在回答之前会花更多时间思考，使其在复杂推理任务、科学和编程方面显著优于其他模型；
 * 2024 年 10 月，Anthropic 推出 [Computer Use](https://www.anthropic.com/news/3-5-models-and-computer-use) 功能，使 AI 能像人类一样操作电脑，通过观看屏幕截图，实现移动光标、点击按钮、使用虚拟键盘输入文本等操作，真正模拟人类与计算机的交互；
-* 2024 年 12 月，Google 发布 Gemini 2.0 Flash，同时还给 Gemini 带了一项名为 [Deep Research](https://blog.google/products/gemini/google-gemini-deep-research/) 的新能力，利用高级推理和长文本处理能力，Deep Research 可以充当个人的研究助理，比如用来做一些复杂的研究报告；
+* 2024 年 12 月 11 号，Google 发布 Gemini 2.0 Flash，同时还给 Gemini 带了一项名为 [Deep Research](https://blog.google/products/gemini/google-gemini-deep-research/) 的新能力，利用高级推理和长文本处理能力，Deep Research 可以充当个人的研究助理，比如用来做一些复杂的研究报告；
+* 2024 年 12 月 19 号，Google 紧接着又发布了 [Gemini 2.0 Flash Thinking](https://deepmind.google/technologies/gemini/flash-thinking/) 公开预览版，这也是一种思考模型，可以在模型生成回答时查看其思考过程，并生成具有更强推理能力的回答；
 * 2025 年 1 月 20 号，深度求索的 [DeepSeek-R1](https://api-docs.deepseek.com/news/news250120) 横空出世，用极低的成本达到了比肩 OpenAI o1 的水平，在全球市场上掀起了一股前所未有的热潮，也潜移默化地把 “推理模型” 这个概念带给了千家万户，将思考过程渲染在聊天界面已经变成了一种标准做法；
 * 2025 年 1 月 23 号，OpenAI 发布 [Operator](https://openai.com/index/introducing-operator/) 智能体，和 Anthropic 的 Computer Use 类似，可以操作浏览器，为用户执行各种复杂任务；
 * 2025 年 2 月 2 号，OpenAI 又发布了 [Deep Research](https://openai.com/index/introducing-deep-research/) 功能，它可以自动搜集大量的网络信息，利用推理能力综合分析，为用户完成更为复杂的研究任务，能在几十分钟内完成人类需要数小时才能完成的工作；
 * 2025 年 2 月 14 号，Perplexity 紧随其后，同样也发布了 [Deep Research](https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research) 功能，能够执行多次搜索、阅读大量来源并生成全面报告；
 * 2025 年 2 月 19 号，xAI 推出 [Grok-3](https://x.ai/news/grok-3)，内置 DeepSearch 和 DeeperSearch 功能；
+* 2025 年 2 月 25 号，阿里 Qwen 团队发布推理模型 [QwQ-Max-Preview](https://qwenlm.github.io/zh/blog/qwq-max-preview/)，它基于 `Qwen2.5-Max` 构建，在数学、编程以及通用任务中展现了更强的能力，同时在 Agent 相关的工作流中也有不错的表现；
 * 2025 年 3 月 5 号，Google 面向 Google One AI Premium 订阅用户推出 [AI Mode](https://blog.google/products/search/ai-mode-search/) 功能，提供对话式搜索体验，支持复杂多轮提问；
 * 2025 年 3 月 6 号，中国 AI 创业公司 Monica 发布 [Manus](https://manus.im/)，号称 “全球首款通用 AI 代理”，其应用场景覆盖旅行规划、股票分析、教育内容生成等 40 余个领域；据称，Manus 在 GAIA 基准测试中刷新了 SOTA 记录，性能远超同类产品，凭借 KOL 助力，一时间刷屏全网，内测邀请码一码难求，甚至被炒到 5 万块钱；
 * 2025 年 3 月 31 号，在中关村论坛智谱 Open Day 上，智谱发布了 [AutoGLM 沉思](https://autoglm-research.zhipuai.cn/)，这又是一款 Deep Research 类智能体，它能够模拟人类的思维过程，完成从数据检索、分析到生成报告的全过程；
+
+可以看出 2025 年刚过去四分之一，Deep Research 就已经开始卷起来了。这其中，OpenAI 发布的 `o1-preview` 和深度求索发布的 `DeepSeek-R1` 是两个关键里程碑，Gemini 2.0 Flash Thinking 和 QwQ 穷追不舍，这些都被称为推理模型（或思考模型），他们引入了 **推理时计算（test-time compute）** 的概念，也就是在推理阶段投入更多的计算资源，例如评估多个潜在答案、进行更深入的规划、以及在给出最终答案前进行自我反思等。
+
+心理学家卡尼曼提出，人类大脑中存在两套系统：系统1和系统2，系统1是无意识的、快速的、直观的，而系统2则是有意识的、缓慢的、需要付出心理努力的，这两套系统在我们日常生活中相互作用，共同影响着我们的思考、决策和行为。
+
+传统模型和推理模型就好比是人类大脑中的系统1和系统2，推理模型用更长的等待时间，换取更高质量、更具实用性的结果。就像著名的 [斯坦福棉花糖实验](https://zh.wikipedia.org/wiki/%E6%A3%89%E8%8A%B1%E7%B3%96%E5%AE%9E%E9%AA%8C)，那些为了获得两个棉花糖而坚持忍耐更长时间的孩子，往往能取得更好的长期成就。推理模型的发展其实是在引导用户接受一种 **延迟满足** 的观念，为了获得更好的结果，用户需要等待更长的处理时间，无论你是否喜欢这种用户体验，大多数用户都已经默默接受了这一点。
+
+正是在这个背景下，Deep Research 开始流行起来，因为 Deep Research 天生需要深度思考和推理。
+
+### Deep Research 示例
+
+### Deep Research 开源实现
