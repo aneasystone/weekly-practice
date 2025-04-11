@@ -256,3 +256,64 @@ Gemini 的 Deep Research 功能可以结合思考模型和联网搜索对话题�
 ![](./images/metaso-report.png)
 
 ### Deep Research 开源实现
+
+目前 Deep Research 开源实现非常多，这一节将挑选几个比较流行的逐一介绍下。
+
+#### assafelovic/gpt-researcher
+
+[GPT Researcher](https://github.com/assafelovic/gpt-researcher) 也被简称为 GPTR，应该是大模型兴起之后最早一批专注于研究报告生成的开源项目。受 [Plan-and-Solve](https://arxiv.org/abs/2305.04091)、[RAG](https://arxiv.org/abs/2005.11401) 和 [STORM](https://arxiv.org/abs/2402.14207) 等论文的启发，GPT Researcher 将系统划分成 **规划者（Planner）**、**研究者（Researcher）** 和 **发布者（Publisher）** 三个部分：
+
+![](./images/gpt-researcher-overview.png)
+
+其中规划者生成研究问题，而研究者根据每个生成的研究问题寻找最相关的信息，最后，发布者筛选和汇总所有相关信息，并生成一份研究报告。
+
+要体验 GPT Researcher，首先下载源码：
+
+```
+$ git clone https://github.com/assafelovic/gpt-researcher.git
+```
+
+然后进入项目根目录：
+
+```
+$ cd gpt-researcher
+```
+
+目录下有一个 `.env.example` 文件，复制这个文件并重命名为 `.env`，然后填写 `OPENAI_API_KEY` 和 `TAVILY_API_KEY` 两个环境变量：
+
+```
+$ cp .env.example .env
+$ vi .env
+OPENAI_API_KEY=xxx
+TAVILY_API_KEY=xxx
+```
+
+接下来安装所需依赖：
+
+```
+$ pip install -r requirements.txt
+```
+
+安装完成后运行：
+
+```
+$ python -m uvicorn main:app --reload
+```
+
+这时就可以通过 `http://localhost:8000` 访问并使用 GPT Researcher 了。
+
+要注意的是，这个页面是用 [纯 JS](https://docs.gptr.dev/docs/gpt-researcher/frontend/vanilla-js-frontend) 实现的，不依赖其他 JS 库，所以体验不怎么好，而且更新有些滞后，有些最新特性体验不了。官方还提供了另一个 [Next.js 版本](https://docs.gptr.dev/docs/gpt-researcher/frontend/nextjs-frontend) 的实现，可以通过下面的步骤启动：
+
+```
+$ cd frontend/nextjs
+$ npm install --legacy-peer-deps
+$ npm run dev
+```
+
+启动成功后，可以通过 `http://localhost:3000` 访问新 UI：
+
+![](./images/gpt-researcher-ui.png)
+
+新 UI 相对于老 UI 在左下角多了一个高级选项：
+
+![](./images/gpt-researcher-ui-settings.png)
