@@ -317,3 +317,133 @@ $ npm run dev
 新 UI 相对于老 UI 在左下角多了一个高级选项：
 
 ![](./images/gpt-researcher-ui-settings.png)
+
+其中 `Report Source` 表示参考数据来源，GPT Researcher 支持从互联网上或本地文档中获取信息：
+
+* **The Internet** - 从互联网上搜索需要的信息，默认使用 Tavily 接口，也支持切换 [其他的搜索引擎](https://docs.gptr.dev/docs/gpt-researcher/search-engines/retrievers)；
+* **My Documents** - 将本地文档 [存到向量数据库中](https://docs.gptr.dev/docs/gpt-researcher/context/vector-stores) 进行检索；
+* **Hybrid** - [混合检索模式](https://docs.gptr.dev/blog/gptr-hybrid)，同时从互联网上和本地文档中检索；
+
+`Tone` 表示报告的写作风格，GPT Researcher 支持下面十几种不同的写作风格：
+
+* **客观** - 公正和无偏见地呈现事实和发现；
+* **正式** - 遵循学术标准，使用复杂的语言和结构；
+* **分析** - 对数据和理论进行批判性评估和详细检查；
+* **说服** - 使观众信服某种观点或论点；
+* **信息** - 提供清晰和全面的主题信息；
+* **解释** - 阐明复杂的概念和过程；
+* **描述** - 对现象、实验或案例研究进行详细描绘；
+* **批判** - 评判研究及其结论的有效性和相关性；
+* **比较** - 并列不同的理论、数据或方法，以突出差异和相似性；
+* **推测** - 探索假设及其潜在影响或未来研究方向；
+* **反思** - 考虑研究过程及个人见解或经历；
+* **叙述** - 通过讲述故事来阐明研究发现或方法论；
+* **幽默** - 轻松愉快且引人入胜，通常使内容更具亲和力；
+* **乐观** - 强调积极发现和潜在益处；
+* **悲观** - 关注局限性、挑战或负面结果；
+* **简单** - 为年轻读者撰写，使用基本词汇和清晰解释；
+* **随意** - 以对话和放松的风格进行轻松的日常阅读；
+
+最后，最上面的 `Report Type` 选项，也是最重要的选项，这个表示生成报告的策略，GPT Researcher 支持四种不同的策略：
+
+* **Summary** - 篇幅短，速度快，生成时间 2min 左右
+* **Detailed** - 篇幅长，内容更有深度，生成时间 5min 左右
+* **Deep Research Report** - 使用 [深度研究方式](https://docs.gptr.dev/blog/2025/02/26/deep-research) 生成报告
+* **Multi Agents Report** - 使用 [多智能体方式](https://docs.gptr.dev/blog/gptr-langgraph) 生成报告
+
+我对这几种不同的生成策略进行了简单的梳理，画了个流程图，感兴趣的同学可以深入到代码里看看：
+
+![](./images/gpt-researcher-flow.png)
+
+#### dzhng/deep-research
+
+https://github.com/dzhng/deep-research
+
+https://deep-research.ataw.top/
+
+#### sentient-agi/OpenDeepSearch
+
+https://github.com/sentient-agi/OpenDeepSearch
+
+#### langchain-ai/open_deep_research
+
+https://github.com/langchain-ai/open_deep_research
+
+https://github.com/langchain-ai/local-deep-researcher
+
+#### huggingface/smolagents
+
+https://huggingface.co/blog/open-deep-research
+
+https://github.com/huggingface/smolagents/tree/main/examples/open_deep_research
+
+#### mannaandpoem/OpenManus
+
+https://github.com/mannaandpoem/OpenManus
+
+https://mp.weixin.qq.com/s/4Ai2QPYxvD5AVUUz01N0aw
+
+https://zhuanlan.zhihu.com/p/28709430630
+
+## 参考
+
+* [PLZ，别再误解大模型联网搜索了](https://www.53ai.com/news/LargeLanguageModel/2025032069843.html)
+* [Introducing ChatGPT search](https://openai.com/index/introducing-chatgpt-search/)
+* [Claude can now search the web](https://www.anthropic.com/news/web-search)
+* [AI Overviews in Search are coming to more places around the world](https://blog.google/products/search/ai-overviews-search-october-2024/)
+* [Grok 3 Beta — The Age of Reasoning Agents](https://x.ai/news/grok-3)
+* [Introducing computer use, a new Claude 3.5 Sonnet, and Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)
+* [Try Deep Research and our new experimental model in Gemini, your AI assistant](https://blog.google/products/gemini/google-gemini-deep-research/)
+* [Open-source DeepResearch – Freeing our search agents](https://huggingface.co/blog/open-deep-research)
+
+### Search
+
+* [YOU.COM](https://you.com/)
+* [iAsk](https://iask.ai/)
+* [Lepton Search](https://search.lepton.run/)
+* [Onion AI Search](https://onionai.so/)
+* [Scira AI](https://scira.ai/)
+* [思·索 MindSearch](https://mindsearch.netlify.app/)
+* [Farfalle](https://www.farfalle.dev/)
+* [Kagi FastGPT](https://kagi.com/fastgpt)
+
+---
+
+* [Github - zaidmukaddam/scira](https://github.com/zaidmukaddam/scira)
+* [Github - rashadphz/farfalle](https://github.com/rashadphz/farfalle)
+* [Github - nilsherzig/LLocalSearch](https://github.com/nilsherzig/LLocalSearch)
+* [Github - nashsu/FreeAskInternet](https://github.com/nashsu/FreeAskInternet)
+* [Github - InternLM/MindSearch](https://github.com/InternLM/MindSearch)
+
+### Deep Search
+
+* [Jina 深度搜索](https://jina.ai/deepsearch/)
+* [天工 AI 搜索](https://www.tiangong.cn/)
+* [秘塔](https://metaso.cn/)
+* [Perplexity](https://www.perplexity.ai/)
+
+---
+
+* [Github - jina-ai/node-DeepResearch](https://github.com/jina-ai/node-DeepResearch)
+* [Github - zilliztech/deep-searcher](https://github.com/zilliztech/deep-searcher)
+* [Github - nickscamara/open-deep-research](https://github.com/nickscamara/open-deep-research)
+
+### Deep Research
+
+* [Introducing Operator](https://openai.com/index/introducing-operator/)
+* [Introducing deep research](https://openai.com/index/introducing-deep-research/)
+* [Introducing Perplexity Deep Research](https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research)
+* [Sider Deep Research](https://sider.ai/wisebase/deep-research)
+* [Manus](https://manus.im/)
+* [AutoGLM 沉思](https://autoglm-research.zhipuai.cn/)
+
+---
+
+* [GitHub - assafelovic/gpt-researcher](https://github.com/assafelovic/gpt-researcher)
+* [Github - langchain-ai/open_deep_research](https://github.com/langchain-ai/open_deep_research)
+* [Github - langchain-ai/local-deep-researcher](https://github.com/langchain-ai/local-deep-researcher)
+* [Github - dzhng/deep-research](https://github.com/dzhng/deep-research)
+* [Github - mannaandpoem/OpenManus](https://github.com/mannaandpoem/OpenManus)
+* [Github - stanford-oval/storm](https://github.com/stanford-oval/storm)
+* [Github - sentient-agi/OpenDeepSearch](https://github.com/sentient-agi/OpenDeepSearch)
+* [Github - binary-husky/gpt_academic](https://github.com/binary-husky/gpt_academic)
