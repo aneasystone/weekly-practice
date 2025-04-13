@@ -259,9 +259,9 @@ Gemini 的 Deep Research 功能可以结合思考模型和联网搜索对话题�
 
 目前 Deep Research 开源实现非常多，这一节将挑选几个比较流行的逐一介绍下。
 
-#### assafelovic/gpt-researcher
+#### [assafelovic/gpt-researcher]((https://github.com/assafelovic/gpt-researcher))
 
-[GPT Researcher](https://github.com/assafelovic/gpt-researcher) 也被简称为 GPTR，应该是大模型兴起之后最早一批专注于研究报告生成的开源项目。受 [Plan-and-Solve](https://arxiv.org/abs/2305.04091)、[RAG](https://arxiv.org/abs/2005.11401) 和 [STORM](https://arxiv.org/abs/2402.14207) 等论文的启发，GPT Researcher 将系统划分成 **规划者（Planner）**、**研究者（Researcher）** 和 **发布者（Publisher）** 三个部分：
+GPT Researcher 也被简称为 GPTR，应该是大模型兴起之后最早一批专注于研究报告生成的开源项目。受 [Plan-and-Solve](https://arxiv.org/abs/2305.04091)、[RAG](https://arxiv.org/abs/2005.11401) 和 [STORM](https://arxiv.org/abs/2402.14207) 等论文的启发，GPT Researcher 将系统划分成 **规划者（Planner）**、**研究者（Researcher）** 和 **发布者（Publisher）** 三个部分：
 
 ![](./images/gpt-researcher-overview.png)
 
@@ -355,11 +355,98 @@ $ npm run dev
 
 ![](./images/gpt-researcher-flow.png)
 
-#### dzhng/deep-research
+#### [dzhng/deep-research](https://github.com/dzhng/deep-research)
 
-https://github.com/dzhng/deep-research
+这个项目是由 [Aomni](https://www.aomni.com/) 的 CEO [David Zhang](https://github.com/dzhng) 开发，在 Github 开源后非常受欢迎，很快便成为万星项目。该项目架构简单易懂，核心代码不过 300 行，允许用户调整研究广度和深度，默认通过 [Firecrawl](https://www.firecrawl.dev) 作为信息搜索和抓取的工具，针对用户提供的主题不断探索发现，直到完成用户的研究目标。
 
-https://deep-research.ataw.top/
+下面简单体验下该项目，首先下载源码并进入工作目录：
+
+```
+$ git clone https://github.com/dzhng/deep-research.git
+$ cd deep-research
+```
+
+修改环境变量：
+
+```
+$ cp .env.example .env.local
+$ vi .env.local
+FIRECRAWL_KEY=xxx
+OPENAI_KEY=xxx
+```
+
+安装所需依赖：
+
+```
+$ npm install
+```
+
+然后运行：
+
+```
+$ npm start
+```
+
+这是一个命令行程序，运行后首先会询问你想研究什么主题，并让你填写研究的广度和深度，以及最后希望生成报告还是答案：
+
+```
+What would you like to research? A2A
+Enter research breadth (recommended 2-10, default 4): 3
+Enter research depth (recommended 1-5, default 2): 2
+Do you want to generate a long report or a specific answer? (report/answer, default report): report
+```
+
+最近 Google 的 A2A 协议比较火，我就让它帮我生成一份 A2A 的调研报告，其中研究广度指的是根据你输入的主题生成 N 个子 query 进行并发搜索和研究，研究深度指的是根据搜索出来的结果进一步生成研究主题的次数，填写完这些信息后，程序会向用户提三个问题，进一步澄清要研究的主题：
+
+```
+Creating research plan...
+
+To better understand your research needs, please answer these follow-up questions:
+
+Can you please clarify the meaning of 'A2A' in your query? For instance, are you referring to an 'ask-to-answer' platform mechanism, 'asset-to-asset' exchange, or another concept entirely?
+Your answer: google a2a protocol
+
+Could you specify the context or domain where 'A2A' is being applied (e.g., finance, technology, social media)?
+Your answer: technology
+
+What specific aspects of 'A2A' are you interested in exploring (e.g., technical functionality, market impact, user engagement, etc.)?
+Your answer: technical functionality
+```
+
+这里可以看到，由于 A2A 是新发布的协议，大模型并不知道是什么，所以需要我们明确输入。回答完三个问题后，就开始深度研究了：
+
+```
+Starting research...
+
+Created 3 queries [
+  {
+    query: 'Google A2A protocol technical functionality overview',
+    researchGoal: 'This query aims to gather comprehensive documentation and analysis of ...'
+  },
+  {
+    query: 'Google A2A protocol design principles and implementation details',
+    researchGoal: 'The goal here is to uncover in-depth information about the design philosophies and ...'
+  },
+  {
+    query: 'Performance and scalability evaluation of the Google A2A protocol',
+    researchGoal: 'This query targets technical performance metrics and scalability aspects of the Google A2A protocol ...'
+  }
+]
+Ran Google A2A protocol technical functionality overview, found 4 contents
+Ran Google A2A protocol design principles and implementation details, found 4 contents
+```
+
+经过大约 3 分钟时间，一份 7 页的研究报告就生成好了：
+
+![](./images/dzhng-deep-research-pdf.png)
+
+下面是大致的程序流程图：
+
+![](./images/dzhng-deep-research-flow.png)
+
+此外，有热心网友为这个程序做了 [Web 页面](https://github.com/AnotiaWang/deep-research-web-ui)，你也可以 [在线体验](https://deep-research.ataw.top/)：
+
+![](./images/dzhng-deep-research-ui.png)
 
 #### sentient-agi/OpenDeepSearch
 
