@@ -561,27 +561,26 @@ $ python gradio_demo.py
 
 感兴趣的可以看下他们的 [论文](https://arxiv.org/abs/2503.20201)。
 
+#### 更多
+
+关于 Deep Search 和 Deep Research，还有很多优秀的开源项目，这些项目将传统的搜索技术充分融合，不仅在报告生成上有着出色的表现，而且在复杂问题的求解上也处于 SOTA 水平。比如在 OpenAI 发布 Deep Research 之后的 24 小时内，Hugging Face 就基于自家的 [smolagents](https://github.com/huggingface/smolagents/tree/main/examples/open_deep_research) 智能体框架实现了 [Open Deep Research](https://huggingface.co/blog/open-deep-research) 开源项目，能够自主浏览网页，滚动页面，处理文件，甚至编写代码对数据进行计算；在 Monica 发布 Manus 之后，MetaGPT 团队仅花费 3 小时就开发了 [OpenManus](https://github.com/mannaandpoem/OpenManus) 项目，也能够自主浏览网页，查询和总结信息，实现了和 Manus 类似的功能，得到社区的广泛关注；还有 LangChain 团队基于 LangGraph 多智能体框架开发的 [Local Deep Researcher](https://github.com/langchain-ai/local-deep-researcher) 和 [Open Deep Research](https://github.com/langchain-ai/open_deep_research) 项目，使用了和 GPT Researcher 一样的 `Plan and Execute` 思路，先用推理模型撰写报告大纲，然后针对每一节并行地搜集信息，最后生成一份详尽的调研报告，得益于 LangSmith 平台，运行过程中还能清晰地看到智能体的规划和执行链路。
+
+除此之外，还有很多项目，篇幅有限，不能一一介绍。不过这些项目的实现思路大体是类似的，相信对上面几个项目的深度体验，结合对 Deep Search 和 Deep Research 原理的理解，在学习其他项目时也能一通百通。
+
 ## 总结
 
-#### langchain-ai/open_deep_research
+本文探讨了自 ChatGPT 引发生成式 AI 浪潮以来，信息检索与生成领域经历的快速演变，重点梳理了 **AI + 搜索**、**深度搜索（Deep Search）** 和 **深度研究（Deep Research）** 这三个相互关联又各有侧重的范式。
 
-https://github.com/langchain-ai/open_deep_research
+**AI + 搜索** 的兴起，标志着对传统搜索引擎局限性的初步回应。通过结合大语言模型与搜索引擎，它旨在克服传统搜索体验差、信息过载的问题，并缓解大模型固有的幻觉与知识静态性。这种模式直接提供答案，简化了用户获取信息的过程，成为了各大模型产品的标配功能。然而，面对模糊或复杂问题时，其依赖单次、直接检索的 **朴素 RAG** 模式暴露出检索精度不足的弊端。
 
-https://github.com/langchain-ai/local-deep-researcher
+**深度搜索（Deep Search）** 应运而生，作为对朴素 RAG 局限性的深化解决方案。它本质上是 **Agentic RAG** 的应用，引入了更复杂的检索策略，如查询重写、查询扩展、多步检索、以及通过智能体的 **思考-行动-观察** 循环进行动态、迭代式的信息搜集与初步分析。深度搜索的核心在于优化检索环节，通过更智能、更具韧性的检索过程，提升对复杂、多跳或需要全局理解问题的上下文获取能力，旨在为用户提供更精确、更相关的答案。
 
-#### huggingface/smolagents
+**深度研究（Deep Research）** 则代表了当前演进的前沿。它建立在深度搜索的基础之上，但目标更为宏大，不仅追求信息的精确获取，更强调 **深度分析、复杂推理、综合洞察和工具使用**。其显著特征包括：
+1. **引入推理（思考）模型**：利用如 OpenAI o1、DeepSeek-R1、Gemini 2.0 Flash Thinking 等模型，通过增加“推理时计算”换取更高质量、更具洞察力的分析结果，用户愿意接受更长的等待时间以获得“延迟满足”带来的优质内容；
+2. **更强大的智能体能力**：集成了更广泛的工具使用（如操作浏览器、执行代码、与操作系统交互）和更复杂的任务规划与分解能力；
+3. **聚焦复杂任务与报告生成**：更擅长处理需要跨领域知识整合、深度行业分析、复杂问题求解、长篇报告撰写等研究型任务，扮演着“研究助理”的角色。
 
-https://huggingface.co/blog/open-deep-research
-
-https://github.com/huggingface/smolagents/tree/main/examples/open_deep_research
-
-#### mannaandpoem/OpenManus
-
-https://github.com/mannaandpoem/OpenManus
-
-https://mp.weixin.qq.com/s/4Ai2QPYxvD5AVUUz01N0aw
-
-https://zhuanlan.zhihu.com/p/28709430630
+从 AI + 搜索到深度搜索，再到深度研究，我们见证了 AI 从简单的信息搬运工，逐步进化为能够进行初步分析的助手，最终迈向能够独立执行复杂研究任务的智能伙伴。这一演进的核心驱动力在于不断克服前一阶段的技术瓶颈，并通过引入更先进的 RAG 技术、智能体框架以及推理模型，持续提升 AI 理解、规划、执行和生成复杂内容的能力。未来，随着技术的不断融合与创新，我们有望看到更加智能、自主的研究型 AI 应用涌现。
 
 ## 参考
 
@@ -593,6 +592,7 @@ https://zhuanlan.zhihu.com/p/28709430630
 * [Introducing computer use, a new Claude 3.5 Sonnet, and Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)
 * [Try Deep Research and our new experimental model in Gemini, your AI assistant](https://blog.google/products/gemini/google-gemini-deep-research/)
 * [Open-source DeepResearch – Freeing our search agents](https://huggingface.co/blog/open-deep-research)
+* [「三小时复刻 Manus，GitHub 2 万星」：OpenManus 多智能体框架的技术拆解](https://mp.weixin.qq.com/s/4Ai2QPYxvD5AVUUz01N0aw)
 
 ### Search
 
@@ -624,7 +624,6 @@ https://zhuanlan.zhihu.com/p/28709430630
 
 * [Github - jina-ai/node-DeepResearch](https://github.com/jina-ai/node-DeepResearch)
 * [Github - zilliztech/deep-searcher](https://github.com/zilliztech/deep-searcher)
-* [Github - nickscamara/open-deep-research](https://github.com/nickscamara/open-deep-research)
 
 ### Deep Research
 
@@ -638,10 +637,14 @@ https://zhuanlan.zhihu.com/p/28709430630
 ---
 
 * [GitHub - assafelovic/gpt-researcher](https://github.com/assafelovic/gpt-researcher)
+* [Github - dzhng/deep-research](https://github.com/dzhng/deep-research)
+* [Github - sentient-agi/OpenDeepSearch](https://github.com/sentient-agi/OpenDeepSearch)
+* [Github - nickscamara/open-deep-research](https://github.com/nickscamara/open-deep-research)
 * [Github - langchain-ai/open_deep_research](https://github.com/langchain-ai/open_deep_research)
 * [Github - langchain-ai/local-deep-researcher](https://github.com/langchain-ai/local-deep-researcher)
-* [Github - dzhng/deep-research](https://github.com/dzhng/deep-research)
 * [Github - mannaandpoem/OpenManus](https://github.com/mannaandpoem/OpenManus)
 * [Github - stanford-oval/storm](https://github.com/stanford-oval/storm)
-* [Github - sentient-agi/OpenDeepSearch](https://github.com/sentient-agi/OpenDeepSearch)
 * [Github - binary-husky/gpt_academic](https://github.com/binary-husky/gpt_academic)
+* [Github - mshumer/OpenDeepResearcher](https://github.com/mshumer/OpenDeepResearcher)
+* [Github - camel-ai/owl](https://github.com/camel-ai/owl)
+* [Github - browser-use/browser-use](https://github.com/browser-use/browser-use)
