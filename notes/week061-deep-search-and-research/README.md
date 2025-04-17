@@ -259,9 +259,9 @@ Gemini 的 Deep Research 功能可以结合思考模型和联网搜索对话题�
 
 目前 Deep Research 开源实现非常多，这一节将挑选几个比较流行的逐一介绍下。
 
-#### [assafelovic/gpt-researcher]((https://github.com/assafelovic/gpt-researcher))
+#### assafelovic/gpt-researcher
 
-GPT Researcher 也被简称为 GPTR，应该是大模型兴起之后最早一批专注于研究报告生成的开源项目。受 [Plan-and-Solve](https://arxiv.org/abs/2305.04091)、[RAG](https://arxiv.org/abs/2005.11401) 和 [STORM](https://arxiv.org/abs/2402.14207) 等论文的启发，GPT Researcher 将系统划分成 **规划者（Planner）**、**研究者（Researcher）** 和 **发布者（Publisher）** 三个部分：
+[GPT Researcher](https://github.com/assafelovic/gpt-researcher) 也被简称为 GPTR，应该是大模型兴起之后最早一批专注于研究报告生成的开源项目。受 [Plan-and-Solve](https://arxiv.org/abs/2305.04091)、[RAG](https://arxiv.org/abs/2005.11401) 和 [STORM](https://arxiv.org/abs/2402.14207) 等论文的启发，GPT Researcher 将系统划分成 **规划者（Planner）**、**研究者（Researcher）** 和 **发布者（Publisher）** 三个部分：
 
 ![](./images/gpt-researcher-overview.png)
 
@@ -355,9 +355,9 @@ $ npm run dev
 
 ![](./images/gpt-researcher-flow.png)
 
-#### [dzhng/deep-research](https://github.com/dzhng/deep-research)
+#### dzhng/deep-research
 
-这个项目是由 [Aomni](https://www.aomni.com/) 的 CEO [David Zhang](https://github.com/dzhng) 开发，在 Github 开源后非常受欢迎，很快便成为万星项目。该项目架构简单易懂，核心代码不过 300 行，允许用户调整研究广度和深度，默认通过 [Firecrawl](https://www.firecrawl.dev) 作为信息搜索和抓取的工具，针对用户提供的主题不断探索发现，直到完成用户的研究目标。
+[dzhng/deep-research](https://github.com/dzhng/deep-research) 这个项目是由 [Aomni](https://www.aomni.com/) 的 CEO [David Zhang](https://github.com/dzhng) 开发，在 Github 开源后非常受欢迎，很快便成为万星项目。该项目架构简单易懂，核心代码不过 300 行，允许用户调整研究广度和深度，默认通过 [Firecrawl](https://www.firecrawl.dev) 作为信息搜索和抓取的工具，针对用户提供的主题不断探索发现，直到完成用户的研究目标。
 
 下面简单体验下该项目，首先下载源码并进入工作目录：
 
@@ -450,7 +450,118 @@ Ran Google A2A protocol design principles and implementation details, found 4 co
 
 #### sentient-agi/OpenDeepSearch
 
-https://github.com/sentient-agi/OpenDeepSearch
+[sentient-agi/OpenDeepSearch](https://github.com/sentient-agi/OpenDeepSearch) 是另一个比较热门的 Deep Research 开源项目，我们来体验下：
+
+```
+$ git clone https://github.com/sentient-agi/OpenDeepSearch.git
+$ cd OpenDeepSearch
+```
+
+安装 OpenDeepSearch：
+
+```
+$ pip install -e .
+$ pip install -r requirements.txt
+```
+
+修改环境变量：
+
+```
+SERPER_API_KEY=xxx
+
+JINA_API_KEY=xxx
+
+OPENAI_API_KEY=xxx
+OPENAI_API_BASE=xxx
+LITELLM_MODEL_ID=gpt-4o-mini
+```
+
+主要包括三个部分：
+
+1. 搜索引擎配置：项目默认使用 [Serper](https://serper.dev/) 作为搜索引擎，也支持使用 [SearXNG](https://github.com/searxng/searxng) 搭建自己的聚合搜索引擎；
+2. 重排序配置：项目默认使用 [Jina](https://jina.ai/) 作为重排序工具，也支持使用 [Infinity](https://github.com/michaelfeil/infinity) 搭建自己的 Embeddings 服务；
+3. 大模型配置：项目使用 [LiteLLM](https://github.com/BerriAI/litellm) 对接大模型，支持多达 100+ 不同的大模型；
+
+OpenDeepSearch 可以作为工具库直接调用：
+
+```
+from opendeepsearch import OpenDeepSearchTool
+
+search_agent = OpenDeepSearchTool(
+    model_name="gpt-4o-mini",
+    reranker="jina"
+)
+
+if not search_agent.is_initialized:
+    search_agent.setup()
+    
+query = "Fastest land animal?"
+result = search_agent.forward(query)
+print(result)
+```
+
+由于 `OpenDeepSearchTool` 实现了 [smolagents](https://github.com/huggingface/smolagents) 的 `Tool` 接口，所以也可以集成到 smolagents 智能体框架中作为工具调用，比如下面使用 `ToolCallingAgent` 创建一个 ReAct 智能体：
+
+```
+from opendeepsearch import OpenDeepSearchTool
+from opendeepsearch.wolfram_tool import WolframAlphaTool
+from opendeepsearch.prompts import REACT_PROMPT
+from smolagents import LiteLLMModel, ToolCallingAgent
+
+model = LiteLLMModel(
+    "gpt-4o-mini",
+    temperature=0.7
+)
+search_agent = OpenDeepSearchTool(
+    model_name="gpt-4o-mini",
+    reranker="jina"
+)
+wolfram_tool = WolframAlphaTool(app_id=os.environ["WOLFRAM_ALPHA_APP_ID"])
+react_agent = ToolCallingAgent(
+    tools=[search_agent, wolfram_tool],
+    model=model,
+    prompt_templates=REACT_PROMPT
+)
+
+query = "How long would a cheetah at full speed take to run the length of Pont Alexandre III?"
+result = react_agent.run(query)
+print(result)
+```
+
+这里的问题是 `一只猎豹以全速奔跑需要多长时间才能跑完亚历山大三世桥的长度？`，运行结果如下：
+
+![](./images/opendeepsearch-react.png)
+
+可以看到程序首先调用搜索工具得知 `亚历山大三世桥的长度为 160 米`，然后模型自己知道 `猎豹的奔跑速度是 30 米/秒`，再调用 WolframAlpha 工具计算 `160 / 30 = 5.333` 从而输出结果。
+
+我们也可以使用 `CodeAgent` 创建一个 [Code 智能体](https://github.com/huggingface/smolagents?tab=readme-ov-file#how-do-code-agents-work)，参考 `gradio_demo.py` 示例代码：
+
+```
+$ python gradio_demo.py
+```
+
+示例代码集成了 [Gradio](https://github.com/gradio-app/gradio) 框架，提供了可视化页面和智能体进行交互：
+
+![](./images/opendeepsearch-gradio-ui.png)
+
+虽然这个项目的名字叫做 Deep Search，但是我觉得也可以将它划到 Deep Research 的范畴，主要在于它处理搜索结果的过程很值得学习，下面是调用 `OpenDeepSearchTool` 的流程图：
+
+![](./images/opendeepsearch-flow.png)
+
+这里有几个点比较值得关注：
+
+1. 提供了默认和专业两种搜索模式，专业模式会对搜索结果进一步处理；
+2. 处理的第一步是抓取页面内容，如果页面是 `wikipedia.org/wiki` 直接使用 [Wikipedia-API](https://github.com/martin-majlis/Wikipedia-API) 获取，否则使用 [Crawl4AI](https://github.com/unclecode/crawl4ai) 爬取；
+3. 将爬取的内容分成段落，使用 [kenhktsui/llm-data-textbook-quality-fasttext-classifer-v2](https://huggingface.co/kenhktsui/llm-data-textbook-quality-fasttext-classifier-v2) 分类器对每个段落按 **教育价值（educational value）** 进行分类，过滤掉教育价值偏低的段落；
+4. 如果页面内容过长，则使用 LangChain 的 `RecursiveCharacterTextSplitter` 对其进行分片，再通过 **重排序（Reranker）** 模型筛选出和原始问题最接近的片段。
+
+可以看出 OpenDeepSearch 更擅长问答场景而不是报告生成，经过对搜索结果一系列的处理，OpenDeepSearch 在 [SimpleQA](https://openai.com/index/introducing-simpleqa/) 单跳查询方面的表现与闭源搜索产品相当，在 [FRAMES](https://huggingface.co/datasets/google/frames-benchmark) 多跳查询上表现远超闭源搜索产品：
+
+![](./images/opendeepsearch-vs-others.png)
+
+感兴趣的可以看下他们的 [论文](https://arxiv.org/abs/2503.20201)。
+
+## 总结
 
 #### langchain-ai/open_deep_research
 
