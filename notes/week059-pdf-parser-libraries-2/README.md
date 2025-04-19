@@ -94,6 +94,10 @@ https://github.com/VikParuchuri/marker
 
 https://github.com/VikParuchuri/surya
 
+## MinerU
+
+https://github.com/opendatalab/MinerU
+
 ## PDF-Extract-Kit
 
 https://github.com/opendatalab/PDF-Extract-Kit

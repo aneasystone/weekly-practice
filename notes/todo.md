@@ -18,6 +18,13 @@
 * [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
 * [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
 
+### DSPy
+
+* [DSPy: The framework for programming—not prompting—foundation models](https://github.com/stanfordnlp/dspy)
+* [DSPy RAG with LlamaIndex — Programming LLMs over Prompting | by Philemon Kiprono | Apr, 2024 | Medium](https://medium.com/@leighphil4/dspy-rag-with-llamaindex-programming-llms-over-prompting-1b12d12cbc43)
+* [Using DSPy For A RAG Implementation | by Cobus Greyling | May, 2024 | Medium](https://cobusgreyling.medium.com/using-dspy-for-a-rag-implementation-aa140caef50e)
+* [Prompting已死？DSPy：自动优化LLM流水线](https://mp.weixin.qq.com/s/oog-dCmWFqT6IAC06pIESA)
+
 ### 模型推理和部署
 
 * [本地运行面壁智能的“贺岁模型”：MiniCPM 2B - 苏洋博客](https://soulteary.com/2024/02/02/locally-run-modelbest-mini-cpm-2b.html)
@@ -125,19 +132,79 @@
 * [Building a RAG application with Redis and Spring AI](https://redis.io/blog/building-a-rag-application-with-redis-and-spring-ai/)
 * [Create a RAG (Retrieval Augmented Generation) Application with Redis and Spring AI](https://www.baeldung.com/spring-ai-redis-rag-app)
 * [Spring AI, Llama 3 and pgvector: bRAGging rights!](https://dev.to/mcadariu/springai-llama3-and-pgvector-bragging-rights-2n8o)
+* [使用Llama3和Ollama来增强RAG - Java译站](https://it.deepinmind.com/llm/2024/05/07/improved-rag-with-llama3-and-ollama.html)
+
+#### RAGFlow
+
+* [检索增强生成引擎 RAGFlow 正式开源！仅一天收获上千颗星](https://www.infoq.cn/article/hjJM3kV620iDoYYOBtPs)
+* [端到端 RAG 解决方案 RAGFlow 正式开源](https://blog.csdn.net/datageek/article/details/137232792)
+* [RAGFlow：基于OCR和文档解析的下一代 RAG 引擎 - 知乎](https://zhuanlan.zhihu.com/p/691598930)
+
+#### GraphRAG
+
+* [GitHub - JayLZhou/GraphRAG: In-depth study of the graphrag](https://github.com/JayLZhou/GraphRAG)
+* [Implementing ‘From Local to Global’ GraphRAG with Neo4j and LangChain: Constructing the Graph](https://neo4j.com/developer-blog/global-graphrag-neo4j-langchain/)
+* [Enhancing RAG-based application accuracy by constructing and leveraging knowledge graphs](https://blog.langchain.dev/enhancing-rag-based-applications-accuracy-by-constructing-and-leveraging-knowledge-graphs/)
+* [Graph-based metadata filtering for improving vector search in RAG applications](https://blog.langchain.dev/graph-based-metadata-filtering-for-improving-vector-search-in-rag-applications/)
+* [Knowledge Graphs and Generative AI (GraphRAG) with Amazon Neptune and LlamaIndex (Part 1) — Natural Language Querying](https://community.aws/content/2kOWDPgScaWwILcSgQfRVpfbTYa/knowledge-graphs-and-generative-ai-graphrag-with-amazon-neptune-and-llamaindex-part-1-natural-language-querying)
+* [Introducing GraphRAG with LangChain and Neo4j](https://medium.com/microsoftazure/introducing-graphrag-with-langchain-and-neo4j-90446df17c1e)
+* [下一代 RAG 技术来了！微软正式开源 GraphRAG：大模型行业将迎来新的升级？](https://www.infoq.cn/article/sqaUMyNg6B8OrCcwg4vo)
+* [实战微软新一代RAG：GraphRAG强大的全局理解能力，碾压朴素RAG？](https://mp.weixin.qq.com/s/gk6lQuDaAurUEIun_S_eEg)
+* [GraphRAG前沿之Graph RAG-Tool Fusion：将知识图谱用于Agent工具编排实现思路](https://mp.weixin.qq.com/s/sQ74TGbTesif2vnPyEs07g)
+* [LangGraph全新4大预构建Agents框架登场](https://mp.weixin.qq.com/s/4WU-c9hYWwvEZLvC91coVw)
+* [GraphRAG + GPT-4o mini 低成本构建 AI 图谱知识库 - 少数派](https://sspai.com/post/90665)
+* [Graph Maker：轻松使用开源大模型将文本转为知识图谱，发现新知识！](https://mp.weixin.qq.com/s/Sn8m5gZyfpmFCCPXHPwWhQ)
+* [NLTK vs LLM：GraphRAG实体提取方法深度大比](https://mp.weixin.qq.com/s/OjGv-7p41smBm4W5c3cj5g)
+* [The GraphRAG Manifesto: 为生成式 AI 增加知识 - 图数据库与分析 [译] | 宝玉的分享](https://baoyu.io/translations/rag/the-graphrag-manifesto-adding-knowledge-to-genai)
 
 #### Multimodality
 
+* [Multimodality and Large Multimodal Models (LMMs)](https://huyenchip.com/2023/10/10/multimodal.html)
 * [Spring AI - Multimodality - Orbis Sensualium Pictus](https://spring.io/blog/2024/04/19/spring-ai-multimodality-orbis-sensualium-pictus)
 * [Audio Multimodality: Expanding AI Interaction with Spring AI and OpenAI](https://spring.io/blog/2024/12/05/spring-ai-audio-modality)
 
+#### Multimodal RAG
+
+* [Nomic multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/nomic_multimodal_rag.ipynb)
+* [Explore Redis & LangChain's Multimodal RAG Template - Redis](https://redis.io/blog/explore-the-new-multimodal-rag-template-from-langchain-and-redis/)
+* [The Ultimate Guide for Building a Multilingual-Multimodal RAG with LlamaIndex and Qdrant](https://towardsdev.com/the-ultimate-guide-for-building-a-multilingual-multimodal-rag-with-llamaindex-and-qdrant-b6ecc2bd37c9)
+* [Multi-Modal Agentic Applications ](https://cobusgreyling.medium.com/multi-modal-agentic-applications-4a15ab0c0bf6)
+* [OmAgent: Build multimodal language agents for fast prototype and production](https://github.com/om-ai-lab/OmAgent)
+* [Cooking with AI: Building a Smart Multimodal Recipe Recommender using Qdrant, LlamaIndex, and Google Gemini](https://medium.com/@benitomartin/cooking-with-ai-building-a-smart-multimodal-recipe-recommender-using-qdrant-llamaindex-and-2d6d1fa6566c)
+
+### MCP
+
+* [Securing Spring AI MCP servers with OAuth2](https://spring.io/blog/2025/04/02/mcp-server-oauth2/)
+* [Model Context Protocol (MCP)](https://jldec.me/blog/mcp)
+* [A Deep Dive Into MCP and the Future of AI Tooling | Andreessen Horowitz](https://a16z.com/a-deep-dive-into-mcp-and-the-future-of-ai-tooling/)
+* [The MCP Authorization Spec Is... a Mess for Enterprise – Software Blog](https://blog.christianposta.com/the-updated-mcp-oauth-spec-is-a-mess/)
+* [Understanding MCP Recent Change Around HTTP+SSE – Software Blog](https://blog.christianposta.com/ai/understanding-mcp-recent-change-around-http-sse/)
+* [万字长文，带你读懂 Anthropic MCP](https://my.oschina.net/qiangmzsx/blog/17987222)
+
+### A2A
+
+* [Announcing the Agent2Agent Protocol (A2A) - Google Developers Blog](https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/)
+* [简明理解 Google A2A 协议：这不是 MCP！](https://mp.weixin.qq.com/s/6nCvH9iVX_BXb7EjOGYzEw)
+
 ## Java
+
+* [Ensuring the right usage of Java 21 new features](https://foojay.io/today/ensuring-the-right-usage-of-java-21-new-features/)
+* [Java 22: What’s New?](https://foojay.io/today/java-22-whats-new/)
+* [Java 22 Is Here, And It's Ready To Rock](https://foojay.io/today/java-22-is-here-and-its-ready-to-rock/)
+* [The Arrival of Java 22! – Inside.java](https://inside.java/2024/03/19/the-arrival-of-java-22/)
+* [Introduction to Java 22 | Baeldung](https://www.baeldung.com/java-22-overview)
+* [Hello, Java 22!](https://spring.io/blog/2024/03/19/hello-java-22)
+* [Java 22正式发布，一文了解全部新特性 - 程序猿DD的个人空间](https://my.oschina.net/didispace/blog/11048218)
+* [Project Loom: Structured Concurrency - Java](https://foojay.io/today/project-loom-structured-concurrency-java/)
+* [The Foreign Function and Memory API - Dev.java](https://dev.java/learn/ffm/)
 
 ### Java Agent
 
 * [Java Agent：通灵之术](https://lsieun.github.io/article/java-agent-summoning-jutsu.html)
 * [Java Agent 系列一：基础篇](https://lsieun.github.io/java-agent/java-agent-01.html)
 * [手把手教你实现一个Java Agent](https://mp.weixin.qq.com/s/BB9GwJVhadjxUWZTaLr5bA)
+* [“JVM” 上的AOP：Java Agent 实战](https://my.oschina.net/u/4662964/blog/15155929)
+* [Java Agent 从入门到内存马 - 先知社区](https://xz.aliyun.com/t/9450)
 
 ### 学习 JNI
 
@@ -150,6 +217,7 @@
 * [Pitfalls on Testing with Spring Boot](https://www.baeldung.com/spring-boot-testing-pitfalls)
 * [Mocking Private Fields With Mockito](https://www.baeldung.com/java-mockito-private-fields)
 * [Run JMeter .jmx File From the Command Line and Configure the Report File](https://www.baeldung.com/java-jmeter-command-line)
+* [Create and Run Apache JMeter Test Scripts via Java Program | Baeldung](https://www.baeldung.com/java-jmeter-create-run-test-scripts)
 
 ### 问题诊断
 
@@ -183,6 +251,7 @@
 
 * [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/3.2.x/reference/htmlsingle/)
 * [Observability with Spring Boot 3](https://spring.io/blog/2022/10/12/observability-with-spring-boot-3)
+* [Tracing in Spring Boot3](https://medium.com/javarevisited/tracing-in-spring-boot3-097205dc08f4)
 * [How Google Cloud emulators and Testcontainers speed up development](https://cloud.google.com/blog/products/application-development/develop-and-test-spring-boot-applications-consistently/)
 * [A Comprehensive guide to Spring Boot 3.2 with Java 21, Virtual Threads, Spring Security, PostgreSQL, Flyway, Caching, Micrometer, Opentelemetry, JUnit 5, RabbitMQ, Keycloak Integration, and More! ](https://medium.com/@jojoooo/exploring-a-base-spring-boot-application-with-java-21-virtual-thread-spring-security-flyway-c0fde13c1eca#551c)
 * [All together now: Spring Boot 3.2, GraalVM native images, Java 21, and virtual threads with Project Loom](https://spring.io/blog/2023/09/09/all-together-now-spring-boot-3-2-graalvm-native-images-java-21-and-virtual)
@@ -217,12 +286,18 @@
 
 * [动态代理大揭秘，带你彻底弄清楚动态代理！](https://my.oschina.net/u/1584523/blog/5261706)
 
+### Java 泛型
+
+* [深入Java泛型及其设计原则 - 大淘宝技术的个人空间](https://my.oschina.net/u/4662964/blog/16510084)
+
 ### SPI
 
 * [JDK中「SPI」原理分析](https://mp.weixin.qq.com/s/X1f94Q0iUp6IP99G8Ft7MQ)
+* [Internet Address Resolution SPI in Java | Baeldung](https://www.baeldung.com/java-service-provider-interface)
 
-### 异步
+### 多线程
 
+* [Guide to ExecutorService vs. CompletableFuture | Baeldung](https://www.baeldung.com/java-executorservice-vs-completablefuture)
 * [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
 * [Is CompletableFuture Non-blocking?](https://www.baeldung.com/java-completablefuture-non-blocking)
 * [CompletableFuture原理与实践-外卖商家端API的异步化](https://tech.meituan.com/2022/05/12/principles-and-practices-of-completablefuture.html)
@@ -236,6 +311,7 @@
 * [理解 gRPC 协议](https://taoshu.in/grpc.html)
 * [Introduction to gRPC with Spring Boot](https://piotrminkowski.com/2023/08/29/introduction-to-grpc-with-spring-boot/)
 * [在 kubernetes 环境中实现 gRPC 负载均衡](https://crossoverjie.top/2023/10/16/ob/k8s-grpc-lb/)
+* [gRPC Authentication in Java Using Application Layer Transport Security (ALTS) | Baeldung](https://www.baeldung.com/java-grpc-authentication-application-layer-transport-security-alts)
 
 ### Protocol Buffers
 
@@ -291,6 +367,7 @@
 
 #### OpenTelemetry
 
+* [OpenTelemetry Tracing on Spring Boot, Java Agent vs. Micrometer Tracing](https://blog.frankel.ch/opentelemetry-tracing-spring-boot/)
 * [Exploring the OpenTelemetry Collector](https://blog.frankel.ch/opentelemetry-collector/)
 * [How to integrate a Spring Boot app with Grafana using OpenTelemetry standards](https://grafana.com/blog/2023/10/30/how-to-integrate-a-spring-boot-app-with-grafana-using-opentelemetry-standards/)
 * [OpenTelemetry in Java](https://opentelemetry.io/docs/instrumentation/java/getting-started/)
@@ -338,6 +415,7 @@
 
 * [Best practices for managing Java dependencies](https://snyk.io/blog/best-practices-for-managing-java-dependencies/)
 * [Introduction to the Dependency Mechanism](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html)
+* [Understanding Maven Dependency Graph or Tree | Baeldung](https://www.baeldung.com/maven-dependency-graph)
 
 ### Maven Archtype
 
@@ -348,6 +426,8 @@
 
 ### 虚拟线程
 
+* [Java虚拟线程探究与性能解析 - 大淘宝技术的个人空间 ](https://my.oschina.net/u/4662964/blog/15646720)
+* [Java Virtual Threads: a Case Study - InfoQ](https://www.infoq.com/articles/java-virtual-threads-a-case-study/)
 * [Working with Virtual Threads in Spring 6](https://www.baeldung.com/spring-6-virtual-threads)
 * [虚拟线程原理及性能分析](https://tech.dewu.com/article?id=89)
 
@@ -366,6 +446,11 @@
 
 * [使用 Go 和 Linux Kernel 技术探究容器化原理](https://cloud.tencent.com/developer/article/2018443)
 * [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
+
+### 容器运行时
+
+* [Open-sourcing gVisor, a sandboxed container runtime](https://cloud.google.com/blog/products/identity-security/open-sourcing-gvisor-a-sandboxed-container-runtime)
+* [以沙箱的方式运行容器:安全容器 gvisor](https://www.cnblogs.com/renshengdezheli/p/18258180)
 
 ## Kubernetes
 
@@ -654,6 +739,8 @@
 
 ### WebAssembly
 
+* [WebAssembly, the Safer Alternative to Integrating Native Code in Java - InfoQ](https://www.infoq.com/articles/sqlite-java-integration-webassembly/)
+* [How to Compile Java to WASM (Web Assembly) | Baeldung](https://www.baeldung.com/java-wasm-web-assembly)
 * [Java 极客眼中的 WebAssembly](https://www.infoq.cn/article/H9VRjX3X1MeXqImEwI6J)
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
 

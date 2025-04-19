@@ -24,7 +24,7 @@
 * [讯飞星火](https://xinghuo.xfyun.cn/)
 * [豆包](https://www.doubao.com/)
 * [Kimi Chat](https://kimi.moonshot.cn) - Moonshot AI 出品的智能助手
-* [Groq](https://groq.com/)
+* [Groq](https://groq.com/) - Fastest AI Inference
 
 #### 客户端
 
@@ -56,12 +56,11 @@
 ### 编程助手
 
 * [GitHub Copilot](https://github.com/features/copilot) - Your AI pair programmer
+* [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
 * [Amazon CodeWhisperer](https://aws.amazon.com/cn/codewhisperer/)
-* [OpenAI Codex](https://openai.com/blog/openai-codex)
-* [Codeium](https://codeium.com/)
+* [Windsurf (formerly Codeium)](https://windsurf.com/) - The most powerful AI Code Editor
 * [Tabnine](https://www.tabnine.com/) - AI assistant for software developers
 * [AlphaCode](https://alphacode.deepmind.com/)
-* [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
 * [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
 * [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
@@ -71,6 +70,13 @@
 * [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
 * [Devin](https://www.cognition.ai/)
 * [Trae](https://www.trae.ai/) - Ship Faster with Trae
+* [Augment Code](https://www.augmentcode.com/) – Developer AI for real work
+* [OpenAI Codex CLI](https://github.com/openai/codex) - Lightweight coding agent that runs in your terminal
+
+#### Cursor
+
+* [yeongpin/cursor-free-vip](https://github.com/yeongpin/cursor-free-vip)
+* [yuaotian/go-cursor-help](https://github.com/yuaotian/go-cursor-help)
 
 #### 代码大模型
 
@@ -445,6 +451,7 @@
     * [Yi](https://github.com/01-ai/Yi) - 01.AI
 * [元象 XVERSE](http://www.xverse.cn/)
     * [XVERSE-13B](https://github.com/xverse-ai/XVERSE-13B) - 由深圳元象科技自主研发的支持多语言的大语言模型
+    * [XVERSE-V-13B](https://github.com/xverse-ai/XVERSE-V-13B)
 * [DeepSeek](https://www.deepseek.com/) - 深度求索
     * [DeepSeek LLM](https://github.com/deepseek-ai/DeepSeek-LLM)
     * [DeepSeek MoE](https://github.com/deepseek-ai/DeepSeek-MoE)
@@ -499,7 +506,7 @@
 * [DeepSpeed](https://github.com/microsoft/DeepSpeed) - Microsoft
 	* [DeepSpeed-Chat](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat)
 	* [DeepSpeed-Chat：最强ChatGPT训练框架，一键完成RLHF训练！](https://mp.weixin.qq.com/s/uuquavhwNg1P9AaIMXOE_A)
-* [Mistral](https://docs.mistral.ai/)
+* [Mistral](https://mistral.ai/)
 * [Gorilla](https://github.com/ShishirPatil/gorilla) - An API store for LLMs
 * [nanoGPT](https://github.com/karpathy/nanoGPT) - The simplest, fastest repository for training/finetuning medium-sized GPTs.
 * [Lit-GPT](https://github.com/Lightning-AI/lit-gpt) - Hackable implementation of state-of-the-art open-source LLMs based on nanoGPT. Supports flash attention, 4-bit and 8-bit quantization, LoRA and LLaMA-Adapter fine-tuning, pre-training. Apache 2.0-licensed.
@@ -541,9 +548,11 @@
 * [Emu Series](https://github.com/baaivision/Emu) - Generative Multimodal Models from BAAI
 * [Ferret](https://github.com/apple/ml-ferret) - Refer and Ground Anything Anywhere at Any Granularity
 * [OpenBMB/VisCPM](https://github.com/OpenBMB/VisCPM) - 基于CPM基础模型的中英双语多模态大模型系列
+* [MGM](https://github.com/dvlab-research/MGM) - Mini-Gemini: Mining the Potential of Multi-modality Vision Language Models
 
 ### 端侧大模型
 
+* [面壁智能](https://modelbest.cn/)
 * [MiniCPM：揭示端侧大语言模型的无限潜力](https://shengdinghu.notion.site/MiniCPM-c805a17c5c8046398914e47f0542095a)
     * [OpenBMB/MiniCPM](https://github.com/OpenBMB/MiniCPM)
     * [OpenBMB/MiniCPM-V](https://github.com/OpenBMB/MiniCPM-V) - A GPT-4V Level MLLM for Single Image, Multi Image and Video on Your Phone
@@ -634,10 +643,13 @@
 * [Coze](https://www.coze.com/home) - a next-generation AI Bot development platform
 * [SkyAgents](https://model-platform.tiangong.cn/) - 天工开放平台
 * [302.AI](https://302.ai/) - 企业级AI应用平台，按用量付费，开箱即用，开源生态
+* [Manus](https://manus.im/)
+* [Genspark](https://www.genspark.ai/) - 重新构想搜索。欢迎使用Agentic引擎。
 
 ### RAG
 
-* [infiniflow/ragflow](https://github.com/infiniflow/ragflow) - an open-source RAG (Retrieval-Augmented Generation) engine based on deep document understanding.
+* [RAGFlow](https://github.com/infiniflow/ragflow) - an open-source RAG engine based on deep document understanding.
+* [GraphRAG](https://github.com/microsoft/graphrag) - A modular graph-based Retrieval-Augmented Generation (RAG) system
 
 ### 工作流
 
@@ -646,6 +658,17 @@
 * [向量脉络 VectorVein](https://github.com/AndersonBY/vector-vein)
 * [ChatFlow](https://github.com/prompt-engineering/chat-flow)
 * [Questflow](https://www.questflow.ai/) - Build AI agents for workflow automation with no-code
+
+### 自动化
+
+* [Zapier](https://zapier.com/) - Automation that moves you forward
+* [Activepieces](https://www.activepieces.com/) - AI-first automation for every team
+    * [Github - activepieces/activepieces](https://github.com/activepieces/activepieces)
+* [n8n](https://github.com/n8n-io/n8n) - Free and source-available fair-code licensed workflow automation tool. Easily automate tasks across different services.
+* [IFTTT](https://ifttt.com/) - Automate business & home
+* [Pipedream](https://github.com/PipedreamHQ/pipedream) - Connect APIs, remarkably fast. Free for developers.
+* [集简云](https://www.jijyun.cn/) - 软件集成可以如此简单
+* [腾讯轻联](https://qinglian.tencent.com/) - 零代码应用集成与数据集成平台
 
 ### Agent
 
@@ -677,6 +700,12 @@
 * [ChatDev](https://github.com/OpenBMB/ChatDev) - Communicative Agents for Software Development
 * [CrewAI](https://github.com/joaomdmoura/crewai) - Framework for orchestrating role-playing, autonomous AI agents.
 
+### 协议
+
+* [MCP](https://github.com/modelcontextprotocol) - A protocol for seamless integration between LLM applications and external data sources
+    * [GitHub - liaokongVFX/MCP-Chinese-Getting-Started-Guide](https://github.com/liaokongVFX/MCP-Chinese-Getting-Started-Guide) - Model Context Protocol(MCP) 编程极速入门
+* [A2A](https://github.com/google/A2A) - An open protocol enabling communication and interoperability between opaque agentic applications.
+
 ### RPA
 
 * [TagUI](https://github.com/aisingapore/TagUI) - Free RPA tool by AI Singapore
@@ -687,6 +716,7 @@
 
 ### Web UI
 
+* [Cherry Studio](https://github.com/CherryHQ/cherry-studio) - a desktop client that supports for multiple LLM providers. Support deepseek-r1
 * [ChatWise](https://chatwise.app/) - The fastest AI chatbot for ChatGPT, DeepSeek, Claude, Gemini and Llama
 * [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键拥有你自己的跨平台 ChatGPT/Gemini 应用。
 * [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
