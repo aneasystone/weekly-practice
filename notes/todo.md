@@ -43,6 +43,12 @@
 * [Using LangSmith to Support Fine-tuning](https://blog.langchain.dev/using-langsmith-to-support-fine-tuning-of-open-source-llms/)
 * [用开源项目，你也能训练自己的 AI 语音模型](https://sspai.com/post/83487)
 
+### 模型量化
+
+* [模型量化与量化在LLM中的应用](https://my.oschina.net/u/5783135/blog/11066139)
+* [「模型量化技术」可视化指南：A Visual Guide to Quantization](https://xie.infoq.cn/article/46068541f35de5382cda6ed9f)
+* [Language Model Quantization Explained](https://cobusgreyling.medium.com/language-model-quantization-explained-ef3d86e655fa)
+
 ### 模型评测
 
 * [Sharing LangSmith Benchmarks](https://blog.langchain.dev/public-langsmith-benchmarks/)
@@ -99,11 +105,6 @@
 * [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
 * [novicezk/midjourney-proxy](https://github.com/novicezk/midjourney-proxy) - 代理 MidJourney 的discord频道，实现api形式调用AI绘图
 
-### RAG
-
-* [LLM之RAG实战（三十）| 探索RAG语义分块策略](https://mp.weixin.qq.com/s/sT7mjAFVbWg5-_CTJPqxkw)
-* [Advanced RAG Retrieval Strategy: Embedded Tables](https://ai.gopubby.com/advanced-rag-retrieval-strategy-embedded-tables-fdb3e44003a5)
-
 ### Spring AI
 
 * [Spring AI 1.0.0 M1 released](https://spring.io/blog/2024/05/30/spring-ai-1-0-0-m1-released)
@@ -127,12 +128,20 @@
 * [A Guide to Structured Output in Spring AI](https://www.baeldung.com/spring-artificial-intelligence-structure-output)
 * [Spring AI Embraces OpenAI's Structured Outputs: Enhancing JSON Response Reliability](https://spring.io/blog/2024/08/09/spring-ai-embraces-openais-structured-outputs-enhancing-json-response)
 
-#### RAG
+#### Multimodality
+
+* [Multimodality and Large Multimodal Models (LMMs)](https://huyenchip.com/2023/10/10/multimodal.html)
+* [Spring AI - Multimodality - Orbis Sensualium Pictus](https://spring.io/blog/2024/04/19/spring-ai-multimodality-orbis-sensualium-pictus)
+* [Audio Multimodality: Expanding AI Interaction with Spring AI and OpenAI](https://spring.io/blog/2024/12/05/spring-ai-audio-modality)
+
+### RAG
 
 * [Building a RAG application with Redis and Spring AI](https://redis.io/blog/building-a-rag-application-with-redis-and-spring-ai/)
 * [Create a RAG (Retrieval Augmented Generation) Application with Redis and Spring AI](https://www.baeldung.com/spring-ai-redis-rag-app)
 * [Spring AI, Llama 3 and pgvector: bRAGging rights!](https://dev.to/mcadariu/springai-llama3-and-pgvector-bragging-rights-2n8o)
 * [使用Llama3和Ollama来增强RAG - Java译站](https://it.deepinmind.com/llm/2024/05/07/improved-rag-with-llama3-and-ollama.html)
+* [LLM之RAG实战（三十）| 探索RAG语义分块策略](https://mp.weixin.qq.com/s/sT7mjAFVbWg5-_CTJPqxkw)
+* [Advanced RAG Retrieval Strategy: Embedded Tables](https://ai.gopubby.com/advanced-rag-retrieval-strategy-embedded-tables-fdb3e44003a5)
 
 #### RAGFlow
 
@@ -157,12 +166,6 @@
 * [NLTK vs LLM：GraphRAG实体提取方法深度大比](https://mp.weixin.qq.com/s/OjGv-7p41smBm4W5c3cj5g)
 * [The GraphRAG Manifesto: 为生成式 AI 增加知识 - 图数据库与分析 [译] | 宝玉的分享](https://baoyu.io/translations/rag/the-graphrag-manifesto-adding-knowledge-to-genai)
 
-#### Multimodality
-
-* [Multimodality and Large Multimodal Models (LMMs)](https://huyenchip.com/2023/10/10/multimodal.html)
-* [Spring AI - Multimodality - Orbis Sensualium Pictus](https://spring.io/blog/2024/04/19/spring-ai-multimodality-orbis-sensualium-pictus)
-* [Audio Multimodality: Expanding AI Interaction with Spring AI and OpenAI](https://spring.io/blog/2024/12/05/spring-ai-audio-modality)
-
 #### Multimodal RAG
 
 * [Nomic multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/nomic_multimodal_rag.ipynb)
@@ -171,6 +174,18 @@
 * [Multi-Modal Agentic Applications ](https://cobusgreyling.medium.com/multi-modal-agentic-applications-4a15ab0c0bf6)
 * [OmAgent: Build multimodal language agents for fast prototype and production](https://github.com/om-ai-lab/OmAgent)
 * [Cooking with AI: Building a Smart Multimodal Recipe Recommender using Qdrant, LlamaIndex, and Google Gemini](https://medium.com/@benitomartin/cooking-with-ai-building-a-smart-multimodal-recipe-recommender-using-qdrant-llamaindex-and-2d6d1fa6566c)
+* [Harnessing GPT-4o’s Vision for Advanced Search: Building Image Embeddings with Qdrant](https://towardsdev.com/harnessing-gpt-4os-vision-for-advanced-search-building-image-embeddings-with-qdrant-5dd887cf40b5)
+
+#### LlamaIndex Workflows
+
+* [Introduction to workflows - LlamaIndex](https://docs.llamaindex.ai/en/stable/understanding/workflows/)
+* [Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/)
+* [Workflow for a ReAct Agent](https://docs.llamaindex.ai/en/stable/examples/workflow/react_agent/)
+* [Introducing workflows beta: a new way to create complex AI applications with LlamaIndex](https://www.llamaindex.ai/blog/introducing-workflows-beta-a-new-way-to-create-complex-ai-applications-with-llamaindex)
+* [Implementing Advanced RAG using LlamaIndex Workflow and Groq](https://medium.com/the-ai-forum/implementing-advanced-rag-using-llamaindex-workflow-and-groq-bd6047299fa5)
+* [Exploring LlamaIndex Workflows: A Step-by-Step Guide for AI Engineers](https://farzzy.hashnode.dev/exploring-llamaindex-workflows-a-step-by-step-guide-to-building-a-rag-system-with-azure-ai-search-and-azure-openai)
+* [Easy RAG workflows with LlamaIndex Query Pipelines | Building Text-to-SQL from Scratch using DAGs in LlamaIndex](https://medium.com/rahasak/llamaindex-query-pipelines-tutorial-text-to-sql-example-d859ed90b87c)
+
 
 ### MCP
 
@@ -185,6 +200,12 @@
 
 * [Announcing the Agent2Agent Protocol (A2A) - Google Developers Blog](https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/)
 * [简明理解 Google A2A 协议：这不是 MCP！](https://mp.weixin.qq.com/s/6nCvH9iVX_BXb7EjOGYzEw)
+
+### Embedding & Reranking
+
+* [RAG经验分享：如何选对Embedding模型？](https://mp.weixin.qq.com/s/2SdFvJuWY78Or7T3kXG1_A)
+* [Training and Finetuning Reranker Models with Sentence Transformers v4](https://huggingface.co/blog/train-reranker)
+* [Optimizing RAG, Fine-tuning Embedding and Reranking models with your Data with Llamaindex](https://medium.com/rahasak/optimizing-rag-supervised-embeddings-reranking-with-your-data-with-llamaindex-88344ff89da7)
 
 ## Java
 
@@ -256,6 +277,11 @@
 * [A Comprehensive guide to Spring Boot 3.2 with Java 21, Virtual Threads, Spring Security, PostgreSQL, Flyway, Caching, Micrometer, Opentelemetry, JUnit 5, RabbitMQ, Keycloak Integration, and More! ](https://medium.com/@jojoooo/exploring-a-base-spring-boot-application-with-java-21-virtual-thread-spring-security-flyway-c0fde13c1eca#551c)
 * [All together now: Spring Boot 3.2, GraalVM native images, Java 21, and virtual threads with Project Loom](https://spring.io/blog/2023/09/09/all-together-now-spring-boot-3-2-graalvm-native-images-java-21-and-virtual)
 
+#### CDS
+
+* [How to use Class Data Sharing with Spring Boot](https://bell-sw.com/blog/how-to-use-cds-with-spring-boot-applications/)
+* [Incredible performance increase in Spring Boot 3 applications with CDS](https://halilural5.medium.com/incredible-performance-increase-in-spring-boot-applications-with-cds-5022ff81948f)
+
 ### Spring Modulith
 
 * [Introducing Spring Modulith](https://spring.io/blog/2022/10/21/introducing-spring-modulith)
@@ -271,6 +297,10 @@
 * [How to Implement Simple Authentication in Spring Boot?](https://www.tutorialspoint.com/how-to-implement-simple-authentication-in-spring-boot)
 * [Securing Spring Boot API With API Key and Secret](https://www.baeldung.com/spring-boot-api-key-secret)
 * [Spring Boot 3.1中如何整合Spring Security和Keycloak](https://blog.didispace.com/spring-boot-3-keycloak-21/)
+
+### Spring Web
+
+* [Hypermedia and Browser Enhancement](https://spring.io/blog/2024/03/15/hypermedia-and-browser-enhancement)
 
 ### Reactor 响应式编程
 
@@ -442,16 +472,6 @@
 
 * [Java 表达式引擎选型调研分析](https://my.oschina.net/u/4090830/blog/10315584)
 
-## Docker
-
-* [使用 Go 和 Linux Kernel 技术探究容器化原理](https://cloud.tencent.com/developer/article/2018443)
-* [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
-
-### 容器运行时
-
-* [Open-sourcing gVisor, a sandboxed container runtime](https://cloud.google.com/blog/products/identity-security/open-sourcing-gvisor-a-sandboxed-container-runtime)
-* [以沙箱的方式运行容器:安全容器 gvisor](https://www.cnblogs.com/renshengdezheli/p/18258180)
-
 ## Kubernetes
 
 ### 部署教程
@@ -553,14 +573,22 @@
 * [应用现代化中的弹性伸缩](https://www.kubesphere.io/zh/blogs/building-resilient-and-scalable-systems/)
 * [用 KEDA 根据工作负载进行快速扩容](https://blog.fleeto.us/post/way-to-keda/)
 
-### Kubernetes 网络
+### 容器运行时
 
+* [使用 Go 和 Linux Kernel 技术探究容器化原理](https://cloud.tencent.com/developer/article/2018443)
+* [Open-sourcing gVisor, a sandboxed container runtime](https://cloud.google.com/blog/products/identity-security/open-sourcing-gvisor-a-sandboxed-container-runtime)
+* [以沙箱的方式运行容器:安全容器 gvisor](https://www.cnblogs.com/renshengdezheli/p/18258180)
+
+### 容器网络
+
+* [使用 Linux 网络虚拟化技术探究容器网络原理](https://cloud.tencent.com/developer/article/2171514)
 * [浅谈 K8s Pod IP 分配机制](https://mp.weixin.qq.com/s/yrg3BkDIxDTa5p45Gsbhww)
 * [16 张图硬核讲解 Kubernetes 网络模型](https://zhuanlan.zhihu.com/p/555185137)
 * [深入理解 kubernetes 网络原理](https://www.zhihu.com/column/c_1414266494658650112)
 * [CNCF 宣布 Cilium 正式毕业](https://www.infoq.cn/article/PMaq9IdtYBhPp3hrRqUt)
 * [Kubernetes网络排错指南（万字长文）](https://mp.weixin.qq.com/s/Beb4QsfiR12bXLsG9VGCFw)
 * [记一次KUBERNETES/DOCKER网络排障](https://coolshell.cn/articles/18654.html)
+* [深入解读 CNI：容器网络接口](https://jimmysong.io/blog/cni-deep-dive/)
 
 ### Service Mesh
 
@@ -597,6 +625,12 @@
 
 * [15 年了，我们到底怎样才能用好 Serverless？](https://my.oschina.net/u/4526289/blog/8695856)
 * [OpenFunction：从 0 到 1，打造新一代开源函数计算平台](https://kubesphere.io/zh/blogs/faas-openfunction/)
+
+### GPU
+
+* [Accelerating Machine Learning with GPUs in Kubernetes using the NVIDIA Device Plugin](https://superorbital.io/blog/gpu-kubernetes-nvidia-device-plugin/)
+* [Advanced Usage of the NVIDIA Device Plugin](https://superorbital.io/blog/gpu-kubernetes-nvidia-advanced-troubleshooting/)
+* [Tackling GPU Underutilization in Kubernetes Runtimes](https://superorbital.io/blog/gpu-kubernetes-underutilization/)
 
 ### eBPF
 
@@ -709,6 +743,7 @@
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（上册）](https://blog.csdn.net/l569590478/article/details/128665558)
 * [「系统性能调优实战」终极关注应用系统性能调优及原理剖析（下册）](https://blog.csdn.net/l569590478/article/details/131500857)
 * [Linux 网络延迟故障排查](https://z.itpub.net/article/detail/B4C1A280915C008AFE190AACAB45A5CB)
+* [Linux性能优化实战-网络丢包问题分析](https://zhuanlan.zhihu.com/p/569410285)
 * [生产Nginx现大量TIME-WAIT，连接耗尽，该如何处理？](https://mp.weixin.qq.com/s/U3ukNQOmsKmfHI20TFSxoQ)
 * [如何分析系统的负载？生产排错必备技能](https://www.yuanjava.cn/posts/load-average/)
 * [什么等等？ I/O Wait ≠ I/O 瓶颈？](https://www.ebpf.top/post/cpu_io_wait/)
@@ -724,6 +759,7 @@
 * [从石器时代到成为“神”，一文讲透 eBPF 技术发展演进史](https://www.infoq.cn/article/Y8NP88aKpFBtG7H2kK4a)
 * [万字长文解读 Linux 内核追踪机制](https://www.infoq.cn/article/jH1lRuqQTi3gjvs5Dh6b)
 * [eBPF 动手实践系列一：解构内核源码 eBPF 样例编译过程](https://my.oschina.net/u/5583868/blog/8670498)
+* [eBPF 零侵扰分布式追踪的进展和探索](https://my.oschina.net/u/3681970/blog/11048275)
 
 ### 系统架构
 
@@ -743,6 +779,17 @@
 * [How to Compile Java to WASM (Web Assembly) | Baeldung](https://www.baeldung.com/java-wasm-web-assembly)
 * [Java 极客眼中的 WebAssembly](https://www.infoq.cn/article/H9VRjX3X1MeXqImEwI6J)
 * [WebAssembly 助力云原生：APISIX 如何借助 Wasm 插件实现扩展功能？](https://apisix.apache.org/zh/blog/2023/03/30/what-is-wasm-and-how-does-apache-apisix-support-it/)
+
+#### Wasm in Docker
+
+* [为什么 Docker 要增加 WebAssembly 运行时？](https://jimmysong.io/blog/why-docker-support-wasm/)
+* [Docker 多平台构建指南：构建 WebAssembly 镜像](https://jimmysong.io/blog/docker-multi-platform-image-building/)
+
+#### Wasm in Kubernetes
+
+* [WebAssembly on Kubernetes](https://www.loft.sh/blog/webassembly-on-kubernetes)
+* [WebAssembly on Kubernetes: from containers to Wasm (part 01)](https://www.cncf.io/blog/2024/03/12/webassembly-on-kubernetes-from-containers-to-wasm-part-01/)
+* [WebAssembly on Kubernetes: the practice guide (part 02)](https://www.cncf.io/blog/2024/03/28/webassembly-on-kubernetes-the-practice-guide-part-02/)
 
 #### Wasm in Dapr
 
@@ -773,6 +820,14 @@
 * [微服务架构下网关的技术选型](https://www.jianshu.com/p/97324f7f3134)
 * [Active Health Check strategies with Spring Cloud Gateway](https://spring.io/blog/2023/07/05/active-health-check-strategies-with-spring-cloud-gateway)
 * [Evaluating Apache APISIX vs. Spring Cloud Gateway](https://blog.frankel.ch/spring-cloud-gateway-apache-apisix/)
+
+#### APISIX
+
+* [Differentiating rate limits in Apache APISIX](https://blog.frankel.ch/different-rate-limits-apisix/)
+* [Advanced URL rewriting with Apache APISIX](https://blog.frankel.ch/advanced-url-rewrite-apisix/) 
+* [Five ways to pass parameters to Apache APISIX](https://blog.frankel.ch/pass-parameters-apisix/)
+* [后端新手如何从 0 到 1 打造一款 Apache APISIX 插件 | 支流科技](https://www.apiseven.com/blog/file-logger)
+* [轻松实现定制化需求：Apache APISIX 和 Node-Red 的联合利用 | 支流科技](https://www.apiseven.com/blog/apache-apisix-and-node-red)
 
 ### Go 学习笔记
 

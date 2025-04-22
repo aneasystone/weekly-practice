@@ -26,9 +26,23 @@
 * [Kimi Chat](https://kimi.moonshot.cn) - Moonshot AI 出品的智能助手
 * [Groq](https://groq.com/) - Fastest AI Inference
 
-#### 客户端
+#### Desktop Client
 
+* [ChatWise](https://chatwise.app/) - The fastest AI chatbot for ChatGPT, DeepSeek, Claude, Gemini and Llama
+* [Cherry Studio 官方网站](https://cherry-ai.com/) - 全能的AI助手
+    * [Github - CherryHQ/cherry-studio](https://github.com/CherryHQ/cherry-studio) - a desktop client that supports for multiple LLM providers. Support deepseek-r1
 * [Chatbox AI](https://chatboxai.app/zh) - 办公学习的 AI 好助手，全平台 AI 客户端，官方免费下载
+* [NVIDIA ChatRTX](https://www.nvidia.com/en-us/ai-on-rtx/chatrtx/)
+
+#### Web UI
+
+* [Lobe Chat](https://github.com/lobehub/lobe-chat) - an open-source, modern-design ChatGPT/LLMs UI/Chat Framework. Supports speech-synthesis, multi-modal, and extensible plugin system. One-click FREE deployment of your private ChatGPT/Gemini/Ollama chat application.
+* [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键拥有你自己的跨平台 ChatGPT/Gemini 应用。
+* [Github - huggingface/chat-ui](https://github.com/huggingface/chat-ui) - Open source codebase powering the HuggingChat app
+* [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
+* [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
+* [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
+* [GeminiProChat](https://github.com/babaohuang/GeminiProChat) - Minimal web UI for GeminiPro.
 
 #### 聚合聊天
 
@@ -45,6 +59,12 @@
 
 * [Shaunwei/RealChar](https://github.com/Shaunwei/RealChar) - Create, Customize and Talk to your AI Character/Companion in Realtime (All in One Codebase!).
 
+#### 智能搜索
+
+* [Perplexity AI](https://www.perplexity.ai/)
+* [天工 AI 搜索](https://search.tiangong.cn/)
+* [秘塔 AI 搜索](https://metaso.cn/)
+
 #### 学习助手
 
 * [JushBJJ/Mr.-Ranedeer-AI-Tutor](https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor) - A GPT-4 AI Tutor Prompt for customizable personalized learning experiences.
@@ -59,15 +79,16 @@
 * [Cursor](https://www.cursor.so/) - Write, edit, and chat about your code with a powerful AI
 * [Amazon CodeWhisperer](https://aws.amazon.com/cn/codewhisperer/)
 * [Windsurf (formerly Codeium)](https://windsurf.com/) - The most powerful AI Code Editor
+* [Cline](https://github.com/cline/cline) - Autonomous coding agent right in your IDE, capable of creating/editing files, executing commands, using the browser, and more with your permission every step of the way.
+* [Roo Code (prev. Roo Cline)](https://github.com/RooVetGit/Roo-Code) - gives you a whole dev team of AI agents in your code editor.
 * [Tabnine](https://www.tabnine.com/) - AI assistant for software developers
 * [AlphaCode](https://alphacode.deepmind.com/)
 * [TabbyML/tabby](https://github.com/TabbyML/tabby) - Self-hosted AI coding assistant
 * [ravenscroftj/turbopilot](https://github.com/ravenscroftj/turbopilot) - Turbopilot is an open source large-language-model based code completion engine that runs locally on CPU
-* [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [bloop](https://bloop.ai/) - Find Code. Fast.
 * [Rift](https://github.com/morph-labs/rift) - an AI-native language server for your personal AI software engineer
 * [Baidu Comate](https://comate.baidu.com/) - Coding Mate Powered by AI
-* [Raccoon 代码小浣熊](https://raccoon.sensetime.com/code) - 商汤科技
+* [Raccoon 代码小浣熊](https://xiaohuanxiong.com/code) - 商汤科技
 * [Devin](https://www.cognition.ai/)
 * [Trae](https://www.trae.ai/) - Ship Faster with Trae
 * [Augment Code](https://www.augmentcode.com/) – Developer AI for real work
@@ -80,6 +101,7 @@
 
 #### 代码大模型
 
+* [facebookresearch/codellama](https://github.com/facebookresearch/codellama) - Inference code for CodeLlama models
 * [StarCoder](https://github.com/bigcode-project/starcoder)
 * [THUDM/CodeGeeX](https://github.com/THUDM/CodeGeeX) - An Open Multilingual Code Generation Model
 * [THUDM/CodeGeeX2](https://github.com/THUDM/CodeGeeX2) - A More Powerful Multilingual Code Generation Model
@@ -87,7 +109,6 @@
 * [CodeFuse](https://codefuse.alipay.com/welcome/open) - 蚂蚁自研的代码生成专属大模型
     * [CodeFuse-MFTCoder](https://github.com/codefuse-ai/MFTCoder) - 多任务微调代码大模型
 * [AlphaCodium](https://github.com/Codium-ai/AlphaCodium) - Code Generation with AlphaCodium: From Prompt Engineering to Flow Engineering
-* [Raccoon 代码小浣熊](https://xiaohuanxiong.com/code) - 商汤科技
 
 #### 调试助手
 
@@ -103,6 +124,7 @@
 
 #### 前端开发
 
+* [Llama Coder](https://github.com/Nutlope/llamacoder) - Open source Claude Artifacts – built with Llama 3.1 405B
 * [Quest AI](https://www.quest.ai/) - Easiest way to build React Apps
 
 #### 代码转换
@@ -188,7 +210,7 @@
 * [zylon-ai/private-gpt](https://github.com/zylon-ai/private-gpt) - Interact with your documents using the power of GPT, 100% privately, no data leaks
 * [PDF GPT](https://github.com/bhaskatripathi/pdfGPT) - allows you to chat with the contents of your PDF file by using GPT capabilities.
 * [GenAI Stack](https://github.com/docker/genai-stack) - Langchain + Docker + Neo4j
-* [FastGPT](https://fastgpt.run/) - 基于 LLM 大模型的 AI 知识库构建平台
+* [FastGPT](https://tryfastgpt.ai/) - 基于 LLM 大模型的 AI 知识库构建平台
 * [QAnything](https://github.com/netease-youdao/QAnything) - Question and Answer based on Anything.
 
 #### 网页助手
@@ -226,6 +248,8 @@
 
 #### 论文助手
 
+* [assafelovic/gpt-researcher](https://github.com/assafelovic/gpt-researcher) - LLM based autonomous agent that conducts deep local and web research on any topic and generates a long report with citations.
+* [stanford-oval/storm](https://github.com/stanford-oval/storm) - An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations.
 * [EssayKillerBrain/EssayKiller_V2](https://github.com/EssayKillerBrain/EssayKiller_V2) - 基于开源GPT2.0的初代创作型人工智能 | 可扩展、可进化
 * [binary-husky/chatgpt_academic](https://github.com/binary-husky/chatgpt_academic) - 科研工作专用ChatGPT拓展，特别优化学术Paper润色体验，支持自定义快捷按钮，支持自定义函数插件，支持markdown代码块表格显示，Tex公式双显示，新增Python/C++项目剖析/自译解功能，PDF/LaTex论文翻译/总结功能，兼容ChatGLM等本地模型
 
@@ -310,6 +334,10 @@
 
 ### 音视频助手
 
+#### 语音对话
+
+* [Qwen2-Audio](https://qwenlm.github.io/zh/blog/qwen2-audio/)
+
 #### 音乐创作
 
 * [Stable Audio](https://stability.ai/stable-audio) - Use generative AI to create music and sound effects.
@@ -328,12 +356,14 @@
 * [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Port of OpenAI's Whisper model in C/C++
 * [DELTA](https://github.com/didi/delta) - DELTA is a deep learning based natural language and speech processing platform. 
 * [Gladia](https://www.gladia.io/) - From audio to knowledge
+* [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) - Multilingual Voice Understanding Model
 
 #### 语音处理
 
 * [Ultimate Vocal Remover V5](https://ultimatevocalremover.com/) - The best vocal remover application on the internet, and it's totally free and open source!
 * [SevaSk/ecoute](https://github.com/SevaSk/ecoute) - Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox. 
 * [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) - 一个基于 VITS 的简单易用的变声框架
+* [Buzz](https://github.com/chidiwilliams/buzz) - Buzz transcribes and translates audio offline on your personal computer. Powered by OpenAI's Whisper.
 
 #### 视频动画
 
@@ -368,6 +398,10 @@
 * [D-ID](https://www.d-id.com/) - The Digital People Platform
 * [TheRamU/Fay](https://github.com/TheRamU/Fay) - 包含Fay控制器及数字人模型
 * [HeyGen](https://www.heygen.com/) - AI Video Generator
+* [V-Express](https://github.com/tencent-ailab/V-Express) - generate a talking head video under the control of a reference image, an audio, and a sequence of V-Kps images.
+* [AniPortrait](https://github.com/Zejun-Yang/AniPortrait) - Audio-Driven Synthesis of Photorealistic Portrait Animation
+* [EchoMimic](https://github.com/antgroup/echomimic) - Lifelike Audio-Driven Portrait Animations through Editable Landmark Conditioning
+* [Sonic](https://github.com/jixiaozhong/Sonic) - Shifting Focus to Global Audio Perception in Portrait Animation
 
 ### 机器人
 
@@ -392,6 +426,9 @@
 ### GPU 租用
 
 * [AutoDL 算力云](https://www.autodl.com/home) - 弹性、好用、省钱，租 GPU 就上 AutoDL
+* [潞晨云](https://cloud.luchentech.com/) - 省钱、弹性、稳定 | 租GPU算力
+* [Free QWQ](https://qwq.aigpu.cn/#suanleme) - 免费分布式 AI 算力平台
+* [ZeroGPU Explorers](https://huggingface.co/zero-gpu-explorers)
 
 ## 大语言模型
 
@@ -455,6 +492,7 @@
 * [DeepSeek](https://www.deepseek.com/) - 深度求索
     * [DeepSeek LLM](https://github.com/deepseek-ai/DeepSeek-LLM)
     * [DeepSeek MoE](https://github.com/deepseek-ai/DeepSeek-MoE)
+    * [DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1)
 * [ChatLM-Chinese-0.2B](https://huggingface.co/charent/ChatLM-mini-Chinese) - 中文对话0.2B小模型
 * [Orion-14B](https://github.com/OrionStarAI/Orion) - 猎户星空
 * [OpenBMB](https://www.openbmb.cn/home) - 面壁智能
@@ -575,6 +613,8 @@
 * [LM Studio](https://lmstudio.ai/) - Discover, download, and run local LLMs
 * [Ray](https://github.com/ray-project/ray) - Ray is an AI compute engine. Ray consists of a core distributed runtime and a set of AI Libraries for accelerating ML workloads.
 * [Inferless](https://docs.inferless.com/introduction/introduction) - the go-to platform for effortlessly deploying machine learning models in the cloud
+* [LocalAI](https://github.com/mudler/LocalAI) - The free, Open Source alternative to OpenAI, Claude and others. Self-hosted and local-first. Drop-in replacement for OpenAI, running on consumer-grade hardware. No GPU required. Runs gguf, transformers, diffusers and many more models architectures. Features: Generate Text, Audio, Video, Images, Voice Cloning, Distributed, P2P inference
+* [NVIDIA NIM](https://www.nvidia.com/en-us/ai-data-science/products/nim-microservices/)
 
 ### 模型网关
 
@@ -583,9 +623,11 @@
 
 ### 模型训练 & 微调
 
+* [CoreNet](https://github.com/apple/corenet) - A library for training deep neural networks
 * [OpenGVLab/LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapter) - Fine-tuning LLaMA to follow Instructions within 1 Hour and 1.2M Parameters
 * [ColossalAI](https://github.com/hpcaitech/ColossalAI) - Making large AI models cheaper, faster and more accessible
 * [Ludwig](https://github.com/ludwig-ai/ludwig) - Low-code framework for building custom LLMs, neural networks, and other AI models
+* [unsloth](https://github.com/unslothai/unsloth) - Finetune Llama 4, DeepSeek-R1, Gemma 3 & Reasoning LLMs 2x faster with 70% less memory!
 * [DLLXW/baby-llama2-chinese](https://github.com/DLLXW/baby-llama2-chinese) - 从头预训练+SFT一个小参数量的中文LLaMa2
 
 ### 模型评估
@@ -627,11 +669,17 @@
 * [Langfuse](https://github.com/langfuse/langfuse) - Open source LLM engineering platform. Observability, metrics, evals, prompt management
 * [Towhee](https://github.com/towhee-io/towhee) - a framework that is dedicated to making neural data processing pipelines simple and fast.
 * [LLMStack](https://llmstack.ai/) - Open-source platform to build AI Agents, workflows and applications with your data
+
+#### Java
+
 * [Spring AI](https://github.com/spring-projects/spring-ai) - An Application Framework for AI Engineering
+* [LangChain4j](https://github.com/langchain4j)
 
 ### LLMOps
 
 * [LangSmith](https://www.langchain.com/langsmith) - Get your LLM app from prototype to production
+* [Laminar](https://lmnr.ai/) - The open-source platform for tracing and evaluating AI applications.
+* [OpenLLMetry](https://github.com/traceloop/openllmetry) - Open-source observability for your LLM application, based on OpenTelemetry
 * [Prompt flow](https://github.com/microsoft/promptflow) - Build high-quality LLM apps - from prototyping, testing to production deployment and monitoring.
 
 ### 大模型应用产品
@@ -641,6 +689,7 @@
 * [OpenGPTs](https://github.com/langchain-ai/opengpts) - open source OpenAI's GPTs and Assistants API
 * [灵境矩阵](https://agents.baidu.com/) - 文心大模型智能体平台
 * [Coze](https://www.coze.com/home) - a next-generation AI Bot development platform
+    * [FastGPT、Dify、Coze横评详细版](https://qqvyz9xr7at.feishu.cn/docx/F70DdchQUofFE1xRLlecc1NKnFe)
 * [SkyAgents](https://model-platform.tiangong.cn/) - 天工开放平台
 * [302.AI](https://302.ai/) - 企业级AI应用平台，按用量付费，开箱即用，开源生态
 * [Manus](https://manus.im/)
@@ -699,6 +748,7 @@
 * [AgentVerse](https://github.com/OpenBMB/AgentVerse) - is designed to facilitate the deployment of multiple LLM-based agents in various applications, which primarily provides two frameworks: task-solving and simulation
 * [ChatDev](https://github.com/OpenBMB/ChatDev) - Communicative Agents for Software Development
 * [CrewAI](https://github.com/joaomdmoura/crewai) - Framework for orchestrating role-playing, autonomous AI agents.
+* [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) - A lightweight, powerful framework for multi-agent workflows
 
 ### 协议
 
@@ -714,17 +764,11 @@
 * [Robocorp](https://robocorp.com/) - Supercharge Python for Automation and Integrations
 * [OpenBots](https://openbots.ai/) - First Enterprise RPA With Zero Bot Licensing
 
-### Web UI
+#### 浏览器
 
-* [Cherry Studio](https://github.com/CherryHQ/cherry-studio) - a desktop client that supports for multiple LLM providers. Support deepseek-r1
-* [ChatWise](https://chatwise.app/) - The fastest AI chatbot for ChatGPT, DeepSeek, Claude, Gemini and Llama
-* [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) - 一键拥有你自己的跨平台 ChatGPT/Gemini 应用。
-* [gradio-app/gradio](https://github.com/gradio-app/gradio) - Create UIs for your machine learning model in Python in 3 minutes
-* [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui) - A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
-* [ChatGPT-Admin-Web](https://github.com/AprilNEA/ChatGPT-Admin-Web) - 带有用户管理和后台管理系统的 ChatGPT WebUI
-* [Lobe Chat](https://github.com/lobehub/lobe-chat) - an open-source, modern-design ChatGPT/LLMs UI/Chat Framework. Supports speech-synthesis, multi-modal, and extensible plugin system. One-click FREE deployment of your private ChatGPT/Gemini/Ollama chat application.
-* [GeminiProChat](https://github.com/babaohuang/GeminiProChat) - Minimal web UI for GeminiPro.
-* [Github - huggingface/chat-ui](https://github.com/huggingface/chat-ui) - Open source codebase powering the HuggingChat app
+* [Fellou AI](https://fellou.ai/) - AI Agentic Browser for Deep Search & Automation
+* [Browser-use](https://github.com/browser-use/browser-use) - Make websites accessible for AI agents
+* [Nanobrowser](https://github.com/nanobrowser/nanobrowser) - Open-Source Chrome extension for AI-powered web automation.
 
 ### 开源硬件
 
@@ -797,12 +841,21 @@
 
 * [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings)
 * [Cohere Embed](https://cohere.com/embed) - The Leading Text Representation Language Model
-* [Cohere Rerank](https://cohere.com/rerank) - Optimize Your Search With One Line of Code
+* [Mixedbread Embedding Models](https://www.mixedbread.com/docs/embeddings/models)
 * [Voyage](https://www.voyageai.com/) - Voyage AI provides cutting-edge embedding/vectorizations models.
+* [BAAI/BGE](https://huggingface.co/collections/BAAI/bge-66797a74476eb1f085c7446d) - 北京智源人工智能研究院
 * [FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) - Dense Retrieval and Retrieval-augmented LLMs
 * [GloVe](https://nlp.stanford.edu/projects/glove/) - Global Vectors for Word Representation
 * [BERT](https://github.com/google-research/bert)
 * [SentenceTransformers](https://www.sbert.net/)
+
+### Rerank
+
+* [Cohere Rerank](https://cohere.com/rerank) - Optimize Your Search With One Line of Code
+* [Jina Reranker](https://jina.ai/reranker/)
+* [Mixedbread Reranking Models](https://www.mixedbread.com/docs/reranking/models)
+* [RankLLM](https://github.com/castorini/rank_llm) - a Python toolkit for reproducible information retrieval research using rerankers, with a focus on listwise reranking.
+* [RankGPT](https://github.com/sunnweiwei/RankGPT) - LLMs as Re-Ranking Agent
 
 ### ANN
 
@@ -815,7 +868,11 @@
 
 ## 记忆管理
 
-* [MemGPT](https://github.com/cpacker/MemGPT) - Teaching LLMs memory management for unbounded context
+* [Letta (formerly MemGPT)](https://github.com/letta-ai/letta) - the stateful agents framework with memory, reasoning, and context management.
 * [GPTCache](https://github.com/zilliztech/GPTCache) - A Library for Creating Semantic Cache for LLM Queries
 * [mem0ai/mem0](https://github.com/mem0ai/mem0) - The Memory layer for your AI apps
     * https://docs.mem0.ai/overview
+
+## 大模型测评
+
+* [Humanity's Last Exam](https://agi.safe.ai/)
