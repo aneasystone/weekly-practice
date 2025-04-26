@@ -97,6 +97,7 @@
 
 * [LLM（廿二）：LLM 时代的 multi-agent 系统](https://zhuanlan.zhihu.com/p/665644399)
 * [CrewAI Unleashed: Future of AI Agent Teams](https://blog.langchain.dev/crewai-unleashed-future-of-ai-agent-teams/)
+* [微软Agent框架AutoGen论文及原理解读](https://mp.weixin.qq.com/s/HgdAn2Bp10T7jCf5nZhdkw)
 
 ### 文生图
 
@@ -331,6 +332,7 @@
 * [Java实现异步编程的8种方式](https://juejin.cn/post/7165147306688249870)
 * [Is CompletableFuture Non-blocking?](https://www.baeldung.com/java-completablefuture-non-blocking)
 * [CompletableFuture原理与实践-外卖商家端API的异步化](https://tech.meituan.com/2022/05/12/principles-and-practices-of-completablefuture.html)
+* [基本功 | 一文讲清多线程和多线程同步 - 美团技术团队](https://tech.meituan.com/2024/07/19/multi-threading-and-multi-thread-synchronization.html)
 
 ### Guava
 
