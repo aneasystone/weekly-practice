@@ -34,7 +34,7 @@
    - 大语言模型（LLM，Large language model）
    - 多模态大模型（LMM，Large multimodal model）
    - 推理大模型
-7. 机器人学
+7. [机器人学](./机器人.md)
    - 自动控制
    - 运动规划
    - 视觉导航

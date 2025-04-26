@@ -17,6 +17,8 @@
 * [Fuck You, Show Me The Prompt.](https://hamel.dev/blog/posts/prompt/)
 * [Prompt learning 教学[最终篇]](https://juejin.cn/post/7233031907293757501)
 * [Prompt learning 教学[基础篇]](https://blog.csdn.net/sinat_39620217/article/details/130619983)
+* [Few-shot prompting to improve tool-calling performance](https://blog.langchain.dev/few-shot-prompting-to-improve-tool-calling-performance/)
+* [Tree Of Thoughts Prompting (ToT)](https://cobusgreyling.medium.com/tree-of-thoughts-prompting-tot-08555b04123e)
 
 ### DSPy
 
@@ -105,6 +107,17 @@
 * [【AI绘画】AI又进化了，革命性突破](https://cuijiahua.com/blog/2023/02/ai-30.html)
 * [BigDL 教程：使用 Stable Diffusion 从文本生成你自己的图像](https://www.infoq.cn/article/sbYgeIQPwWH6q7DXvLsj)
 * [novicezk/midjourney-proxy](https://github.com/novicezk/midjourney-proxy) - 代理 MidJourney 的discord频道，实现api形式调用AI绘图
+
+### ComfyUI
+
+* [Getting Started - ComfyUI](https://docs.comfy.org/get_started/gettingstarted)
+* [Beginner's Guide to ComfyUI - Stable Diffusion Art](https://stable-diffusion-art.com/comfyui/)
+* [藏师傅手把手教你把实拍照片变成黑神话悟空风格的视频](https://mp.weixin.qq.com/s/i7WbOXQAC_v7gZUx_AvIsg)
+* [AI 画图真刺激，手把手教你如何用 ComfyUI 来画出刺激的图](https://mp.weixin.qq.com/s/hTVdQzTvz0lsW4TEQBY3AA)
+
+### 多模态
+
+* [使用 Dify 和 AI 大模型理解视频内容：Qwen 2 VL 72B - 苏洋博客](https://soulteary.com/2024/08/20/understanding-video-content-using-dify-and-ai-large-models-qwen-2-vl-72b.html)
 
 ### Spring AI
 
