@@ -34,6 +34,9 @@
    - 大语言模型（LLM，Large language model）
    - 多模态大模型（LMM，Large multimodal model）
    - 推理大模型
+   - [代码大模型](./代码大模型.md)
+   - [智能体](./智能体.md)
+   - [RAG](./RAG.md)
 7. [机器人学](./机器人.md)
    - 自动控制
    - 运动规划
