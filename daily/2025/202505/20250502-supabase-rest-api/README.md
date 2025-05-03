@@ -99,7 +99,8 @@ $ curl -X POST 'https://lsggedvvakgatnhfehlu.supabase.co/rest/v1/students' \
 获取满足条件的数据：
 
 ```
-$ curl -X GET 'https://lsggedvvakgatnhfehlu.supabase.co/rest/v1/students?id=eq.3' -H "apikey: <ANON_KEY>"
+$ curl -X GET 'https://lsggedvvakgatnhfehlu.supabase.co/rest/v1/students?id=eq.3' \
+    -H "apikey: <ANON_KEY>"
 ```
 
 其中 `id=eq.3` 是 PostgREST 特有的过滤器语法，表示查询 id 等于 3 的数据，它还支持更多的过滤器，如下图所示：
