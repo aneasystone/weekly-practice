@@ -41,7 +41,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 然后就可以通过 `supabase` 库的 `create_client` 方法创建客户端，访问和操作数据库了：
 
-```
+```python
 from supabase import create_client, Client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 response = (
@@ -58,7 +58,7 @@ Supabase Python SDK 提供了 `table` 方法来操作表，然后通过 `insert`
 
 **新增数据：**
 
-```
+```python
 response = (
     supabase.table("students")
     .insert({"name": "zhangsan", "age": 18})
@@ -68,7 +68,7 @@ response = (
 
 其中 `insert` 也可以接收一个列表，批量插入数据：
 
-```
+```python
 response = (
     supabase.table("students")
     .insert([
@@ -81,7 +81,7 @@ response = (
 
 **修改数据：**
 
-```
+```python
 response = (
     supabase.table("students")
     .update({"age": 20})
@@ -92,7 +92,7 @@ response = (
 
 Supabase 也提供了 `upsert` 方法，根据主键判断，如果数据不存在，则插入，如果存在，则更新：
 
-```
+```python
 response = (
     supabase.table("students")
     .upsert({"id": 15, "name": "zhangsan", "age": 20})
@@ -102,7 +102,7 @@ response = (
 
 **删除数据：**
 
-```
+```python
 response = (
     supabase.table("students")
     .delete()
@@ -113,7 +113,7 @@ response = (
 
 当有多个 id 需要删除时，可以使用 `in_` 方法批量删除：
 
-```
+```python
 response = (
     supabase.table("students")
     .delete()
@@ -124,7 +124,7 @@ response = (
 
 **查询数据：**
 
-```
+```python
 response = (
     supabase.table("students")
     .select("*")
@@ -134,7 +134,7 @@ response = (
 
 其中 `select("*")` 用于查询所有字段，也可以指定查询的字段：
 
-```
+```python
 response = (
     supabase.table("students")
     .select("name, age")
