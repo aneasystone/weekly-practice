@@ -65,7 +65,9 @@
 
 ### Code Interpreter
 
+* [ChatGPT 神器 Code Interpreter 终于开放，到底怎么用？这里有一份保姆级教程 | 机器之心](https://www.jiqizhixin.com/articles/2023-07-09-2)
 * [How to use ChatGPT’s new “Code Interpreter” feature](https://www.pluralsight.com/resources/blog/data/chatgpt-code-interpreter-plugin-guide)
+* [Code Interpreter: 使用PandoraBox和LangGraph构建的Agent](https://lengm.cn/post/20240625_code_interpreter_langgraph/)
 
 #### Jupyter
 
