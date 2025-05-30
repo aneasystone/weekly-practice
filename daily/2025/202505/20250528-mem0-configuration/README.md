@@ -101,7 +101,7 @@ config = {
 * Together
 * AWS Bedrock
 
-Mem0 还支持接入本地部署的嵌入模型，比如 Ollama 和 Lmstudio，此外还支持通过 Hugging Face 的 `SentenceTransformer` 库加载本地模型，或者使用 Hugging Face 的 [文本嵌入推理服务（Text Embeddings Inference，TEI）](https://huggingface.co/docs/text-embeddings-inference/index) 接入更多的模型。
+Mem0 还支持接入本地部署的嵌入模型，比如 Ollama 和 LM Studio，此外还支持通过 Hugging Face 的 `SentenceTransformer` 库加载本地模型，或者使用 Hugging Face 的 [文本嵌入推理服务（Text Embeddings Inference，TEI）](https://huggingface.co/docs/text-embeddings-inference/index) 接入更多的模型。
 
 此外，Mem0 也兼容 LangChain 开发框架，支持几十种不同的嵌入模型，参考文档：
 
