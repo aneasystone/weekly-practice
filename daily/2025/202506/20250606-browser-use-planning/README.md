@@ -273,8 +273,8 @@ Current date and time: 2025-06-04 06:36
         "next_goal": "click on the link at index 127, then open that new tab"
     },
     "action": [
-        {"action_name": "click_element_by_index", "action_params": {"index": 127}},
-        {"action_name": "switch_to_tab", "action_params": {"page_id": 3}}
+        { "click_element_by_index": { "index": 127 } },
+        { "switch_to_tab": { "page_id": 3 } }
     ]
 }
 ```
