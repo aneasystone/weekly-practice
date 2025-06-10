@@ -106,6 +106,8 @@ structured_output = llm_with_structure.invoke("随机生成5条学生信息")
 print(structured_output)
 ```
 
+输出结果如下：
+
 ```python
 students=[
   Student(name='张伟', age=15, gender='男', grade=10, school='北京中学'), 
@@ -169,7 +171,7 @@ students=[
 ]
 ```
 
-那么，大模型是如何选择下一步动作的呢？其实，这里的关键就在于前面 Browser Use 定义的 `ActionModel` 这个模式，这是一个动态模式，在 `Agent` 初始函数中有一个 `_setup_action_models()` 方法，它的作用是将所有可用的工具注入到这个模式中：
+可以看到，这里就一个 function。那么，大模型是如何选择下一步动作的呢？其实，这里的关键就在于前面 Browser Use 定义的 `ActionModel` 这个模式，这是一个动态模式，在 `Agent` 初始函数中有一个 `_setup_action_models()` 方法，它的作用是将所有可用的工具注入到这个模式中：
 
 ```python
 def _setup_action_models(self) -> None:
