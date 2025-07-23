@@ -23,7 +23,7 @@ $ python deepdoc/vision/t_ocr.py --inputs /path/to/demo.pdf
 
 ![](./images/ocr-result-2.png)
 
-继续使用下面的命令测试一下 DLR 功能（注意后面的 ``--mode layout` 参数，表示布局分析模式）：
+继续使用下面的命令测试一下 DLR 功能（注意后面的 `--mode layout` 参数，表示布局分析模式）：
 
 ```
 $ python deepdoc/vision/t_recognizer.py --inputs /path/to/demo.pdf --mode layout
