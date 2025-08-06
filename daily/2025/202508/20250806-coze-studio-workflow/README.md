@@ -166,7 +166,7 @@ export CODE_RUNNER_TIMEOUT_SECONDS=""
 export CODE_RUNNER_MEMORY_LIMIT_MB=""
 ```
 
-修复环境变量配置之后，通过下面的命令重启 Coze 服务生效：
+修改环境变量配置之后，通过下面的命令重启 Coze 服务生效：
 
 ```
 $ docker compose --profile '*' up -d --force-recreate --no-deps coze-server
