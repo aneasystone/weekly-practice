@@ -191,6 +191,8 @@ if isReActAgent {
 
 相比于我们上面的示例代码，Coze Studio 创建 ReAct Agent 时多了一个 `ToolReturnDirectly` 参数，不知道大家还记不记得我们之前在实战工作流时讲过，工作流的结束节点有两种返回方式：
 
+![](./images/coze-workflow-end-node.png)
+
 * **返回变量**：工作流运行结束后会以 JSON 格式输出所有返回参数，智能体在对话中触发工作流后，会自动总结 JSON 格式的内容，并以自然语言回复用户；
 * **返回文本**：工作流运行结束后，智能体将直接使用指定的内容回复对话；
 
