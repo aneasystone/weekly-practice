@@ -1,0 +1,233 @@
+[
+    {
+        "node": 0,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 2,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 8,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 10,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 14,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 20,
+        "cluster": 0,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 24,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 1,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 19,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 22,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 12,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 23,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 3,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 16,
+        "cluster": 1,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": false
+    },
+    {
+        "node": 13,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 4,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 5,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 9,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 15,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 18,
+        "cluster": 2,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 21,
+        "cluster": 3,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 6,
+        "cluster": 3,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 17,
+        "cluster": 3,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 7,
+        "cluster": 3,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 11,
+        "cluster": 3,
+        "parent_cluster": null,
+        "level": 0,
+        "is_final_cluster": true
+    },
+    {
+        "node": 24,
+        "cluster": 4,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 1,
+        "cluster": 4,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 22,
+        "cluster": 5,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 19,
+        "cluster": 5,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 12,
+        "cluster": 5,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 16,
+        "cluster": 5,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 3,
+        "cluster": 6,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    },
+    {
+        "node": 23,
+        "cluster": 6,
+        "parent_cluster": 1,
+        "level": 1,
+        "is_final_cluster": true
+    }
+]
