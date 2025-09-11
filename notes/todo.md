@@ -159,29 +159,6 @@
 * [LLM之RAG实战（三十）| 探索RAG语义分块策略](https://mp.weixin.qq.com/s/sT7mjAFVbWg5-_CTJPqxkw)
 * [Advanced RAG Retrieval Strategy: Embedded Tables](https://ai.gopubby.com/advanced-rag-retrieval-strategy-embedded-tables-fdb3e44003a5)
 
-#### RAGFlow
-
-* [检索增强生成引擎 RAGFlow 正式开源！仅一天收获上千颗星](https://www.infoq.cn/article/hjJM3kV620iDoYYOBtPs)
-* [端到端 RAG 解决方案 RAGFlow 正式开源](https://blog.csdn.net/datageek/article/details/137232792)
-* [RAGFlow：基于OCR和文档解析的下一代 RAG 引擎 - 知乎](https://zhuanlan.zhihu.com/p/691598930)
-
-#### GraphRAG
-
-* [GitHub - JayLZhou/GraphRAG: In-depth study of the graphrag](https://github.com/JayLZhou/GraphRAG)
-* [Implementing ‘From Local to Global’ GraphRAG with Neo4j and LangChain: Constructing the Graph](https://neo4j.com/developer-blog/global-graphrag-neo4j-langchain/)
-* [Enhancing RAG-based application accuracy by constructing and leveraging knowledge graphs](https://blog.langchain.dev/enhancing-rag-based-applications-accuracy-by-constructing-and-leveraging-knowledge-graphs/)
-* [Graph-based metadata filtering for improving vector search in RAG applications](https://blog.langchain.dev/graph-based-metadata-filtering-for-improving-vector-search-in-rag-applications/)
-* [Knowledge Graphs and Generative AI (GraphRAG) with Amazon Neptune and LlamaIndex (Part 1) — Natural Language Querying](https://community.aws/content/2kOWDPgScaWwILcSgQfRVpfbTYa/knowledge-graphs-and-generative-ai-graphrag-with-amazon-neptune-and-llamaindex-part-1-natural-language-querying)
-* [Introducing GraphRAG with LangChain and Neo4j](https://medium.com/microsoftazure/introducing-graphrag-with-langchain-and-neo4j-90446df17c1e)
-* [下一代 RAG 技术来了！微软正式开源 GraphRAG：大模型行业将迎来新的升级？](https://www.infoq.cn/article/sqaUMyNg6B8OrCcwg4vo)
-* [实战微软新一代RAG：GraphRAG强大的全局理解能力，碾压朴素RAG？](https://mp.weixin.qq.com/s/gk6lQuDaAurUEIun_S_eEg)
-* [GraphRAG前沿之Graph RAG-Tool Fusion：将知识图谱用于Agent工具编排实现思路](https://mp.weixin.qq.com/s/sQ74TGbTesif2vnPyEs07g)
-* [LangGraph全新4大预构建Agents框架登场](https://mp.weixin.qq.com/s/4WU-c9hYWwvEZLvC91coVw)
-* [GraphRAG + GPT-4o mini 低成本构建 AI 图谱知识库 - 少数派](https://sspai.com/post/90665)
-* [Graph Maker：轻松使用开源大模型将文本转为知识图谱，发现新知识！](https://mp.weixin.qq.com/s/Sn8m5gZyfpmFCCPXHPwWhQ)
-* [NLTK vs LLM：GraphRAG实体提取方法深度大比](https://mp.weixin.qq.com/s/OjGv-7p41smBm4W5c3cj5g)
-* [The GraphRAG Manifesto: 为生成式 AI 增加知识 - 图数据库与分析 [译] | 宝玉的分享](https://baoyu.io/translations/rag/the-graphrag-manifesto-adding-knowledge-to-genai)
-
 #### Multimodal RAG
 
 * [Nomic multi-modal RAG](https://github.com/langchain-ai/langchain/blob/master/cookbook/nomic_multimodal_rag.ipynb)
