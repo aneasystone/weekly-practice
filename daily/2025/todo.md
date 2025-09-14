@@ -99,6 +99,7 @@
 
 ### Workflow Builder
 
+* https://github.com/langflow-ai/langflow
 * https://github.com/simstudioai/sim
     * https://www.sim.ai/
 * [Pathway](https://github.com/pathwaycom/pathway) - Python ETL framework for stream processing, real-time analytics, LLM pipelines, and RAG.
@@ -402,3 +403,18 @@ https://loop.coze.cn/open/docs/cozeloop/explore-cozeloop
 * [LangGraph全新4大预构建Agents框架登场](https://mp.weixin.qq.com/s/4WU-c9hYWwvEZLvC91coVw)
 * [Graph Maker：轻松使用开源大模型将文本转为知识图谱，发现新知识！](https://mp.weixin.qq.com/s/Sn8m5gZyfpmFCCPXHPwWhQ)
 * [NLTK vs LLM：GraphRAG实体提取方法深度大比](https://mp.weixin.qq.com/s/OjGv-7p41smBm4W5c3cj5g)
+
+## KAG
+
+* https://github.com/OpenSPG/openspg
+* https://github.com/OpenSPG/KAG
+* https://openspg.github.io/v2/docs_ch
+* https://spg.openkg.cn/
+* http://openkg.cn/
+* https://github.com/OpenSPG/OneKE
+
+## Dify
+
+* https://mp.weixin.qq.com/s/Ue_WNzuLvcVJSpBlnwgNyQ
+* https://mp.weixin.qq.com/s/6Z3qsZ3lZI-47qYfj1RW-g
+* https://github.com/langgenius/dify/releases/tag/2.0.0-beta.1
