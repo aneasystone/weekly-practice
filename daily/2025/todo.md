@@ -91,6 +91,7 @@
 ### RAG
 
 - https://github.com/JayLZhou/GraphRAG
+- https://github.com/OSU-NLP-Group/HippoRAG
 - https://github.com/HKUDS/LightRAG
 * [kotaemon](https://github.com/Cinnamon/kotaemon) - An open-source RAG-based tool for chatting with your documents.
     * https://cinnamon.github.io/kotaemon/
@@ -386,6 +387,10 @@ https://github.com/coze-dev/coze-loop
 
 https://loop.coze.cn/open/docs/cozeloop/explore-cozeloop
 
+## Claude Code
+
+- https://github.com/eyaltoledano/claude-task-master
+
 ## GraphRAG
 
 - https://microsoft.github.io/graphrag/prompt_tuning/overview/
@@ -413,8 +418,7 @@ https://loop.coze.cn/open/docs/cozeloop/explore-cozeloop
 * http://openkg.cn/
 * https://github.com/OpenSPG/OneKE
 
-## Dify
+## Chat2Graph
 
-* https://mp.weixin.qq.com/s/Ue_WNzuLvcVJSpBlnwgNyQ
-* https://mp.weixin.qq.com/s/6Z3qsZ3lZI-47qYfj1RW-g
-* https://github.com/langgenius/dify/releases/tag/2.0.0-beta.1
+* https://www.cnblogs.com/fanzhidongyzby/p/18944119/chat2graph
+* https://zhuanlan.zhihu.com/p/1938275673589416334
