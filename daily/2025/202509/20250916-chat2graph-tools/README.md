@@ -231,12 +231,6 @@ MCP 工具基于 Model Context Protocol 协议，用于与独立的外部进程�
       args: ["@modelcontextprotocol/server-filesystem", "."]
 ```
 
-    STDIO = "STDIO"
-    SSE = "SSE"
-    WEBSOCKET = "WEBSOCKET"
-    STREAMABLE_HTTP = "STREAMABLE_HTTP"
-
-
 MCP 工具的配置包括：
 
 - `transport_type`：支持 `STDIO`、`SSE`、`WEBSOCKET`、`STREAMABLE_HTTP` 四种不同的通信协议；
