@@ -122,6 +122,8 @@ $ gunicorn \
 
 此外，Dify 支持通过 [Celery](https://github.com/celery/celery) 处理异步任务和定时任务，它利用 Redis 作为消息中间件，把一些耗时的操作（比如发送邮件、处理图片、数据分析等）放到后台去执行，而不会阻塞主程序的运行。
 
+![](./images/celery.png)
+
 我们可以执行下面的命令启动 Celery 的任务处理服务：
 
 ```
