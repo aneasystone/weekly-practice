@@ -118,6 +118,8 @@ $ gunicorn \
 
 > `flask run` 是为开发阶段设计的轻量级工具，而 `gunicorn` 是为生产环境优化的专业 **WSGI 应用服务器**，专门解决生产场景下的高并发、稳定性和资源管理等问题。
 
+![](./images/gunicorn.png)
+
 ### Celery 任务模式
 
 此外，Dify 支持通过 [Celery](https://github.com/celery/celery) 处理异步任务和定时任务，它利用 Redis 作为消息中间件，把一些耗时的操作（比如发送邮件、处理图片、数据分析等）放到后台去执行，而不会阻塞主程序的运行。
