@@ -1,6 +1,6 @@
 # 学习 Dify 的路由系统
 
-我们昨天学习了 Dify 的代码架构和三种启动模式，不过在应用启动过程中，我们并没有看到路由注册的相关代码，这里的关键就在于它模块化的扩展系统。Dify 通过 `ext_blueprints` 模块注册路由，使用 Flask 的 Blueprint 和 Flask-RESTX 等 Namespace 实现模块化的 API 路由管理。我们今天就来学习这部分内容。
+我们昨天学习了 Dify 的代码架构和三种启动模式，不过在应用启动过程中，我们并没有看到路由注册的相关代码，这里的关键就在于它模块化的扩展系统。Dify 通过 `ext_blueprints` 模块注册路由，使用 Flask 的 Blueprint 和 Flask-RESTX 的 Namespace 实现模块化的 API 路由管理。我们今天就来学习这部分内容。
 
 ## Flask 框架
 
@@ -23,7 +23,7 @@ Flask 的设计哲学是 **微框架**，它只提供 Web 开发的核心功能�
 - **Flask-Login**：用户认证和会话管理
 - **Flask-CORS**：跨域资源共享支持
 - **Flask-Compress**：自动压缩 HTTP 响应内容
-- **Flask-orjson**：使用用 orjson（一个高性能的 JSON 库）替换 Flask 默认的 JSON 编码器和解码器
+- **Flask-orjson**：使用 orjson（一个高性能的 JSON 库）替换 Flask 默认的 JSON 编码器和解码器
 
 ### Flask 基本使用
 
@@ -104,7 +104,7 @@ Flask 的 Blueprint 功能允许我们将大型应用拆分成多个模块，每
 
 Dify 充分利用了这一特性来组织其复杂的 API 结构。
 
-## 学习 Dify 的 `ext_blueprints` 扩展
+## Dify 的 `ext_blueprints` 扩展
 
 在 Dify 中，所有的蓝图都在 `api/extensions/ext_blueprints.py` 文件中统一注册：
 
@@ -312,6 +312,8 @@ from .workspace import models
 # 添加 Namespace
 api.add_namespace(service_api_ns)
 ```
+
+这里有点奇怪的是，`service_api` 和 `console` 不一样，它是通过 `api.add_namespace()` 方式注册路由的，而且如果你仔细阅读其他几个蓝图的代码会发现，所有的蓝图都使用了 Namespace 特性，唯独 `console` 是个例外，不清楚是历史遗留问题，还是设计如此，如果是设计如此，又是基于什么考虑的呢？有清楚的朋友，欢迎评论区交流~
 
 ## 小结
 
