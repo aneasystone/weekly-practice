@@ -267,6 +267,8 @@ $ java -XX:+UseZGC -XX:+ZGenerational -Xmx100M -Xlog:gc* ZgcTest.java
 
 这个输出比较多，此处就省略了，从输出中可以看到不同分代的回收情况。关于 ZGC，还有很多微调参数，详细内容可参考 [ZGC 的官方文档](https://wiki.openjdk.org/display/zgc)。
 
+> 注意，在 Java 23 中分代式 ZGC 已经是默认选项，不需要再用 `-XX:+ZGenerational` 参数开启，另外，在 Java 24 中非分代模式已被正式移除。
+
 ## 小结
 
 今天我们学习了 Java 21 引入的 **分代式 ZGC（Generational ZGC）** 这一新的垃圾回收特性，它在原有 ZGC 的基础上融入了分代回收的思想，进一步优化了应用的吞吐量和延迟性能。
