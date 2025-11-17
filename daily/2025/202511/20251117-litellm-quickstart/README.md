@@ -12,10 +12,10 @@ LiteLLM 正是为了解决这个问题而诞生的。它是一个开源的 Pytho
 
 LiteLLM 的核心价值主要体现在以下几个方面：
 
-**统一的 API 接口**：LiteLLM 将所有 LLM 服务商的 API 都转换为 OpenAI 的 API 格式，这意味着你只需要学习一套 API，就可以调用任何支持的模型。无论服务商更换、模型迭代，你的代码基本不需要改动。
-**完善的重试和容错机制**：通过 Router 和 Fallback 功能，LiteLLM 支持在多个模型部署之间进行负载均衡和自动容错，当某个服务商出现故障时，可以自动切换到备用方案，确保服务的可用性。
-**成本追踪和预算管理**：LiteLLM 可以自动计算每次 API 调用的成本，并支持设定每个用户或团队的预算限额，帮助企业更好地控制成本。
-**Proxy Server 网关**：LiteLLM 提供的代理服务器可以作为一个中心化的 LLM 网关，统一处理认证、速率限制、成本追踪等问题，特别适合大型组织内部部署。
+- **统一的 API 接口**：LiteLLM 将所有 LLM 服务商的 API 都转换为 OpenAI 的 API 格式，这意味着你只需要学习一套 API，就可以调用任何支持的模型。无论服务商更换、模型迭代，你的代码基本不需要改动。
+- **完善的重试和容错机制**：通过 Router 和 Fallback 功能，LiteLLM 支持在多个模型部署之间进行负载均衡和自动容错，当某个服务商出现故障时，可以自动切换到备用方案，确保服务的可用性。
+- **成本追踪和预算管理**：LiteLLM 可以自动计算每次 API 调用的成本，并支持设定每个用户或团队的预算限额，帮助企业更好地控制成本。
+- **Proxy Server 网关**：LiteLLM 提供的代理服务器可以作为一个中心化的 LLM 网关，统一处理认证、速率限制、成本追踪等问题，特别适合大型组织内部部署。
 
 目前有[不少开源项目](https://docs.litellm.ai/docs/project)使用了 LiteLLM，比如 [smolagents](https://github.com/huggingface/smolagents)、[Open Interpreter](https://github.com/openinterpreter/open-interpreter)、[Quivr](https://github.com/QuivrHQ/quivr) 等：
 
@@ -237,10 +237,10 @@ except APIError as e:
 
 LiteLLM Proxy 主要有以下功能：
 
-**多模型管理和负载均衡**：可以配置多个模型和多个部署，Proxy 会自动进行负载均衡，分散请求到不同的模型部署，提高整体吞吐量。
-**密钥管理和成本追踪**：为每个团队或用户生成虚拟 API Key，追踪每个 Key 的成本消耗，支持设定使用预算和速率限制。
-**统一的认证和授权**：Proxy 可以作为中心化的认证层，所有应用通过它来访问 LLM 服务，避免将各种 API Key 散布在各个应用中。
-**可观测性和日志**：支持与 Langfuse、Helicone、LunaryAI 等可观测平台集成，记录所有 API 调用的详细信息，便于监控和调试。
+- **多模型管理和负载均衡**：可以配置多个模型和多个部署，Proxy 会自动进行负载均衡，分散请求到不同的模型部署，提高整体吞吐量。
+- **密钥管理和成本追踪**：为每个团队或用户生成虚拟 API Key，追踪每个 Key 的成本消耗，支持设定使用预算和速率限制。
+- **统一的认证和授权**：Proxy 可以作为中心化的认证层，所有应用通过它来访问 LLM 服务，避免将各种 API Key 散布在各个应用中。
+- **可观测性和日志**：支持与 Langfuse、Helicone、LunaryAI 等可观测平台集成，记录所有 API 调用的详细信息，便于监控和调试。
 
 ### 快速启动
 
