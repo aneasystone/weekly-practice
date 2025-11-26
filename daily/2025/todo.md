@@ -369,6 +369,8 @@ https://github.com/infiniflow/ragflow/tree/main/sandbox
 * [端到端 RAG 解决方案 RAGFlow 正式开源](https://blog.csdn.net/datageek/article/details/137232792)
 * [RAGFlow：基于OCR和文档解析的下一代 RAG 引擎 - 知乎](https://zhuanlan.zhihu.com/p/691598930)
 
+### 标签集的检索
+
 ## Coze Studio
 
 ### 配置多模态输入
@@ -422,3 +424,12 @@ https://loop.coze.cn/open/docs/cozeloop/explore-cozeloop
 
 * https://www.cnblogs.com/fanzhidongyzby/p/18944119/chat2graph
 * https://zhuanlan.zhihu.com/p/1938275673589416334
+
+## Dify
+
+https://github.com/svcvit/Awesome-Dify-Workflow
+
+通过知识流水线创建知识库
+
+https://docs.dify.ai/zh-hans/guides/knowledge-base/knowledge-pipeline/readme
+
