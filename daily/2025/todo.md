@@ -433,3 +433,102 @@ https://github.com/svcvit/Awesome-Dify-Workflow
 
 https://docs.dify.ai/zh-hans/guides/knowledge-base/knowledge-pipeline/readme
 
+## LiteLLM
+
+回调机制
+
+https://docs.litellm.ai/docs/proxy/logging#custom-callback-apis-async
+https://docs.litellm.ai/docs/observability/callbacks
+https://docs.litellm.ai/docs/observability/custom_callback
+https://docs.litellm.ai/docs/proxy/dynamic_logging
+https://docs.litellm.ai/docs/proxy/team_logging
+https://docs.litellm.ai/docs/proxy/call_hooks
+https://docs.litellm.ai/docs/proxy/rules
+
+编程助手
+
+OpenAI Codex
+https://docs.litellm.ai/docs/tutorials/openai_codex
+Gemini CLI
+https://docs.litellm.ai/docs/tutorials/litellm_gemini_cli
+Qwen Code CLI
+https://docs.litellm.ai/docs/tutorials/litellm_qwen_code_cli
+Claude Code
+https://docs.litellm.ai/docs/tutorials/claude_responses_api
+
+高级特性
+
+Computer Use
+https://docs.litellm.ai/docs/completion/computer_use
+Web Search
+https://docs.litellm.ai/docs/completion/web_search
+Web Fetch
+https://docs.litellm.ai/docs/completion/web_fetch
+Function Calling
+https://docs.litellm.ai/docs/completion/function_call
+Using Audio Models
+https://docs.litellm.ai/docs/completion/audio
+Using PDF Input
+https://docs.litellm.ai/docs/completion/document_understanding
+Structured Outputs (JSON Mode)
+https://docs.litellm.ai/docs/completion/json_mode
+'Thinking' / 'Reasoning Content'
+https://docs.litellm.ai/docs/reasoning_content
+Using Vision Models
+https://docs.litellm.ai/docs/completion/vision
+Image Generation in Chat Completions, Responses API
+https://docs.litellm.ai/docs/completion/image_generation_chat
+Veo Video Generation with Google AI Studio
+https://docs.litellm.ai/docs/proxy/veo_video_generation
+Call Gemini Realtime API with Audio Input/Output
+https://docs.litellm.ai/docs/tutorials/gemini_realtime_with_audio
+Using Vector Stores (Knowledge Bases)
+https://docs.litellm.ai/docs/completion/knowledgebase
+
+MCP Server
+
+https://docs.litellm.ai/docs/mcp
+https://docs.litellm.ai/docs/mcp_usage
+https://docs.litellm.ai/docs/mcp_control
+https://docs.litellm.ai/docs/mcp_cost
+https://docs.litellm.ai/docs/mcp_guardrail
+
+Search
+
+https://docs.litellm.ai/docs/search/
+
+Vector stores
+
+https://docs.litellm.ai/docs/vector_stores/create
+https://docs.litellm.ai/docs/vector_stores/search
+
+支持接口一览
+
+https://docs.litellm.ai/docs/assistants
+https://docs.litellm.ai/docs/audio_transcription
+https://docs.litellm.ai/docs/text_to_speech
+https://docs.litellm.ai/docs/batches
+https://docs.litellm.ai/docs/completion
+https://docs.litellm.ai/docs/text_completion
+https://docs.litellm.ai/docs/bedrock_converse
+https://docs.litellm.ai/docs/embedding/supported_embedding
+https://docs.litellm.ai/docs/files_endpoints
+https://docs.litellm.ai/docs/fine_tuning
+https://docs.litellm.ai/docs/generateContent
+https://docs.litellm.ai/docs/apply_guardrail
+https://docs.litellm.ai/docs/bedrock_invoke
+https://docs.litellm.ai/docs/image_edits
+https://docs.litellm.ai/docs/image_generation
+https://docs.litellm.ai/docs/image_variations
+https://docs.litellm.ai/docs/videos
+https://docs.litellm.ai/docs/anthropic_unified
+https://docs.litellm.ai/docs/moderation
+https://docs.litellm.ai/docs/ocr
+https://docs.litellm.ai/docs/realtime
+https://docs.litellm.ai/docs/rerank
+https://docs.litellm.ai/docs/response_api
+
+Pass through
+
+https://docs.litellm.ai/docs/pass_through/intro
+https://docs.litellm.ai/docs/proxy/pass_through
