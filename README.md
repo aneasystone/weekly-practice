@@ -32,6 +32,7 @@
 
 ### 博客归档
 
+* WEEK062 - [通过 SSH 隧道从外网访问内网 Mac Mini 的共享屏幕](./notes/week062-ssh-tunnel-vnc-remote-access/README.md)
 * WEEK061 - [聊聊 Deep Search 和 Deep Research](./notes/week061-deep-search-and-research/README.md)
 * WEEK060 - [实战 Model Context Protocol](./notes/week060-mcp-in-action/README.md)
 * WEEK059 - [盘点 Python 中那些 PDF 解析库](./notes/week059-pdf-parser-libraries/README.md)
