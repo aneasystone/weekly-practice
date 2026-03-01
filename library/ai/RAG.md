@@ -33,6 +33,8 @@
 * [QAnything](https://github.com/netease-youdao/QAnything) - Question and Answer based on Anything.
 * [UltraRAG](https://github.com/OpenBMB/UltraRAG) - A Low-Code MCP Framework for Building Complex and Innovative RAG Pipelines
 * [Vespa](https://github.com/vespa-engine/vespa) - AI + Data, online.
+* [LightRAG](https://github.com/HKUDS/LightRAG) - Simple and Fast Retrieval-Augmented Generation
+* [RAG-Anything](https://github.com/HKUDS/RAG-Anything) - All-in-One RAG Framework
 
 ### 文档处理
 
@@ -48,10 +50,16 @@
 * [Unstructured](https://github.com/Unstructured-IO/unstructured) - Convert documents to structured data effortlessly
 * [DataChain](https://github.com/datachain-ai/datachain) - Analytics, Versioning and ETL for multimodal data: video, audio, PDFs, images
 * [Unstract](https://github.com/Zipstack/unstract) - No-code LLM Platform to launch APIs and ETL Pipelines to structure unstructured documents
+* [MonkeyOCR](https://github.com/Yuliang-Liu/MonkeyOCR) - Document Parsing with a Structure-Recognition-Relation Triplet Paradigm
 
 ### 信息提取
 
 * [LangExtract](https://github.com/google/langextract) - A Python library for extracting structured information from unstructured text using LLMs with precise source grounding and interactive visualization.
+
+### 网页解析
+
+* [Crawl4AI](https://github.com/unclecode/crawl4ai) - Open-source LLM Friendly Web Crawler & Scraper.
+* [Firecrawl](https://github.com/firecrawl/firecrawl) - The Web Data API for AI - Turn entire websites into LLM-ready markdown or structured data
 
 ### 应用场景
 
