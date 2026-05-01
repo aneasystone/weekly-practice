@@ -138,3 +138,5 @@ node_modules/
 *.dylib
 
 *.ttc
+
+draft/*
