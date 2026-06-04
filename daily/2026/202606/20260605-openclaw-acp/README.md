@@ -94,8 +94,6 @@ $ /acp spawn claude --bind here --cwd /Users/zhangchangzhi/Codes/demo/sudoku
 $ /acp status
 ```
 
-![](./images/acp-status.png)
-
 `status` 会把这个会话的后端、绑定的 harness、当前模式（persistent 还是 oneshot）、运行状态、各项运行时选项和能力都列出来；要是上一轮出过错，`lastError` 里也会留着。
 
 任务做完后，收尾有两条命令：
